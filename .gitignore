@@ -8,3 +8,11 @@ apps/audio-server/bin/
 __pycache__/
 *.py[cod]
 *$py.class
+
+# --- Node ---
+node_modules/
+npm-debug.log*
+
+dist/
+dist-ssr/
+*.local
