@@ -1,6 +1,7 @@
 # --- Python/Environment ---
 apps/audio-server/venv/
 venv/
+apps/audio-server/bin/
 .env
 
 # --- Python Bytecode ---

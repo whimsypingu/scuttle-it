@@ -13,3 +13,7 @@ class VenvInitializationError(SetupError):
 class DenoInstallError(SetupError):
     """Raised when deno installation fails"""
     pass
+
+class FFmpegInstallError(SetupError):
+    """Raised when ffmpeg installation fails"""
+    pass

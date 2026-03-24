@@ -67,7 +67,7 @@ def _get_deno_name() -> dict:
     }
 
 
-def download_deno(target_path: Path = None, force: bool = False) -> dict:
+def download_deno(target_path: Path = None, force: bool = False):
     """
     Downloads and extracts the latest Deno binary for the current platform.
     This uses Deno's GitHub releases pattern
@@ -81,9 +81,6 @@ def download_deno(target_path: Path = None, force: bool = False) -> dict:
         target_path (Path, optional): The destination path for the Deno binary. 
             Defaults to the path defined in 'apps.audio_server.bin' in the manifest.
         force (bool): Whether to force download from source. Defaults to False
-
-    Returns:
-        dict: A mapping containing 'JS_RUNTIME_BIN_PATH' pointing to the installed binary.
 
     Raises:
         DenoInstallError: If the download, extraction, or permission update fails.    

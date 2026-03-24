@@ -3,6 +3,7 @@ import sys
 from boot.errors import SetupError
 from boot.setup_venv import ensure_venv, run_pip_install, install_ytdlp
 from boot.install_deno import download_deno
+from boot.install_ffmpeg import download_ffmpeg
 
 logging.basicConfig(
     level=logging.INFO,
@@ -22,6 +23,9 @@ try:
     install_ytdlp()
 
     download_deno(force=False)
+
+    download_ffmpeg(force=False)
+
     
 except SetupError as e:
     print(f"\033[91m[SETUP ERROR]\033[0m {e}")
