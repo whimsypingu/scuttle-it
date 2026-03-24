@@ -12,7 +12,7 @@ from .errors import SetupError, WorkspaceConfigError, VenvInitializationError
 logger = logging.getLogger(__name__)
 
 
-def get_python_exe(venv_path: str = None) -> Path:
+def get_python_bin(venv_path: str = None) -> Path:
     """
     Given a venv path, returns a path to the python binary (regardless of if it exists or not).
     """
@@ -21,9 +21,9 @@ def get_python_exe(venv_path: str = None) -> Path:
 
     bin_name = "python.exe" if os.name == "nt" else "python"
     scripts_dir = "Scripts" if os.name == "nt" else "bin"
-    python_exe = venv_path / scripts_dir / bin_name
+    python_bin = venv_path / scripts_dir / bin_name
 
-    return python_exe
+    return python_bin
 
 
 def ensure_venv():
@@ -36,10 +36,10 @@ def ensure_venv():
         abs_venv_path = get_workspace_path("apps.audio-server.venv")
 
         #check for binary
-        python_exe = get_python_exe(abs_venv_path)
+        python_bin = get_python_bin(abs_venv_path)
 
         #create venv if missing
-        if not python_exe.exists():
+        if not python_bin.exists():
             logger.info(f"venv missing or broken (no executable). Initializing at: {abs_venv_path}")
             venv.create(env_dir=abs_venv_path, with_pip=True, clear=True) #theoretically could throw PermissionError if not enough installation space
 
@@ -47,7 +47,7 @@ def ensure_venv():
         else:
             logger.info(f"Verified healthy venv exists at {abs_venv_path}")
 
-        return python_exe
+        return python_bin
 
     except json.JSONDecodeError:
         raise SetupError("Invalid JSON format for workspace.json")
@@ -63,22 +63,22 @@ def ensure_venv():
         raise VenvInitializationError(f"Could not create venv: {e}") from e
 
 
-def run_pip_install(python_exe: Path = None, requirements_path: Path = None, upgrade_pip: bool = True):
+def run_pip_install(python_bin: Path = None, requirements_path: Path = None, upgrade_pip: bool = True):
     """
     Executes pip commands within the specified venv bin directory.
-    Expects python_exe field to be the python binary in the venv
+    Expects python_bin field to be the python binary in the venv
     """
-    if not python_exe:
-        python_exe = get_python_exe()
+    if not python_bin:
+        python_bin = get_python_bin()
 
-    if not python_exe.exists():
-        raise FileNotFoundError(f"Could not find python executable at {python_exe}")
+    if not python_bin.exists():
+        raise FileNotFoundError(f"Could not find python executable at {python_bin}")
     
     #upgrade pip itself first, standard practice apparently
     if upgrade_pip:
         logger.info("Upgrading pip...")
         subprocess.run(
-            [str(python_exe), "-m", "pip", "install", "--upgrade", "pip"], 
+            [str(python_bin), "-m", "pip", "install", "--upgrade", "pip"], 
             check=True,
             capture_output=True,
             text=True
@@ -91,7 +91,7 @@ def run_pip_install(python_exe: Path = None, requirements_path: Path = None, upg
     if requirements_path and requirements_path.exists():
         logger.info(f"Installing requirements from {requirements_path}...")
         subprocess.run(
-            [str(python_exe), "-m", "pip", "install", "--upgrade", "-r", str(requirements_path)], 
+            [str(python_bin), "-m", "pip", "install", "--upgrade", "-r", str(requirements_path)], 
             check=True,
             capture_output=True,
             text=True
@@ -100,21 +100,21 @@ def run_pip_install(python_exe: Path = None, requirements_path: Path = None, upg
         logger.warning(f"Requirements file not found at {requirements_path}, skipping.")
 
 
-def install_ytdlp(python_exe: Path = None):
+def install_ytdlp(python_bin: Path = None):
     """
     Standalone specialized install for yt-dlp to get the latest pre-releases.
     """
-    if not python_exe:
-        python_exe = get_python_exe()
+    if not python_bin:
+        python_bin = get_python_bin()
 
-    if not python_exe.exists():
-        raise FileNotFoundError(f"Could not find python executable at {python_exe}")
+    if not python_bin.exists():
+        raise FileNotFoundError(f"Could not find python executable at {python_bin}")
     
     logger.info("Installing/Updating yt-dlp (pre-release)...")
     
     # -U is --upgrade, --pre allows development/pre-release versions
     subprocess.run(
-        [str(python_exe), "-m", "pip", "install", "-U", "--pre", "yt-dlp[default]"], 
+        [str(python_bin), "-m", "pip", "install", "-U", "--pre", "yt-dlp[default]"], 
         check=True,
         capture_output=True,
         text=True

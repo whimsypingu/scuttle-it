@@ -9,3 +9,7 @@ class WorkspaceConfigError(SetupError):
 class VenvInitializationError(SetupError):
     """Raised when native venv module fails to create environment"""
     pass
+
+class DenoInstallError(SetupError):
+    """Raised when deno installation fails"""
+    pass
