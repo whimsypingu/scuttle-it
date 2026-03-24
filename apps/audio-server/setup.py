@@ -4,6 +4,7 @@ from boot.errors import SetupError
 from boot.setup_venv import ensure_venv, run_pip_install, install_ytdlp
 from boot.install_deno import download_deno
 from boot.install_ffmpeg import download_ffmpeg
+from boot.install_cloudflared import download_cloudflared
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,6 +26,8 @@ try:
     download_deno(force=False)
 
     download_ffmpeg(force=False)
+
+    download_cloudflared(force=False)
 
     
 except SetupError as e:

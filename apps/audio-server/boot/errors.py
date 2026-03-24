@@ -17,3 +17,7 @@ class DenoInstallError(SetupError):
 class FFmpegInstallError(SetupError):
     """Raised when ffmpeg installation fails"""
     pass
+
+class CloudflaredInstallError(SetupError):
+    """Raised when cloudflared installation fails"""
+    pass
