@@ -3,9 +3,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Play, SkipBack, SkipForward, ListMusic } from 'lucide-react';
 
 import { PLAYER_CONFIG, NAV_CONFIG } from '@/constants/layout';
+import { QueueView } from '@/features/queue/QueueView';
+import { NowPlayingView } from '@/features/player/NowPlayingView';
 
-export const GlobalPlayer = () => {
-    const [isExpanded, setIsExpanded] = useState(false);
+interface GlobalPlayerProps {
+  isExpanded: boolean;
+  setIsExpanded: (value: boolean) => void;
+}
+
+export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) => {
+
+    const [showQueue, setShowQueue] = useState(false);
 
     // This function handles the "snap" logic after the user lets go
     const onDragEnd = (_: any, info: any) => {
@@ -13,15 +21,27 @@ export const GlobalPlayer = () => {
         const velocityThreshold = 500; // px/s
 
         if (isExpanded) {
-        // If expanded, check if swiped down far enough or fast enough
-        if (info.offset.y > swipeThreshold || info.velocity.y > velocityThreshold) {
-            setIsExpanded(false);
-        }
+            // SWIPE DOWN -> close player
+            if (info.offset.y > swipeThreshold || info.velocity.y > velocityThreshold) {
+
+                if (!showQueue) {
+                    setIsExpanded(false);
+                }
+                setShowQueue(false);
+            }
+            // SWIPE UP -> open queue, only if not already open
+            else if (info.offset.y < -swipeThreshold || info.velocity.y < -velocityThreshold) {
+
+                if (!showQueue) {
+                    setShowQueue(true);
+                }
+            }
         } else {
-        // If collapsed, check if swiped up
-        if (info.offset.y < -swipeThreshold || info.velocity.y < -velocityThreshold) {
-            setIsExpanded(true);
-        }
+
+            // If collapsed, check if swiped up
+            if (info.offset.y < -swipeThreshold || info.velocity.y < -velocityThreshold) {
+                setIsExpanded(true);
+            }
         }
     };
 
@@ -39,14 +59,15 @@ export const GlobalPlayer = () => {
             }}
             transition={{ 
                 type: 'spring', 
-                stiffness: 300, 
-                damping: 30 
+                stiffness: 400, 
+                damping: 30,
+                mass: 0.8, 
             }}
             className="fixed z-50 shadow-2xl overflow-hidden cursor-pointer"
             onClick={() => !isExpanded && setIsExpanded(true)}
             drag="y" // enable vertical dragging
             dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={0.1}
+            dragElastic={0.05}
             onDragEnd={onDragEnd}
         >
         {/* We use AnimatePresence to swap the "Mini" and "Full" content 
@@ -65,15 +86,34 @@ export const GlobalPlayer = () => {
                     <ChevronDown className="w-8 h-8 mb-8" />
                     </button>
                     
-                    <div className="flex-1 flex flex-col items-center justify-center">
-                    <motion.div layoutId="album-art" className="w-full aspect-square bg-brand/20 rounded-lg mb-8" />
-                    <div className="w-full">
-                        <h2 className="text-2xl font-bold">Scuttle Rebuild</h2>
-                        <p className="text-white/70">The New Professional</p>
+                    <div className="flex-1 relative">
+                        <AnimatePresence initial={false} mode="popLayout">
+                            {showQueue ? (
+                                <motion.div 
+                                    key="queue"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.2, ease: "circOut" }}
+                                    className="absolute inset-0"
+                                >
+                                    <QueueView />
+                                </motion.div>
+                            ) : (
+                                <motion.div 
+                                    key="now-playing"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="absolute inset-0"
+                                >
+                                    <NowPlayingView key="now-playing" />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
-                    </div>
-
-                    {/* Controls omitted for brevity, same as before */}
+                    
                 </motion.div>
             ) : (
                 <motion.div
