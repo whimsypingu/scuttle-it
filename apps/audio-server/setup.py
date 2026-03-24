@@ -24,9 +24,7 @@ try:
     install_ytdlp()
 
     download_deno(force=False)
-
     download_ffmpeg(force=False)
-
     download_cloudflared(force=False)
 
     
