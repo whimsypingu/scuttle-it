@@ -1,0 +1,9 @@
+# --- Python/Environment ---
+apps/audio-server/venv/
+venv/
+.env
+
+# --- Python Bytecode ---
+__pycache__/
+*.py[cod]
+*$py.class

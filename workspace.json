@@ -1,0 +1,21 @@
+{
+    "project": {
+        "name": "scuttle_rebuild",
+        "version": "0.1.0",
+        "author": "whimsypingu"
+    },
+    "apps": {
+        "audio_server": {
+            "root": "apps/audio-server",
+            "venv": "apps/audio-server/venv",
+            "bin": "apps/audio-server/bin",
+            "requirements": "apps/audio-server/requirements.txt"
+        },
+        "web_client": {
+            "root": "apps/web-client"
+        },
+        "desktop_launcher": {
+            "root": "apps/desktop-launcher"
+        }
+    }
+}
