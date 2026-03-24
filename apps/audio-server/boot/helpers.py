@@ -58,9 +58,14 @@ def get_workspace_item(query: str, default: str = None) -> str:
         logger.error(f"Required workspace item '{query}' not found.")
         raise WorkspaceConfigError(f"Missing required configuration key: {query}") from None
 
-def get_workspace_path(query: str, default: str = None) -> Path:
+def get_workspace_path(query: str, default: str = None, ensure_exists: bool = False) -> Path:
     """
     Specialized helper for fields that represent relative paths.
+
+    Args:
+        query: Dot notation path in workspace.json
+        default: Fallback string if query is missing
+        ensure_exists: Creates the directory if it doesn't exist. Defaults to False
     
     Returns an absolute Path object resolved against the repo root.
 
@@ -69,8 +74,14 @@ def get_workspace_path(query: str, default: str = None) -> Path:
     rel_path = get_workspace_item(query, default=default)
     if not isinstance(rel_path, str):
         raise WorkspaceConfigError(f"workspace item '{query}' must be a string path, got {type(rel_path)}")
+    
+    path = (get_repo_root() / rel_path).resolve()
+
+    if ensure_exists:
+        path.mkdir(parents=True, exist_ok=True)
+        logger.debug(f"Ensured directory exists: {path}")
         
-    return (get_repo_root() / rel_path).resolve()
+    return path
 
 
 # --- ENV FILE ---

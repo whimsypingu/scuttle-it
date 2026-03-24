@@ -108,7 +108,7 @@ def download_deno(target_path: Path = None, force: bool = False):
 
     #prepare directory and download in chunks to a temp file before swapping
     if target_path is None:
-        target_path = get_workspace_path("apps.audio-server.bin") / bin_name
+        target_path = get_workspace_path(query="apps.audio-server.bin", ensure_exists=True) / bin_name
 
     #do an in-memory download and extraction because deno packages in zip files
     try:

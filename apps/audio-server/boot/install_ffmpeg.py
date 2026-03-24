@@ -41,7 +41,7 @@ def install_ffmpeg_windows():
     url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
 
     try:
-        bin_dir = get_workspace_path("apps.audio-server.bin")
+        bin_dir = get_workspace_path(query="apps.audio-server.bin", ensure_exists=True)
 
         with tempfile.TemporaryDirectory() as tmp:
             archive_path = Path(tmp) / "ffmpeg.zip"
@@ -83,7 +83,7 @@ def install_ffmpeg_macos():
     url = "https://evermeet.cx/ffmpeg/getrelease/zip"
 
     try:
-        bin_dir = get_workspace_path("apps.audio-server.bin")
+        bin_dir = get_workspace_path(query="apps.audio-server.bin", ensure_exists=True)
 
         with tempfile.TemporaryDirectory() as tmp:
             archive_path = Path(tmp) / "ffmpeg.zip"
@@ -124,7 +124,7 @@ def install_ffmpeg_linux():
     url = "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz"
 
     try:
-        bin_dir = get_workspace_path("apps.audio-server.bin")
+        bin_dir = get_workspace_path(query="apps.audio-server.bin", ensure_exists=True)
 
         with tempfile.TemporaryDirectory() as tmp:
             archive_path = Path(tmp) / "ffmpeg.tar.xz"
@@ -173,7 +173,7 @@ def download_ffmpeg(force: bool = False):
     """
     #initial check to just re-register in env if binaries already exist
     if not force:
-        bin_dir = get_workspace_path("apps.audio-server.bin")
+        bin_dir = get_workspace_path(query="apps.audio-server.bin", ensure_exists=True)
         ffmpeg_path = check_binary_exists("ffmpeg")
         ffprobe_path = check_binary_exists("ffprobe")
 
