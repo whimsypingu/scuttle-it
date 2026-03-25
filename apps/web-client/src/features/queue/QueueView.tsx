@@ -2,13 +2,15 @@
 import { motion } from 'framer-motion';
 import { Music2, GripVertical } from 'lucide-react';
 
-export const QueueView = () => {
-    const mockQueue = [
-        { id: '1', title: 'Scuttle 1', artist: 'X' },
-        { id: '2', title: 'Scuttle 2', artist: 'Y' },
-        { id: '3', title: 'Scuttle 3', artist: 'Z' },
-    ];
+export const generateMockQueue = (count: number) => {
+    return Array.from({ length: count }, (_, i) => ({
+        id: `${i+1}`,
+        title: `Scuttle Track ${i+1}`,
+        artist: String.fromCharCode(65 + (i % 26)),
+    }));
+};
 
+export const QueueView = () => {
     return (
         <motion.div 
             initial={{ y: 20, opacity: 0 }}
@@ -23,7 +25,7 @@ export const QueueView = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-                {mockQueue.map((track) => (
+                {generateMockQueue(1000).map((track) => (
                 <div 
                     key={track.id} 
                     className="flex items-center gap-4 p-2 rounded-lg hover:bg-white/5 group transition-colors"
