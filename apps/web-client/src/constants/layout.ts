@@ -9,7 +9,7 @@ export const PLAYER_CONFIG = {
 };
 
 export const NAV_CONFIG = {
-    height: 48,
+    height: 32,
 };
 
 // Helper to calculate the total "dead zone" at the bottom of the screen

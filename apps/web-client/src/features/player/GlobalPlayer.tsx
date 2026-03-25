@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent, circOut } from 'framer-motion';
-import { ChevronDown, Play, SkipBack, SkipForward, ListMusic, GripVertical, Music2 } from 'lucide-react';
+import { ChevronDown, Play, SkipBack, SkipForward, Shuffle, Repeat, ListMusic, GripVertical, Music2 } from 'lucide-react';
 
 import { PLAYER_CONFIG, NAV_CONFIG } from '@/constants/layout';
+import { Slider } from '@/components/ui/slider';
 
 interface GlobalPlayerProps {
   isExpanded: boolean;
@@ -51,29 +52,7 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
     };
 
     // scrolling shrinking the size of the album art and moving it around
-    const [scrollEl, setScrollEl] = useState<HTMLElement | null>(null);
-    const { scrollYProgress, scrollY } = useScroll({ 
-        container: scrollEl ? { current: scrollEl } : undefined
-    });
-
     const [isCompact, setIsCompact] = useState(false);
-
-    const LIMIT = 50;
-    useMotionValueEvent(scrollY, "change", (latest) => {
-        console.log("Framer ScrollY:", latest);
-        if (latest > LIMIT && !isCompact) {
-            console.log("SET TO TRUE");
-            setIsCompact(true);
-        }
-        if (latest <= LIMIT && isCompact) {
-            console.log("SET TO FALSE");
-            setIsCompact(false);
-        }
-    });
-    useMotionValueEvent(scrollYProgress, "change", (latest) => {
-        console.log("Framer ScrollYProgress:", latest);
-    });
-
     return (
         <motion.div
             layout // The magic prop that handles smooth resizing
@@ -84,17 +63,16 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
                 left: isExpanded ? 0 : `${PLAYER_CONFIG.marginSide}px`,
                 right: isExpanded ? 0 : `${PLAYER_CONFIG.marginSide}px`,
                 borderRadius: isExpanded ? '0px' : `${PLAYER_CONFIG.borderRadius}px`,
-                backgroundColor: isExpanded? 'var(--color-surface)' : 'var(--color-brand)',
+                backgroundColor: isExpanded? 'var(--color-background)' : 'var(--color-brand)',
             }}
             transition={{ 
                 type: 'spring', 
-                stiffness: 400, 
-                damping: 30,
-                mass: 0.8, 
+                visualDuration: 0.3,
+                bounce: 0.1,
             }}
             className="fixed z-50 shadow-2xl overflow-hidden cursor-pointer"
             onClick={() => !isExpanded && setIsExpanded(true)}
-            drag="y" // enable vertical dragging
+            drag={"y"} // enable vertical dragging
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={0.05}
             onDragEnd={onDragEnd}
@@ -109,10 +87,10 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="relative flex flex-col h-full p-8"
+                    className="relative flex flex-col h-full px-8 pt-8"
                 >
                     <button onClick={(e) => { e.stopPropagation(); setIsExpanded(false); }}>
-                        <ChevronDown className="w-8 h-8 mb-8" />
+                        <ChevronDown className="w-8 h-8" />
                     </button>
                     
                     
@@ -126,43 +104,75 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
                             bounce: 0.1
                         }}
                     >
-                        <motion.div 
+                        <motion.div
                             layout
-                            className={`flex ${isCompact ? "flex-row items-center gap-4" : "flex-col gap-4 items-center justify-center"} w-full`}
+                            layoutId="compact-stuff"
+                            className={`flex flex-col ${isCompact ? "gap-4" : "gap-8"} items-center justify-center w-full`}
                         >
-
-                            {/* ALBUM ART */}
-                            <motion.div
+                            <motion.div 
                                 layout
-                                layoutId="album-art"
-                                style={{
-                                    width: isCompact ? "48px" : "192px",
-                                    height: isCompact ? "48px" : "192px",
-                                    borderRadius: isCompact ? "rounded" : "rounded-xl",
-                                }}
-                                className="bg-brand shadow-2xl flex-shrink-0"
-                            />
-
-                            {/* TEXT BLOCK */}
-                            <motion.div
-                                layout
-                                className={`flex flex-col ${isCompact ? "text-left" : "text-center"} justify-between`}
+                                layoutId="album-art-text-block"
+                                className={`flex ${isCompact ? "flex-row items-center gap-4" : "flex-col gap-4 items-center justify-center"} w-full`}
                             >
-                                <motion.h2 layout className="text-xl font-bold truncate">Scuttle Rebuild</motion.h2>
-                                <motion.p layout className="text-white/60 text-sm">The New Professional</motion.p>
-                            </motion.div> 
+                                {/* ALBUM ART */}
+                                <motion.div
+                                    layout
+                                    layoutId="album-art"
+                                    style={{
+                                        width: isCompact ? "48px" : "192px",
+                                        height: isCompact ? "48px" : "192px",
+                                        borderRadius: isCompact ? "rounded" : "rounded-xl",
+                                    }}
+                                    className="bg-brand shadow-2xl flex-shrink-0"
+                                    onClick={() => setIsCompact(!isCompact)}
+                                />
+
+                                {/* TEXT BLOCK */}
+                                <motion.div
+                                    layout
+                                    layoutId="text-block"
+                                    className={`flex flex-col flex-1 min-w-0 w-full ${isCompact ? "text-left" : "text-center"} items-center justify-between`} 
+                                >
+                                    <motion.h2 layout className="text-xl font-bold truncate leading-tight w-full">Scuttle Rebuild</motion.h2>
+                                    <motion.p layout className="text-white/60 text-sm truncate w-full">The New Professional</motion.p>
+                                </motion.div> 
+
+                            </motion.div>
+
+                            {/* CONTROL BLOCK */}
+                            <motion.div
+                                layout
+                                layoutId="control-block"
+                                className={`flex flex-col ${isCompact ? "gap-2" : "gap-6"} w-full`}
+                                onPointerDownCapture={(e) => e.stopPropagation()} /* capture scrubbing */
+                            >
+                                <Slider 
+                                    defaultValue={[0]} max={100} step={1}
+                                />
+
+                                {/* BUTTON ROW */}
+                                <div
+                                    className={`flex items-center justify-between w-full ${isCompact ? "px-2" : "px-8"}`}
+                                >
+                                    <Shuffle size={isCompact ? 20 : 28} className="fill-current" />
+
+                                    <div className={`flex items-center ${isCompact ? "gap-6" : "gap-10"}`}>
+                                        <SkipBack size={isCompact ? 20 : 28} className="fill-current" />
+                                        <Play size={isCompact ? 20 : 28} className="fill-current" />
+                                        <SkipForward size={isCompact ? 20 : 28} className="fill-current" />
+                                    </div>
+                                    <Repeat size={isCompact ? 20 : 28} className="fill-current" />
+                                </div>
+                            </motion.div>
 
                         </motion.div>
                     </motion.div>
 
                     {/* SCROLL AREA */}
                     <div
-                        ref={(el) => setScrollEl(el)}
                         className="flex-1 overflow-y-auto px-8 custom-scrollbar bg-surface h-full"
                         onPointerDown={(e) => e.stopPropagation()}
                     >
-
-
                         <div className="space-y-2 py-8">
                             {generateMockQueue(100).map((track) => (
                             <div 
@@ -183,54 +193,6 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
 
                     </div>
 
-                    {/* <div 
-                        ref={scrollRef}
-                        className="flex-1 overflow-y-auto px-8 custom-scrollbar"
-                        onPointerDown={(e) => e.stopPropagation()}
-                    >
-                        <div className="sticky top-0 z-20 bg-surface pb-6">
-
-                            
-                            <motion.div
-                                className="relative flex flex-col items-center"
-                            >
-
-                            </motion.div>
-                        </div>
-
-                        <div className="pt-6 pb-20">
-                            <QueueView /> 
-                        </div>
-                    </div>
- */}
-                    {/* <div className="flex-1 relative">
-                        <AnimatePresence initial={false} mode="popLayout">
-                            {showQueue ? (
-                                <motion.div 
-                                    key="queue"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.2, ease: "circOut" }}
-                                    className="absolute inset-0"
-                                >
-                                    <QueueView />
-                                </motion.div>
-                            ) : (
-                                <motion.div 
-                                    key="now-playing"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="absolute inset-0"
-                                >
-                                    <NowPlayingView key="now-playing" />
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div> */}
-                    
                 </motion.div>
             ) : (
                 <motion.div

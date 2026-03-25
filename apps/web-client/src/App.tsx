@@ -10,7 +10,7 @@ const MockLibrary = () => (
     <h1 className="text-2xl font-bold mb-4">Your Library</h1>
     <div className="grid grid-cols-2 gap-4">
       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
-        <div key={i} className="bg-panel aspect-square rounded-md shadow-lg p-4">
+        <div key={i} className="bg-card aspect-square rounded-md shadow-lg p-4">
            <div className="w-full h-3/4 bg-zinc-800 rounded mb-2" />
            <div className="h-4 w-3/4 bg-zinc-700 rounded" />
         </div>
