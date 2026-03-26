@@ -1,10 +1,12 @@
 import { useRef, useState } from "react";
-import { BOTTOM_SHELF, NAV_CONFIG } from "../player/player.constants";
-import { MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TrackItem } from "../track/TrackItem";
 
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react";
+
+import { TrackItem } from "@/features/track/TrackItem";
+
+import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
 
 export const MockSearch = () => {
@@ -12,18 +14,24 @@ export const MockSearch = () => {
     const [query, setQuery] = useState("");
 
     const inputRef = useRef<HTMLInputElement>(null);
+    const resultsRef = useRef<HTMLDivElement>(null);
 
     return (
         <>
         <div 
             className="w-full h-full flex flex-col px-4 overflow-hidden touch-none"
             style={{ paddingBottom: `${NAV_CONFIG.height}px` }}
-            onPointerDown={() => {
-                setIsSearching(false);
+            onPointerDown={(e) => {
                 inputRef.current?.blur();
+
+                //does not close the search results if touching the results div
+                if (resultsRef.current?.contains(e.target as Node)) {
+                    return;
+                }
+                setIsSearching(false);
             }}
         >
-            {/* STICKY HEADER */}
+            {/* HEADER */}
             <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4">
                 <h1 className="text-2xl font-light mb-4">Search</h1>
                 
@@ -49,16 +57,19 @@ export const MockSearch = () => {
                     {isSearching ? (
                         <>
                         <motion.div 
+                            ref={resultsRef}
                             key="search-results"
                             initial="hidden"
                             animate="show"
                             exit="hidden"
                             variants={{
                                 show: {
-                                    transition: { staggerChildren: 0.1 } // Results pop in one by one
+                                    transition: { staggerChildren: 0.05 } // Results pop in one by one
                                 }
                             }}
-                            className="flex flex-col gap-1 pt-2 pb-20"
+                            // className="flex flex-col gap-1 pt-2 pb-20"
+                            className="flex flex-col gap-1 pt-2"
+                            style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
                         >
                             {/* BOGUS RESULTS ARRAY */}
                             {[...Array(10)].map((_, i) => (
@@ -114,7 +125,7 @@ const MockBrowserCategories = () => {
             initial={{ opacity: 0, scale: 0.98 }}    
             animate={{ opacity: 1, scale: 1 }}    
             exit={{ opacity: 0, scale: 0.98 }}    
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
             className="flex flex-col gap-4 mt-6"
             style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
         >
