@@ -1,20 +1,18 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, Play } from 'lucide-react';
-import { PlayIcon, PauseIcon, FastForwardIcon, RewindIcon, ShuffleIcon, RepeatIcon  } from '@phosphor-icons/react';
 
-import { PLAYER_CONFIG, NAV_CONFIG } from '@/constants/layout';
 import { Slider } from '@/components/ui/slider';
-import { QueueView } from '@/features/queue/QueueView';
 
-interface GlobalPlayerProps {
-  isExpanded: boolean;
-  setIsExpanded: (value: boolean) => void;
-}
+import { PlayIcon, PauseIcon, FastForwardIcon, RewindIcon, ShuffleIcon, RepeatIcon, CaretDownIcon  } from '@phosphor-icons/react';
+
+import { PLAYER_CONFIG, NAV_CONFIG } from '@/features/player/player.constants';
+import type { GlobalPlayerProps } from './player.types';
+
+import { QueueView } from '@/features/queue/QueueView';
 
 export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) => {
 
-    // This function handles the "snap" logic after the user lets go
+    // This function handles the opening and closing of the player
     const onDragEnd = (_: any, info: any) => {
         const swipeThreshold = 50; // px
         const velocityThreshold = 500; // px/s
@@ -25,7 +23,6 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
                 setIsExpanded(false);
             }
         } else {
-
             // If collapsed, check if swiped up
             if (info.offset.y < -swipeThreshold || info.velocity.y < -velocityThreshold) {
                 setIsExpanded(true);
@@ -67,7 +64,7 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
                 <motion.div layout layoutId="global-player-inner-container" className="relative flex flex-col h-full px-8 pt-8">
 
                 <button onClick={(e) => { e.stopPropagation(); setIsExpanded(false); }}>
-                    <ChevronDown className="w-8 h-8" />
+                    <CaretDownIcon size={20} weight="regular" />
                 </button>
                 
                 {/* THE HEADER: This stays at the top */}
@@ -217,7 +214,7 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
                         </motion.div> 
                     </div>
             
-                    <Play className="w-6 h-6 fill-current" />
+                    <PlayIcon size={20} weight="fill" />
                 </motion.div>
             )}
         </motion.div>

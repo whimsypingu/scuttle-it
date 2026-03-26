@@ -1,5 +1,5 @@
 import { Home, Search, Library, User } from 'lucide-react';
-import { NAV_CONFIG } from '@/constants/layout';
+import { NAV_CONFIG } from '@/features/player/player.constants';
 
 export const NavBar = () => {
     return (

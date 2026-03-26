@@ -1,5 +1,3 @@
-// src/constants/layout.ts
-
 export const PLAYER_CONFIG = {
     collapsedHeight: 64, // px
     expandedHeight: '100dvh',

@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import { MainLayout } from '@/layouts/MainLayout'
 import { GlobalPlayer } from '@/features/player/GlobalPlayer';
-import { NavBar } from '@/features/navbar/NavBar';
+import { NavBar } from '@/features/player/NavBar';
 
 // These will be real components soon!
 const MockLibrary = () => (
