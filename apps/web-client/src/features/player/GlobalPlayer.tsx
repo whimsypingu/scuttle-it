@@ -1,16 +1,11 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
-import { Slider } from '@/components/ui/slider';
-
-import { PlayIcon, PauseIcon, FastForwardIcon, RewindIcon, ShuffleIcon, RepeatIcon, CaretDownIcon  } from '@phosphor-icons/react';
-
 import { PLAYER_CONFIG, NAV_CONFIG } from '@/features/player/player.constants';
-import type { GlobalPlayerProps } from './player.types';
+import type { GlobalPlayerProps } from '@/features/player/player.types';
 
-import { QueueView } from '@/features/queue/QueueView';
-import { ExpandedView } from './ExpandedView';
-import { MiniView } from './MiniView';
+import { ExpandedView } from '@/features/player/ExpandedView';
+import { MiniView } from '@/features/player/MiniView';
 
 export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) => {
 

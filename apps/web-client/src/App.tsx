@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import { MainLayout } from '@/layouts/MainLayout'
 import { GlobalPlayer } from '@/features/player/GlobalPlayer';
-import { NavBar } from '@/features/player/NavBar';
+import { NavBar } from '@/features/player/GlobalNavBar';
 
 // These will be real components soon!
 const MockLibrary = () => (
@@ -20,12 +20,12 @@ const MockLibrary = () => (
 );
 
 function App() {
-	const [isExpanded, setIsExpanded] = useState(false);
+	const [isPlayerExpanded, setIsPlayerExpanded] = useState(false);
 
     return (
     <div className="relative h-dvh w-full overflow-hidden bg-surface">
 
-		{!isExpanded && (
+		{!isPlayerExpanded && (
 			<>
 				<MainLayout>
 					<MockLibrary />
@@ -35,7 +35,7 @@ function App() {
 			</>
 		)}
 
-		<GlobalPlayer isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
+		<GlobalPlayer isExpanded={isPlayerExpanded} setIsExpanded={setIsPlayerExpanded} />
 		
     </div>
     )
