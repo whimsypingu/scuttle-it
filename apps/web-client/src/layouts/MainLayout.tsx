@@ -2,7 +2,6 @@ import React from 'react';
 
 interface MainLayoutProps {
     children: React.ReactNode;
-    PlayerElement: React.ReactNode;
 }
 
 export const MainLayout = ({ children }: MainLayoutProps) => {

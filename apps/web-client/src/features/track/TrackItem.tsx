@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { motion, useMotionValue, useMotionValueEvent, useTransform } from 'framer-motion';
 import { MusicNoteIcon } from '@phosphor-icons/react';
 
-import { ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX } from './track.constants';
-import type { TrackItemProps } from './track.types';
-
+import { ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/features/track/track.constants';
+import type { TrackItemProps } from '@/features/track/track.types';
 
 export const TrackItem = ({ 
 	track, 
@@ -15,28 +14,30 @@ export const TrackItem = ({
 	/* DRAG ACTION HANDLING */
 	const x = useMotionValue(0);
 
-	const justifyAction = useTransform(x, (latest) => (latest > 0 ? "flex-start" : "flex-end")); //which side to justify the icon
+	const justify = useTransform(x, (latest) => (latest > 0 ? "flex-start" : "flex-end")); //which side to justify the icon
 	const opacity = useTransform(x, [-50, 0, 50], [1, 0, 1]);
-	const actionIndex = useTransform(
+	const currentIndex = useTransform(
 		x, 
 		[LARGE_SWIPE_THRESHOLD_PX, SMALL_SWIPE_THRESHOLD_PX, -(SMALL_SWIPE_THRESHOLD_PX), -(LARGE_SWIPE_THRESHOLD_PX)],
-		[0, 1, 2, 3]
+		[0, 1, 2, 3] //current action index
 	);
 
-	const [activeIndex, setActiveIndex] = useState<number>(1);
-
-	useMotionValueEvent(actionIndex, "change", (latest) => {
+	//get the closest action
+	const [activeIndex, setActiveIndex] = useState<number>(1); //which action to map to
+	useMotionValueEvent(currentIndex, "change", (latest) => {
 		const rounded = Math.round(latest);
 		if (rounded !== activeIndex) {
 			setActiveIndex(rounded);
 		}
 	});
-
 	const actionKey = actions[activeIndex];
+
+	//extract the right Icon and color from the swipe
 	const config = ACTION_CONFIG[actionKey];
 	const IconComponent = config.icon;
 	const color = config.color;
 
+	//handle the end of the drag. for now just console logs
 	const handleDragEnd = (_: any, info: any) => {
 		const offset = info.offset.x;
 
@@ -55,7 +56,7 @@ export const TrackItem = ({
 			msg = `${msg} Left`;
 		}
 		console.log(msg)
-	}
+	};
 
 	return (
 		<>
@@ -65,7 +66,7 @@ export const TrackItem = ({
 			<motion.div 
 				style={{ 
 					opacity,
-					justifyContent: justifyAction
+					justifyContent: justify
 				}}
 				className="absolute inset-0 flex items-center px-6 bg-zinc-800"
 			>
@@ -74,7 +75,7 @@ export const TrackItem = ({
 					key={activeIndex}
 					style={{ color }}
 				>
-					<IconComponent size={20} weight="fill" />
+					<IconComponent size={ICON_SIZE_PX} weight="fill" />
 				</motion.div>
 			</motion.div>
 
@@ -85,12 +86,11 @@ export const TrackItem = ({
 				dragSnapToOrigin={true}
 				dragElastic={0.4}
 				style={{ x }}
-
 				onDragEnd={handleDragEnd}
 				className="flex items-center gap-4 py-2 px-3 bg-background rounded-lg active:cursor-grabbing relative z-10 shadow-xl"
 			>
 				<div className="w-12 h-12 bg-zinc-800 rounded flex items-center justify-center shrink-0">
-					<MusicNoteIcon size={20} />
+					<MusicNoteIcon size={ICON_SIZE_PX} />
 				</div>
 
 				<div className="flex-1 min-w-0 text-left flex flex-col">
