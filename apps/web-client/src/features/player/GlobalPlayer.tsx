@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useDragControls } from 'framer-motion';
 
 import { PLAYER_CONFIG, NAV_CONFIG } from '@/features/player/player.constants';
 import type { GlobalPlayerProps } from '@/features/player/player.types';
@@ -27,6 +27,8 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
         }
     };
 
+    const dragControls = useDragControls();
+
     // scrolling shrinking the size of the album art and moving it around
     const [isCompact, setIsCompact] = useState(false);
 
@@ -52,6 +54,7 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
             className="fixed z-50 shadow-2xl overflow-hidden cursor-pointer"
             onClick={() => !isExpanded && setIsExpanded(true)}
             drag={"y"} // enable vertical dragging
+            dragControls={dragControls}
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={0.05}
             onDragEnd={onDragEnd}
@@ -61,6 +64,7 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
                     isCompact={isCompact}
                     setIsCompact={setIsCompact}
                     onClose={() => setIsExpanded(false)}
+                    playerDragControls={dragControls}
                 />
             ) : (
                 <MiniView

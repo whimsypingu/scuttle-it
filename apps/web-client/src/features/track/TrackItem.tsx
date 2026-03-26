@@ -82,6 +82,7 @@ export const TrackItem = ({
 			{/* DRAG LAYER */}
 			<motion.div
 				drag="x"
+				dragDirectionLock
 				dragConstraints={{ left: 0, right: 0 }}
 				dragSnapToOrigin={true}
 				dragElastic={0.4}

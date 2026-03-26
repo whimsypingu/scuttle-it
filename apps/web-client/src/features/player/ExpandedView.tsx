@@ -11,7 +11,7 @@ import type { ExpandedViewProps } from '@/features/player/player.types';
 
 
 //consider not propagating isCompact down to here and just start it here
-export const ExpandedView = ({ isCompact, setIsCompact, onClose }: ExpandedViewProps) => {
+export const ExpandedView = ({ isCompact, setIsCompact, onClose, playerDragControls }: ExpandedViewProps) => {
     return (
         <>
         <motion.div
@@ -150,7 +150,7 @@ export const ExpandedView = ({ isCompact, setIsCompact, onClose }: ExpandedViewP
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1, duration: 0.4 }} // Slight delay so the container expands first
                     className="flex-1 overflow-y-auto px-2 custom-scrollbar h-full"
-                    onPointerDown={(e) => e.stopPropagation()}
+                    onPointerDown={() => playerDragControls.cancel()}
                 >
                     <QueueView />
                 </motion.div>

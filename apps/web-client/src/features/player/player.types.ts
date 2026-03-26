@@ -1,3 +1,4 @@
+import type { DragControls } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 import React from 'react';
 
@@ -23,6 +24,8 @@ export interface NavItemProps {
 //all the space above the navbar
 export interface MainLayoutProps {
     children: React.ReactNode;
+    activeTab: Tab;
+    onTabChange: (tab: Tab) => void;
 }
 
 //player
@@ -39,4 +42,5 @@ export interface ExpandedViewProps {
     isCompact: boolean;
     setIsCompact: (value: boolean) => void;
     onClose: () => void; //what to do when closed
+    playerDragControls: DragControls; //parent dragControls to cancel when dragging on the queue
 }
