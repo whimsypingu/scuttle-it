@@ -1,5 +1,14 @@
 export interface GlobalPlayerProps {
-  isExpanded: boolean;
-  setIsExpanded: (value: boolean) => void;
+    isExpanded: boolean;
+    setIsExpanded: (value: boolean) => void;
 }
 
+export interface MiniViewProps {
+    onExpand: () => void; // what do when expanded
+}
+
+export interface ExpandedViewProps {
+    isCompact: boolean;
+    setIsCompact: (value: boolean) => void;
+    onClose: () => void; //what to do when closed
+}
