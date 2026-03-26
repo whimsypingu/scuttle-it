@@ -1,3 +1,10 @@
+export type Tab = 'home' | 'search' | 'library' | 'user';
+
+export interface NavBarProps {
+    activeTab: Tab;
+    onTabChange: (tab: Tab) => void;
+}
+
 export interface GlobalPlayerProps {
     isExpanded: boolean;
     setIsExpanded: (value: boolean) => void;

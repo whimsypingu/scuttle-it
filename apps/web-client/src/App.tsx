@@ -2,7 +2,9 @@ import { useState } from 'react'
 
 import { MainLayout } from '@/layouts/MainLayout'
 import { GlobalPlayer } from '@/features/player/GlobalPlayer';
-import { NavBar } from '@/features/player/GlobalNavBar';
+import { NavBar } from '@/features/player/NavBar';
+
+import type { Tab } from '@/features/player/player.types';
 
 // These will be real components soon!
 const MockLibrary = () => (
@@ -19,8 +21,26 @@ const MockLibrary = () => (
   </div>
 );
 
+// Mock components for different tabs
+const MockHome = () => <div className="p-4"><h1 className="text-2xl font-bold">Home View</h1></div>;
+const MockSearch = () => <div className="p-4"><h1 className="text-2xl font-bold">Search View</h1></div>;
+//const MockLibrary = () => <div className="p-4"><h1 className="text-2xl font-bold">Library View</h1></div>;
+const MockProfile = () => <div className="p-4"><h1 className="text-2xl font-bold">Your Profile</h1></div>;
+
 function App() {
 	const [isPlayerExpanded, setIsPlayerExpanded] = useState(false);
+	const [activeTab, setActiveTab] = useState<Tab>("home");
+
+	// Simple helper to render the right content based on tab
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'home': return <MockHome />;
+            case 'search': return <MockSearch />;
+            case 'library': return <MockLibrary />;
+            case 'user': return <MockProfile />;
+            default: return <MockHome />;
+        }
+    };
 
     return (
     <div className="relative h-dvh w-full overflow-hidden bg-surface">
@@ -28,10 +48,13 @@ function App() {
 		{!isPlayerExpanded && (
 			<>
 				<MainLayout>
-					<MockLibrary />
+					{renderContent()}
 				</MainLayout>
 
-				<NavBar />
+				<NavBar
+					activeTab={activeTab}
+					onTabChange={setActiveTab}
+				/>
 			</>
 		)}
 
