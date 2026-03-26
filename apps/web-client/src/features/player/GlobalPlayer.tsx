@@ -1,22 +1,16 @@
 import { useState } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent, circOut } from 'framer-motion';
-import { ChevronDown, Play, ListMusic, GripVertical, Music2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ChevronDown, Play } from 'lucide-react';
 import { PlayIcon, PauseIcon, FastForwardIcon, RewindIcon, ShuffleIcon, RepeatIcon  } from '@phosphor-icons/react';
 
 import { PLAYER_CONFIG, NAV_CONFIG } from '@/constants/layout';
 import { Slider } from '@/components/ui/slider';
+import { QueueView } from '@/features/queue/QueueView';
 
 interface GlobalPlayerProps {
   isExpanded: boolean;
   setIsExpanded: (value: boolean) => void;
 }
-export const generateMockQueue = (count: number) => {
-    return Array.from({ length: count }, (_, i) => ({
-        id: `${i+1}`,
-        title: `Scuttle Track ${i+1}`,
-        artist: String.fromCharCode(65 + (i % 26)),
-    }));
-};
 
 export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) => {
 
@@ -41,6 +35,7 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
 
     // scrolling shrinking the size of the album art and moving it around
     const [isCompact, setIsCompact] = useState(false);
+
     return (
         <>
         <motion.div 
@@ -78,7 +73,7 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
                 {/* THE HEADER: This stays at the top */}
                 <motion.div 
                     layout
-                    className={`top-0 z-20 py-8 ${isCompact ? "px-2" : "px-0 h-full"} w-full`}
+                    className={`top-0 z-20 py-8 ${isCompact ? "px-5" : "px-2 h-full"} w-full`} //should i do px-5 or px-2 for isCompact?
                     transition={{
                         type: "spring",
                         stiffness: 400,
@@ -114,14 +109,14 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
                                     layout="position"
                                     className="text-lg font-medium truncate leading-tight max-w-full block"
                                 >
-                                    Scuttle Rebuild grrrrrrrrrrrrrrrrrrrrrrrrrrr
+                                    Scuttle Rebuild GRRRRRRRRRRRRRRRRRRRRR
                                 </motion.span>
                                 
                                 <motion.span 
                                     layout="position"
                                     className="text-white/60 text-sm font-light truncate max-w-full block"
                                 >
-                                    The New Professional
+                                    Track Artist
                                 </motion.span>
                             </motion.div> 
 
@@ -189,23 +184,7 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
                         className="flex-1 overflow-y-auto px-2 custom-scrollbar h-full"
                         onPointerDown={(e) => e.stopPropagation()}
                     >
-                        <div className="space-y-2 py-8">
-                            {generateMockQueue(100).map((track) => (
-                            <div 
-                                key={track.id} 
-                                className="flex items-center gap-4 py-2 rounded-lg hover:bg-white/5 group transition-colors"
-                            >
-                                <div className="w-12 h-12 bg-zinc-800 rounded flex items-center justify-center shrink-0">
-                                <Music2 className="w-5 h-5 text-white/20" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                <div className="font-medium text-sm truncate">{track.title}</div>
-                                <div className="text-xs text-white/40 truncate">{track.artist}</div>
-                                </div>
-                                <GripVertical className="w-5 h-5 text-white/10 group-active:text-white/40 cursor-grab" />
-                            </div>
-                            ))}
-                        </div>
+                        <QueueView />
                     </motion.div>
                     </>
                 ) : null}
@@ -220,20 +199,20 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
                         <motion.div
                             layout="position"
                             layoutId="text-block"
-                            className={`flex flex-col flex-1 min-w-0 w-full text-left items-center justify-between`} 
+                            className={`flex flex-col flex-1 min-w-0 w-full text-left items-start justify-between`} 
                         >
                             <motion.span 
                                 layout="position"
-                                className="text-sn font-bold truncate leading-tight w-full"
+                                className="text-md font-medium truncate leading-tight max-w-full block"
                             >
                                 Scuttle Rebuild
                             </motion.span>
                             
                             <motion.span 
                                 layout="position"
-                                className="text-white/60 text-xs truncate w-full"
+                                className="text-white/60 text-xs font-light truncate max-w-full block"
                             >
-                                The New Professional
+                                Track Artist
                             </motion.span>
                         </motion.div> 
                     </div>

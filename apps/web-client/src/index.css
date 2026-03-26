@@ -8,6 +8,8 @@
 @theme {
     --color-brand: #E50914;
     --color-brand-hover: #B20710;
+    --color-brand-muted: #E5091420;
+
     --color-surface: #121212;
     --color-panel: #181818;
 
