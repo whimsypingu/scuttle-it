@@ -1,23 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, useMotionValue, useMotionValueEvent, useTransform } from 'framer-motion';
-import { HeartIcon, MusicNoteIcon, PlusCircleIcon, TrashIcon, type Icon } from '@phosphor-icons/react';
+import { MusicNoteIcon } from '@phosphor-icons/react';
 
-interface TrackItemProps {
-    track: { id: string; title: string; artist: string };
-    index: number;
-	actions?: [SwipeActionType, SwipeActionType, SwipeActionType, SwipeActionType]; //leftmost action to rightmost action
-}
+import { ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX } from './track.constants';
+import type { TrackItemProps } from './track.types';
 
-type SwipeActionType = "queue" | "like" | "delete" | "edit";
-const ACTION_CONFIG: Record<SwipeActionType, { icon: Icon, color: string }> = {
-	like: { icon: HeartIcon, color: "var(--color-brand)" },
-	queue: { icon: PlusCircleIcon, color: "var(--color-primary)" },
-	delete: { icon: TrashIcon, color: "var(--color-brand)" },
-	edit: { icon: TrashIcon, color: "black" }
-};
-
-const SMALL_SWIPE_THRESHOLD = 50; 
-const LARGE_SWIPE_THRESHOLD = 100;
 
 export const TrackItem = ({ 
 	track, 
@@ -32,7 +19,7 @@ export const TrackItem = ({
 	const opacity = useTransform(x, [-50, 0, 50], [1, 0, 1]);
 	const actionIndex = useTransform(
 		x, 
-		[LARGE_SWIPE_THRESHOLD, SMALL_SWIPE_THRESHOLD, -(SMALL_SWIPE_THRESHOLD), -(LARGE_SWIPE_THRESHOLD)],
+		[LARGE_SWIPE_THRESHOLD_PX, SMALL_SWIPE_THRESHOLD_PX, -(SMALL_SWIPE_THRESHOLD_PX), -(LARGE_SWIPE_THRESHOLD_PX)],
 		[0, 1, 2, 3]
 	);
 
@@ -54,9 +41,9 @@ export const TrackItem = ({
 		const offset = info.offset.x;
 
 		let msg = "ACTION: ";
-		if (Math.abs(offset) >= LARGE_SWIPE_THRESHOLD) {
+		if (Math.abs(offset) >= LARGE_SWIPE_THRESHOLD_PX) {
 			msg = `${msg} Large `;
-		} else if (Math.abs(offset) >= SMALL_SWIPE_THRESHOLD) {
+		} else if (Math.abs(offset) >= SMALL_SWIPE_THRESHOLD_PX) {
 			msg = `${msg} Small `;
 		} else {
 			msg = `${msg} None `;
