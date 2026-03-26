@@ -3,6 +3,9 @@ import { PlayIcon } from '@phosphor-icons/react';
 
 import type { MiniViewProps } from '@/features/player/player.types';
 
+import { PLAYER_CONFIG } from '@/features/player/player.constants';
+
+
 export const MiniView = ({ onExpand }: MiniViewProps) => {
     return (
         <>
@@ -45,7 +48,7 @@ export const MiniView = ({ onExpand }: MiniViewProps) => {
                     </motion.span>
                 </motion.div> 
 
-                <PlayIcon size={20} weight="fill" />
+                <PlayIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
             </div>
         </motion.div>
         </>

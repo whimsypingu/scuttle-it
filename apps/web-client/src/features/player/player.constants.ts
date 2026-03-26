@@ -9,6 +9,8 @@ export const PLAYER_CONFIG = {
     borderRadius: 12,
     marginSide: 8,
     marginBottom: 12, // Gap between Nav and Player
+
+    iconSize: 20,
 };
 
 //navbar sizing

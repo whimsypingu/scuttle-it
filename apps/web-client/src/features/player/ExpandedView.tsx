@@ -5,7 +5,10 @@ import { CaretDownIcon, FastForwardIcon, PlayIcon, RepeatIcon, RewindIcon, Shuff
 
 import { QueueView } from '@/features/queue/QueueView';
 
+import { PLAYER_CONFIG } from '@/features/player/player.constants';
+
 import type { ExpandedViewProps } from '@/features/player/player.types';
+
 
 //consider not propagating isCompact down to here and just start it here
 export const ExpandedView = ({ isCompact, setIsCompact, onClose }: ExpandedViewProps) => {
@@ -23,7 +26,7 @@ export const ExpandedView = ({ isCompact, setIsCompact, onClose }: ExpandedViewP
                     onClose();
                 }}
             >
-                <CaretDownIcon size={20} weight="regular" />
+                <CaretDownIcon size={PLAYER_CONFIG.iconSize} weight="regular" />
             </button>
 
             {/* HEADER: Transitions between compact (which includes queue) and current track view */}
@@ -92,7 +95,8 @@ export const ExpandedView = ({ isCompact, setIsCompact, onClose }: ExpandedViewP
                         />
 
                         {/* DURATION ROW */}
-                        <div
+                        <motion.div
+                            layout
                             className={`flex flex-row items-center justify-between w-full px-2`}
                         >
                             <div className="flex-shrink-0">
@@ -106,26 +110,32 @@ export const ExpandedView = ({ isCompact, setIsCompact, onClose }: ExpandedViewP
                                     4:56
                                 </span>
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* BUTTON ROW */}
-                        <div
-                            className={`flex flex-row items-center justify-between w-full px-2`}
+                        <motion.div
+                            layout
+                            className={`relative flex flex-row items-center w-full px-2`}
                         >
                             <div className="flex-shrink-0">
-                                <ShuffleIcon size={20} weight="fill" />
+                                <ShuffleIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
                             </div>
+                            
+                            {/* mighty jank to reduce glitchy look when compact/uncompacting */}
+                            <motion.div 
+                                layout 
+                                layoutId="center-control-group" 
+                                className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center gap-4"
+                            >
+                                <RewindIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
+                                <PlayIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
+                                <FastForwardIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
+                            </motion.div>
 
-                            <div className={`flex-1 min-w-0 flex flex-row items-center justify-center min-w-0 gap-4`}>
-                                <RewindIcon size={20} weight="fill" />
-                                <PlayIcon size={20} weight="fill" />
-                                <FastForwardIcon size={20} weight="fill" />
+                            <div className="ml-auto flex-shrink-0">
+                                <RepeatIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
                             </div>
-
-                            <div className="flex-shrink-0">
-                                <RepeatIcon size={20} weight="fill" />
-                            </div>
-                        </div>
+                        </motion.div>
                     </motion.div>
                 </motion.div>
             </motion.div>
