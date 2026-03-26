@@ -1,9 +1,8 @@
-import { Home, Search, Library, User } from 'lucide-react';
-import { NAV_CONFIG } from '@/features/player/player.constants';
+import { NAV_CONFIG, NAV_ITEMS } from '@/features/player/player.constants';
 
-import type { NavBarProps } from '@/features/player/player.types';
+import type { NavBarProps, NavItemProps } from '@/features/player/player.types';
 
-export const NavBar = ({ activeTab, onTabChange }: NavBarProps) => {
+export const NavBar = ({ activeTab, onTabChange }: NavBarProps)  => {
     return (
         <>
         <nav 
@@ -11,26 +10,16 @@ export const NavBar = ({ activeTab, onTabChange }: NavBarProps) => {
             style={{ height: `${NAV_CONFIG.height}px` }}
         >
             <div className="flex justify-around items-start gap-2 h-full px-4 py-0">
-                <NavItem 
-                    icon={<Home />} 
-                    active={activeTab === "home"}
-                    onClick={() => onTabChange("home")}
-                />
-                <NavItem 
-                    icon={<Search />} 
-                    active={activeTab === "search"}
-                    onClick={() => onTabChange("search")}
-                />
-                <NavItem 
-                    icon={<Library />} 
-                    active={activeTab === "library"}
-                    onClick={() => onTabChange("library")}
-                />
-                <NavItem 
-                    icon={<User />} 
-                    active={activeTab === "user"}
-                    onClick={() => onTabChange("user")}
-                />
+                {NAV_ITEMS.map(({ tab, icon }) => (
+                    <>
+                    <NavItem
+                        key={tab}
+                        icon={icon}
+                        active={activeTab === tab}
+                        onClick={() => onTabChange(tab)}
+                    />
+                    </>
+                ))}
             </div>
         </nav>
         </>
@@ -38,7 +27,7 @@ export const NavBar = ({ activeTab, onTabChange }: NavBarProps) => {
 };
 
 // Internal Helper for consistency
-const NavItem = ({ icon, active, onClick }: { icon: React.ReactNode, active: boolean, onClick: () => void }) => (
+const NavItem = ({ icon: IconComponent, active, onClick }: NavItemProps) => (
     <button 
         className={`
             flex flex-col items-center justify-center gap-1 
@@ -48,7 +37,7 @@ const NavItem = ({ icon, active, onClick }: { icon: React.ReactNode, active: boo
         onClick={onClick}
     >
         <div className="h-[50%] aspect-square [&>svg]:w-full [&>svg]:h-full">
-            {icon}
+            <IconComponent strokeWidth={active ? 2.5 : 2} />
         </div>
     </button>
 );

@@ -1,3 +1,8 @@
+import { Home, Library, Search, User } from 'lucide-react';
+
+import type { NavItemConfig } from '@/features/player/player.types';
+
+//player sizing and location
 export const PLAYER_CONFIG = {
     collapsedHeight: 64, // px
     expandedHeight: '100dvh',
@@ -6,6 +11,7 @@ export const PLAYER_CONFIG = {
     marginBottom: 12, // Gap between Nav and Player
 };
 
+//navbar sizing
 export const NAV_CONFIG = {
     height: 32,
 };
@@ -16,3 +22,11 @@ export const BOTTOM_SHELF_TOTAL_HEIGHT =
     NAV_CONFIG.height + 
     PLAYER_CONFIG.marginBottom + 
     20; // Extra padding for breathing room
+
+//navbar tab items
+export const NAV_ITEMS: readonly NavItemConfig[] = [
+    { tab: "home", icon: Home },
+    { tab: "search", icon: Search },
+    { tab: "library", icon: Library },
+    { tab: "user", icon: User }
+]

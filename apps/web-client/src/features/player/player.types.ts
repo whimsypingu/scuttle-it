@@ -1,3 +1,7 @@
+import type { LucideIcon } from 'lucide-react';
+import React from 'react';
+
+//navbar
 export type Tab = 'home' | 'search' | 'library' | 'user';
 
 export interface NavBarProps {
@@ -5,6 +9,23 @@ export interface NavBarProps {
     onTabChange: (tab: Tab) => void;
 }
 
+export interface NavItemConfig {
+    readonly tab: Tab;
+    readonly icon: LucideIcon;
+}
+
+export interface NavItemProps {
+    icon: LucideIcon;
+    active: boolean;
+    onClick: () => void;
+}
+
+//all the space above the navbar
+export interface MainLayoutProps {
+    children: React.ReactNode;
+}
+
+//player
 export interface GlobalPlayerProps {
     isExpanded: boolean;
     setIsExpanded: (value: boolean) => void;
