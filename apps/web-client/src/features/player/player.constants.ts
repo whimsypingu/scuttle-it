@@ -19,11 +19,17 @@ export const NAV_CONFIG = {
 };
 
 // Helper to calculate the total "dead zone" at the bottom of the screen
-export const BOTTOM_SHELF_TOTAL_HEIGHT = 
-    PLAYER_CONFIG.collapsedHeight + 
-    NAV_CONFIG.height + 
-    PLAYER_CONFIG.marginBottom + 
-    20; // Extra padding for breathing room
+export const BOTTOM_SHELF = {
+    totalHeight: (
+        PLAYER_CONFIG.collapsedHeight + 
+        NAV_CONFIG.height + 
+        PLAYER_CONFIG.marginBottom
+    ),
+    playerHeightWithMargins: (
+        PLAYER_CONFIG.collapsedHeight +
+        (2 * PLAYER_CONFIG.marginBottom)
+    )
+}
 
 //navbar tab items
 export const NAV_ITEMS: readonly NavItemConfig[] = [
