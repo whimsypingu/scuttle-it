@@ -2,6 +2,7 @@ import { NAV_CONFIG, NAV_ITEMS } from '@/features/player/player.constants';
 
 import type { NavBarProps, NavItemProps } from '@/features/player/player.types';
 
+
 export const NavBar = ({ activeTab, onTabChange }: NavBarProps)  => {
     return (
         <>

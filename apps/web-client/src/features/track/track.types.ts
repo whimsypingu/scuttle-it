@@ -15,6 +15,7 @@ export interface Track {
 
 export interface TrackItemProps {
     track: Track;
+    onSelect: (track: Track) => void;
     index: number;
 	actions?: [TrackActionType, TrackActionType, TrackActionType, TrackActionType]; //leftmost action to rightmost action
 }

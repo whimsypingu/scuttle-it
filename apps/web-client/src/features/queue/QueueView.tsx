@@ -1,29 +1,60 @@
-// src/features/player/queue/components/QueueView.tsx
-import { useState } from 'react';
-import { motion, useMotionValue } from 'framer-motion';
-import { Heart, ListPlus, Music2 } from 'lucide-react';
+import { useMemo } from 'react';
+import { motion } from 'framer-motion';
 
 import { TrackItem } from '@/features/track/TrackItem';
 
-export const generateMockQueue = (count: number) => {
-    return Array.from({ length: count }, (_, i) => ({
-        id: `${i+1}`,
-        title: `Scuttle Track ${i+1}`,
-        artist: String.fromCharCode(65 + (i % 26)),
-    }));
-};
+import type { Track } from '@/features/track/track.types';
+
 
 export const QueueView = () => {
 
+    const MOCK_TRACKS = useMemo(() => {
+        return [...Array(20)].map((_, i) => ({
+            id: `track-${i}`,
+            title: `Queue Track ${i+1}`,
+            artist: "Unknown Artist",
+        }));
+    }, []);
+
+    const handleTrackSelect = (track: Track) => {
+        console.log("Selected track:", track.title);
+    }
+
     return (
-        <div 
-            className="space-y-2 py-2"
+        <motion.div
+            key="playlist-content"
+            initial="hidden"
+            animate="show"
+            exit="hidden"
+            variants={{
+                show: {
+                    transition: {
+                        staggerChildren: 0.05
+                    }
+                }
+            }}
+            className="flex flex-col gap-1 w-full py-2"
             onDragStartCapture={(e) => e.stopPropagation()}
             onDragCapture={(e) => e.stopPropagation()}
         >
-            {generateMockQueue(100).map((track, index) => (
-                <TrackItem key={track.id} track={track} index={index} />
+            {/* TRACK LIST */}
+            {MOCK_TRACKS.map((track, i) => (
+                <>
+                <motion.div
+                    key={track.id}
+                    variants={{
+                        hidden: { opacity: 0, y: 15 },
+                        show: { opacity: 1, y: 0, transition: { type: "spring", damping: 20 } }
+                    }}
+                >
+                    <TrackItem 
+                        track={track}
+                        onSelect={(track) => handleTrackSelect(track)}
+                        index={i}
+                    />
+                </motion.div>
+                </>
             ))}
-        </div>
+        </motion.div>
     );
 };

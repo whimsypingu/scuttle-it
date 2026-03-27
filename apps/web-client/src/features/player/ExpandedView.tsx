@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
-import { Slider } from '@/components/ui/slider';
 
 import { CaretDownIcon, FastForwardIcon, PlayIcon, RepeatIcon, RewindIcon, ShuffleIcon } from '@phosphor-icons/react';
+import { Slider } from '@/components/ui/slider';
 
 import { QueueView } from '@/features/queue/QueueView';
 

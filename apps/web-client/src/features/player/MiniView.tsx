@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
+
 import { PlayIcon } from '@phosphor-icons/react';
 
-import type { MiniViewProps } from '@/features/player/player.types';
-
 import { PLAYER_CONFIG } from '@/features/player/player.constants';
+
+import type { MiniViewProps } from '@/features/player/player.types';
 
 
 export const MiniView = ({ onExpand }: MiniViewProps) => {

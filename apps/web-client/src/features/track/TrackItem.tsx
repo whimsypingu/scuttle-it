@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { motion, useMotionValue, useMotionValueEvent, useTransform } from 'framer-motion';
+
 import { MusicNoteIcon } from '@phosphor-icons/react';
 
 import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/features/track/track.constants';
+
 import type { TrackItemProps } from '@/features/track/track.types';
 
+
 export const TrackItem = ({ 
-	track, 
+	track,
+	onSelect,
 	index = 0,
 	actions = ["like", "queue", "delete", "edit"] //default setup
 }: TrackItemProps) => {
@@ -37,6 +41,13 @@ export const TrackItem = ({
 	const IconComponent = config.icon;
 	const color = config.color;
 
+	
+    //handle the start of a drag and prevent taps from triggering on drags with a flag
+    const [isDragging, setIsDragging] = useState(false);
+    const handleDragStart = () => {
+        setIsDragging(true);
+    }
+
 	//handle the end of the drag. for now just console logs
 	const handleDragEnd = (_: any, info: any) => {
 		const offset = info.offset.x;
@@ -56,7 +67,17 @@ export const TrackItem = ({
 			msg = `${msg} Left`;
 		}
 		console.log(msg)
-	};
+
+		//reset the dragging flag after one frame to prevent taps from triggering
+        requestAnimationFrame(() => setIsDragging(false));
+    };
+
+    //cancel taps on drags
+    const handleTap = () => {
+        if (isDragging) return;
+
+        onSelect(track);
+    };
 
 	return (
 		<>
@@ -87,7 +108,14 @@ export const TrackItem = ({
 				dragSnapToOrigin={true}
 				dragElastic={0.4}
 				style={{ x }}
-				onDragEnd={handleDragEnd}
+
+				onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                onTap={handleTap}
+
+				whileTap={!isDragging ? { scale: 0.98 } : {}}
+				transition={{ type: "spring", stiffness: 400, damping: 30 }}
+			
 				className="flex items-center gap-4 py-2 px-3 bg-background rounded-lg active:cursor-grabbing relative z-10 shadow-xl"
 			>
 				<div className="w-12 h-12 bg-zinc-800 rounded flex items-center justify-center shrink-0">

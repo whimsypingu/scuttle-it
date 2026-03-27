@@ -1,5 +1,7 @@
 import { NAV_CONFIG } from "@/features/player/player.constants";
+
 import type { HomeViewProps } from "./home.types";
+
 
 export const MockHome = ({
     tabResetSignal

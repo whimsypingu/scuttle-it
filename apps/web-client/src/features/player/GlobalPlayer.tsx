@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { motion, useDragControls } from 'framer-motion';
 
-import { PLAYER_CONFIG, NAV_CONFIG } from '@/features/player/player.constants';
-import type { GlobalPlayerProps } from '@/features/player/player.types';
-
 import { ExpandedView } from '@/features/player/ExpandedView';
 import { MiniView } from '@/features/player/MiniView';
+
+import { PLAYER_CONFIG, NAV_CONFIG } from '@/features/player/player.constants';
+
+import type { GlobalPlayerProps } from '@/features/player/player.types';
+
 
 export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) => {
 

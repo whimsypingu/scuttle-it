@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+
+import { PlaylistList } from "@/features/playlist/PlaylistList";
 
 import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
-import type { SearchViewProps } from "./search.types";
-import { PlaylistList } from "../playlist/PlaylistList";
+
+import type { SearchViewProps } from "@/features/search/search.types";
 
 
 export const MockSearch = ({

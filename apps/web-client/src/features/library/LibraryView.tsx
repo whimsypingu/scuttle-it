@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { XIcon } from "@phosphor-icons/react";
+
+import { PlaylistItem } from "@/features/playlist/PlaylistItem";
+import { PlaylistList } from "@/features/playlist/PlaylistList";
+
 import { NAV_CONFIG, BOTTOM_SHELF } from "@/features/player/player.constants";
 
-import { PlaylistItem } from "../playlist/PlaylistItem";
-import { PlaylistList } from "../playlist/PlaylistList";
-import type { Playlist } from "../playlist/playlist.types";
+import type { Playlist } from "@/features/playlist/playlist.types";
+import type { LibraryViewProps } from "@/features/library/library.types";
 
-import { XIcon } from "@phosphor-icons/react";
-import type { LibraryViewProps } from "./library.types";
 
 export const MockLibrary = ({
     tabResetSignal
