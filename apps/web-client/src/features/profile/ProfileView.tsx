@@ -1,11 +1,11 @@
 import { NAV_CONFIG } from "@/features/player/player.constants";
 
-import type { HomeViewProps } from "@/features/home/home.types";
+import type { ProfileViewProps } from "@/features/profile/profile.types";
 
 
-export const MockHome = ({
+export const MockProfile = ({
     tabResetSignal
-}: HomeViewProps) => {
+}: ProfileViewProps) => {
     const itemCount = 12;
     const items = Array.from({ length: itemCount }, (_, i) => i + 1);
 
@@ -17,7 +17,7 @@ export const MockHome = ({
         >
             {/* HEADER */}
             <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4">
-                <h1 className="tab-heading">Home</h1>
+                <h1 className="tab-heading">Profile</h1>
             </div>
 
             {/* CONTENT AREA */}

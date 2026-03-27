@@ -36,5 +36,5 @@ export const NAV_ITEMS: readonly NavItemConfig[] = [
     { tab: "home", icon: Home },
     { tab: "search", icon: Search },
     { tab: "library", icon: Library },
-    { tab: "user", icon: User }
+    { tab: "profile", icon: User }
 ]

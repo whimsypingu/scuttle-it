@@ -4,14 +4,13 @@ import { MainLayout } from '@/features/player/MainLayout';
 import { GlobalPlayer } from '@/features/player/GlobalPlayer';
 import { NavBar } from '@/features/player/NavBar';
 
-import type { Tab } from '@/features/player/player.types';
-
 import { MockHome } from '@/features/home/HomeView';
 import { MockLibrary } from '@/features/library/LibraryView';
 import { MockSearch } from '@/features/search/SearchView';
+import { MockProfile } from '@/features/profile/ProfileView';
 
-// Mock components for different tabs
-const MockProfile = () => <div className="p-4"><h1 className="text-2xl font-bold">Your Profile</h1></div>;
+import type { Tab } from '@/features/player/player.types';
+
 
 function App() {
 	const [isPlayerExpanded, setIsPlayerExpanded] = useState(false);
@@ -32,7 +31,7 @@ function App() {
 			home: MockHome,
 			search: MockSearch,
 			library: MockLibrary,
-			user: MockProfile
+			profile: MockProfile
 		}[activeTab] || MockHome
 
 		return <TabComponent tabResetSignal={tabResetSignal} />

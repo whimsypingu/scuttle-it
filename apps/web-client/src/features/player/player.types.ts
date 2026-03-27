@@ -3,7 +3,7 @@ import type { LucideIcon } from 'lucide-react';
 import React from 'react';
 
 //navbar
-export type Tab = 'home' | 'search' | 'library' | 'user';
+export type Tab = "home" | "search" | "library" | "profile";
 
 export interface NavBarProps {
     activeTab: Tab;
