@@ -33,7 +33,7 @@ export const MockSearch = () => {
         >
             {/* HEADER */}
             <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4">
-                <h1 className="text-2xl font-light mb-4">Search</h1>
+                <h1 className="tab-heading mb-4">Search</h1>
                 
                 {/* SEARCH BAR */}
                 <InputGroup>
@@ -67,7 +67,6 @@ export const MockSearch = () => {
                                     transition: { staggerChildren: 0.05 } // Results pop in one by one
                                 }
                             }}
-                            // className="flex flex-col gap-1 pt-2 pb-20"
                             className="flex flex-col gap-1 pt-2"
                             style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
                         >

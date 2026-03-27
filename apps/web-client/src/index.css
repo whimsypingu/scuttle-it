@@ -37,6 +37,12 @@
     }
 }
 
+@layer components {
+    .tab-heading {
+        @apply text-2xl font-medium tracking-tight;
+    }
+}
+
 #root {
     width: 100%;
     height: 100%;

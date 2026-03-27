@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, useMotionValue, useMotionValueEvent, useTransform } from 'framer-motion';
 import { MusicNoteIcon } from '@phosphor-icons/react';
 
-import { ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/features/track/track.constants';
+import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/features/track/track.constants';
 import type { TrackItemProps } from '@/features/track/track.types';
 
 export const TrackItem = ({ 
@@ -15,7 +15,7 @@ export const TrackItem = ({
 	const x = useMotionValue(0);
 
 	const justify = useTransform(x, (latest) => (latest > 0 ? "flex-start" : "flex-end")); //which side to justify the icon
-	const opacity = useTransform(x, [-50, 0, 50], [1, 0, 1]);
+	const opacity = useTransform(x, [SMALL_SWIPE_THRESHOLD_PX, 0, -(SMALL_SWIPE_THRESHOLD_PX)], [1, 0, 1]);
 	const currentIndex = useTransform(
 		x, 
 		[LARGE_SWIPE_THRESHOLD_PX, SMALL_SWIPE_THRESHOLD_PX, -(SMALL_SWIPE_THRESHOLD_PX), -(LARGE_SWIPE_THRESHOLD_PX)],
@@ -33,7 +33,7 @@ export const TrackItem = ({
 	const actionKey = actions[activeIndex];
 
 	//extract the right Icon and color from the swipe
-	const config = ACTION_CONFIG[actionKey];
+	const config = TRACK_ACTION_CONFIG[actionKey];
 	const IconComponent = config.icon;
 	const color = config.color;
 

@@ -12,7 +12,7 @@ export const MockHome = () => {
         >
             {/* HEADER */}
             <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4">
-                <h1 className="text-2xl font-light">Home</h1>
+                <h1 className="tab-heading">Home</h1>
             </div>
 
             {/* CONTENT AREA */}

@@ -1,11 +1,10 @@
 import type { IconProps } from "@phosphor-icons/react";
 
-export type SwipeActionType = "queue" | "like" | "delete" | "edit";
+export type TrackActionType = "queue" | "like" | "delete" | "edit";
 
-export interface SwipeActionConfig {
+export interface TrackActionConfig {
     icon: React.ComponentType<IconProps>;
     color: string;
-    label?: string;
 }
 
 export interface Track {
@@ -17,6 +16,6 @@ export interface Track {
 export interface TrackItemProps {
     track: Track;
     index: number;
-	actions?: [SwipeActionType, SwipeActionType, SwipeActionType, SwipeActionType]; //leftmost action to rightmost action
+	actions?: [TrackActionType, TrackActionType, TrackActionType, TrackActionType]; //leftmost action to rightmost action
 }
 
