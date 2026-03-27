@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
@@ -7,14 +7,26 @@ import { MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { TrackItem } from "@/features/track/TrackItem";
 
 import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
+import type { SearchViewProps } from "./search.types";
 
 
-export const MockSearch = () => {
+export const MockSearch = ({
+    tabResetSignal
+}: SearchViewProps) => {
     const [isSearching, setIsSearching] = useState(false);
     const [query, setQuery] = useState("");
 
     const inputRef = useRef<HTMLInputElement>(null);
     const resultsRef = useRef<HTMLDivElement>(null);
+
+    // Reset when the signal changes
+    useEffect(() => {
+        if (tabResetSignal > 0) {
+            setIsSearching(false);
+            // If you had a scrollRef, you'd trigger it here too:
+            // scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, [tabResetSignal]);
 
     return (
         <>

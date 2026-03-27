@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { NAV_CONFIG, BOTTOM_SHELF } from "@/features/player/player.constants";
@@ -8,9 +8,21 @@ import { PlaylistDetailView } from "../playlist/PlaylistDetailView";
 import type { Playlist } from "../playlist/playlist.types";
 
 import { XIcon } from "@phosphor-icons/react";
+import type { LibraryViewProps } from "./library.types";
 
-export const MockLibrary = () => {
+export const MockLibrary = ({
+    tabResetSignal
+}: LibraryViewProps) => {
     const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
+
+    // Reset when the signal changes
+    useEffect(() => {
+        if (tabResetSignal > 0) {
+            setSelectedPlaylist(null);
+            // If you had a scrollRef, you'd trigger it here too:
+            // scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, [tabResetSignal]);
 
     return (
         <>
@@ -21,15 +33,16 @@ export const MockLibrary = () => {
             <AnimatePresence mode="wait">
                 {!selectedPlaylist ? (
                     <>
+                    {/* LIST VIEW */}
                     <motion.div
-                        key="library-list-view"
+                        key="library-root"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         className="w-full h-full flex flex-col"
                     >
                         {/* HEADER */}
-                        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4">
+                        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4 flex flex-col">
                             <h1 className="tab-heading">Library</h1>
                         </div>
 
@@ -53,6 +66,7 @@ export const MockLibrary = () => {
                     </>
                 ) : (
                     <>
+                    {/* PLAYLIST DETAILS */}
                     <motion.div
                         key="playlist-detail-view"
                         initial={{ opacity: 0 }}
@@ -61,19 +75,50 @@ export const MockLibrary = () => {
                         className="w-full h-full flex flex-col"
                     >
                         {/* HEADER */}
-                        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4 flex items-center justify-between">
-                            <h1 className="tab-heading truncate pr-4">
-                                {selectedPlaylist.name}
-                            </h1>
-                            <button
-                                onPointerDown={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedPlaylist(null);
-                                }}
-                                className="text-sm font-medium text-white/40 active:text-white shrink-0"
-                            >
-                                <XIcon size={20} weight="bold" />
-                            </button>
+                        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4 flex flex-col">
+                            <div className="flex items-center justify-between mb-2">
+                                <h1 className="tab-heading truncate pr-4">
+                                    {selectedPlaylist.name}
+                                </h1>
+                                <button
+                                    onPointerDown={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedPlaylist(null);
+                                    }}
+                                    className="text-sm font-medium text-white/40 active:text-white shrink-0"
+                                >
+                                    <XIcon size={20} weight="bold" />
+                                </button>
+                            </div>
+    
+                            {/* ABOUT / METADATA SECTION */}
+                            <div className="flex flex-col gap-1 pb-2">
+                                {/* <div className="flex items-center gap-2">
+                                    <div 
+                                        className="w-3 h-3 rounded-full" 
+                                        style={{ backgroundColor: selectedPlaylist.color }} 
+                                    />
+                                    <span className="text-[10px] uppercase tracking-widest font-bold text-white/90">
+                                        Archived Collection
+                                    </span>
+                                </div>
+                                
+                                <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2">
+                                    Created on March 2026. This archive contains high-fidelity 
+                                    renders and curated selections from the {selectedPlaylist.name} sessions.
+                                </p>
+ */}
+                                <div className="flex gap-4 mx-1">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] text-zinc-600 uppercase font-medium">Tracks</span>
+                                        <span className="text-xs text-white/70">{selectedPlaylist.trackCount}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] text-zinc-600 uppercase font-medium">Duration</span>
+                                        <span className="text-xs text-white/70">2h 45m</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         {/* CONTENT AREA */}
@@ -89,50 +134,6 @@ export const MockLibrary = () => {
                         </div>
 
                     </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
-
-
-        </div>
-        </>
-    );
-
-    const deprecated = (
-        <>
-        {/* HEADER */}
-        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4">
-            <h1 className="tab-heading">Library</h1>
-        </div>
-
-        {/* CONTENT AREA */}
-        <div className="flex-1 overflow-y-auto no-scrollbar">
-            <AnimatePresence mode="wait">
-                {!selectedPlaylist ? (
-                    <>
-                    <motion.div 
-                        key="library-list"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="flex flex-col gap-0"
-                        style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
-                    >
-                        {/* PLAYLIST LIST */}
-                        {MOCK_PLAYLISTS.map((p) => (
-                            <PlaylistItem
-                                key={p.id}
-                                playlist={p}
-                                onSelect={(p) => setSelectedPlaylist(p)}
-                            />
-                        ))}
-                    </motion.div>
-                    </>
-                ) : (
-                    <>
-                    <PlaylistDetailView
-                        playlist={selectedPlaylist}
-                    />
                     </>
                 )}
             </AnimatePresence>

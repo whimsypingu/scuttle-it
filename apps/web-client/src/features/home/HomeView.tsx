@@ -1,6 +1,9 @@
 import { NAV_CONFIG } from "@/features/player/player.constants";
+import type { HomeViewProps } from "./home.types";
 
-export const MockHome = () => {
+export const MockHome = ({
+    tabResetSignal
+}: HomeViewProps) => {
     const itemCount = 12;
     const items = Array.from({ length: itemCount }, (_, i) => i + 1);
 

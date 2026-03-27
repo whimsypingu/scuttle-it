@@ -16,16 +16,26 @@ const MockProfile = () => <div className="p-4"><h1 className="text-2xl font-bold
 function App() {
 	const [isPlayerExpanded, setIsPlayerExpanded] = useState(false);
 	const [activeTab, setActiveTab] = useState<Tab>("home");
+	const [tabResetSignal, setTabResetSignal] = useState(0); //reset tab signal
+
+	const handleTabChange = (newTab: Tab) => {
+		if (newTab === activeTab) {
+			setTabResetSignal(prev => prev + 1);
+		} else {
+			setActiveTab(newTab);
+		}
+	}
 
 	// Simple helper to render the right content based on tab
 	const renderContent = () => {
-		switch (activeTab) {
-			case "home": return <MockHome />;
-			case "search": return <MockSearch />;
-			case "library": return <MockLibrary />;
-			case "user": return <MockProfile />;
-			default: return <MockHome />;
-		}
+		const TabComponent = {
+			home: MockHome,
+			search: MockSearch,
+			library: MockLibrary,
+			user: MockProfile
+		}[activeTab] || MockHome
+
+		return <TabComponent tabResetSignal={tabResetSignal} />
 	};
 
 	return (
@@ -35,14 +45,14 @@ function App() {
 				<>
 				<MainLayout
 					activeTab={activeTab}
-					onTabChange={setActiveTab}
+					onTabChange={handleTabChange}
 				>
 					{renderContent()}
 				</MainLayout>
 
 				<NavBar
 					activeTab={activeTab}
-					onTabChange={setActiveTab}
+					onTabChange={handleTabChange}
 				/>
 				</>
 			)}
