@@ -20,6 +20,6 @@ export interface PlaylistItemProps {
     actions?: [PlaylistActionType, PlaylistActionType];
 }
 
-export interface PlaylistDetailViewProps {
+export interface PlaylistListProps {
     playlist: Playlist;
 }

@@ -2,12 +2,12 @@ import { motion } from 'framer-motion';
 
 import { TrackItem } from '@/features/track/TrackItem';
 
-import type { PlaylistDetailViewProps } from '@/features/playlist/playlist.types';
+import type { PlaylistListProps } from '@/features/playlist/playlist.types';
 
 
-export const PlaylistDetailView = ({
+export const PlaylistList = ({
     playlist
-}: PlaylistDetailViewProps) => {
+}: PlaylistListProps) => {
     return (
         <>
         <motion.div

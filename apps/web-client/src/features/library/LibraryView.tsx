@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { NAV_CONFIG, BOTTOM_SHELF } from "@/features/player/player.constants";
 
 import { PlaylistItem } from "../playlist/PlaylistItem";
-import { PlaylistDetailView } from "../playlist/PlaylistDetailView";
+import { PlaylistList } from "../playlist/PlaylistList";
 import type { Playlist } from "../playlist/playlist.types";
 
 import { XIcon } from "@phosphor-icons/react";
@@ -76,17 +76,17 @@ export const MockLibrary = ({
                     >
                         {/* HEADER */}
                         <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4 flex flex-col">
-                            <div className="flex items-center justify-between mb-2">
+                            <div 
+                                className="flex items-center justify-between mb-2"
+                                onPointerDown={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedPlaylist(null);
+                                }}
+                            >
                                 <h1 className="tab-heading truncate pr-4">
                                     {selectedPlaylist.name}
                                 </h1>
-                                <button
-                                    onPointerDown={(e) => {
-                                        e.stopPropagation();
-                                        setSelectedPlaylist(null);
-                                    }}
-                                    className="text-sm font-medium text-white/40 active:text-white shrink-0"
-                                >
+                                <button className="text-sm font-medium text-white/40 active:text-white shrink-0">
                                     <XIcon size={20} weight="bold" />
                                 </button>
                             </div>
@@ -107,7 +107,7 @@ export const MockLibrary = ({
                                     Created on March 2026. This archive contains high-fidelity 
                                     renders and curated selections from the {selectedPlaylist.name} sessions.
                                 </p>
- */}
+                                 */}
                                 <div className="flex gap-4 mx-1">
                                     <div className="flex flex-col">
                                         <span className="text-[10px] text-zinc-600 uppercase font-medium">Tracks</span>
@@ -127,7 +127,7 @@ export const MockLibrary = ({
                                 className="flex flex-col gap-0"
                                 style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
                             >
-                                <PlaylistDetailView
+                                <PlaylistList
                                     playlist={selectedPlaylist}
                                 />
                             </div>
