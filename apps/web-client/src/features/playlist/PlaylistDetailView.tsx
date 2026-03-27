@@ -1,7 +1,5 @@
 import { motion } from 'framer-motion';
 
-import { BOTTOM_SHELF } from '@/features/player/player.constants';
-
 import { TrackItem } from '@/features/track/TrackItem';
 
 import type { PlaylistDetailViewProps } from '@/features/playlist/playlist.types';
@@ -13,7 +11,7 @@ export const PlaylistDetailView = ({
     return (
         <>
         <motion.div
-            key="playlist-detail"
+            key="playlist-content"
             initial="hidden"
             animate="show"
             exit="hidden"
@@ -25,7 +23,6 @@ export const PlaylistDetailView = ({
                 }
             }}
             className="flex flex-col gap-1 w-full"
-            style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
         >
             {/* TRACK LIST */}
             {[...Array(20)].map((_, i) => (

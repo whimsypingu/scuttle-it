@@ -37,13 +37,9 @@ export const PlaylistItem = ({
     const IconComponent = config.icon;
     const color = config.color;
 
-    //handle the start of a drag by setting a draggingreference
-    // const isDraggingRef = useRef(false);
+    //handle the start of a drag and prevent taps from triggering on drags with a flag
     const [isDragging, setIsDragging] = useState(false);
-
     const handleDragStart = () => {
-        // isDraggingRef.current = true;
-        // console.log("Drag Start");
         setIsDragging(true);
     }
 
@@ -72,20 +68,15 @@ export const PlaylistItem = ({
         }
         console.log(msg)
 
-        //reset the draggingref after a tiny delay so handleTap doesn't trigger
-        // setTimeout(() => { isDraggingRef.current = false; }, 50);
+        //reset the dragging flag after one frame to prevent taps from triggering
         requestAnimationFrame(() => setIsDragging(false));
     };
 
+    //cancel taps on drags
     const handleTap = () => {
-        // if (isDraggingRef.current) {
-        if (isDragging) {
-            console.log("Tap BLOCKED");
-            return;
-        };
+        if (isDragging) return;
 
         onSelect(playlist);
-        console.log("Tap Triggered");
     };
 
     return (
