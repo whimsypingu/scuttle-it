@@ -9,7 +9,7 @@
             "root": "apps/audio-server",
             "venv": "apps/audio-server/venv",
             "bin": "apps/audio-server/bin",
-            "requirements": "apps/audio-server/requirements.txt"
+            "toml": "apps/audio-server/pyproject.toml"
         },
         "web_client": {
             "root": "apps/web-client"
