@@ -91,7 +91,7 @@ class YouTubeClient(BaseModel):
             return True
 
         except Exception as e:
-            logger.error(f"Unexpected error during yt-dlp update: {e}")
+            logger.exception(f"Unexpected error during yt-dlp update: {e}")
             return False
         
 
@@ -179,7 +179,7 @@ class YouTubeClient(BaseModel):
 
                 logger.info(f"{raw_id} | {raw_title} | {raw_uploader} | {raw_duration}")
             except Exception as e:
-                logger.error(f"Failed to parse metadata: {e}")
+                logger.exception(f"Failed to parse metadata: {e}")
 
             return True
 

@@ -4,6 +4,7 @@ venv/
 apps/audio-server/bin/
 .env
 *.egg-info
+apps/audio-server/data/
 
 # --- Python Bytecode ---
 __pycache__/

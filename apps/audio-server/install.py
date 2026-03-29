@@ -1,6 +1,7 @@
 import logging
 import sys
 from boot.errors import SetupError
+from boot.setup_env import set_env_defaults
 from boot.setup_venv import ensure_venv, run_pip_install, install_ytdlp
 from boot.install_deno import download_deno
 from boot.install_ffmpeg import download_ffmpeg
@@ -19,6 +20,7 @@ logger = logging.getLogger(__name__)
 logger.info("Audio Server setup initialized")
 
 try:
+    set_env_defaults(overwrite=False)
     python_exe = ensure_venv()
     run_pip_install()
     install_ytdlp()

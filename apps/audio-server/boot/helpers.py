@@ -116,7 +116,7 @@ def check_binary_exists(bin_name: str, folder_path: Path = None) -> Path | None:
     return bin_path
 
 
-def update_env(key: str, value: str | Path):
+def update_env(key: str, value: str | int | float | Path, overwrite: bool = True):
     """
     Update or insert a key=value pair in the .env file. 
     DOES NOT call load_dotenv(override=True) afterwards.
@@ -124,7 +124,8 @@ def update_env(key: str, value: str | Path):
 
     Args:
         key (str): Environment variable name.
-        value (str | Path): New value to set. Converts Paths to posix str
+        value (str | int | float | Path): New value to set. Converts Paths to posix str
+        overwrite (bool): Forces an overwrite even if the key exists already. Defaults to True
     """
     val_str = value.as_posix() if isinstance(value, Path) else str(value)
     new_line = f"{key}={val_str}\n"
@@ -137,21 +138,25 @@ def update_env(key: str, value: str | Path):
         with env_file.open("r") as f:
             lines = f.readlines()
 
-    # Update if key exists, else append
-    updated = False
+    # Do not update if key exists and overwrite=False, otherwise update. if key does not exist, append
+    key_exists = False
     for i, line in enumerate(lines):
         if line.strip().startswith(f"{key}="):
-            lines[i] = new_line
-            updated = True
+            key_exists = True
             break
 
-    if not updated:
+    if not key_exists:
         lines.append(new_line)
+    elif key_exists and not overwrite:
+        logger.info(f"Skipping setting {key}: already exists in .env and overwrite=False")
+        return
+    else: 
+        lines[i] = new_line
 
     # Write all lines back to the .env file
     with env_file.open("w") as f:
         f.writelines(lines)
 
-    os.environ[key] = str(value) #just in case Path
-    logger.info(f"Environment variable {key} set to {value}")
+    os.environ[key] = str(val_str) #just in case Path
+    logger.info(f"Environment variable {key} set to {val_str}")
 
