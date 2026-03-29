@@ -14,7 +14,9 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # --- ENV PATH VALIDATION ---
-    BIN_DIR: DirectoryPath #validates that this directory actually exists
+    DATA_DIR: DirectoryPath #validates that this directory actually exists
+    BIN_DIR: DirectoryPath 
+    
     PYTHON_BIN_PATH: FilePath #consider adding binary executable checks
     JS_RUNTIME_BIN_PATH: FilePath
     FFMPEG_BIN_PATH: FilePath

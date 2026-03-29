@@ -10,6 +10,7 @@ apps/audio-server/data/
 __pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
 
 # --- Node ---
 node_modules/
