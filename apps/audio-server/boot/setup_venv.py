@@ -115,7 +115,7 @@ def install_ytdlp(python_bin: Path = None):
     
     # -U is --upgrade, --pre allows development/pre-release versions
     subprocess.run(
-        [str(python_bin), "-m", "pip", "install", "-U", "--pre", "yt-dlp[default]"], 
+        [str(python_bin), "-m", "pip", "install", "--no-cache-dir", "-U", "--pre", "yt-dlp[default]"], 
         check=True,
         capture_output=True,
         text=True
