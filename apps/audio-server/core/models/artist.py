@@ -3,9 +3,9 @@ from core.models.base import ScuttleBase
 
 class ArtistBase(ScuttleBase):
     id: str
-    artist: str
-    artist_display: Optional[str] = None
+    name: str
+    name_display: Optional[str] = None
 
     @property
     def display(self) -> str:
-        return self.title_display or self.title
+        return self.name_display or self.name

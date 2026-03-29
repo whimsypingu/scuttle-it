@@ -1,4 +1,5 @@
 from typing import Optional, List
+from pydantic import Field
 from core.models.base import ScuttleBase
 
 class TrackBase(ScuttleBase):
@@ -7,7 +8,7 @@ class TrackBase(ScuttleBase):
     title_display: Optional[str] = None
     duration: float = 0.0
 
-    artist_ids: List[str] = []
+    artist_ids: List[str] = Field(..., min_length=1)
 
     @property
     def display(self) -> str:

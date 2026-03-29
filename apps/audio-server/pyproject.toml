@@ -12,3 +12,9 @@ dependencies = {file = ["requirements.txt"]}
 
 [tool.setuptools.package-dir]
 "" = "."
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+addopts = "-v -s"
