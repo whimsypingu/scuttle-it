@@ -45,8 +45,19 @@ async def get_status():
 
 @app.get("/test/ytdlp-version")
 async def get_version():
-    code, out, err = await app.state.yt_client._run_command(["yt-dlp", "--version"])
+    yt_client: YouTubeClient = app.state.yt_client
+    code, out, err = await yt_client._run_command(["yt-dlp", "--version"])
 
     if code == 0:
         return {"version": out}
     return {"error": err, "exit_code": code}
+
+@app.get("/test/update")
+async def update():
+    yt_client: YouTubeClient = app.state.yt_client
+    await yt_client.update()
+
+@app.get("/test/download")
+async def download(youtube_id: str):
+    yt_client: YouTubeClient = app.state.yt_client
+    await yt_client.download_by_youtube_id(youtube_id)

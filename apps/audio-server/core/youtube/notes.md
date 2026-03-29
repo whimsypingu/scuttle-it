@@ -1,0 +1,1 @@
+Can't run FastAPI with the --reload flag otherwise it can't run other async processes without crashing
