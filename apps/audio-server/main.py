@@ -3,7 +3,7 @@
 import asyncio
 import logging
 
-from core.youtube.exceptions import YtdlpDownloadError, YtdlpMetadataError, YtdlpTimeoutError, YtdlpUpdateError
+from core.youtube.youtube_exceptions import YtdlpDownloadError, YtdlpMetadataError, YtdlpTimeoutError, YtdlpUpdateError
 from fastapi import FastAPI, HTTPException 
 from contextlib import asynccontextmanager
 from config import settings #triggers validation here

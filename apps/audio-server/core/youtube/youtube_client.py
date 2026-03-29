@@ -4,7 +4,7 @@ from pydantic import BaseModel, FilePath, DirectoryPath
 
 from config import settings
 from core.models.track import TrackBase
-from core.youtube.exceptions import YtdlpDownloadError, YtdlpMetadataError, YtdlpTimeoutError, YtdlpUpdateError
+from core.youtube.youtube_exceptions import YtdlpDownloadError, YtdlpMetadataError, YtdlpTimeoutError, YtdlpUpdateError
 
 logger = logging.getLogger(__name__)
 

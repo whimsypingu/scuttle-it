@@ -1,6 +1,6 @@
 import logging
 import sys
-from boot.errors import SetupError
+from boot.boot_exceptions import SetupError
 from boot.setup_env import set_env_defaults
 from boot.setup_venv import ensure_venv, run_pip_install, install_ytdlp
 from boot.install_deno import download_deno

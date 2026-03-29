@@ -1,6 +1,6 @@
 import logging
 
-from .helpers import update_env, get_workspace_path
+from .boot_utils import update_env, get_workspace_path
 
 logger = logging.getLogger(__name__)
 

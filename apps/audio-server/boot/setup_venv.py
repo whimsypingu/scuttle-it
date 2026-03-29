@@ -6,8 +6,8 @@ import subprocess
 
 from pathlib import Path
 
-from .helpers import get_workspace_path, update_env
-from .errors import SetupError, WorkspaceConfigError, VenvInitializationError
+from .boot_utils import get_workspace_path, update_env
+from .boot_exceptions import SetupError, WorkspaceConfigError, VenvInitializationError
 
 logger = logging.getLogger(__name__)
 

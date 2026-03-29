@@ -2,7 +2,7 @@ import os
 import json
 import logging
 from pathlib import Path
-from .errors import WorkspaceConfigError
+from .boot_exceptions import WorkspaceConfigError
 
 logger = logging.getLogger(__name__)
 

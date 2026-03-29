@@ -6,8 +6,8 @@ import json
 import urllib.request
 import logging 
 
-from .helpers import get_workspace_path, check_binary_exists, update_env
-from .errors import CloudflaredInstallError
+from .boot_utils import get_workspace_path, check_binary_exists, update_env
+from .boot_exceptions import CloudflaredInstallError
 
 logger = logging.getLogger(__name__)
 

@@ -7,8 +7,8 @@ import urllib.request
 import logging 
 from pathlib import Path
 
-from .helpers import get_workspace_path, check_binary_exists, update_env
-from .errors import FFmpegInstallError
+from .boot_utils import get_workspace_path, check_binary_exists, update_env
+from .boot_exceptions import FFmpegInstallError
 
 logger = logging.getLogger(__name__)
 
