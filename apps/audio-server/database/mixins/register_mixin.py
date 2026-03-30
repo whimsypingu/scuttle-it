@@ -1,4 +1,5 @@
 import logging
+import sqlite3
 import aiosqlite
 
 from core.models.track import TrackBase
@@ -90,5 +91,46 @@ class RegisterMixin:
         except Exception:
             logger.exception(f"Critical failure during track registration check for track_id: {track_id}")
             raise
-                
+
+    async def register_download(self, track_id: str) -> bool:
+        """Register a download. Returns True on success."""
+        try:
+            async with self.session() as db:
+                await db.execute('''
+                    INSERT OR IGNORE INTO downloads (id, downloaded_at)
+                    VALUES (?, unixepoch());
+                ''', (track_id,))
+                return True
         
+        except sqlite3.IntegrityError:
+            logger.error(f"Foreign Key Violation: Cannot register download without registered track for track_id: {track_id}")
+            return False
+
+        except Exception:
+            logger.exception(f"Critical failure during track registration for track_id: {track_id}")
+            raise
+
+    async def unregister_download(self, track_id: str) -> bool:
+        """Unregister a download. Returns True on success."""
+        try:
+            async with self.session() as db:
+                await db.execute('DELETE FROM downloads WHERE id = ?;', (track_id,))
+                logger.info(f"Unregistered download track_id: {track_id}")
+                return True
+        
+        except Exception:
+            logger.exception(f"Critical failure during download un-registration for track_id: {track_id}")
+            raise
+
+    async def is_track_downloaded(self, track_id: str) -> bool:
+        """Check if a track_id is registered to downloaded. Returns True or False based on existence."""
+        try: 
+            async with self.session() as db:
+                async with await db.execute('SELECT 1 FROM downloads WHERE id = ? LIMIT 1;', (track_id,)) as cursor:
+                    row = await cursor.fetchone()
+                    return row is not None
+                
+        except Exception:
+            logger.exception(f"Critical failure during download registration check for track_id: {track_id}")
+            raise
+
