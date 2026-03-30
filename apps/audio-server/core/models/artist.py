@@ -1,7 +1,8 @@
 from core.models.base import ScuttleBase
 
 class ArtistBase(ScuttleBase):
-    id: str
+    internal_id: int | None = None
+    id: str | None = None #optional external source ID
     name: str
     name_display: str | None = None
 

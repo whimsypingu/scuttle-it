@@ -1,6 +1,5 @@
 import pytest
 from pydantic import ValidationError
-from core.models.artist import ArtistBase
 from core.models.track import TrackBase
 
 
@@ -24,13 +23,9 @@ def test_track_display_override(sample_track):
     assert sample_track.title_display == sample_track.display
 
 
-def test_track_requires_at_least_one_artist():
-    #should fail when no artist ids are supplied for a track
+def test_track_requires_at_least_one_artist(missing_artists_track_data):
+    #should fail when no artists are supplied for a track
     with pytest.raises(ValidationError):
-        TrackBase(
-            id="123",
-            title="foo",
-            artist_ids=[]
-        )
+        TrackBase(**missing_artists_track_data)
 
 

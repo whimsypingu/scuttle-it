@@ -8,12 +8,13 @@ from pydantic import BaseModel, DirectoryPath
 from config import settings
 
 from database.mixins.seed_mixin import SeedMixin
+from database.mixins.register_mixin import RegisterMixin
 
 
-logger = logging.Logger(__name__)
+logger = logging.getLogger(__name__)
 
 
-class DatabaseManager(BaseModel, SeedMixin):
+class DatabaseManager(BaseModel, SeedMixin, RegisterMixin):
     db_dir: DirectoryPath = settings.DATABASE_DIR
     db_path: Path = settings.DATABASE_DIR / "scuttle.db" #not a pydantic FilePath because it may not exist on first run
     sql_dir: DirectoryPath = settings.DATABASE_DIR / "sql"

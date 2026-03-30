@@ -9,9 +9,14 @@ class SeedMixin:
         """Reads .sql files and executes it in increasing filename order"""
         sql_files = sorted(self.sql_dir.glob("*.sql"))
 
-        async with self.session() as db:
-            for sql_file in sql_files:
-                logger.info(f"Executing {sql_file.name}...")
-                with open(sql_file, "r") as f:
-                    script = f.read()
-                    await db.executescript(script)
+        try:
+            async with self.session() as db:
+                for sql_file in sql_files:
+                    logger.info(f"Executing {sql_file.name}...")
+                    with open(sql_file, "r") as f:
+                        script = f.read()
+                        await db.executescript(script)
+
+        except Exception:
+            logger.exception(f"Failed to build database from directory: {self.sql_dir}")
+            raise
