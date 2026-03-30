@@ -1,6 +1,7 @@
 fastapi
 uvicorn[standard]
 websockets
+aiosqlite
 pydantic
 pydantic-settings
 python-dotenv

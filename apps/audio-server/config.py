@@ -14,8 +14,9 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # --- ENV PATH VALIDATION ---
-    DATA_DIR: DirectoryPath #validates that this directory actually exists
-    BIN_DIR: DirectoryPath 
+    BIN_DIR: DirectoryPath #validates that this directory actually exists
+    DATA_DIR: DirectoryPath 
+    DATABASE_DIR: DirectoryPath
     
     PYTHON_BIN_PATH: FilePath #consider adding binary executable checks
     JS_RUNTIME_BIN_PATH: FilePath

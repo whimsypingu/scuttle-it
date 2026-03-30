@@ -4,6 +4,7 @@ import asyncio
 import logging
 
 from core.youtube.youtube_exceptions import YtdlpDownloadError, YtdlpMetadataError, YtdlpTimeoutError, YtdlpUpdateError
+from database.database_manager import DatabaseManager
 from fastapi import FastAPI, HTTPException 
 from contextlib import asynccontextmanager
 from config import settings #triggers validation here
@@ -21,6 +22,10 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    db_manager = DatabaseManager()
+
+    app.state.db_manager = db_manager
+
     yt_client = YouTubeClient(
         name="ScuttleDownloader",
         base_dir=settings.BIN_DIR
@@ -28,6 +33,7 @@ async def lifespan(app: FastAPI):
 
     app.state.yt_client = yt_client
 
+    await db_manager.build_from_directory()
     yield
 
 
@@ -45,6 +51,8 @@ async def root():
 @app.get("/status")
 async def get_status():
     return {"status": "online", "version": "0.1.0"}
+
+
 
 @app.get("/test/ytdlp-version")
 async def get_version():

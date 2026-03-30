@@ -9,10 +9,11 @@
             "root": "apps/audio-server",
             "venv": "apps/audio-server/venv",
             "bin": "apps/audio-server/bin",
-            "data": "apps/audio-server/data",
 
-            "toml": "apps/audio-server/pyproject.toml",
-            "database": "apps/audio-server/database/scuttle.db"
+            "data": "apps/audio-server/data",
+            "database": "apps/audio-server/database",
+
+            "toml": "apps/audio-server/pyproject.toml"
         },
         "web_client": {
             "root": "apps/web-client"
