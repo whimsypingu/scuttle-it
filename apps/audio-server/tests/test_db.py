@@ -1,5 +1,8 @@
 import pytest
 
+from database.database_manager import DatabaseManager
+
+
 @pytest.mark.asyncio
 async def test_register_track(db, sample_track):
     #not registered
@@ -65,3 +68,15 @@ async def test_register_download(db, sample_track):
     #not downloaded
     q10 = await db.is_track_downloaded(sample_track.id)
     assert q10 is False
+
+
+@pytest.mark.asyncio
+async def test_search(db: DatabaseManager, sample_track):
+    q1 = await db.register_track(sample_track)
+
+    q2 = await db.build_search_index()
+    assert q2 is True
+    
+    #blank search
+    q3 = await db.search("")
+    assert q3 == []
