@@ -57,13 +57,17 @@ class YouTubeClient(BaseModel):
             logger.error(f"Command timed out after {self.cmd_timeout}s")
             raise
 
+        #0 for downloads, 101 for searches
+        valid_returncodes = (0, 101)
+
         out = stdout.decode(errors="replace").strip()
         err = stderr.decode(errors="replace").strip()
 
-        #0 for downloads, 101 for searches
-        valid_returncodes = (0, 101)
         if process.returncode not in valid_returncodes:
-            logger.error(f"Command failed with exit code {process.returncode}. Whitelisted returncodes: {valid_returncodes}")
+            if not err:
+                logger.warning(f"Process caught with unknown exit code {process.returncode}, but stderr was empty. Might require manual whitelisting.")
+            else:
+                logger.error(f"Command failed with exit code {process.returncode}. Whitelisted returncodes: {valid_returncodes}")
             raise RuntimeError(f"Command failed with exit code {process.returncode}: {err}")
 
         return (out, err)
