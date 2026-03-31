@@ -1,4 +1,4 @@
-# Run this file from the project root directory with: [ python -m uvicorn apps.audio-server.main:app --reload ]
+# Run this file from the project root directory with: [ python -m uvicorn apps.audio-server.main:app ]
 
 import asyncio
 import logging
@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 
 from config import settings #triggers validation here
 
-from routers import test_router
+from api.routers import test_router
 
 from core.youtube.youtube_client import YouTubeClient
 from database.database_manager import DatabaseManager
