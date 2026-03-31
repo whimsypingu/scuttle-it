@@ -60,8 +60,10 @@ class YouTubeClient(BaseModel):
         out = stdout.decode(errors="replace").strip()
         err = stderr.decode(errors="replace").strip()
 
-        if process.returncode != 0:
-            logger.error(f"Command failed with exit code {process.returncode}")
+        #0 for downloads, 101 for searches
+        valid_returncodes = (0, 101)
+        if process.returncode not in valid_returncodes:
+            logger.error(f"Command failed with exit code {process.returncode}. Whitelisted returncodes: {valid_returncodes}")
             raise RuntimeError(f"Command failed with exit code {process.returncode}: {err}")
 
         return (out, err)
@@ -200,8 +202,8 @@ class YouTubeClient(BaseModel):
 
     async def search_by_query(
         self,
-        query: str,
-        limit: int = 3
+        q: str,
+        limit: int = 5
     ) -> list[TrackBase]:
         """
         Search YouTube using yt-dlp for the query, and return limit number of TrackBase objects
@@ -212,25 +214,27 @@ class YouTubeClient(BaseModel):
             str(self.python_bin),
             "-m",
             "yt_dlp",
-            f"ytsearch{limit}:{query}",
-            "--format", self.dl_format_filter,
+            f"ytsearch{limit}:{q}",
+            "--max-downloads", str(limit),
+            "-S", "+size,+br,+res,+fps", #smallest file size
             "--user-agent", self.dl_user_agent,
-            "--no-download",
+            "--skip-download",
             "--no-cache-dir", #prevents using stale cached DASH fragments
+            "--js-runtimes", f"deno:{str(self.js_runtime_bin)}", #jsruntime
             "--print", f"%(id)s{UNIT_SEP}%(title)s{UNIT_SEP}%(uploader)s{UNIT_SEP}%(duration)s"
         ]
         
-        logger.info(f"Starting search: {query}")
+        logger.info(f"Starting search: {q}")
 
         try:
             out, err = await self._run_command(cmd)
 
-            logger.info("yt-dlp downloaded successfully.")
+            logger.info("yt-dlp searched successfully.")
 
             #parse
             lines = out.strip().splitlines()
             if not lines:
-                raise YtdlpMetadataError(f"Could not find any metadata for yt-dlp search query: {query}")
+                raise YtdlpMetadataError(f"Could not find any metadata for yt-dlp search query: {q}")
             
             results = []
             for metadata_line in lines:

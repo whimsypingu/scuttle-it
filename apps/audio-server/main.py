@@ -75,13 +75,6 @@ async def get_status():
 
 
 
-
-@app.get("/test/update")
-async def update():
-    yt_client: YouTubeClient = app.state.yt_client
-    await yt_client.update()
-
-
 @app.get("/test/search")
 async def search():
     db_manager: DatabaseManager = app.state.db_manager 
