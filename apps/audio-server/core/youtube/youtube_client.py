@@ -1,10 +1,11 @@
 import logging
 import asyncio
+from core.models.artist import ArtistBase
 from pydantic import BaseModel, FilePath, DirectoryPath
 
 from config import settings
 from core.models.track import TrackBase
-from core.youtube.youtube_exceptions import YtdlpDownloadError, YtdlpMetadataError, YtdlpTimeoutError, YtdlpUpdateError
+from core.youtube.youtube_exceptions import YtdlpDownloadError, YtdlpMetadataError, YtdlpSearchError, YtdlpTimeoutError, YtdlpUpdateError
 
 logger = logging.getLogger(__name__)
 
@@ -168,7 +169,11 @@ class YouTubeClient(BaseModel):
             if not metadata_line:
                 raise YtdlpMetadataError(f"Could not find metadata line in yt-dlp output: {out}")
 
-            raw_id, raw_title, raw_uploader, raw_duration = metadata_line.split(UNIT_SEP)
+            parts = metadata_line.split(UNIT_SEP)
+            if len(parts) != 4:
+                raise YtdlpMetadataError(f"Invalid line format from yt-dlp search output: {metadata_line}")
+
+            raw_id, raw_title, raw_uploader, raw_duration = parts
 
             logger.info(f"{raw_id} | {raw_title} | {raw_uploader} | {raw_duration}")
 
@@ -177,7 +182,9 @@ class YouTubeClient(BaseModel):
                 id=raw_id,
                 title=raw_title,
                 duration=raw_duration,
-                artist_ids=[raw_uploader]
+                artists=[ArtistBase(
+                    name=raw_uploader
+                )]
             )
 
         except asyncio.TimeoutError as e:
@@ -189,3 +196,70 @@ class YouTubeClient(BaseModel):
         except Exception as e:
             logger.exception(f"Unexpected error during yt-dlp download: {e}")
             raise YtdlpDownloadError() from e
+        
+
+    async def search_by_query(
+        self,
+        query: str,
+        limit: int = 3
+    ) -> list[TrackBase]:
+        """
+        Search YouTube using yt-dlp for the query, and return limit number of TrackBase objects
+        """
+
+        UNIT_SEP = "\x1f"
+        cmd = [
+            str(self.python_bin),
+            "-m",
+            "yt_dlp",
+            f"ytsearch{limit}:{query}",
+            "--format", self.dl_format_filter,
+            "--user-agent", self.dl_user_agent,
+            "--no-download",
+            "--no-cache-dir", #prevents using stale cached DASH fragments
+            "--print", f"%(id)s{UNIT_SEP}%(title)s{UNIT_SEP}%(uploader)s{UNIT_SEP}%(duration)s"
+        ]
+        
+        logger.info(f"Starting search: {query}")
+
+        try:
+            out, err = await self._run_command(cmd)
+
+            logger.info("yt-dlp downloaded successfully.")
+
+            #parse
+            lines = out.strip().splitlines()
+            if not lines:
+                raise YtdlpMetadataError(f"Could not find any metadata for yt-dlp search query: {query}")
+            
+            results = []
+            for metadata_line in lines:
+                parts = metadata_line.split(UNIT_SEP)
+                if len(parts) != 4:
+                    raise YtdlpMetadataError(f"Invalid line format from yt-dlp search output: {metadata_line}")
+                
+                raw_id, raw_title, raw_uploader, raw_duration = parts
+    
+                logger.info(f"{raw_id} | {raw_title} | {raw_uploader} | {raw_duration}")
+                
+                results.append(TrackBase(
+                    id=f"{self.yt_prefix}{raw_id}",
+                    title=raw_title,
+                    duration=int(raw_duration),
+                    artists=[ArtistBase(
+                        name=raw_uploader
+                    )]
+                ))
+
+            return results
+
+        except asyncio.TimeoutError as e:
+            raise YtdlpTimeoutError() from e
+        
+        except RuntimeError as e:
+            raise YtdlpSearchError() from e            
+
+        except Exception as e:
+            logger.exception(f"Unexpected error during yt-dlp search: {e}")
+            raise YtdlpSearchError() from e
+
