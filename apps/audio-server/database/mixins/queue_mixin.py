@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class PlayQueueMixin:
     """Handles database backed play queue"""
 
-    async def push_play_queue(self, track_id) -> True:
+    async def push_play_queue(self, track_id) -> bool:
         """Push to the end of the Play Queue"""
         logger.info(f"Pushing track_id {track_id} to the end of the Play Queue...")
 
@@ -35,6 +35,32 @@ class PlayQueueMixin:
         
         except Exception:
             logger.exception(f"Failed to push track_id {track_id} to end of the Play Queue")
+            raise
+
+    async def pop_play_queue(self) -> bool:
+        """Pop from the front of the Play Queue"""
+        logger.info(f"Popping from the front of the Play Queue...")
+
+        query = f'''
+            DELETE FROM play_queue
+            WHERE position = (
+                SELECT MIN(position)
+                FROM play_queue
+            );
+        '''
+
+        try:
+            async with self.session() as db:
+                async with db.execute(query) as cursor:
+                    if cursor.rowcount == 0:
+                        logger.info("Play Queue is empty, nothing to pop.")
+                        return False
+                    
+                    logger.info("Successfully popped the first track from the Play Queue")
+                    return True
+
+        except Exception:
+            logger.exception(f"Failed to pop first track from the Play Queue")
             raise
 
 

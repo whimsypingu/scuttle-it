@@ -53,6 +53,20 @@ async def push_play_queue(
             detail="Crashed"
         )
     
+@router.post("/pop-play-queue")
+async def pop_play_queue(
+    db_manager: DatabaseManager = Depends(get_db_manager)
+):
+    try:
+        success = await db_manager.pop_play_queue()
+        return success
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail="Crashed"
+        )
+    
 @router.get("/get-play-queue")
 async def get_play_queue(
     db_manager: DatabaseManager = Depends(get_db_manager)
