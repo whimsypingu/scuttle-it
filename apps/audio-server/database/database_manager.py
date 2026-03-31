@@ -4,7 +4,6 @@ import math
 from pathlib import Path
 from contextlib import asynccontextmanager
 
-from pydantic import BaseModel, DirectoryPath
 from config import settings
 
 from database.mixins.seed_mixin import SeedMixin
@@ -16,12 +15,24 @@ from database.mixins.queue_mixin import PlayQueueMixin
 logger = logging.getLogger(__name__)
 
 
-class DatabaseManager(BaseModel, SeedMixin, RegisterMixin, SearchMixin, PlayQueueMixin):
-    db_dir: DirectoryPath = settings.DATABASE_DIR
-    db_path: Path = settings.DATABASE_DIR / "scuttle.db" #not a pydantic FilePath because it may not exist on first run
-    sql_dir: DirectoryPath = settings.DATABASE_DIR / "sql"
+class DatabaseManager(SeedMixin, RegisterMixin, SearchMixin, PlayQueueMixin):
+    def __init__(
+        self,
+        **overrides
+    ):
+        self.db_dir: Path = settings.DATABASE_DIR
+        self.db_path: Path = settings.DATABASE_DIR / "scuttle.db"
+        self.sql_dir: Path = settings.DATABASE_DIR / "sql"
 
-    data_dir: DirectoryPath = settings.DATA_DIR
+        self.data_dir: Path = settings.DATA_DIR
+
+        for key, value in overrides.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            else:
+                logger.warning(f"DatabaseManager ignored unknown override: {key}")
+
+        logger.info(f"DatabaseManager ready.")
 
     async def _get_connection(self) -> aiosqlite.Connection:
         """Returns an async connection with WAL and Scuttle UDFs"""

@@ -1,34 +1,45 @@
 import logging
 import asyncio
-from core.models.artist import ArtistBase
-from pydantic import BaseModel, FilePath, DirectoryPath
+from pathlib import Path
 
 from config import settings
 from core.models.track import TrackBase
+from core.models.artist import ArtistBase
 from core.youtube.youtube_exceptions import YtdlpDownloadError, YtdlpMetadataError, YtdlpSearchError, YtdlpTimeoutError, YtdlpUpdateError
 
 logger = logging.getLogger(__name__)
 
 
-class YouTubeClient(BaseModel):
-    #defaults, these become self. fields automatically
-    data_dir: DirectoryPath = settings.DATA_DIR
+class YouTubeClient():
+    def __init__(
+        self,
+        **overrides
+    ):
+        self.data_dir: Path = settings.DATA_DIR
 
-    yt_prefix: str = "YT___"
-    
-    dl_format_filter: str = "bestaudio/best"
-    dl_format: str = "m4a" #reduces size while maintaining quality and compatibility with most browsers for scrubbing
-    dl_quality: str = "0"
-    dl_user_agent: str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
-    dl_temp_format: str = "%(ext)s"
+        self.yt_prefix: str = "YT___"
+        
+        self.dl_format_filter: str = "bestaudio/best"
+        self.dl_format: str = "m4a" #reduces size while maintaining quality and compatibility with most browsers for scrubbing
+        self.dl_quality: str = "0"
+        self.dl_user_agent: str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
+        self.dl_temp_format: str = "%(ext)s"
 
-    pp_ffmpeg: str = "ffmpeg:-movflags +faststart" #moves the MOOV atom in m4a files to the front for streaming
-    
-    cmd_timeout: int = 120
+        self.pp_ffmpeg: str = "ffmpeg:-movflags +faststart" #moves the MOOV atom in m4a files to the front for streaming
+        
+        self.cmd_timeout: int = 120
 
-    python_bin: FilePath = settings.PYTHON_BIN_PATH
-    js_runtime_bin: FilePath = settings.JS_RUNTIME_BIN_PATH
-    ffmpeg_dir: DirectoryPath = settings.BIN_DIR
+        self.python_bin: Path = settings.PYTHON_BIN_PATH
+        self.js_runtime_bin: Path = settings.JS_RUNTIME_BIN_PATH
+        self.ffmpeg_dir: Path = settings.BIN_DIR
+
+        for key, value in overrides.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            else:
+                logger.warning(f"YouTubeClient ignored unknown override: {key}")
+
+        logger.info(f"YouTubeClient ready.")
 
 
     async def _run_command(self, cmd: list[str]) -> tuple[str, str]:

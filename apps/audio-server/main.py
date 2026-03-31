@@ -34,10 +34,7 @@ async def lifespan(app: FastAPI):
     db_manager = DatabaseManager()
     app.state.db_manager = db_manager
 
-    yt_client = YouTubeClient(
-        name="ScuttleDownloader",
-        base_dir=settings.BIN_DIR
-    )
+    yt_client = YouTubeClient()
     app.state.yt_client = yt_client
 
     await db_manager.build_from_directory()
