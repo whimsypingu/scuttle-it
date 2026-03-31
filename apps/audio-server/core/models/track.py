@@ -7,7 +7,7 @@ class TrackBase(ScuttleBase):
     id: str | None = None #optional external source ID 
     title: str
     title_display: str | None = None
-    duration: float = 0.0
+    duration: float = Field(default=0.0, ge=0.0, description="Duration in seconds")
 
     artists: list[ArtistBase] = Field(..., min_length=1)
 
