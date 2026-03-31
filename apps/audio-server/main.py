@@ -3,15 +3,18 @@
 import asyncio
 import logging
 
-from core.youtube.youtube_exceptions import YtdlpDownloadError, YtdlpMetadataError, YtdlpTimeoutError, YtdlpUpdateError
 from fastapi import FastAPI, HTTPException 
 from contextlib import asynccontextmanager
+
 from config import settings #triggers validation here
+
+from routers import test_router
 
 from core.youtube.youtube_client import YouTubeClient
 from database.database_manager import DatabaseManager
 
 
+from core.youtube.youtube_exceptions import YtdlpDownloadError, YtdlpMetadataError, YtdlpTimeoutError, YtdlpUpdateError
 from core.models.artist import ArtistBase
 from core.models.track import TrackBase
 
@@ -28,14 +31,12 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db_manager = DatabaseManager()
-
     app.state.db_manager = db_manager
 
     yt_client = YouTubeClient(
         name="ScuttleDownloader",
         base_dir=settings.BIN_DIR
     )
-
     app.state.yt_client = yt_client
 
     await db_manager.build_from_directory()
@@ -62,6 +63,8 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+app.include_router(test_router.router)
+
 @app.get("/")
 async def root():
     return {"message": "Audio Server is Live"}
@@ -72,14 +75,6 @@ async def get_status():
 
 
 
-@app.get("/test/ytdlp-version")
-async def get_version():
-    yt_client: YouTubeClient = app.state.yt_client
-    try:
-        out, err = await yt_client._run_command(["yt-dlp", "--version"])
-        return {"version": out}
-    except Exception:
-        return {"error": err}
 
 @app.get("/test/update")
 async def update():
