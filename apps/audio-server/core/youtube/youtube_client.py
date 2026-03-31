@@ -17,7 +17,7 @@ class YouTubeClient():
     ):
         self.data_dir: Path = settings.DATA_DIR
 
-        self.yt_prefix: str = "YT___"
+        self.yt_prefix: str = "" # "YT___"
         
         self.dl_format_filter: str = "bestaudio/best"
         self.dl_format: str = "m4a" #reduces size while maintaining quality and compatibility with most browsers for scrubbing

@@ -4,7 +4,7 @@ class DownloadJob(BaseModel):
     track_id: str | None = None
     query: str | None = None
 
-    priority: int = Field(default=100, ge=0) #lower number = higher priority
+    priority: bool = False #is it important or not
 
     @model_validator(mode="after")
     def check_id_or_query(self) -> "DownloadJob":
@@ -15,3 +15,8 @@ class DownloadJob(BaseModel):
             raise ValueError("DownloadJob cannot have both a track_id and a query.")
         
         return self
+    
+    @property
+    def identifier(self) -> str:
+        """Returns whichever identifier is available, which validator ensures."""
+        return self.track_id or self.query
