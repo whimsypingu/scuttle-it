@@ -8,7 +8,8 @@ from contextlib import asynccontextmanager
 
 from config import settings #triggers validation here
 
-from api.routers import test_router
+from api.routers.test_router import TestRouter
+from api.routers.queue_router import QueueRouter
 
 from core.youtube.youtube_client import YouTubeClient
 from database.database_manager import DatabaseManager
@@ -63,7 +64,8 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-app.include_router(test_router.router)
+app.include_router(TestRouter)
+app.include_router(QueueRouter)
 
 @app.get("/")
 async def root():

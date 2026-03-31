@@ -26,7 +26,7 @@ class RegisterMixin:
                 #existence check
                 async with db.execute('SELECT 1 FROM tracks WHERE id = ?', (track.id,)) as cursor:
                     if await cursor.fetchone():
-                        logger.warning(f"Duplicate track with id {track.id} exists")
+                        logger.warning(f"Duplicate track with id {track.id} exists, skipping registration.")
                         return False
                     
                 #insert
