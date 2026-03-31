@@ -4,12 +4,17 @@ import asyncio
 import logging
 
 from core.youtube.youtube_exceptions import YtdlpDownloadError, YtdlpMetadataError, YtdlpTimeoutError, YtdlpUpdateError
-from database.database_manager import DatabaseManager
 from fastapi import FastAPI, HTTPException 
 from contextlib import asynccontextmanager
 from config import settings #triggers validation here
 
 from core.youtube.youtube_client import YouTubeClient
+from database.database_manager import DatabaseManager
+
+
+from core.models.artist import ArtistBase
+from core.models.track import TrackBase
+
 
 
 logging.basicConfig(
@@ -34,6 +39,19 @@ async def lifespan(app: FastAPI):
     app.state.yt_client = yt_client
 
     await db_manager.build_from_directory()
+
+    await db_manager.register_track(TrackBase(
+        id="track_id_1",
+        title="never gonna give you up",
+        title_display="Never Gonna Give You Up",
+        duration=212.0,
+        artists=[ArtistBase(
+            id="artist_id_1",
+            name="rick astley",
+            name_display="Rick Astley"
+        )]
+    ))
+    await db_manager.build_search_index()
     yield
 
 
@@ -57,16 +75,24 @@ async def get_status():
 @app.get("/test/ytdlp-version")
 async def get_version():
     yt_client: YouTubeClient = app.state.yt_client
-    code, out, err = await yt_client._run_command(["yt-dlp", "--version"])
-
-    if code == 0:
+    try:
+        out, err = await yt_client._run_command(["yt-dlp", "--version"])
         return {"version": out}
-    return {"error": err, "exit_code": code}
+    except Exception:
+        return {"error": err}
 
 @app.get("/test/update")
 async def update():
     yt_client: YouTubeClient = app.state.yt_client
     await yt_client.update()
+
+
+@app.get("/test/search")
+async def search():
+    db_manager: DatabaseManager = app.state.db_manager 
+    result = await db_manager.search("never")
+    return {"result": result}
+
 
 @app.post("/test/download/{youtube_id}")
 async def download(youtube_id: str):

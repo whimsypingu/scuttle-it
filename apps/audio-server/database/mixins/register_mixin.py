@@ -1,6 +1,5 @@
 import logging
 import sqlite3
-import aiosqlite
 
 from core.models.track import TrackBase
 
@@ -32,10 +31,10 @@ class RegisterMixin:
                     
                 #insert
                 cursor = await db.execute('''
-                    INSERT INTO tracks (id, title, duration)
-                    VALUES (?, ?, ?)
+                    INSERT INTO tracks (id, title, title_display, duration)
+                    VALUES (?, ?, ?, ?)
                     RETURNING internal_id;
-                ''', (track.id, track.title, track.duration))
+                ''', (track.id, track.title, track.title_display, track.duration))
                 row = await cursor.fetchone()
                 if not row:
                     logger.error(f"Failed to get internal_id for track: {track}")
@@ -45,10 +44,13 @@ class RegisterMixin:
                 #insert artists
                 for artist in track.artists:                
                     cursor = await db.execute('''
-                        INSERT INTO artists (name)
-                        VALUES (?)
+                        INSERT INTO artists (id, name, name_display)
+                        VALUES (?, ?, ?)
+                        ON CONFLICT(id) DO UPDATE SET
+                            name = excluded.name,
+                            name_display = COALESCE(excluded.name_display, artists.name_display)
                         RETURNING internal_id;
-                    ''', (artist.name,))
+                    ''', (artist.id, artist.name, artist.name_display))
                     row = await cursor.fetchone()
                     if not row:
                         logger.error(f"Failed to get internal_id for artist: {artist}")

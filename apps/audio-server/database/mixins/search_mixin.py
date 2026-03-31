@@ -64,7 +64,7 @@ class SearchMixin:
                     a.name || '{UNIT_SEP}' ||
                     COALESCE(a.name_display, ''), 
                     '{RECORD_SEP}'
-                ) AS artist_blob
+                ) AS artist_blob,
                 
                 -- Scoring logic: BM25 * preferences * download boost
                 sub.score * t.pref_weight * MAX(a.pref_weight) *
@@ -82,7 +82,7 @@ class SearchMixin:
             JOIN track_artists ta ON ta.track_internal_id = t.internal_id
             JOIN artists a ON a.internal_id = ta.artist_internal_id
             LEFT JOIN downloads d ON d.id = t.id
-            GROUP BY sub.internal_id
+            GROUP BY t.internal_id
             ORDER BY final_rank ASC
             LIMIT {results_limit};
         '''
@@ -99,11 +99,18 @@ class SearchMixin:
                         artists = []
                         for packet in row["artist_blob"].split(RECORD_SEP):
                             parts = packet.split(UNIT_SEP)
+
+                            #explicit part handling
+                            a_internal_id = int(parts[0])
+                            a_id = parts[1] or None
+                            a_name = parts[2]
+                            a_name_display = parts[3] or None
+
                             artists.append(ArtistBase(
-                                internal_id=int(parts[0]),
-                                id=parts[1] if parts[1] else None,
-                                name=parts[2],
-                                name_display=parts[3] if parts[3] else None
+                                internal_id=a_internal_id,
+                                id=a_id,
+                                name=a_name,
+                                name_display=a_name_display
                             ))
 
                         #re-inflate into the TrackBase object (automatically type-casted)
