@@ -1,9 +1,12 @@
 import traceback
 
 from fastapi import APIRouter, Depends, Query, HTTPException
-from api.dependencies import get_yt_client, get_db_manager
+from api.dependencies import get_dl_queue, get_yt_client, get_db_manager
 from core.youtube.youtube_client import YouTubeClient
 from database.database_manager import DatabaseManager
+from core.download.download_queue import DownloadQueue
+from core.models.jobs import DownloadJob
+
 
 TestRouter = APIRouter(prefix="/test", tags=["Test"])
 
@@ -37,4 +40,21 @@ async def search_yt(
             status_code=500,
             detail="Crashed"
         )
+    
+@TestRouter.post("/download-by-search")
+async def download_by_search(
+    q: str = Query(..., min_length=1, description="Search query"),
+    dl_queue: DownloadQueue = Depends(get_dl_queue)
+):
+    try:
+        await dl_queue.add(DownloadJob(
+            query=q
+        ))
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail="Crashed"
+        )
+        
     

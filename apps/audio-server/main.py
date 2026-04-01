@@ -3,6 +3,8 @@
 import asyncio
 import logging
 
+from core.download.download_queue import DownloadQueue
+from core.download.download_worker import DownloadWorker
 from fastapi import FastAPI, HTTPException 
 from contextlib import asynccontextmanager
 
@@ -29,11 +31,29 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db_manager = DatabaseManager()
     app.state.db_manager = db_manager
 
+    #global
+    dl_queue = DownloadQueue()
+    app.state.dl_queue = dl_queue
+
+    workers = []
+    for i in range(2):
+        dl_worker = DownloadWorker(
+            worker_id=f"Worker-{i+1}",
+            dl_queue=dl_queue,
+            yt_client=YouTubeClient()
+        )
+        workers.append(dl_worker)
+
+        #start working in the background
+        asyncio.create_task(dl_worker.run())
+
+    #global yt_client for testing
     yt_client = YouTubeClient()
     app.state.yt_client = yt_client
 
@@ -51,7 +71,12 @@ async def lifespan(app: FastAPI):
         )]
     ))
     await db_manager.build_search_index()
+
     yield
+
+    #shutdown
+    for w in workers:
+        w.stop()
 
 
 app = FastAPI(
