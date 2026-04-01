@@ -14,9 +14,33 @@ import type { SearchViewProps } from "@/features/search/search.types";
 export const MockSearch = ({
     tabResetSignal
 }: SearchViewProps) => {
-    const [isSearching, setIsSearching] = useState(false);
     const [query, setQuery] = useState("");
 
+    // debounce effect on search input
+    const [debouncedQuery, setDebouncedQuery] = useState("");
+    useEffect(() => {
+        if (!query.trim()) {
+            setDebouncedQuery("");
+            return;
+        }
+
+        const handler = setTimeout(() => {
+            setDebouncedQuery(query);
+        }, 500); //ms delay to set the debounced query value
+
+        // cancel the timer if the user types again within the delay
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [query]);
+    useEffect(() => {
+        if (debouncedQuery) {
+            console.log(`Sending request to backend...`);
+        }
+    }, [debouncedQuery]);
+
+    // for checking where the user taps to close the search results
+    const [isSearching, setIsSearching] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const resultsRef = useRef<HTMLDivElement>(null);
 
