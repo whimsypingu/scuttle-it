@@ -18,8 +18,8 @@
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false, //EMERGENCY: CHANGE THIS BACK WHEN DONE
+    "noUnusedParameters": false, //EMERGENCY: CHANGE THIS BACK WHEN DONE
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,

@@ -16,7 +16,9 @@
             "toml": "apps/audio-server/pyproject.toml"
         },
         "web_client": {
-            "root": "apps/web-client"
+            "root": "apps/web-client",
+
+            "dist": "apps/web-client/dist"
         },
         "desktop_launcher": {
             "root": "apps/desktop-launcher"

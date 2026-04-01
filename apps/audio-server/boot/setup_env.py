@@ -17,7 +17,8 @@ def set_env_defaults(overwrite: bool = True):
         "HOST": "0.0.0.0",
         "PORT": 8000,
         "DATA_DIR": get_workspace_path("apps.audio-server.data", ensure_exists=True),
-        "DATABASE_DIR": get_workspace_path("apps.audio-server.database", ensure_exists=True)
+        "DATABASE_DIR": get_workspace_path("apps.audio-server.database", ensure_exists=True),
+        "DIST_DIR": get_workspace_path("apps.web-client.dist")
     }
 
     logger.info("Initializing .env default values")

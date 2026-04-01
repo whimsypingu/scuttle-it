@@ -3,9 +3,9 @@
 import asyncio
 import logging
 
-from core.download.download_queue import DownloadQueue
-from core.download.download_worker import DownloadWorker
-from fastapi import FastAPI, HTTPException 
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
 
 from config import settings #triggers validation here
@@ -16,13 +16,8 @@ from api.routers.search_router import SearchRouter
 
 from core.youtube.youtube_client import YouTubeClient
 from database.database_manager import DatabaseManager
-
-
-from core.youtube.youtube_exceptions import YtdlpDownloadError, YtdlpMetadataError, YtdlpTimeoutError, YtdlpUpdateError
-from core.models.artist import ArtistBase
-from core.models.track import TrackBase
-
-
+from core.download.download_queue import DownloadQueue
+from core.download.download_worker import DownloadWorker
 
 logging.basicConfig(
     level=logging.INFO,
@@ -87,43 +82,3 @@ async def get_status():
 
 
 
-@app.post("/test/download/{youtube_id}")
-async def download(youtube_id: str):
-    yt_client: YouTubeClient = app.state.yt_client
-
-    try:
-        #first attempt
-        return await yt_client.download_by_youtube_id(youtube_id)
-
-    except YtdlpDownloadError:
-        logger.error("Download failed once:", exc_info=True)
-        
-        try:
-            #try to fix the environment and retry download
-            await yt_client.update()
-            await asyncio.sleep(1)
-            return await yt_client.download_by_youtube_id(youtube_id)
-        
-        except YtdlpUpdateError:
-            raise HTTPException(
-                status_code=500,
-                detail="yt-dlp update failed"
-            )
-        
-        except YtdlpDownloadError:
-            raise HTTPException(
-                status_code=500,
-                detail="Download failed after updating yt-dlp"
-            )
-
-    except YtdlpTimeoutError:
-        raise HTTPException(
-            status_code=504,
-            detail="Download timed out"
-        )
-
-    except YtdlpMetadataError:
-        raise HTTPException(
-            status_code=502,
-            detail="Could not parse video metadata after extraction"
-        )

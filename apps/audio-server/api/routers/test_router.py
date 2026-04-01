@@ -73,4 +73,45 @@ async def db_search_proto(
             status_code=500,
             detail="Crashed"
         )
-    
+
+
+# @app.post("/test/download/{youtube_id}")
+# async def download(youtube_id: str):
+#     yt_client: YouTubeClient = app.state.yt_client
+
+#     try:
+#         #first attempt
+#         return await yt_client.download_by_youtube_id(youtube_id)
+
+#     except YtdlpDownloadError:
+#         logger.error("Download failed once:", exc_info=True)
+        
+#         try:
+#             #try to fix the environment and retry download
+#             await yt_client.update()
+#             await asyncio.sleep(1)
+#             return await yt_client.download_by_youtube_id(youtube_id)
+        
+#         except YtdlpUpdateError:
+#             raise HTTPException(
+#                 status_code=500,
+#                 detail="yt-dlp update failed"
+#             )
+        
+#         except YtdlpDownloadError:
+#             raise HTTPException(
+#                 status_code=500,
+#                 detail="Download failed after updating yt-dlp"
+#             )
+
+#     except YtdlpTimeoutError:
+#         raise HTTPException(
+#             status_code=504,
+#             detail="Download timed out"
+#         )
+
+#     except YtdlpMetadataError:
+#         raise HTTPException(
+#             status_code=502,
+#             detail="Could not parse video metadata after extraction"
+#         )
