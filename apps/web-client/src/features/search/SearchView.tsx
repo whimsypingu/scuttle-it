@@ -59,124 +59,106 @@ export const MockSearch = ({
             className="w-full h-full flex flex-col px-4 overflow-hidden touch-none"
             style={{ paddingBottom: `${NAV_CONFIG.height}px` }}
         >
-            <AnimatePresence mode="wait">
-                {!isSearching ? (
-                    <>
-                    <motion.div
-                        key="search-root"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="w-full h-full flex flex-col"
-                    >
+            {/* HEADER */}
+            <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4">
+                <div 
+                    className="flex items-center justify-between mb-2"
+                    onPointerDown={(e) => {
+                        if (isSearching) {
+                            e.stopPropagation();
+                            inputRef.current?.blur();
+                            setIsSearching(false);
+                        }
+                    }}
+                >
+                    <h1 className="tab-heading truncate pr-4">
+                        Search
+                    </h1>
 
-                        {/* HEADER */}
-                        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4">
-                            <div className="flex items-center justify-between mb-2">
-                                <h1 className="tab-heading truncate pr-4">
-                                    Search
-                                </h1>
-                            </div>
-                            
-                            {/* SEARCH BAR */}
-                            <InputGroup>
-                                <InputGroupInput
-                                    ref={inputRef}
-                                    type="text"
-                                    value={query}
-                                    onChange={(e) => setQuery(e.target.value)}
-                                    onFocus={() => setIsSearching(true)}
-                                    placeholder="What do you want to listen to?"
-                                />
-                                <InputGroupAddon align="inline-end">
-                                    <MagnifyingGlassIcon size={20} weight="bold" />
-                                </InputGroupAddon>
-                            </InputGroup>
-                        </div>
+                    {isSearching && (
+                        <>
+                        <button className="text-sm font-medium text-white/40 active:text-white shrink-0">
+                            <XIcon size={20} weight="bold" />
+                        </button>
+                        </>
+                    )}
+                </div>
+                
+                {/* SEARCH BAR */}
+                <InputGroup>
+                    <InputGroupInput
+                        ref={inputRef}
+                        type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onFocus={() => setIsSearching(true)}
+                        placeholder="What do you want to listen to?"
+                    />
+                    <InputGroupAddon align="inline-end">
+                        <MagnifyingGlassIcon size={20} weight="bold" />
+                    </InputGroupAddon>
+                </InputGroup>
+            </div>
 
-                        {/* CONTENT AREA */}
-                        <div className="flex-1 overflow-y-auto no-scrollbar">
-                            <div 
-                                className="flex flex-col gap-1"
-                                style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
-                            >
-                                <MockBrowserCategories />
-                            </div>
-                        </div>
-                    </motion.div>
-                    </>
-                ) : (
-
-                    <>
-                    <motion.div
-                        key="search-results"
-                        ref={resultsRef}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="w-full h-full flex flex-col"
-                    >
-                        {/* HEADER */}
-                        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4">
-                            <div 
-                                className="flex items-center justify-between mb-2"
-                                onPointerDown={(e) => {
-                                    e.stopPropagation();
-                                    inputRef.current?.blur();
-                                    setIsSearching(false);
-                                }}
-                            >
-                                <h1 className="tab-heading truncate pr-4">
-                                    Search
-                                </h1>
-                                    <button className="text-sm font-medium text-white/40 active:text-white shrink-0"
-                                    >
-                                        <XIcon size={20} weight="bold" />
-                                    </button>
-                            </div>
-                            
-                            {/* SEARCH BAR */}
-                            <InputGroup>
-                                <InputGroupInput
-                                    ref={inputRef}
-                                    type="text"
-                                    value={query}
-                                    onChange={(e) => setQuery(e.target.value)}
-                                    onFocus={() => setIsSearching(true)}
-                                    placeholder="What do you want to listen to?"
-                                />
-                                <InputGroupAddon align="inline-end">
-                                    <MagnifyingGlassIcon size={20} weight="bold" />
-                                </InputGroupAddon>
-                            </InputGroup>
-                        </div>
-
-                        {/* CONTENT AREA */}
-                        <div 
-                            className="flex-1 overflow-y-auto no-scrollbar"
-                            onPointerDown={(e) => {
-                                inputRef.current?.blur();
-
-                                //does not close the search results if touching the results div
-                                if (resultsRef.current?.contains(e.target as Node)) {
-                                    return;
-                                }
-                                setIsSearching(false);
-                            }}                            
+            <div className="flex-1 relative overflow-hidden">
+                <AnimatePresence mode="wait">
+                    {!isSearching ? (
+                        <>
+                        <motion.div
+                            key="search-root"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="w-full h-full flex flex-col"
                         >
-                            <div 
-                                className="flex flex-col gap-0"
-                                style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
-                            >
-                                <PlaylistList
-                                    playlist={MOCK_SEARCH_PLAYLIST}
-                                />
+                            {/* CONTENT AREA */}
+                            <div className="flex-1 overflow-y-auto no-scrollbar">
+                                <div 
+                                    className="flex flex-col gap-1"
+                                    style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
+                                >
+                                    <MockBrowserCategories />
+                                </div>
                             </div>
-                        </div>
-                    </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
+                        </motion.div>
+                        </>
+                    ) : (
+                        <>
+                        <motion.div
+                            key="search-results"
+                            ref={resultsRef}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="w-full h-full flex flex-col"
+                        >
+                            {/* CONTENT AREA */}
+                            <div 
+                                className="flex-1 overflow-y-auto no-scrollbar"
+                                onPointerDown={(e) => {
+                                    inputRef.current?.blur();
+
+                                    //does not close the search results if touching the results div
+                                    if (resultsRef.current?.contains(e.target as Node)) {
+                                        return;
+                                    }
+                                    setIsSearching(false);
+                                }}                            
+                            >
+                                <div 
+                                    className="flex flex-col gap-0"
+                                    style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
+                                >
+                                    <PlaylistList
+                                        playlist={MOCK_SEARCH_PLAYLIST}
+                                    />
+                                </div>
+                            </div>
+                        </motion.div>
+                        </>
+                    )}
+                </AnimatePresence>
+            </div>
 
         </motion.div>
         </>
