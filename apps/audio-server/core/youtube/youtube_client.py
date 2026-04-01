@@ -193,6 +193,10 @@ class YouTubeClient():
             raw_id, raw_title, raw_uploader, raw_duration = parts
 
             logger.info(f"{raw_id} | {raw_title} | {raw_uploader} | {raw_duration}")
+            
+            #id check
+            if raw_id != youtube_id:
+                raise YtdlpMetadataError(f"Mismatched yt-dlp id: extracted id {raw_id} != provided YouTube id {youtube_id}")
 
             #return value
             return TrackBase(

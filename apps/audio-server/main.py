@@ -47,7 +47,8 @@ async def lifespan(app: FastAPI):
         dl_worker = DownloadWorker(
             worker_id=f"Worker-{i+1}",
             dl_queue=dl_queue,
-            yt_client=YouTubeClient()
+            yt_client=YouTubeClient(),
+            db_manager=db_manager
         )
         workers.append(dl_worker)
 
@@ -55,18 +56,6 @@ async def lifespan(app: FastAPI):
         asyncio.create_task(dl_worker.run())
 
     await db_manager.build_from_directory()
-
-    await db_manager.register_track(TrackBase(
-        id="track_id_1",
-        title="never gonna give you up",
-        title_display="Never Gonna Give You Up",
-        duration=212.0,
-        artists=[ArtistBase(
-            id="artist_id_1",
-            name="rick astley",
-            name_display="Rick Astley"
-        )]
-    ))
     await db_manager.build_search_index()
 
     yield

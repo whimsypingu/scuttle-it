@@ -63,7 +63,7 @@ class RegisterMixin:
                         VALUES (?, ?);
                     ''', (track_internal_id, artist_internal_id))
 
-                logger.info(f"Successfully registered new track: {track}")
+                logger.info(f"Successfully registered new track: {track.id} | {track.title}")
                 return True
         
         except Exception:
@@ -99,7 +99,7 @@ class RegisterMixin:
         try:
             async with self.session() as db:
                 await db.execute('''
-                    INSERT OR IGNORE INTO downloads (id, downloaded_at)
+                    INSERT OR IGNORE INTO downloads (track_id, downloaded_at)
                     VALUES (?, unixepoch());
                 ''', (track_id,))
                 return True
@@ -116,7 +116,7 @@ class RegisterMixin:
         """Unregister a download. Returns True on success."""
         try:
             async with self.session() as db:
-                await db.execute('DELETE FROM downloads WHERE id = ?;', (track_id,))
+                await db.execute('DELETE FROM downloads WHERE track_id = ?;', (track_id,))
                 logger.info(f"Unregistered download track_id: {track_id}")
                 return True
         
@@ -128,7 +128,7 @@ class RegisterMixin:
         """Check if a track_id is registered to downloaded. Returns True or False based on existence."""
         try: 
             async with self.session() as db:
-                async with await db.execute('SELECT 1 FROM downloads WHERE id = ? LIMIT 1;', (track_id,)) as cursor:
+                async with await db.execute('SELECT 1 FROM downloads WHERE track_id = ? LIMIT 1;', (track_id,)) as cursor:
                     row = await cursor.fetchone()
                     return row is not None
                 
