@@ -67,6 +67,8 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+app.mount("/assets", StaticFiles(directory=(settings.DIST_DIR / "assets")), name="assets")
+
 app.include_router(TestRouter)
 app.include_router(QueueRouter)
 app.include_router(SearchRouter)
@@ -74,7 +76,7 @@ app.include_router(SearchRouter)
 
 @app.get("/")
 async def root():
-    return {"message": "Audio Server is Live"}
+    return FileResponse(settings.DIST_DIR / "index.html")
 
 @app.get("/status")
 async def get_status():
