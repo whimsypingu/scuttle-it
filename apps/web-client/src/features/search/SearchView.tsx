@@ -34,9 +34,23 @@ export const MockSearch = ({
         };
     }, [query]);
     useEffect(() => {
-        if (debouncedQuery) {
-            console.log(`Sending request to backend...`);
-        }
+        const fetchData = async() => {
+            if (debouncedQuery) {
+                console.log(`Sending request to backend...`);
+
+                try {
+                    const response = await fetch(`/search/db-search?q=${encodeURIComponent(query)}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP Error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    console.log("Results:", data);
+                } catch (error) {
+                    console.error("Fetch failed:", error);
+                }
+            }
+        };
+        fetchData();
     }, [debouncedQuery]);
 
     // for checking where the user taps to close the search results
