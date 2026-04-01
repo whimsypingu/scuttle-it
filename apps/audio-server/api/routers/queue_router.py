@@ -1,8 +1,7 @@
 import traceback
 
 from fastapi import APIRouter, Depends, Query, HTTPException
-from api.dependencies import get_yt_client, get_db_manager
-from core.youtube.youtube_client import YouTubeClient
+from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
 
 QueueRouter = APIRouter(prefix="/queue", tags=["Queue"])

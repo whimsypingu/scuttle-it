@@ -70,7 +70,7 @@ class SearchMixin:
                 
                 -- Scoring logic: BM25 * preferences * download boost
                 sub.score * t.pref_weight * MAX(a.pref_weight) *
-                    CASE WHEN d.id IS NOT NULL THEN 10.0 ELSE 1.0
+                    CASE WHEN d.track_id IS NOT NULL THEN 10.0 ELSE 1.0
                     END AS final_rank
             FROM (
                 SELECT
@@ -83,7 +83,7 @@ class SearchMixin:
             JOIN tracks t ON t.internal_id = sub.internal_id
             JOIN track_artists ta ON ta.track_internal_id = t.internal_id
             JOIN artists a ON a.internal_id = ta.artist_internal_id
-            LEFT JOIN downloads d ON d.id = t.id
+            LEFT JOIN downloads d ON d.track_id = t.id
             GROUP BY t.internal_id
             ORDER BY final_rank ASC
             LIMIT {results_limit};
@@ -94,6 +94,75 @@ class SearchMixin:
                 async with db.execute(query, (fts_query,)) as cursor:
                     rows = await cursor.fetchall()
                     return results_to_trackbase_list(rows)
+                
+        except Exception:
+            logger.exception(f"Failed to search query: {q}")
+            raise
+
+
+    async def test_search(self, q: str):
+        #prepare fts query (prefix matching on all tokens)
+        tokens = q.split()
+        fts_query = " AND ".join(f"{t}*" for t in tokens)
+
+        internal_scan_limit = 1000 #how many to ensure we catch all relevant downloads to reduce the number of JOIN operations
+        results_limit = 30
+
+        UNIT_SEP = "\x1f"
+        RECORD_SEP = "\x1e"
+
+        query = f'''
+            SELECT
+                -- TrackBase fields
+                t.internal_id,
+                t.id,
+                t.title,
+                t.title_display,
+                t.duration,
+
+                -- ArtistBase fields
+                GROUP_CONCAT(
+                    a.internal_id || '{UNIT_SEP}' ||
+                    COALESCE(a.id, '') || '{UNIT_SEP}' ||
+                    a.name || '{UNIT_SEP}' ||
+                    COALESCE(a.name_display, ''), 
+                    '{RECORD_SEP}'
+                ) AS artist_blob
+                
+            FROM (
+                SELECT
+                    rowid AS internal_id,
+                    bm25(catalog_fts, 1.0, 1.5) AS score
+                FROM catalog_fts
+                WHERE catalog_fts MATCH ?
+                LIMIT {internal_scan_limit}
+            ) AS sub
+            JOIN tracks t ON t.internal_id = sub.internal_id
+            JOIN track_artists ta ON ta.track_internal_id = t.internal_id
+            JOIN artists a ON a.internal_id = ta.artist_internal_id
+            GROUP BY t.internal_id
+            LIMIT {results_limit};
+        '''
+
+        query2 = '''
+            SELECT
+                rowid,
+                title,
+                names,
+
+                bm25(catalog_fts, 1.0, 1.5) AS score
+            FROM catalog_fts
+            WHERE catalog_fts MATCH ?;
+        '''
+
+        try:
+            async with self.session() as db:
+                async with db.execute(query2, (fts_query,)) as cursor:
+                    rows = await cursor.fetchall()
+                    return rows
+                # async with db.execute(query, (fts_query,)) as cursor:
+                #     rows = await cursor.fetchall()
+                #     return results_to_trackbase_list(rows)
                 
         except Exception:
             logger.exception(f"Failed to search query: {q}")

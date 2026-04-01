@@ -12,6 +12,7 @@ from config import settings #triggers validation here
 
 from api.routers.test_router import TestRouter
 from api.routers.queue_router import QueueRouter
+from api.routers.search_router import SearchRouter
 
 from core.youtube.youtube_client import YouTubeClient
 from database.database_manager import DatabaseManager
@@ -53,10 +54,6 @@ async def lifespan(app: FastAPI):
         #start working in the background
         asyncio.create_task(dl_worker.run())
 
-    #global yt_client for testing
-    yt_client = YouTubeClient()
-    app.state.yt_client = yt_client
-
     await db_manager.build_from_directory()
 
     await db_manager.register_track(TrackBase(
@@ -88,6 +85,8 @@ app = FastAPI(
 
 app.include_router(TestRouter)
 app.include_router(QueueRouter)
+app.include_router(SearchRouter)
+
 
 @app.get("/")
 async def root():
@@ -97,13 +96,6 @@ async def root():
 async def get_status():
     return {"status": "online", "version": "0.1.0"}
 
-
-
-@app.get("/test/search")
-async def search():
-    db_manager: DatabaseManager = app.state.db_manager 
-    result = await db_manager.search("never")
-    return {"result": result}
 
 
 @app.post("/test/download/{youtube_id}")
