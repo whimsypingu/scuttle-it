@@ -41,7 +41,9 @@ async def search_youtube(
             query_limit=query_limit
         )
         await dl_queue.add(job)
-        return job.id
+        return {
+            "job_id": job.id
+        }
     
     except Exception as e:
         traceback.print_exc()
