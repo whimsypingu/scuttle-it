@@ -4,6 +4,7 @@ import { AudioProvider } from '@/features/audio/AudioProvider';
 import { MainLayout } from '@/features/player/MainLayout';
 import { GlobalPlayer } from '@/features/player/GlobalPlayer';
 import { NavBar } from '@/features/player/NavBar';
+import { Toast } from '@/features/toast/Toast';
 
 import { MockHome } from '@/features/home/HomeView';
 import { MockLibrary } from '@/features/library/LibraryView';
@@ -60,6 +61,7 @@ function App() {
 
 				<GlobalPlayer isExpanded={isPlayerExpanded} setIsExpanded={setIsPlayerExpanded} />
 				
+				<Toast />
 			</div>
 		</AudioProvider>
 	)

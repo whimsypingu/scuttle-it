@@ -25,6 +25,11 @@ export const BOTTOM_SHELF = {
         NAV_CONFIG.height + 
         PLAYER_CONFIG.marginBottom
     ),
+    totalHeightWithMargins: (
+        PLAYER_CONFIG.collapsedHeight + 
+        NAV_CONFIG.height + 
+        (2 * PLAYER_CONFIG.marginBottom)
+    ),
     playerHeightWithMargins: (
         PLAYER_CONFIG.collapsedHeight +
         (2 * PLAYER_CONFIG.marginBottom)

@@ -9,6 +9,7 @@ import { MusicNoteIcon } from '@phosphor-icons/react';
 import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/model/model.constants';
 
 import type { TrackItemProps } from '@/model/model.types';
+import { toast } from 'sonner';
 
 
 export const TrackItem = ({ 
@@ -56,20 +57,19 @@ export const TrackItem = ({
 		const offset = info.offset.x;
 
 		let msg = "ACTION: ";
-		if (Math.abs(offset) >= LARGE_SWIPE_THRESHOLD_PX) {
-			msg = `${msg} Large `;
-		} else if (Math.abs(offset) >= SMALL_SWIPE_THRESHOLD_PX) {
-			msg = `${msg} Small `;
-		} else {
-			msg = `${msg} None `;
+		if (offset >= LARGE_SWIPE_THRESHOLD_PX) {
+			console.log("ACTION:", actions[0]);
+			toast(`ACTION: ${actions[0]}`)
+		} else if (offset <= -(LARGE_SWIPE_THRESHOLD_PX)) {
+			console.log("ACTION:", actions[3]);
+			toast(`ACTION: ${actions[3]}`)
+		} else if (offset >= SMALL_SWIPE_THRESHOLD_PX) {
+			console.log("ACTION:", actions[1]);
+			toast(`ACTION: ${actions[1]}`)
+		} else if (offset <= -(SMALL_SWIPE_THRESHOLD_PX)) {
+			console.log("ACTION:", actions[2]);
+			toast(`ACTION: ${actions[2]}`)
 		}
-
-		if (offset > 0) {
-			msg = `${msg} Right`;
-		} else {
-			msg = `${msg} Left`;
-		}
-		console.log(msg)
 
 		//reset the dragging flag after one frame to prevent taps from triggering
         requestAnimationFrame(() => setIsDragging(false));
