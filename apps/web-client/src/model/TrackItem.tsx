@@ -3,9 +3,9 @@ import { motion, useMotionValue, useMotionValueEvent, useTransform } from 'frame
 
 import { MusicNoteIcon } from '@phosphor-icons/react';
 
-import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/features/track/track.constants';
+import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/model/model.constants';
 
-import type { TrackItemProps } from '@/features/track/track.types';
+import type { TrackItemProps } from '@/model/model.types';
 
 
 export const TrackItem = ({ 
@@ -124,10 +124,10 @@ export const TrackItem = ({
 
 				<div className="flex-1 min-w-0 text-left flex flex-col">
 					<span className="font-medium text-sm truncate text-white">
-						{track.title}
+						{track.titleDisplay ?? track.title}
 					</span>
 					<span className="text-xs text-white/40 truncate">
-						{track.artist}
+						{track.artists.map(a => a.nameDisplay ?? a.name).join(", ")}
 					</span>
 				</div>
 

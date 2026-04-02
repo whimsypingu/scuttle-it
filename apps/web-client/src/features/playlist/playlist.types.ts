@@ -1,5 +1,7 @@
 import type { IconProps } from "@phosphor-icons/react";
 
+import type { TrackBase } from "@/model/model.types";
+
 export type PlaylistActionType = "pin" | "delete";
 
 export interface PlaylistActionConfig {
@@ -21,5 +23,5 @@ export interface PlaylistItemProps {
 }
 
 export interface PlaylistListProps {
-    playlist: Playlist;
+    tracks?: TrackBase[];
 }

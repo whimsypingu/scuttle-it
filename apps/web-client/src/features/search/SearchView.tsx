@@ -8,13 +8,17 @@ import { PlaylistList } from "@/features/playlist/PlaylistList";
 
 import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
+import { SearchAPI } from "@/features/search/search.api";
 import type { SearchViewProps } from "@/features/search/search.types";
+import type { TrackBase } from "@/model/model.types";
+import { useLibraryStore } from "@/store/useLibraryStore";
 
 
 export const MockSearch = ({
     tabResetSignal
 }: SearchViewProps) => {
     const [query, setQuery] = useState("");
+    const [searchResults, setSearchResults] = useState<TrackBase[]>([]);
 
     // debounce effect on search input
     const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -33,24 +37,22 @@ export const MockSearch = ({
             clearTimeout(handler);
         };
     }, [query]);
+    const addTracks = useLibraryStore((state) => state.addTracks); //add to store
     useEffect(() => {
-        const fetchData = async() => {
-            if (debouncedQuery) {
-                console.log(`Sending request to backend...`);
+        if (!debouncedQuery) return;
 
-                try {
-                    const response = await fetch(`/search/db-search?q=${encodeURIComponent(query)}`);
-                    if (!response.ok) {
-                        throw new Error(`HTTP Error! status: ${response.status}`);
-                    }
-                    const data = await response.json();
-                    console.log("Results:", data);
-                } catch (error) {
-                    console.error("Fetch failed:", error);
-                }
-            }
-        };
-        fetchData();
+        const controller = new AbortController();
+
+        SearchAPI.searchDatabase(debouncedQuery, controller.signal)
+            .then((results: TrackBase[]) => {
+                addTracks(results);
+                setSearchResults(results);
+            })
+            .catch(err => {
+                console.error(err);
+            });
+
+        return () => controller.abort();
     }, [debouncedQuery]);
 
     // for checking where the user taps to close the search results
@@ -164,7 +166,7 @@ export const MockSearch = ({
                                     style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
                                 >
                                     <PlaylistList
-                                        playlist={MOCK_SEARCH_PLAYLIST}
+                                        tracks={searchResults}
                                     />
                                 </div>
                             </div>

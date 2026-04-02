@@ -130,7 +130,7 @@ export const MockLibrary = ({
                                 style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
                             >
                                 <PlaylistList
-                                    playlist={selectedPlaylist}
+                                    tracks={[]}
                                 />
                             </div>
                         </div>

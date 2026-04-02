@@ -1,25 +1,16 @@
-import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 
-import { TrackItem } from '@/features/track/TrackItem';
+import { TrackItem } from '@/model/TrackItem';
 
 import type { PlaylistListProps } from '@/features/playlist/playlist.types';
-import type { Track } from '../track/track.types';
+import type { TrackBase } from '@/model/model.types';
 
 
 export const PlaylistList = ({
-    playlist
+    tracks = []
 }: PlaylistListProps) => {
 
-    const MOCK_TRACKS = useMemo(() => {
-        return [...Array(20)].map((_, i) => ({
-            id: `track-${i}`,
-            title: `Archived Track ${i+1}`,
-            artist: "Unknown Artist",
-        }));
-    }, []);
-
-    const handleTrackSelect = (track: Track) => {
+    const handleTrackSelect = (track: TrackBase) => {
         console.log("Selected track:", track.title);
     }
 
@@ -40,7 +31,7 @@ export const PlaylistList = ({
             className="flex flex-col gap-1 w-full"
         >
             {/* TRACK LIST */}
-            {MOCK_TRACKS.map((track, i) => (
+            {tracks.map((track, i) => (
                 <>
                 <motion.div
                     key={track.id}

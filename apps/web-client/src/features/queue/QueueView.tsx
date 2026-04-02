@@ -1,22 +1,26 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 
-import { TrackItem } from '@/features/track/TrackItem';
+import { TrackItem } from '@/model/TrackItem';
 
-import type { Track } from '@/features/track/track.types';
+import type { TrackBase } from '@/model/model.types';
 
 
 export const QueueView = () => {
 
-    const MOCK_TRACKS = useMemo(() => {
+    const MOCK_TRACKS: TrackBase[] = useMemo(() => {
         return [...Array(20)].map((_, i) => ({
             id: `track-${i}`,
             title: `Queue Track ${i+1}`,
-            artist: "Unknown Artist",
+            artists: [{
+                id: `artist-${i}`,
+                name: `Artist ${i+1}`
+            }],
+            duration: 20
         }));
     }, []);
 
-    const handleTrackSelect = (track: Track) => {
+    const handleTrackSelect = (track: TrackBase) => {
         console.log("Selected track:", track.title);
     }
 
