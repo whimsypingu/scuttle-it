@@ -36,10 +36,13 @@ async def search_youtube(
     dl_queue: DownloadQueue = Depends(get_dl_queue)
 ):
     try:
-        await dl_queue.add(DownloadJob( 
+        job = DownloadJob(
             query=q,
             query_limit=query_limit
-        ))
+        )
+        await dl_queue.add(job)
+        return job.id
+    
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(

@@ -5,7 +5,7 @@ import type { TrackNorm, TrackBase } from '@/model/model.types';
 /**
  * Maps raw API response (snake_case) TrackBase to frontend TrackBase (camelCase)
  */
-export const mapTrackBase = (track: any): TrackBase => {
+export const makeSafeApiTrackBase = (track: any): TrackBase => {
     //snake_case to camelCase
     return {
         id: track.id,

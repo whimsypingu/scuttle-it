@@ -1,6 +1,9 @@
+import uuid
 from pydantic import BaseModel, Field, model_validator
 
 class DownloadJob(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    
     track_id: str | None = None
     query: str | None = None
     priority: bool = False #is it important or not

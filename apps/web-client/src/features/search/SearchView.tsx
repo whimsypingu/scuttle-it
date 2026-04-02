@@ -1,17 +1,18 @@
 import { useEffect, useRef, useState } from "react";
+import { useAddTracks } from "@/store/useLibraryStore";
+
 import { motion, AnimatePresence } from "framer-motion";
 
 import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 
 import { PlaylistList } from "@/features/playlist/PlaylistList";
+import { SearchAPI } from "@/features/search/search.api";
 
 import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
-import { SearchAPI } from "@/features/search/search.api";
 import type { SearchViewProps } from "@/features/search/search.types";
 import type { TrackBase } from "@/model/model.types";
-import { useAddTracks } from "@/store/useLibraryStore";
 
 
 export const MockSearch = ({
@@ -42,9 +43,10 @@ export const MockSearch = ({
         if (!debouncedQuery) return;
 
         const controller = new AbortController();
-
+        
+        //search database
         SearchAPI.searchDatabase(debouncedQuery, controller.signal)
-            .then((results: TrackBase[]) => {
+            .then((results) => {
                 addTracks(results); // store
                 setSearchResults(results); // show
             })
@@ -68,6 +70,19 @@ export const MockSearch = ({
             // scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
         }
     }, [tabResetSignal]);
+
+    // deep search
+    const handleDeepSearch = async () => {
+        if (!query.trim()) return;
+
+        SearchAPI.searchYouTube(query)
+            .then((jobId) => {
+                console.log(`Successfully queued job with id: ${jobId}`);
+            })
+            .catch((err) => {
+                console.error(`SearchAPI.searchYouTube error: ${err}`);
+            });
+    }
 
     return (
         <>
@@ -108,6 +123,12 @@ export const MockSearch = ({
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onFocus={() => setIsSearching(true)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                handleDeepSearch();
+                                inputRef.current?.blur(); //unfocus
+                            }
+                        }}
                         placeholder="What do you want to listen to?"
                     />
                     <InputGroupAddon align="inline-end">
