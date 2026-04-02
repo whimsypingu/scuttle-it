@@ -11,7 +11,7 @@ import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 import { SearchAPI } from "@/features/search/search.api";
 import type { SearchViewProps } from "@/features/search/search.types";
 import type { TrackBase } from "@/model/model.types";
-import { useLibraryStore } from "@/store/useLibraryStore";
+import { useAddTracks } from "@/store/useLibraryStore";
 
 
 export const MockSearch = ({
@@ -37,7 +37,7 @@ export const MockSearch = ({
             clearTimeout(handler);
         };
     }, [query]);
-    const addTracks = useLibraryStore((state) => state.addTracks); //add to store
+    const addTracks = useAddTracks(); //zustand hook
     useEffect(() => {
         if (!debouncedQuery) return;
 
@@ -45,11 +45,11 @@ export const MockSearch = ({
 
         SearchAPI.searchDatabase(debouncedQuery, controller.signal)
             .then((results: TrackBase[]) => {
-                addTracks(results);
-                setSearchResults(results);
+                addTracks(results); // store
+                setSearchResults(results); // show
             })
             .catch(err => {
-                console.error(err);
+                console.error(`SearchAPI.searchDatabase error: ${err}`);
             });
 
         return () => controller.abort();

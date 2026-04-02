@@ -27,4 +27,12 @@ export const useLibraryStore = create<LibraryState>((set) => ({
             artistBases: nextArtists
         };
     }),
+
+    playingTrackId: null,
+    setPlayingTrackId: (id) => set({ playingTrackId: id }),
 }));
+
+//hooks
+export const useAddTracks = () => useLibraryStore((s) => s.addTracks);
+export const usePlayingTrackId = () => useLibraryStore((s) => s.playingTrackId);
+export const useSetPlayingTrackId = () => useLibraryStore((s) => s.setPlayingTrackId);

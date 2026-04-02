@@ -6,6 +6,7 @@ import { MusicNoteIcon } from '@phosphor-icons/react';
 import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/model/model.constants';
 
 import type { TrackItemProps } from '@/model/model.types';
+import { usePlayingTrackId, useSetPlayingTrackId } from '@/store/useLibraryStore';
 
 
 export const TrackItem = ({ 
@@ -72,9 +73,18 @@ export const TrackItem = ({
         requestAnimationFrame(() => setIsDragging(false));
     };
 
+
+	/* TAP ACTION HANDLING */
+	const playingTrackId = usePlayingTrackId();
+	const setPlayingTrackId = useSetPlayingTrackId();
+
+	const isActive = playingTrackId === track.id;
+
     //cancel taps on drags
     const handleTap = () => {
         if (isDragging) return;
+
+		setPlayingTrackId(track.id); //update global store
 
         onSelect(track);
     };
@@ -118,7 +128,11 @@ export const TrackItem = ({
 			
 				className="flex items-center gap-4 py-2 px-3 bg-background rounded-lg active:cursor-grabbing relative z-10 shadow-xl"
 			>
-				<div className="w-12 h-12 bg-zinc-800 rounded flex items-center justify-center shrink-0">
+				<div className={`
+					w-12 h-12 
+					${isActive ? "bg-purple-500 text-white" : "bg-zinc-800 text-white/40"}
+					rounded flex items-center justify-center shrink-0
+				`}>
 					<MusicNoteIcon size={ICON_SIZE_PX} />
 				</div>
 

@@ -6,4 +6,7 @@ export interface LibraryState {
 
     // process incoming API data
     addTracks: (incoming: TrackBase[]) => void;
+
+    playingTrackId: TrackId | null;
+    setPlayingTrackId: (id: TrackId | null) => void;
 }
