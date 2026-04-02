@@ -1,14 +1,8 @@
 import { create } from 'zustand';
-import type { ArtistId, ArtistBase, TrackId, TrackNorm, TrackBase } from '@/model/model.types';
+
 import { shredTrackBase } from '@/model/model.utils';
 
-interface LibraryState {
-    trackNorms: Record<TrackId, TrackNorm>;
-    artistBases: Record<ArtistId, ArtistBase>;
-
-    // process incoming API data
-    addTracks: (incoming: TrackBase[]) => void;
-}
+import type { LibraryState } from '@/store/store.types';
 
 export const useLibraryStore = create<LibraryState>((set) => ({
     trackNorms: {},
