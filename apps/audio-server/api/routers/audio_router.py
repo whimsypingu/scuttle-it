@@ -1,6 +1,6 @@
 import traceback
 from pathlib import Path
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Path, HTTPException
 from fastapi.responses import FileResponse
 
 from config import settings
@@ -21,9 +21,9 @@ def resolve_track_path(track_id: str) -> Path:
     raise HTTPException(status_code=404, detail=f"Track {track_id} not found")
     
 
-@AudioRouter.get("/stream")
+@AudioRouter.get("/stream/{track_id}")
 async def get_audio_stream(
-    track_id: str = Query(..., min_length=1, description="Track ID"),
+    track_id: str = Path(..., min_length=1, description="Track ID"),
     db_manager: DatabaseManager = Depends(get_db_manager),
     dl_queue: DownloadQueue = Depends(get_dl_queue)
 ):
@@ -33,7 +33,7 @@ async def get_audio_stream(
                 track_id=track_id,
                 priority=True
             )
-            dl_queue.add(job)
+            await dl_queue.add(job)
             return {
                 "job_id": job.id
             }

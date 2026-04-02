@@ -20,7 +20,7 @@ export const SearchAPI = {
         q: string,
         signal?: AbortSignal
     ): Promise<string> => {
-        const response = await fetch(`/search/yt-search?q=${encodeURIComponent(q)}`, { signal, method: "POST" });
+        const response = await fetch(`/search/yt-search?q=${encodeURIComponent(q)}&query_limit=1`, { signal, method: "POST" });
         if (!response.ok) throw new Error("YouTube search failed");
 
         const rawData = await response.json();

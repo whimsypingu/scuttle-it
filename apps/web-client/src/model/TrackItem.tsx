@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { motion, useMotionValue, useMotionValueEvent, useTransform } from 'framer-motion';
 
+import { usePlayingTrackId, useSetPlayingTrackId } from '@/store/useLibraryStore';
+import { useAudio } from '@/features/audio/AudioProvider';
+
 import { MusicNoteIcon } from '@phosphor-icons/react';
 
 import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/model/model.constants';
 
 import type { TrackItemProps } from '@/model/model.types';
-import { usePlayingTrackId, useSetPlayingTrackId } from '@/store/useLibraryStore';
 
 
 export const TrackItem = ({ 
@@ -81,9 +83,16 @@ export const TrackItem = ({
 	const isActive = playingTrackId === track.id;
 
     //cancel taps on drags
-    const handleTap = () => {
+	const audio = useAudio();
+    const handleTap = async () => {
         if (isDragging) return;
 
+		try {
+			await audio.playTrack(track.id);
+			console.log(`NOW PLAYING: ${track.title}`);
+		} catch (err) {
+			console.error("Playback failed to start:", err);
+		}
 		setPlayingTrackId(track.id); //update global store
 
         onSelect(track);

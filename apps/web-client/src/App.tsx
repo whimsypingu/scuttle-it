@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { AudioProvider } from '@/features/audio/AudioProvider';
 import { MainLayout } from '@/features/player/MainLayout';
 import { GlobalPlayer } from '@/features/player/GlobalPlayer';
 import { NavBar } from '@/features/player/NavBar';
@@ -38,27 +39,29 @@ function App() {
 	};
 
 	return (
-		<div className="relative h-dvh w-full overflow-hidden bg-surface">
+		<AudioProvider>
+			<div className="relative h-dvh w-full overflow-hidden bg-surface">
 
-			{!isPlayerExpanded && (
-				<>
-				<MainLayout
-					activeTab={activeTab}
-					onTabChange={handleTabChange}
-				>
-					{renderContent()}
-				</MainLayout>
+				{!isPlayerExpanded && (
+					<>
+					<MainLayout
+						activeTab={activeTab}
+						onTabChange={handleTabChange}
+					>
+						{renderContent()}
+					</MainLayout>
 
-				<NavBar
-					activeTab={activeTab}
-					onTabChange={handleTabChange}
-				/>
-				</>
-			)}
+					<NavBar
+						activeTab={activeTab}
+						onTabChange={handleTabChange}
+					/>
+					</>
+				)}
 
-			<GlobalPlayer isExpanded={isPlayerExpanded} setIsExpanded={setIsPlayerExpanded} />
-			
-		</div>
+				<GlobalPlayer isExpanded={isPlayerExpanded} setIsExpanded={setIsPlayerExpanded} />
+				
+			</div>
+		</AudioProvider>
 	)
 }
 
