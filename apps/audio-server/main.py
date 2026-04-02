@@ -11,6 +11,8 @@ from contextlib import asynccontextmanager
 from config import settings #triggers validation here
 
 from api.routers.test_router import TestRouter
+
+from api.routers.audio_router import AudioRouter
 from api.routers.queue_router import QueueRouter
 from api.routers.search_router import SearchRouter
 
@@ -70,6 +72,8 @@ app = FastAPI(
 app.mount("/assets", StaticFiles(directory=(settings.DIST_DIR / "assets")), name="assets")
 
 app.include_router(TestRouter)
+
+app.include_router(AudioRouter)
 app.include_router(QueueRouter)
 app.include_router(SearchRouter)
 
