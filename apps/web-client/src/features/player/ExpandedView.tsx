@@ -149,7 +149,8 @@ export const ExpandedView = ({ isCompact, setIsCompact, onClose, playerDragContr
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1, duration: 0.4 }} // Slight delay so the container expands first
-                    className="flex-1 overflow-y-auto px-2 custom-scrollbar h-full"
+                    // className="flex-1 overflow-y-auto px-2 custom-scrollbar h-full"
+                    className="flex-1 overflow-hidden px-2 h-full"
                     onPointerDown={() => playerDragControls.cancel()}
                 >
                     <QueueView />
