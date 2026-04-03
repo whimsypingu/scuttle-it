@@ -9,7 +9,7 @@ import { MusicNoteIcon } from '@phosphor-icons/react';
 import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/model/model.constants';
 
 import type { TrackItemProps } from '@/model/model.types';
-import { toast } from 'sonner';
+import { makeToast } from '@/features/toast/Toast';
 
 
 export const TrackItem = ({ 
@@ -59,16 +59,16 @@ export const TrackItem = ({
 		let msg = "ACTION: ";
 		if (offset >= LARGE_SWIPE_THRESHOLD_PX) {
 			console.log("ACTION:", actions[0]);
-			toast(`ACTION: ${actions[0]}`)
+			makeToast.message(`ACTION: ${actions[0]}`);
 		} else if (offset <= -(LARGE_SWIPE_THRESHOLD_PX)) {
 			console.log("ACTION:", actions[3]);
-			toast(`ACTION: ${actions[3]}`)
+			makeToast.message(`ACTION: ${actions[3]}`)
 		} else if (offset >= SMALL_SWIPE_THRESHOLD_PX) {
 			console.log("ACTION:", actions[1]);
-			toast(`ACTION: ${actions[1]}`)
+			makeToast.message(`ACTION: ${actions[1]}`)
 		} else if (offset <= -(SMALL_SWIPE_THRESHOLD_PX)) {
 			console.log("ACTION:", actions[2]);
-			toast(`ACTION: ${actions[2]}`)
+			makeToast.message(`ACTION: ${actions[2]}`)
 		}
 
 		//reset the dragging flag after one frame to prevent taps from triggering
