@@ -1,5 +1,7 @@
-import type { QueueTrack } from "@/model/model.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+
+import type { QueueTrack } from "@/model/model.types";
+
 
 export const useQueue = () => {
     const queryClient = useQueryClient();
@@ -9,8 +11,9 @@ export const useQueue = () => {
     const { data: queue = [], isLoading, error } = useQuery({
         queryKey,
         queryFn: async () => {
-            const response = await fetch(`/queue/get`);
+            const response = await fetch(`/queue/get`, { method: "GET" });
             if (!response.ok) throw new Error("Failed to fetch queue");
+            
             const data = await response.json();
             return data.queue as QueueTrack[];
         },

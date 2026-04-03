@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { QueryClientProvider } from '@tanstack/react-query';
 import { AudioProvider } from '@/features/audio/AudioProvider';
 import { MainLayout } from '@/features/player/MainLayout';
 import { GlobalPlayer } from '@/features/player/GlobalPlayer';
@@ -12,8 +13,7 @@ import { MockSearch } from '@/features/search/SearchView';
 import { MockProfile } from '@/features/profile/ProfileView';
 
 import type { Tab } from '@/features/player/player.types';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from './store/queryClient';
+import { queryClient } from '@/store/queryClient';
 
 
 function App() {
