@@ -24,18 +24,25 @@ export const TrackItem = ({
 
 	const justify = useTransform(x, (latest) => (latest > 0 ? "flex-start" : "flex-end")); //which side to justify the icon
 	const opacity = useTransform(x, [SMALL_SWIPE_THRESHOLD_PX, 0, -(SMALL_SWIPE_THRESHOLD_PX)], [1, 0, 1]);
-	const currentIndex = useTransform(
-		x, 
-		[LARGE_SWIPE_THRESHOLD_PX, SMALL_SWIPE_THRESHOLD_PX, -(SMALL_SWIPE_THRESHOLD_PX), -(LARGE_SWIPE_THRESHOLD_PX)],
-		[0, 1, 2, 3] //current action index
-	);
 
-	//get the closest action
+	//get the closest action (for display)
 	const [activeIndex, setActiveIndex] = useState<number>(1); //which action to map to
-	useMotionValueEvent(currentIndex, "change", (latest) => {
-		const rounded = Math.round(latest);
-		if (rounded !== activeIndex) {
-			setActiveIndex(rounded);
+	// useMotionValueEvent(currentIndex, "change", (latest) => {
+	useMotionValueEvent(x, "change", (latest) => {
+		let newIndex = 1;
+
+		if (latest >= LARGE_SWIPE_THRESHOLD_PX) {
+			newIndex = 0; //large right swipe
+		} else if (latest >= 0) {
+			newIndex = 1; //right
+		} else if (latest <= -(LARGE_SWIPE_THRESHOLD_PX)) {
+			newIndex = 3; //large left swipe
+		} else {
+			newIndex = 2;
+		}
+
+		if (newIndex !== activeIndex) {
+			setActiveIndex(newIndex);
 		}
 	});
 	const actionKey = actions[activeIndex];
@@ -44,7 +51,6 @@ export const TrackItem = ({
 	const config = TRACK_ACTION_CONFIG[actionKey];
 	const IconComponent = config.icon;
 	const color = config.color;
-
 	
     //handle the start of a drag and prevent taps from triggering on drags with a flag
     const [isDragging, setIsDragging] = useState(false);
@@ -53,8 +59,10 @@ export const TrackItem = ({
     }
 
 	//handle the end of the drag. for now just console logs
-	const handleDragEnd = (_: any, info: any) => {
-		const offset = info.offset.x;
+	const handleDragEnd = () => {
+
+		const offset = x.get(); // visual X offset and not info.offset.x which is highly inflated
+		console.log("Visual position:", offset);
 
 		if (offset >= LARGE_SWIPE_THRESHOLD_PX) {
 			console.log("ACTION:", actions[0]);
