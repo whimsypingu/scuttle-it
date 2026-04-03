@@ -1,7 +1,7 @@
 import logging
 import time
 
-from database.mixins.mixin_utils import results_to_trackbase_list
+from database.mixins.mixin_utils import row_to_trackbase
 
 from core.models.artist import ArtistBase
 from core.models.track import TrackBase
@@ -93,7 +93,9 @@ class SearchMixin:
             async with self.session() as db:
                 async with db.execute(query, (fts_query,)) as cursor:
                     rows = await cursor.fetchall()
-                    return results_to_trackbase_list(rows)
+                    return [
+                        row_to_trackbase(row) for row in rows
+                    ]
                 
         except Exception:
             logger.exception(f"Failed to search query: {q}")

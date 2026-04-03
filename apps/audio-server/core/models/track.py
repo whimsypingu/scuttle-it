@@ -14,3 +14,7 @@ class TrackBase(ScuttleBase):
     @property
     def display(self) -> str:
         return self.title_display or self.title
+
+
+class QueueTrack(TrackBase):
+    queue_id: int

@@ -76,6 +76,7 @@ ON playlist_tracks (playlist_id, position, track_id);
 
 -- play queue
 CREATE TABLE IF NOT EXISTS play_queue (
+    queue_id INTEGER PRIMARY KEY AUTOINCREMENT, --used for state management
     track_id TEXT NOT NULL,
     position REAL NOT NULL UNIQUE,
     added_at INTEGER DEFAULT (unixepoch()),

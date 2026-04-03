@@ -1,10 +1,8 @@
 import logging
-import time
 
-from database.mixins.mixin_utils import results_to_trackbase_list
+from database.mixins.mixin_utils import row_to_trackbase
 
-from core.models.artist import ArtistBase
-from core.models.track import TrackBase
+from core.models.track import QueueTrack
 
 logger = logging.getLogger(__name__)
 
@@ -37,34 +35,26 @@ class PlayQueueMixin:
             logger.exception(f"Failed to push track_id {track_id} to end of the Play Queue")
             raise
 
-    async def pop_play_queue(self) -> bool:
-        """Pop from the front of the Play Queue"""
-        logger.info(f"Popping from the front of the Play Queue...")
-
-        query = f'''
-            DELETE FROM play_queue
-            WHERE position = (
-                SELECT MIN(position)
-                FROM play_queue
-            );
-        '''
+    async def pop_play_queue(self, queue_id) -> bool:
+        """Pop a specific item from the Play Queue"""
+        logger.info(f"Popping track with queue_id {queue_id} the Play Queue...")
 
         try:
             async with self.session() as db:
-                async with db.execute(query) as cursor:
-                    if cursor.rowcount == 0:
-                        logger.info("Play Queue is empty, nothing to pop.")
-                        return False
+                cursor = await db.execute("DELETE FROM play_queue WHERE queue_id = ?;", (queue_id,))
+                if cursor.rowcount == 0:
+                    logger.info(f"Track {queue_id} already gone or doesn't exist.")
+                    return False
                     
-                    logger.info("Successfully popped the first track from the Play Queue")
-                    return True
+                logger.info(f"Successfully popped {queue_id} from the Play Queue")
+                return True
 
         except Exception:
-            logger.exception(f"Failed to pop first track from the Play Queue")
+            logger.exception(f"Failed to pop track {queue_id} from the Play Queue")
             raise
 
 
-    async def get_play_queue(self) -> list[TrackBase]:
+    async def get_play_queue(self) -> list[QueueTrack]:
         """Retrieve the full play queue with all metadata"""
 
         UNIT_SEP = "\x1f"
@@ -89,6 +79,7 @@ class PlayQueueMixin:
                 ) AS artist_blob,
 
                 -- Position
+                pq.queue_id
                 pq.position
             FROM play_queue pq
             JOIN tracks t ON pq.track_id = t.id
@@ -102,7 +93,13 @@ class PlayQueueMixin:
             async with self.session() as db:
                 async with db.execute(query) as cursor:
                     rows = await cursor.fetchall()
-                    return results_to_trackbase_list(rows)
+
+                    return [
+                        QueueTrack(
+                            **row_to_trackbase(row),
+                            queue_id=row["queue_id"]
+                        ) for row in rows
+                    ]
 
         except Exception:
             logger.exception("Failed to retrieve Play Queue contents")
