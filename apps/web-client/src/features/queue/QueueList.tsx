@@ -1,16 +1,20 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Virtuoso } from 'react-virtuoso';
+import { useQueue } from '@/store/hooks/useQueue';
 
 import { TrackItem } from '@/model/TrackItem';
 
-import type { TrackBase } from '@/model/model.types';
+import type { QueueTrack, TrackBase } from '@/model/model.types';
 
 
-export const QueueView = () => {
+export const QueueList = () => {
 
-    const MOCK_TRACKS: TrackBase[] = useMemo(() => {
+    const { queue, pop, isLoading } = useQueue();
+
+    const MOCK_TRACKS: QueueTrack[] = useMemo(() => {
         return [...Array(1000)].map((_, i) => ({
+            queueId: i,
             id: `track-${i}`,
             title: `Queue Track ${i+1}`,
             artists: [{

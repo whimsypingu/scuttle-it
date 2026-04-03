@@ -12,6 +12,8 @@ import { MockSearch } from '@/features/search/SearchView';
 import { MockProfile } from '@/features/profile/ProfileView';
 
 import type { Tab } from '@/features/player/player.types';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './store/queryClient';
 
 
 function App() {
@@ -41,6 +43,7 @@ function App() {
 
 	return (
 		<AudioProvider>
+		<QueryClientProvider client={queryClient}>
 			<div className="relative h-dvh w-full overflow-hidden bg-surface">
 
 				{!isPlayerExpanded && (
@@ -63,6 +66,7 @@ function App() {
 				
 				<Toast isExpanded={isPlayerExpanded} />
 			</div>
+		</QueryClientProvider>
 		</AudioProvider>
 	)
 }

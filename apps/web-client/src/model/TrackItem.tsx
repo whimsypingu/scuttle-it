@@ -8,15 +8,16 @@ import { MusicNoteIcon } from '@phosphor-icons/react';
 
 import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/model/model.constants';
 
-import type { TrackItemProps } from '@/model/model.types';
+import type { QueueTrack, TrackAction, TrackItemProps } from '@/model/model.types';
 import { makeToast } from '@/features/toast/Toast';
+import { useTrackActionHandler } from './model.utils';
 
 
 export const TrackItem = ({ 
 	track,
 	onSelect,
 	index = 0,
-	actions = ["like", "queue", "delete", "edit"] //default setup
+	actions = ["like", "queueLast", "delete", "edit"] //default setup
 }: TrackItemProps) => {
 
 	/* DRAG ACTION HANDLING */
@@ -58,20 +59,53 @@ export const TrackItem = ({
         setIsDragging(true);
     }
 
+	//actual action execution via model.utils action handler
+	const executeAction = useTrackActionHandler();
+	const triggerAction = (action: TrackAction) => {
+		switch (action) {
+			//special field for deleteQueue
+			case "deleteQueue": {
+				const queueId = (track as QueueTrack).queueId;
+				if (queueId === undefined) {
+					console.error("Tried to call deleteQueue on a non-QueueTrack. No queueId available.");
+					return;
+				} 
+				executeAction({
+					action,
+					queueId,
+				});
+				break;
+			}
+
+			//fallthrough for all other actions (queueLast, like, delete, edit)
+			default: {
+				executeAction({
+					action,
+					trackId: track.id,
+				});
+				break;
+			}
+		}
+	};
+
 	//handle the end of the drag. for now just console logs
 	const handleDragEnd = () => {
 
 		const offset = x.get(); // visual X offset and not info.offset.x which is highly inflated
 
-		if (offset >= LARGE_SWIPE_THRESHOLD_PX) {
-			makeToast(`ACTION: ${actions[0]}`);
-		} else if (offset <= -(LARGE_SWIPE_THRESHOLD_PX)) {
-			makeToast(`ACTION: ${actions[3]}`);
-		} else if (offset >= SMALL_SWIPE_THRESHOLD_PX) {
-			makeToast(`ACTION: ${actions[1]}`);
-		} else if (offset <= -(SMALL_SWIPE_THRESHOLD_PX)) {
-			makeToast(`ACTION: ${actions[2]}`);
+		if (Math.abs(offset) >= SMALL_SWIPE_THRESHOLD_PX) {
+			triggerAction(actionKey);
 		}
+
+		// if (offset >= LARGE_SWIPE_THRESHOLD_PX) {
+		// 	makeToast(`ACTION: ${actions[0]}`);
+		// } else if (offset <= -(LARGE_SWIPE_THRESHOLD_PX)) {
+		// 	makeToast(`ACTION: ${actions[3]}`);
+		// } else if (offset >= SMALL_SWIPE_THRESHOLD_PX) {
+		// 	makeToast(`ACTION: ${actions[1]}`);
+		// } else if (offset <= -(SMALL_SWIPE_THRESHOLD_PX)) {
+		// 	makeToast(`ACTION: ${actions[2]}`);
+		// }
 
 		//reset the dragging flag after one frame to prevent taps from triggering
         requestAnimationFrame(() => setIsDragging(false));

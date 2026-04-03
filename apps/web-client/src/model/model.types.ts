@@ -1,13 +1,17 @@
 import type { IconProps } from "@phosphor-icons/react";
 
 export type ArtistId = string;
+export type TrackId = string;
+export type QueueId = number; //queue integrity value
+
 export interface ArtistBase {
     id: ArtistId;
     name: string;
     nameDisplay?: string;
 }
 
-export type TrackId = string;
+
+//deprecated?
 export interface TrackNorm { //zustand storage format
     id: TrackId;
     title: string;
@@ -15,6 +19,8 @@ export interface TrackNorm { //zustand storage format
     artistIds: ArtistId[];
     duration: number;
 }
+
+
 export interface TrackBase {
     id: TrackId;
     title: string;
@@ -23,18 +29,28 @@ export interface TrackBase {
     duration: number;
 }
 export interface QueueTrack extends TrackBase {
-    queue_id: number;
+    queueId: QueueId;
 }
 
-export type TrackActionType = "queue" | "like" | "delete" | "edit";
-export interface TrackActionConfig {
+//all available track actions with their required properties to execute the functions
+export type TrackActionProps = 
+    | { action: "queueLast"; trackId: TrackId }
+    | { action: "like"; trackId: TrackId }
+    | { action: "delete"; trackId: TrackId }
+    | { action: "deleteQueue"; queueId: QueueId }
+    | { action: "edit"; trackId: TrackId };
+export type TrackAction = TrackActionProps["action"];
+
+export interface TrackActionConfig { //corresponding phosphor icon and color pairing to show on swipe for a TrackAction
     icon: React.ComponentType<IconProps>;
     color: string;
 }
+
+//fields for a TrackItem
 export interface TrackItemProps {
-    track: TrackBase;
-    onSelect: (track: TrackBase) => void;
+    track: TrackBase | QueueTrack; //technically just TrackBase works fine but for clarity it could be version of one
+    onSelect: (track: TrackBase | QueueTrack) => void;
     index: number;
-	actions?: [TrackActionType, TrackActionType, TrackActionType, TrackActionType]; //leftmost action to rightmost action
+	actions?: [TrackAction, TrackAction, TrackAction, TrackAction]; //leftmost action to rightmost action
 }
 

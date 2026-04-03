@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { CaretDownIcon, FastForwardIcon, PlayIcon, RepeatIcon, RewindIcon, ShuffleIcon } from '@phosphor-icons/react';
 import { Slider } from '@/components/ui/slider';
 
-import { QueueView } from '@/features/queue/QueueView';
+import { QueueList } from '@/features/queue/QueueList';
 
 import { PLAYER_CONFIG } from '@/features/player/player.constants';
 
@@ -153,7 +153,7 @@ export const ExpandedView = ({ isCompact, setIsCompact, onClose, playerDragContr
                     className="flex-1 overflow-hidden px-2 h-full"
                     onPointerDown={() => playerDragControls.cancel()}
                 >
-                    <QueueView />
+                    <QueueList />
                 </motion.div>
                 </>
             )}
