@@ -56,19 +56,18 @@ export const TrackItem = ({
 	const handleDragEnd = (_: any, info: any) => {
 		const offset = info.offset.x;
 
-		let msg = "ACTION: ";
 		if (offset >= LARGE_SWIPE_THRESHOLD_PX) {
 			console.log("ACTION:", actions[0]);
-			makeToast.message(`ACTION: ${actions[0]}`);
+			makeToast(`ACTION: ${actions[0]}`);
 		} else if (offset <= -(LARGE_SWIPE_THRESHOLD_PX)) {
 			console.log("ACTION:", actions[3]);
-			makeToast.message(`ACTION: ${actions[3]}`)
+			makeToast(`ACTION: ${actions[3]}`);
 		} else if (offset >= SMALL_SWIPE_THRESHOLD_PX) {
 			console.log("ACTION:", actions[1]);
-			makeToast.message(`ACTION: ${actions[1]}`)
+			makeToast(`ACTION: ${actions[1]}`);
 		} else if (offset <= -(SMALL_SWIPE_THRESHOLD_PX)) {
 			console.log("ACTION:", actions[2]);
-			makeToast.message(`ACTION: ${actions[2]}`)
+			makeToast(`ACTION: ${actions[2]}`);
 		}
 
 		//reset the dragging flag after one frame to prevent taps from triggering

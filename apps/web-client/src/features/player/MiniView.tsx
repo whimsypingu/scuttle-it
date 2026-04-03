@@ -13,13 +13,13 @@ export const MiniView = ({ onExpand }: MiniViewProps) => {
         <motion.div
             layout
             layoutId="global-player-inner-container"
-            className="flex items-center justify-between h-full px-3"
+            className="flex items-center justify-between h-full px-3 gap-3"
             onClick={(e) => {
                 e.stopPropagation();
                 onExpand();
             }}
         >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
                 
                 {/* SHARED: ALBUM ART */}
                 <motion.div
@@ -49,8 +49,12 @@ export const MiniView = ({ onExpand }: MiniViewProps) => {
                     </motion.span>
                 </motion.div> 
 
+            </div>
+
+            <div className="flex items-center px-2">
                 <PlayIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
             </div>
+                
         </motion.div>
         </>
     );

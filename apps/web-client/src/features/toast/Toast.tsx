@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 
 import { BOTTOM_SHELF, PLAYER_CONFIG } from "@/features/player/player.constants";
-import { TOAST_PADDING_PX } from "@/features/toast/toast.constants";
+import { toastBaseStyle } from "@/features/toast/toast.constants";
 
 import type { ToastProps } from "@/features/toast/toast.types";
 
@@ -37,19 +37,15 @@ export const Toast = ({ isExpanded }: ToastProps) => {
     )
 }
 
-export const makeToast = {
-    message: (msg: string) => {
-        toast(msg, {
-            style: {
-                alignItems: "center",
-                justifyContent: "center",
-                textAlign: "center",
-
-                padding: `${TOAST_PADDING_PX}px`,
-
-                color: "var(--color-muted-foreground)",
-                whiteSpace: "nowrap"
-            }
-        })
-    }
+// makeToast wrapper
+const makeToastBase = (msg: string) => {
+    toast(msg, {
+        style: {
+            ...toastBaseStyle,
+            color: "var(--color-muted-foreground)",
+        }
+    })
 }
+//makeToastBase.error = (msg: string) => {} //specialized versions
+
+export const makeToast = makeToastBase; //export single makeToast with default message version
