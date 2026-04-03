@@ -62,19 +62,14 @@ export const TrackItem = ({
 	const handleDragEnd = () => {
 
 		const offset = x.get(); // visual X offset and not info.offset.x which is highly inflated
-		console.log("Visual position:", offset);
 
 		if (offset >= LARGE_SWIPE_THRESHOLD_PX) {
-			console.log("ACTION:", actions[0]);
 			makeToast(`ACTION: ${actions[0]}`);
 		} else if (offset <= -(LARGE_SWIPE_THRESHOLD_PX)) {
-			console.log("ACTION:", actions[3]);
 			makeToast(`ACTION: ${actions[3]}`);
 		} else if (offset >= SMALL_SWIPE_THRESHOLD_PX) {
-			console.log("ACTION:", actions[1]);
 			makeToast(`ACTION: ${actions[1]}`);
 		} else if (offset <= -(SMALL_SWIPE_THRESHOLD_PX)) {
-			console.log("ACTION:", actions[2]);
 			makeToast(`ACTION: ${actions[2]}`);
 		}
 
