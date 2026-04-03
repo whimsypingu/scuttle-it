@@ -55,8 +55,8 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
             }}
             className={`
                 fixed shadow-2xl overflow-hidden cursor-pointer
-                ${isExpanded ? "z-[40]" : "z-[60]"}
-            `} // sandwich the z-index (50) of the toasts so it slides behind the miniview
+                z-[50]
+            `}
             onClick={() => !isExpanded && setIsExpanded(true)}
             drag={"y"} // enable vertical dragging
             dragControls={dragControls}

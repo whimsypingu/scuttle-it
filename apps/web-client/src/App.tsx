@@ -61,7 +61,7 @@ function App() {
 
 				<GlobalPlayer isExpanded={isPlayerExpanded} setIsExpanded={setIsPlayerExpanded} />
 				
-				<Toast />
+				<Toast isExpanded={isPlayerExpanded} />
 			</div>
 		</AudioProvider>
 	)
