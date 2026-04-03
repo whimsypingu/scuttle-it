@@ -155,10 +155,6 @@ export const TrackItem = ({
 						{track.artists.map(a => a.nameDisplay ?? a.name).join(", ")}
 					</span>
 				</div>
-
-				{/* Note: Reorder handle is visually here but doesn't have reorder logic yet */}
-				<div className="w-5 h-5 text-white/10" />
-
 			</motion.div>
 		</div>
 		</>
