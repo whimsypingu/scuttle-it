@@ -1,4 +1,4 @@
-import type { ArtistId, ArtistBase, TrackId, TrackNorm, TrackBase } from '@/model/model.types';
+import type { ArtistId, ArtistBase, TrackId, TrackNorm, TrackBase, QueueTrack } from '@/model/model.types';
 
 export interface LibraryState {
     trackNorms: Record<TrackId, TrackNorm>;
@@ -9,4 +9,9 @@ export interface LibraryState {
 
     playingTrackId: TrackId | null;
     setPlayingTrackId: (id: TrackId | null) => void;
+}
+
+export interface QueueResponse {
+    success: boolean;
+    queue: QueueTrack[];
 }

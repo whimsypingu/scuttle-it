@@ -22,6 +22,9 @@ export interface TrackBase {
     artists: ArtistBase[];
     duration: number;
 }
+export interface QueueTrack extends TrackBase {
+    queue_id: number;
+}
 
 export type TrackActionType = "queue" | "like" | "delete" | "edit";
 export interface TrackActionConfig {
