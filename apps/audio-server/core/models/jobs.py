@@ -1,7 +1,8 @@
 import uuid
-from pydantic import BaseModel, Field, model_validator
+from core.models.base import ScuttleBase
+from pydantic import Field, model_validator
 
-class DownloadJob(BaseModel):
+class DownloadJob(ScuttleBase):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     
     track_id: str | None = None
