@@ -19,7 +19,7 @@ export default defineConfig({
 		}
 	},
 	optimizeDeps: {
-		exclude: ["@phosphor-icons/react"],
+		include: ["@phosphor-icons/react"],
 	},
 	resolve: {
 		alias: {

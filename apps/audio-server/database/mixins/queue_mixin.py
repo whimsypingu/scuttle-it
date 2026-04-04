@@ -79,7 +79,7 @@ class PlayQueueMixin:
                 ) AS artist_blob,
 
                 -- Position
-                pq.queue_id
+                pq.queue_id,
                 pq.position
             FROM play_queue pq
             JOIN tracks t ON pq.track_id = t.id
@@ -96,7 +96,7 @@ class PlayQueueMixin:
 
                     return [
                         QueueTrack(
-                            **row_to_trackbase(row),
+                            **row_to_trackbase(row).model_dump(),
                             queue_id=row["queue_id"]
                         ) for row in rows
                     ]
