@@ -11,6 +11,7 @@ import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX
 import type { QueueTrack, TrackAction, TrackItemProps } from '@/model/model.types';
 import { makeToast } from '@/features/toast/Toast';
 import { useTrackActionHandler } from './model.utils';
+import { useQueue } from '@/store/hooks/useQueue';
 
 
 export const TrackItem = ({ 
@@ -103,25 +104,26 @@ export const TrackItem = ({
 
 
 	/* TAP ACTION HANDLING */
-	const playingTrackId = usePlayingTrackId();
-	const setPlayingTrackId = useSetPlayingTrackId();
-
-	const isActive = playingTrackId === track.id;
-
-    //cancel taps on drags
+	const { queue } = useQueue(); //get the latest queue from tanstack
 	const audio = useAudio();
+
+	const currentTrack = queue[0];
+	const isActive = currentTrack?.id === track.id;
+
     const handleTap = async () => {
-        if (isDragging) return;
+        if (isDragging) return; //cancel taps on drags
 
 		try {
+			// audio engine must play
 			await audio.playTrack(track.id);
 			console.log(`NOW PLAYING: ${track.title}`);
+
+			//queueNOW mutation required
+
+			onSelect(track);
 		} catch (err) {
 			console.error("Playback failed to start:", err);
 		}
-		setPlayingTrackId(track.id); //update global store
-
-        onSelect(track);
     };
 
 	return (
