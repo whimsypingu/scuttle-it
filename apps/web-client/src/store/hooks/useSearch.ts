@@ -17,8 +17,8 @@ export const useSearch = (query: string) => {
     });
 
     const ytSearch = useMutation({
-        mutationFn: async (q: string) => {
-            const response = await fetch(`/search/yt-search?q=${encodeURIComponent(q)}`, { method: "POST" });
+        mutationFn: async ({ q, limit = 1 }: { q: string; limit?: number }) => {
+            const response = await fetch(`/search/yt-search?q=${encodeURIComponent(q)}&query_limit=${limit}`, { method: "POST" });
             if (!response.ok) throw new Error("YouTube request failed");
 
             const rawData = await response.json();

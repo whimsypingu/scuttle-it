@@ -58,7 +58,7 @@ export const MockSearch = ({
     // deep search
     const handleDeepSearch = async () => {
         if (!query.trim()) return;
-        triggerYoutubeSearch(query);
+        triggerYoutubeSearch({ q: query, limit: 1 });
     }
 
     return (
