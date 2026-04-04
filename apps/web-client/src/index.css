@@ -1,4 +1,13 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+
+/*  ^^ FIXED BUILD ISSUE!!
+https://github.com/tailwindlabs/tailwindcss/discussions/17227
+
+FINALLY SOLVED THE STUPID BUILD LAG, MAY GOD STRIKE DOWN 
+WHOEVER DESIGNED THIS PART OF TAILWIND
+AND THEIR FAMILY AS WELL
+ */
+
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
