@@ -1,17 +1,15 @@
 import { useState } from 'react';
 import { motion, useMotionValue, useMotionValueEvent, useTransform } from 'framer-motion';
 
-import { usePlayingTrackId, useSetPlayingTrackId } from '@/store/useLibraryStore';
-import { useAudio } from '@/features/audio/AudioProvider';
-
 import { MusicNoteIcon } from '@phosphor-icons/react';
+
+import { useAudio } from '@/features/audio/AudioProvider';
+import { useTrackActionHandler } from '@/model/model.utils';
+import { useQueue } from '@/store/hooks/useQueue';
 
 import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/model/model.constants';
 
 import type { QueueTrack, TrackAction, TrackItemProps } from '@/model/model.types';
-import { makeToast } from '@/features/toast/Toast';
-import { useTrackActionHandler } from './model.utils';
-import { useQueue } from '@/store/hooks/useQueue';
 
 
 export const TrackItem = ({ 

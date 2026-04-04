@@ -1,4 +1,6 @@
-# Run this file from the project root directory with: [ python -m uvicorn apps.audio-server.main:app ]
+# Run this file from the project root directory with:
+
+# python -m uvicorn apps.audio-server.main:app
 
 import asyncio
 import logging
