@@ -97,16 +97,6 @@ export const TrackItem = ({
 			triggerAction(actionKey);
 		}
 
-		// if (offset >= LARGE_SWIPE_THRESHOLD_PX) {
-		// 	makeToast(`ACTION: ${actions[0]}`);
-		// } else if (offset <= -(LARGE_SWIPE_THRESHOLD_PX)) {
-		// 	makeToast(`ACTION: ${actions[3]}`);
-		// } else if (offset >= SMALL_SWIPE_THRESHOLD_PX) {
-		// 	makeToast(`ACTION: ${actions[1]}`);
-		// } else if (offset <= -(SMALL_SWIPE_THRESHOLD_PX)) {
-		// 	makeToast(`ACTION: ${actions[2]}`);
-		// }
-
 		//reset the dragging flag after one frame to prevent taps from triggering
         requestAnimationFrame(() => setIsDragging(false));
     };

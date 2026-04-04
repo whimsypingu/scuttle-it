@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useAddTracks } from "@/store/useLibraryStore";
 
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -7,7 +6,6 @@ import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 
 import { PlaylistList } from "@/features/playlist/PlaylistList";
-import { SearchAPI } from "@/features/search/search.api";
 
 import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
