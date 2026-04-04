@@ -14,15 +14,17 @@ import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 import type { SearchViewProps } from "@/features/search/search.types";
 import type { TrackBase } from "@/model/model.types";
 
+import { useSearch } from "@/store/hooks/useSearch";
+
 
 export const MockSearch = ({
     tabResetSignal
 }: SearchViewProps) => {
+    //query handling
     const [query, setQuery] = useState("");
-    const [searchResults, setSearchResults] = useState<TrackBase[]>([]);
+    const [debouncedQuery, setDebouncedQuery] = useState("");
 
     // debounce effect on search input
-    const [debouncedQuery, setDebouncedQuery] = useState("");
     useEffect(() => {
         if (!query.trim()) {
             setDebouncedQuery("");
@@ -38,24 +40,9 @@ export const MockSearch = ({
             clearTimeout(handler);
         };
     }, [query]);
-    const addTracks = useAddTracks(); //zustand hook
-    useEffect(() => {
-        if (!debouncedQuery) return;
 
-        const controller = new AbortController();
-        
-        //search database
-        SearchAPI.searchDatabase(debouncedQuery, controller.signal)
-            .then((results) => {
-                addTracks(results); // store
-                setSearchResults(results); // show
-            })
-            .catch(err => {
-                console.error(`SearchAPI.searchDatabase error: ${err}`);
-            });
-
-        return () => controller.abort();
-    }, [debouncedQuery]);
+    // search hook
+    const { results, isLoading, isError, triggerYoutubeSearch } = useSearch(debouncedQuery);
 
     // for checking where the user taps to close the search results
     const [isSearching, setIsSearching] = useState(false);
@@ -66,22 +53,14 @@ export const MockSearch = ({
     useEffect(() => {
         if (tabResetSignal > 0) {
             setIsSearching(false);
-            // If you had a scrollRef, you'd trigger it here too:
-            // scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+            setQuery(""); //clear input when coming back to the tab
         }
     }, [tabResetSignal]);
 
     // deep search
     const handleDeepSearch = async () => {
         if (!query.trim()) return;
-
-        SearchAPI.searchYouTube(query)
-            .then((jobId) => {
-                console.log(`Successfully queued job with id: ${jobId}`);
-            })
-            .catch((err) => {
-                console.error(`SearchAPI.searchYouTube error: ${err}`);
-            });
+        triggerYoutubeSearch(query);
     }
 
     return (
@@ -187,7 +166,7 @@ export const MockSearch = ({
                                     style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
                                 >
                                     <PlaylistList
-                                        tracks={searchResults}
+                                        tracks={results}
                                     />
                                 </div>
                             </div>
