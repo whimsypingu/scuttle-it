@@ -11,6 +11,16 @@ export default defineConfig({
 		tailwindcss(),
 		visualizer({ open: true, filename: "bundle-analysis.html", template: "treemap", gzipSize: true, brotliSize: true })
 	],
+	build: {
+		rolldownOptions: {
+			treeshake: {
+				moduleSideEffects: false
+			}
+		}
+	},
+	optimizeDeps: {
+		exclude: ["@phosphor-icons/react"],
+	},
 	resolve: {
 		alias: {
 			"@": fileURLToPath(new URL("./src", import.meta.url))

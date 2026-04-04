@@ -1,19 +1,22 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 
 import { QueryClientProvider } from '@tanstack/react-query';
 import { AudioProvider } from '@/features/audio/AudioProvider';
 import { MainLayout } from '@/features/player/MainLayout';
-import { GlobalPlayer } from '@/features/player/GlobalPlayer';
+
 import { NavBar } from '@/features/player/NavBar';
 import { Toast } from '@/features/toast/Toast';
 
-import { MockHome } from '@/features/home/HomeView';
-import { MockLibrary } from '@/features/library/LibraryView';
-import { MockSearch } from '@/features/search/SearchView';
-import { MockProfile } from '@/features/profile/ProfileView';
-
 import type { Tab } from '@/features/player/player.types';
 import { queryClient } from '@/store/queryClient';
+
+
+const GlobalPlayer = lazy(() => import('@/features/player/GlobalPlayer').then(m => ({ default: m.GlobalPlayer })));
+
+const MockHome = lazy(() => import('@/features/home/HomeView').then(m => ({ default: m.MockHome })));
+const MockSearch = lazy(() => import('@/features/search/SearchView').then(m => ({ default: m.MockSearch })));
+const MockLibrary = lazy(() => import('@/features/library/LibraryView').then(m => ({ default: m.MockLibrary })));
+const MockProfile = lazy(() => import('@/features/profile/ProfileView').then(m => ({ default: m.MockProfile })));
 
 
 function App() {
@@ -38,7 +41,11 @@ function App() {
 			profile: MockProfile
 		}[activeTab] || MockHome
 
-		return <TabComponent tabResetSignal={tabResetSignal} />
+		return (
+			<Suspense fallback={<div className="flex-1 bg-surface" />}>
+				<TabComponent tabResetSignal={tabResetSignal} />
+			</Suspense>
+		);
 	};
 
 	return (
@@ -62,7 +69,9 @@ function App() {
 					</>
 				)}
 
-				<GlobalPlayer isExpanded={isPlayerExpanded} setIsExpanded={setIsPlayerExpanded} />
+				<Suspense fallback={null}>
+					<GlobalPlayer isExpanded={isPlayerExpanded} setIsExpanded={setIsPlayerExpanded} />
+				</Suspense>
 				
 				<Toast isExpanded={isPlayerExpanded} />
 			</div>
