@@ -21,19 +21,27 @@ export class StandardStrategy implements AudioStrategy {
 
         this.currentTrackId = trackId;
         this.element.src = fullUrl;
-        this.element.load();
 
         return new Promise((resolve, reject) => {
+            const cleanup = () => {
+                this.element.removeEventListener("canplaythrough", handleCanPlay);
+                this.element.removeEventListener("error", handleError);
+            };
+
             const handleCanPlay = () => {
+                cleanup();
                 resolve();
             };
 
             const handleError = (e: ErrorEvent) => {
+                cleanup();
                 reject(e);
             };
 
             this.element.addEventListener("canplaythrough", handleCanPlay, { once: true });
             this.element.addEventListener("error", handleError as any, { once: true });
+
+            this.element.load();
         });
     }
 
