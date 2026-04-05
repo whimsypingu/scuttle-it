@@ -6,6 +6,30 @@ from database.database_manager import DatabaseManager
 
 QueueRouter = APIRouter(prefix="/queue", tags=["Queue"])
 
+#temporary crash exception
+DefaultCrashException = HTTPException(
+    status_code=500,
+    detail="Crashed"
+)
+
+
+@QueueRouter.post("/set-first")
+async def set_first_play_queue(
+    track_id: str = Query(..., min_length=1, description="Track ID to set first"),
+    db_manager: DatabaseManager = Depends(get_db_manager)
+):
+    try:
+        success = await db_manager.set_first_play_queue(track_id) #status after attempting push
+        updated_queue = await db_manager.get_play_queue() #get the updated queue
+
+        return {
+            "success": success,
+            "queue": updated_queue
+        }
+    
+    except Exception as e:
+        traceback.print_exc()
+        raise DefaultCrashException
 
 @QueueRouter.post("/push")
 async def push_play_queue(
@@ -23,10 +47,7 @@ async def push_play_queue(
     
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )
+        raise DefaultCrashException
     
 @QueueRouter.post("/pop")
 async def pop_play_queue(
@@ -44,10 +65,7 @@ async def pop_play_queue(
     
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )
+        raise DefaultCrashException
     
 @QueueRouter.get("/get")
 async def get_play_queue(
@@ -62,8 +80,5 @@ async def get_play_queue(
     
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )
+        raise DefaultCrashException
     

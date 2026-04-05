@@ -10,6 +10,38 @@ logger = logging.getLogger(__name__)
 class PlayQueueMixin:
     """Handles database backed play queue"""
 
+    async def set_first_play_queue(self, track_id) -> bool:
+        """Set and replace the first element of the Play Queue"""
+        logger.info(f"Setting track_id {track_id} as the first entry in the Play Queue...")
+
+        try: 
+            async with self.session() as db:
+                cursor = await db.execute('''
+                    DELETE FROM play_queue
+                    WHERE queue_id = (
+                        SELECT queue_id
+                        FROM play_queue
+                        ORDER BY position
+                        LIMIT 1
+                    )
+                    RETURNING position;
+                ''')
+                row = await cursor.fetchone() #returns None if empty
+                first_position = row[0] if row is not None else 100.0
+
+                await db.execute('''
+                    INSERT INTO play_queue (track_id, position)
+                    VALUES (?, ?);
+                ''', (track_id, first_position))
+
+                logger.info(f"Successfully set track_id {track_id} as the first entry of the Play Queue with position value: {first_position}")
+                return True
+
+        except Exception:
+            logger.exception(f"Failed to set track_id {track_id} as the first entry of the Play Queue")
+            raise
+
+
     async def push_play_queue(self, track_id) -> bool:
         """Push to the end of the Play Queue"""
         logger.info(f"Pushing track_id {track_id} to the end of the Play Queue...")
