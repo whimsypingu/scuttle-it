@@ -12,7 +12,7 @@ export default defineConfig({
 		visualizer({ open: true, filename: "bundle-analysis.html", template: "treemap", gzipSize: true, brotliSize: true })
 	],
 	build: {
-		rolldownOptions: {
+		rollupOptions: {
 			treeshake: {
 				moduleSideEffects: false
 			}
@@ -28,5 +28,8 @@ export default defineConfig({
 	},
 	server: {
 		allowedHosts: ['.trycloudflare.com'],
+		watch: {
+			ignored: ['**/node_modules/**', '**/dist/**', '**/assets/**'],
+		}
 	}
 })

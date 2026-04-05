@@ -1,11 +1,16 @@
-@import "tailwindcss" source(none);
+@import "tailwindcss";
 
 /*  ^^ FIXED BUILD ISSUE!!
 https://github.com/tailwindlabs/tailwindcss/discussions/17227
 
 FINALLY SOLVED THE STUPID BUILD LAG, MAY GOD STRIKE DOWN 
 WHOEVER DESIGNED THIS PART OF TAILWIND
-AND THEIR FAMILY AS WELL
+AND THEIR FAMILY AS WELL -- i am sorry, this was a vite + tailwindcss versioning issue.
+
+ACTUALLY FIXED THE BUILD ISSUE!!
+https://www.reddit.com/r/reactjs/comments/1rvd4fg/unable_to_install_tailwindcss_in_vite_project/
+
+I FOUND ROLLDOWNOPTIONS IS NOT SUPPORTED AFTER READING THIS THREAD AMAZING
  */
 
 @import "tw-animate-css";
