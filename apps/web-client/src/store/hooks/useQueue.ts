@@ -2,11 +2,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import type { QueueTrack, TrackBase } from "@/model/model.types";
 import { toQueueTrackWithQueueId } from "@/model/model.utils";
+import { useAudio } from "@/features/audio/AudioProvider";
 
 
 export const useQueue = () => {
     const queryClient = useQueryClient();
     const queryKey = ["play_queue"];
+
+    const audio = useAudio();
     
     //fetch queue
     const { data: queue = [], isLoading, error } = useQuery({
@@ -23,8 +26,6 @@ export const useQueue = () => {
 
     const setFirstMutation = useMutation({
         mutationFn: async (track: TrackBase) => {
-            //trigger audio load here?
-
             const response = await fetch(`/queue/set-first?track_id=${track.id}`, { method: "POST" });
 
             if (!response.ok) throw new Error("Failed to set first entry in queue");
@@ -32,6 +33,7 @@ export const useQueue = () => {
         },
         onMutate: async (track: TrackBase) => {
             //audio engine immediately here?
+            await audio.playTrack(track.id); //maybe swap to fire and forget?
             
             await queryClient.cancelQueries({ queryKey }); // cancel outgoing refetches so they dont rewrite optimistic changes
 
@@ -46,7 +48,7 @@ export const useQueue = () => {
 
             return { rollbackQueue }; //return context for rollback
         },
-        onError: (err, trackId, context) => {
+        onError: (err, track, context) => {
             if (context?.rollbackQueue) {
                 queryClient.setQueryData(queryKey, context.rollbackQueue);
             }

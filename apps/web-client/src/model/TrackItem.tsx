@@ -99,7 +99,6 @@ export const TrackItem = ({
 
 	/* TAP ACTION HANDLING */
 	const { queue } = useQueue(); //get the latest queue from tanstack
-	const audio = useAudio();
 
 	const currentTrack = queue[0];
 	const isActive = currentTrack?.id === track.id;
@@ -108,11 +107,7 @@ export const TrackItem = ({
         if (isDragging) return; //cancel taps on drags
 
 		try {
-			// audio engine must play
-			await audio.playTrack(track.id);
-			console.log(`NOW PLAYING: ${track.title}`);
-
-			//see models.utils.ts for implementation
+			//wrapper for actionHandler, see models.utils.ts for implementation
 			triggerAction("setFirst");
 
 			onSelect(track);
