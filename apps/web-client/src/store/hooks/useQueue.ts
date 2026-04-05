@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
-import type { QueueTrack } from "@/model/model.types";
+import type { QueueTrack, TrackBase } from "@/model/model.types";
+import { toQueueTrackWithQueueId } from "@/model/model.utils";
 
 
 export const useQueue = () => {
@@ -20,10 +21,48 @@ export const useQueue = () => {
         staleTime: Infinity, 
     });
 
+    const setFirstMutation = useMutation({
+        mutationFn: async (track: TrackBase) => {
+            //trigger audio load here?
+
+            const response = await fetch(`/queue/set-first?track_id=${track.id}`, { method: "POST" });
+
+            if (!response.ok) throw new Error("Failed to set first entry in queue");
+            return await response.json();
+        },
+        onMutate: async (track: TrackBase) => {
+            //audio engine immediately here?
+            
+            await queryClient.cancelQueries({ queryKey }); // cancel outgoing refetches so they dont rewrite optimistic changes
+
+            const rollbackQueue = queryClient.getQueryData(queryKey); //get the rollback state
+
+            const queueTrack = toQueueTrackWithQueueId(track, -1); //typecast to a QueueTrack with -1 default queueId field
+
+            queryClient.setQueryData(queryKey, (old: QueueTrack[]) => {
+                if (!old) return [queueTrack];
+                return [queueTrack, old.slice(1)];
+            })
+
+            return { rollbackQueue }; //return context for rollback
+        },
+        onError: (err, trackId, context) => {
+            if (context?.rollbackQueue) {
+                queryClient.setQueryData(queryKey, context.rollbackQueue);
+            }
+            console.log("Optimistic setFirst failed, rolling back.");
+        },
+        onSuccess: (data) => {
+            queryClient.setQueryData(queryKey, data.queue); //immediately swap the optimistic -1 queueId for DB-assigned queueId
+        }
+    });
+
     const pushMutation = useMutation({
-        mutationFn: async (trackId: string) => {
-            const response = await fetch(`/queue/push?track_id=${trackId}`, { method: "POST" });
-            return response.json();
+        mutationFn: async (track: TrackBase) => {
+            const response = await fetch(`/queue/push?track_id=${track.id}`, { method: "POST" });
+
+            if (!response.ok) throw new Error("Failed to push to queue");
+            return await response.json();
         },
         onSuccess: (data) => {
             queryClient.setQueryData(queryKey, data.queue);
@@ -31,8 +70,10 @@ export const useQueue = () => {
     });
 
     const popMutation = useMutation({
-        mutationFn: async (queueId: number) => {
-            const response = await fetch(`/queue/pop?queue_id=${queueId}`, { method: "POST" });
+        mutationFn: async (queueTrack: QueueTrack) => {
+            const response = await fetch(`/queue/pop?queue_id=${queueTrack.queueId}`, { method: "POST" });
+
+            if (!response.ok) throw new Error("Failed to pop from queue");
             return response.json();
         },
         onSuccess: (data) => {
@@ -44,6 +85,7 @@ export const useQueue = () => {
         queue,
         isLoading,
         error,
+        setFirst: setFirstMutation.mutate,
         push: pushMutation.mutate,
         pop: popMutation.mutate,
         isPushing: pushMutation.isPending,

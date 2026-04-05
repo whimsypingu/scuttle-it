@@ -64,14 +64,10 @@ export const TrackItem = ({
 		switch (action) {
 			//special field for deleteQueue
 			case "deleteQueue": {
-				const queueId = (track as QueueTrack).queueId;
-				if (queueId === undefined) {
-					console.error("Tried to call deleteQueue on a non-QueueTrack. No queueId available.");
-					return;
-				} 
+				const queueTrack = track as QueueTrack;
 				executeAction({
 					action,
-					queueId,
+					queueTrack
 				});
 				break;
 			}
@@ -80,7 +76,7 @@ export const TrackItem = ({
 			default: {
 				executeAction({
 					action,
-					trackId: track.id,
+					track
 				});
 				break;
 			}
@@ -116,7 +112,8 @@ export const TrackItem = ({
 			await audio.playTrack(track.id);
 			console.log(`NOW PLAYING: ${track.title}`);
 
-			//queueNOW mutation required
+			//see models.utils.ts for implementation
+			triggerAction("setFirst");
 
 			onSelect(track);
 		} catch (err) {

@@ -8,7 +8,7 @@ export const LARGE_SWIPE_THRESHOLD_PX = 100;
 
 //all available track actions with their corresponding icons and colors on swipe
 export const TRACK_ACTION_CONFIG: Record<TrackAction, TrackActionConfig> = {
-	like: { 
+	setFirst: { 
         icon: HeartIcon, 
         color: "var(--color-brand)" 
     },
@@ -22,6 +22,10 @@ export const TRACK_ACTION_CONFIG: Record<TrackAction, TrackActionConfig> = {
     },
 	deleteQueue: { 
         icon: TrashIcon, 
+        color: "var(--color-brand)" 
+    },
+	like: { 
+        icon: HeartIcon, 
         color: "var(--color-brand)" 
     },
 	edit: { 

@@ -2,39 +2,40 @@
 import { makeToast } from '@/features/toast/Toast';
 import { useQueue } from '@/store/hooks/useQueue';
 
-import type { TrackActionProps } from '@/model/model.types';
+import type { QueueId, QueueTrack, TrackActionProps, TrackBase } from '@/model/model.types';
 
 
 export const useTrackActionHandler = () => {
     //access the mutations from the tanstack query hook
-    const { push, pop } = useQueue();
+    const { setFirst, push, pop } = useQueue();
 
     const handleAction = (props: TrackActionProps) => {
+        console.log(props.action);
+        
         switch (props.action) {
+            case "setFirst": //set first in queue
+                setFirst(props.track);
+                break;
+
             case "queueLast": //add to queue
-                console.log(props.action);
                 makeToast(props.action);
-                push(props.trackId);
+                push(props.track);
                 break;
 
             case "delete":
-                console.log(props.action);
                 makeToast(props.action);
                 break;
 
             case "deleteQueue": //delete from queue
-                console.log(props.action);
                 makeToast(props.action);
-                pop(props.queueId);
+                pop(props.queueTrack);
                 break;
 
             case "edit":
-                console.log(props.action);
                 makeToast(props.action);
                 break;
 
             case "like":
-                console.log(props.action);
                 makeToast(props.action);
                 break;
         }
@@ -42,3 +43,12 @@ export const useTrackActionHandler = () => {
 
     return handleAction;
 };
+
+
+export const toQueueTrackWithQueueId = (
+    track: TrackBase, 
+    queueId: QueueId = -1
+): QueueTrack => ({
+    ...track,
+    queueId,
+});

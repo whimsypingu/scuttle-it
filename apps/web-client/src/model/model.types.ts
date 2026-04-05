@@ -34,11 +34,12 @@ export interface QueueTrack extends TrackBase {
 
 //all available track actions with their required properties to execute the functions
 export type TrackActionProps = 
-    | { action: "queueLast"; trackId: TrackId }
-    | { action: "like"; trackId: TrackId }
-    | { action: "delete"; trackId: TrackId }
-    | { action: "deleteQueue"; queueId: QueueId }
-    | { action: "edit"; trackId: TrackId };
+    | { action: "setFirst"; track: TrackBase }
+    | { action: "queueLast"; track: TrackBase }
+    | { action: "like"; track: TrackBase }
+    | { action: "delete"; track: TrackBase }
+    | { action: "deleteQueue"; queueTrack: QueueTrack }
+    | { action: "edit"; track: TrackBase };
 export type TrackAction = TrackActionProps["action"];
 
 export interface TrackActionConfig { //corresponding phosphor icon and color pairing to show on swipe for a TrackAction
