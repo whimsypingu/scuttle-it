@@ -5,9 +5,21 @@ import { PlayIcon } from '@phosphor-icons/react';
 import { PLAYER_CONFIG } from '@/features/player/player.constants';
 
 import type { MiniViewProps } from '@/features/player/player.types';
+import { useQueue } from '@/store/hooks/useQueue';
 
 
 export const MiniView = ({ onExpand }: MiniViewProps) => {
+    const { queue } = useQueue(); //get the latest queue from tanstack
+
+    const currentTrack = queue?.[0];
+    console.log(currentTrack);
+
+    const currentTitle = currentTrack?.titleDisplay ?? currentTrack?.title ?? "---";
+    console.log(`title: ${currentTitle}`);
+
+    const currentArtist = currentTrack?.artists.map(a => a.nameDisplay ?? a.name) ?? "---";
+    console.log(`artist: ${currentArtist}`);
+
     return (
         <>
         <motion.div
@@ -38,14 +50,14 @@ export const MiniView = ({ onExpand }: MiniViewProps) => {
                         layout="position"
                         className="text-md font-medium truncate leading-tight max-w-full block"
                     >
-                        Placeholder Track Title
+                        {currentTitle}
                     </motion.span>
                     
                     <motion.span 
                         layout="position"
                         className="text-white/60 text-xs font-light truncate max-w-full block"
                     >
-                        Track Artist
+                        {currentArtist}
                     </motion.span>
                 </motion.div> 
 

@@ -8,10 +8,22 @@ import { QueueList } from '@/features/queue/QueueList';
 import { PLAYER_CONFIG } from '@/features/player/player.constants';
 
 import type { ExpandedViewProps } from '@/features/player/player.types';
+import { useQueue } from '@/store/hooks/useQueue';
 
 
 //consider not propagating isCompact down to here and just start it here
 export const ExpandedView = ({ isCompact, setIsCompact, onClose, playerDragControls }: ExpandedViewProps) => {
+    const { queue } = useQueue(); //get the latest queue from tanstack
+
+    const currentTrack = queue?.[0];
+    console.log(currentTrack);
+
+    const currentTitle = currentTrack?.titleDisplay ?? currentTrack?.title ?? "---";
+    console.log(`title: ${currentTitle}`);
+
+    const currentArtist = currentTrack?.artists.map(a => a.nameDisplay ?? a.name) ?? "---";
+    console.log(`artist: ${currentArtist}`);
+
     return (
         <>
         <motion.div
@@ -69,14 +81,14 @@ export const ExpandedView = ({ isCompact, setIsCompact, onClose, playerDragContr
                                 layout="position"
                                 className="text-lg font-medium truncate leading-tight max-w-full block"
                             >
-                                Scuttle Rebuild GRRRRRRRRRRRRRRRRRRRRR
+                                {currentTitle}
                             </motion.span>
                             
                             <motion.span 
                                 layout="position"
                                 className="text-white/60 text-sm font-light truncate max-w-full block"
                             >
-                                Track Artist
+                                {currentArtist}
                             </motion.span>
                         </motion.div> 
 

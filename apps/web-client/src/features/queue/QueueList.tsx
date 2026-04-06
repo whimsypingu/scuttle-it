@@ -12,6 +12,10 @@ export const QueueList = () => {
 
     const { queue, pop, isLoading } = useQueue();
 
+    const currentQueue = queue?.slice(1) ?? [];
+    console.log(currentQueue);
+
+
     const handleTrackSelect = (track: TrackBase) => {
         console.log("Selected track:", track.title);
     }
@@ -24,7 +28,7 @@ export const QueueList = () => {
             onDragCapture={(e) => e.stopPropagation()}
         >
             <Virtuoso 
-                data={queue}
+                data={currentQueue}
                 overscan={10}
                 itemContent={(index, track) => (
                     <TrackItem 

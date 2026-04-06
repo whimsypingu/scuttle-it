@@ -1,7 +1,7 @@
 import type { AudioStrategy } from "@/features/audio/audio.types";
 import { StandardStrategy } from "@/features/audio/strategies/StandardStrategy";
 
-export class AudioController {
+export class audioController {
     private strategy: AudioStrategy;
 
     constructor(outputElement: HTMLAudioElement) {

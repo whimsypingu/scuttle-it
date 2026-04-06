@@ -3,7 +3,6 @@ import { motion, useMotionValue, useMotionValueEvent, useTransform } from 'frame
 
 import { MusicNoteIcon } from '@phosphor-icons/react';
 
-import { useAudio } from '@/features/audio/AudioProvider';
 import { useTrackActionHandler } from '@/model/model.utils';
 import { useQueue } from '@/store/hooks/useQueue';
 

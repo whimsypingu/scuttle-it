@@ -1,25 +1,25 @@
 import React, { createContext, useContext, useEffect, useRef } from "react";
-import { AudioController } from "@/features/audio/AudioController";
+import { audioController } from "@/features/audio/audioController";
 
-const AudioContext = createContext<AudioController | null>(null);
+const AudioContext = createContext<audioController | null>(null);
 
 export const AudioProvider = ({ children }: { children: React.ReactNode}) => {
     const audioRef = useRef<HTMLAudioElement>(null); //main persistent DOM audio element
-    const controllerRef = useRef<AudioController | null>(null); //logic for the audio
+    const controllerRef = useRef<audioController | null>(null); //logic for the audio
 
     //initialize on loading references
     useEffect(() => {
         if (audioRef.current && !controllerRef.current) {
-            controllerRef.current = new AudioController(audioRef.current); //link logic to element
+            controllerRef.current = new audioController(audioRef.current); //link logic to element
         }
     }, []);
 
     //wrapper for allowing access to audio element
     return (
-        <AudioContext.Provider value={controllerRef.current}>
+        <AudioContext value={controllerRef.current}>
             <audio ref={audioRef} aria-hidden="true" />
             {children}
-        </AudioContext.Provider>
+        </AudioContext>
     );
 };
 

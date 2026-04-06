@@ -1,7 +1,6 @@
 import { lazy, Suspense, useState } from 'react'
 
 import { QueryClientProvider } from '@tanstack/react-query';
-import { AudioProvider } from '@/features/audio/AudioProvider';
 import { MainLayout } from '@/features/player/MainLayout';
 
 import { NavBar } from '@/features/player/NavBar';
@@ -49,7 +48,6 @@ function App() {
 	};
 
 	return (
-		<AudioProvider>
 		<QueryClientProvider client={queryClient}>
 			<div className="relative h-dvh w-full overflow-hidden bg-surface">
 
@@ -76,8 +74,7 @@ function App() {
 				<Toast isExpanded={isPlayerExpanded} />
 			</div>
 		</QueryClientProvider>
-		</AudioProvider>
-	)
+	);
 }
 
 export default App
