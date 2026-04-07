@@ -1,15 +1,16 @@
 import { motion } from 'framer-motion';
 
-import { CaretDownIcon, FastForwardIcon, PlayIcon, RepeatIcon, RewindIcon, ShuffleIcon } from '@phosphor-icons/react';
-import { Slider } from '@/components/ui/slider';
+import { useQueue } from '@/store/hooks/useQueue';
 
+import { CaretDownIcon } from '@phosphor-icons/react';
+
+import { ExpandedViewControls } from '@/features/player/subcomponents/ExpandedViewControls';
 import { QueueList } from '@/features/queue/QueueList';
 
 import { PLAYER_CONFIG } from '@/features/player/player.constants';
 
 import type { ExpandedViewProps } from '@/features/player/player.types';
-import { useQueue } from '@/store/hooks/useQueue';
-import { useAudioEngine } from '../audio/useAudioEngine';
+
 
 
 //consider not propagating isCompact down to here and just start it here
@@ -24,8 +25,6 @@ export const ExpandedView = ({ isCompact, setIsCompact, onClose, playerDragContr
 
     const currentArtist = currentTrack?.artists.map(a => a.nameDisplay ?? a.name) ?? "---";
     console.log(`artist: ${currentArtist}`);
-
-    const { currentTime, duration } = useAudioEngine();
 
     return (
         <>
@@ -98,60 +97,7 @@ export const ExpandedView = ({ isCompact, setIsCompact, onClose, playerDragContr
                     </motion.div>
 
                     {/* CONTROLS */}
-                    <motion.div
-                        layout
-                        layoutId="control-block"
-                        className={`flex flex-col gap-1 w-full`}
-                        onPointerDownCapture={(e) => e.stopPropagation()} /* capture scrubbing */
-                    >
-                        {/* SLIDER */}
-                        <Slider 
-                            defaultValue={[0]} max={100} step={1}
-                        />
-
-                        {/* DURATION ROW */}
-                        <motion.div
-                            layout
-                            className={`flex flex-row items-center justify-between w-full px-2`}
-                        >
-                            <div className="flex-shrink-0">
-                                <span className={`text-[10px] font-medium tabular-nums text-white/40`}>
-                                    {currentTime}
-                                </span>
-                            </div>
-
-                            <div className="flex-shrink-0">
-                                <span className={`text-[10px] font-medium tabular-nums text-white/40`}>
-                                    {duration}
-                                </span>
-                            </div>
-                        </motion.div>
-
-                        {/* BUTTON ROW */}
-                        <motion.div
-                            layout
-                            className={`relative flex flex-row items-center w-full px-2`}
-                        >
-                            <div className="flex-shrink-0">
-                                <ShuffleIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
-                            </div>
-                            
-                            {/* mighty jank to reduce glitchy look when compact/uncompacting */}
-                            <motion.div 
-                                layout 
-                                layoutId="center-control-group" 
-                                className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center gap-4"
-                            >
-                                <RewindIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
-                                <PlayIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
-                                <FastForwardIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
-                            </motion.div>
-
-                            <div className="ml-auto flex-shrink-0">
-                                <RepeatIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
-                            </div>
-                        </motion.div>
-                    </motion.div>
+                    <ExpandedViewControls />
                 </motion.div>
             </motion.div>
 

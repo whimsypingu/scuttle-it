@@ -47,6 +47,10 @@ class AudioEngine implements IAudioEngine  {
         }
     }
 
+    public seek(time: number): void {
+        this.strategy.seek(time);
+    }
+
     public currentTime() {
         return this.strategy.currentTime();
     }

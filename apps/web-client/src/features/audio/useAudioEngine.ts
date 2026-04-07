@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { audioEngine } from "./audioEngine"
 import type { AudioStatus } from "./audio.types";
-import { formatTime } from "./audio.utils";
 
 export const useAudioEngine = () => {
     const [status, setStatus] = useState<AudioStatus>({
@@ -21,7 +20,7 @@ export const useAudioEngine = () => {
 
     return {
         isPaused: status.isPaused,
-        currentTime: formatTime(status.currentTime),
-        duration: formatTime(status.duration)
+        rawTime: status.currentTime,
+        rawDuration: status.duration
     }
 }
