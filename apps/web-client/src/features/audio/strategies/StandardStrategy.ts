@@ -1,15 +1,39 @@
-import type { AudioStrategy } from "@/features/audio/audio.types";
+import type { AudioStatus, AudioStrategy, AudioSubscriber } from "@/features/audio/audio.types";
 
 export class StandardStrategy implements AudioStrategy {
     readonly strategy = "standard";
 
     private static instance: StandardStrategy
+    private subscribers: Set<AudioSubscriber> = new Set();
 
     private currentTrackId: string | null = null;
     private audioEl: HTMLAudioElement = new Audio();
 
     private constructor() {
-        //this.audioEl.preload
+        console.log("[StandardStrategy] Constructor triggered.");
+
+        const notify = () => {
+            console.log(`[StandardStrategy] Notify to ${this.subscribers.size} subscribers with currentTime: ${this.audioEl.currentTime}`);
+            
+            const status: AudioStatus = {
+                src: this.audioEl.currentSrc,
+                isPaused: this.audioEl.paused,
+                currentTime: this.audioEl.currentTime,
+                duration: this.audioEl.duration
+            };
+            this.subscribers.forEach(callbackFn => callbackFn(status));
+        };
+
+        this.audioEl.addEventListener("play", notify);
+        this.audioEl.addEventListener("pause", notify);
+        this.audioEl.addEventListener("timeupdate", notify);
+        this.audioEl.addEventListener("durationchange", notify);
+        this.audioEl.addEventListener("ended", notify);
+    }
+
+    public subscribe(callbackFn: AudioSubscriber) {
+        this.subscribers.add(callbackFn);
+        return () => this.subscribers.delete(callbackFn);
     }
 
     public static getInstance(): StandardStrategy {
@@ -24,7 +48,12 @@ export class StandardStrategy implements AudioStrategy {
 
         //prevent reloading if the same track is already set
         if (this.currentTrackId === trackId && this.audioEl.src.includes(fullUrl)) {
-            console.debug("[StandardStrategy] Track already loaded, skipping.");
+            console.log("[StandardStrategy] Track already loaded, skipping.");
+
+            if (this.audioEl.ended) {
+                this.audioEl.currentTime = 0;
+            }
+
             return;
         }
 
@@ -74,6 +103,24 @@ export class StandardStrategy implements AudioStrategy {
 
     isPaused(): boolean {
         return this.audioEl.paused;
+    }
+
+    seek(time: number): void {
+        if (this.audioEl.readyState <= 0) {
+            console.warn("[StandardStrategy] Cannot seek: Have nothing.");
+            return;
+        }
+
+        const targetTime = Math.max(0, Math.min(time, this.audioEl.duration || 0)); //clamp time
+        this.audioEl.currentTime = targetTime;
+    }
+
+    currentTime(): number {
+        return this.audioEl.currentTime || 0;
+    }
+
+    duration(): number {
+        return this.audioEl.duration || 0;
     }
 
     cleanup(): void {

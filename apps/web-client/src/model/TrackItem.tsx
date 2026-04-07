@@ -108,7 +108,7 @@ export const TrackItem = ({
 
 		try {
 			//play audio
-			audioEngine.playTrack(track.id);
+			audioEngine.playTrack(track.id, true);
 
 			//wrapper for actionHandler, see models.utils.ts for implementation
 			triggerAction("setFirst");

@@ -1,7 +1,7 @@
-import type { AudioStrategy } from "./audio.types";
+import type { AudioStrategy, AudioSubscriber, IAudioEngine } from "./audio.types";
 import { StandardStrategy } from "./strategies/StandardStrategy";
 
-class AudioEngine {
+class AudioEngine implements IAudioEngine  {
     private static instance: AudioEngine;
     private strategy: AudioStrategy;
     
@@ -24,9 +24,35 @@ class AudioEngine {
         return AudioEngine.instance;
     }
 
-    public async playTrack(trackId: string) {
+    public subscribe(callbackFn: AudioSubscriber) {
+        return this.strategy.subscribe(callbackFn);
+    }
+
+    public async playTrack(trackId: string, forceRestart: boolean = false) {
         await this.strategy.load(trackId);
+
+        if (forceRestart) {
+            this.strategy.seek(0); //reset
+        }
+
         await this.strategy.play();
+    }
+
+    public async playPauseTrack(trackId: string) {
+        if (this.strategy.isPaused()) {
+            await this.strategy.load(trackId);
+            await this.strategy.play();
+        } else {
+            this.strategy.pause();
+        }
+    }
+
+    public currentTime() {
+        return this.strategy.currentTime();
+    }
+
+    public duration() {
+        return this.strategy.duration();
     }
 }
 

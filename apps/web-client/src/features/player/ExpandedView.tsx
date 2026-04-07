@@ -9,6 +9,7 @@ import { PLAYER_CONFIG } from '@/features/player/player.constants';
 
 import type { ExpandedViewProps } from '@/features/player/player.types';
 import { useQueue } from '@/store/hooks/useQueue';
+import { useAudioEngine } from '../audio/useAudioEngine';
 
 
 //consider not propagating isCompact down to here and just start it here
@@ -23,6 +24,8 @@ export const ExpandedView = ({ isCompact, setIsCompact, onClose, playerDragContr
 
     const currentArtist = currentTrack?.artists.map(a => a.nameDisplay ?? a.name) ?? "---";
     console.log(`artist: ${currentArtist}`);
+
+    const { currentTime, duration } = useAudioEngine();
 
     return (
         <>
@@ -113,13 +116,13 @@ export const ExpandedView = ({ isCompact, setIsCompact, onClose, playerDragContr
                         >
                             <div className="flex-shrink-0">
                                 <span className={`text-[10px] font-medium tabular-nums text-white/40`}>
-                                    1:23
+                                    {currentTime}
                                 </span>
                             </div>
 
                             <div className="flex-shrink-0">
                                 <span className={`text-[10px] font-medium tabular-nums text-white/40`}>
-                                    4:56
+                                    {duration}
                                 </span>
                             </div>
                         </motion.div>
