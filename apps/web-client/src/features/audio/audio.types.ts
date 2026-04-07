@@ -1,6 +1,8 @@
 export interface AudioState {
     src: string;
+    isPlaying: boolean;
     currentTime: number;
+    duration: number;
 }
 
 export interface AudioStrategy {

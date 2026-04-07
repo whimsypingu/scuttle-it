@@ -9,6 +9,7 @@ import { useQueue } from '@/store/hooks/useQueue';
 import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/model/model.constants';
 
 import type { QueueTrack, TrackAction, TrackItemProps } from '@/model/model.types';
+import { audioEngine } from '@/features/audio/audioEngine';
 
 
 export const TrackItem = ({ 
@@ -106,6 +107,9 @@ export const TrackItem = ({
         if (isDragging) return; //cancel taps on drags
 
 		try {
+			//play audio
+			audioEngine.playTrack(track.id);
+
 			//wrapper for actionHandler, see models.utils.ts for implementation
 			triggerAction("setFirst");
 
