@@ -13,25 +13,93 @@ import { useQueue } from "@/store/hooks/useQueue";
 
 
 //used inside the ExpandedViewControls major subcomponent
-const ExpandedViewPlayPauseButton = () => {
-    const { queue } = useQueue(); //get the latest queue from tanstack
+const ExpandedViewButtons = () => {
+    const { queue, pop } = useQueue(); //get the latest queue from tanstack
     const currentTrack = queue?.[0];
+    const nextTrack = queue?.[1];
 
     const { isPaused } = useAudioEngine();
 
+    const handleRewind = () => {
+        if (!currentTrack) {
+            console.warn("No track in queue to rewind.");
+            return;
+        }
+
+        console.log(`REWINDING TRACK: ${currentTrack.title}`);
+
+        //rewind only if at least 1 second has passed in audio playback
+        if (audioEngine.currentTime() >= 1) {
+            audioEngine.seek(0);
+        }
+    }
+
+    const handleSkip = () => {
+        if (!currentTrack) {
+            console.warn("No track in queue to skip.");
+            return;
+        };
+
+        console.log(`SKIPPING TRACK: ${currentTrack.title}`);
+
+        pop(currentTrack);
+
+        //continue playing the next track if playing audio and next track is available
+        if (!isPaused && nextTrack) {
+            audioEngine.playTrack(nextTrack.id, true);
+        }
+    }
+
     return (
         <>
-        {/* PLAY/PAUSE */}
-        <button
-            className="p-2 transition-transform active:scale-95"
-            onClick={() => audioEngine.playPauseTrack(currentTrack?.id)}
+        {/* BUTTON ROW */}
+        <motion.div
+            layout
+            className={`relative flex flex-row items-center w-full`}
         >
-            {isPaused ? (
-                <PlayIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
-            ) : (
-                <PauseIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
-            )}
-        </button>
+            <button className="p-2 flex-shrink-0">
+                <ShuffleIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
+            </button>
+            
+            {/* mighty jank to reduce glitchy look when compact/uncompacting */}
+            <motion.div 
+                layout 
+                layoutId="center-control-group" 
+                className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center"
+            >
+                {/* REWIND */}
+                <button
+                    className="p-2 transition-transform active:scale-95"
+                    onClick={handleRewind}
+                >
+                    <RewindIcon size={PLAYER_CONFIG.iconSize} weight="fill" />                    
+                </button>
+
+                {/* PLAY/PAUSE */}
+                <button
+                    className="p-2 transition-transform active:scale-95"
+                    onClick={() => audioEngine.playPauseTrack(currentTrack?.id)}
+                >
+                    {isPaused ? (
+                        <PlayIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
+                    ) : (
+                        <PauseIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
+                    )}
+                </button>
+
+                {/* SKIP */}
+                <button
+                    className="p-2 transition-transform active:scale-95"
+                    onClick={handleSkip}
+                >
+                    <FastForwardIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
+                </button>
+            </motion.div>
+
+            <button className="p-2 ml-auto flex-shrink-0">
+                <RepeatIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
+            </button>
+        </motion.div>
         </>
     );
 };
@@ -100,44 +168,8 @@ export const ExpandedViewControls = () => {
                 </div>
             </motion.div>
 
-            {/* BUTTON ROW */}
-            <motion.div
-                layout
-                className={`relative flex flex-row items-center w-full`}
-            >
-                <button className="p-2 flex-shrink-0">
-                    <ShuffleIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
-                </button>
-                
-                {/* mighty jank to reduce glitchy look when compact/uncompacting */}
-                <motion.div 
-                    layout 
-                    layoutId="center-control-group" 
-                    className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center"
-                >
-                    {/* REWIND */}
-                    <button
-                        className="p-2 transition-transform active:scale-95"
-                        onClick={() => null}
-                    >
-                        <RewindIcon size={PLAYER_CONFIG.iconSize} weight="fill" />                    
-                    </button>
+            <ExpandedViewButtons />
 
-                    <ExpandedViewPlayPauseButton />
-
-                    {/* SKIP */}
-                    <button
-                        className="p-2 transition-transform active:scale-95"
-                        onClick={() => null}
-                    >
-                        <FastForwardIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
-                    </button>
-                </motion.div>
-
-                <button className="p-2 ml-auto flex-shrink-0">
-                    <RepeatIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
-                </button>
-            </motion.div>
         </motion.div>
         </>
     );
