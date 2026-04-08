@@ -34,17 +34,14 @@ export const useQueue = () => {
             return data;
         },
         onMutate: async (track: TrackBase) => {
-            //audio engine immediately here?
-            // audio.playTrack(track.id).catch(e => console.error("Audio failed:", e));
-            
             await queryClient.cancelQueries({ queryKey }); // cancel outgoing refetches so they dont rewrite optimistic changes
 
             const rollbackQueue = queryClient.getQueryData(queryKey); //get the rollback state
 
-            const queueTrack = toQueueTrackWithQueueId(track, -1); //typecast to a QueueTrack with -1 default queueId field
+            const tempQueueTrack = toQueueTrackWithQueueId(track, -1); //typecast to a QueueTrack with -1 default queueId field
 
             queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
-                return [queueTrack, ...(old?.slice(1) || [])];
+                return [tempQueueTrack, ...(old?.slice(1) || [])];
             });
 
             return { rollbackQueue }; //return context for rollback
@@ -53,7 +50,7 @@ export const useQueue = () => {
             if (context?.rollbackQueue) {
                 queryClient.setQueryData(queryKey, context.rollbackQueue);
             }
-            console.log("Optimistic setFirst failed, rolling back.");
+            console.log("Optimistic setFirst queue failed, rolling back.");
         },
         onSuccess: (data) => {
             queryClient.setQueryData(queryKey, data.queue); //immediately swap the optimistic -1 queueId for DB-assigned queueId
@@ -69,11 +66,30 @@ export const useQueue = () => {
             const data = await response.json();
             return data;
         },
+        onMutate: async (track: TrackBase) => {
+            await queryClient.cancelQueries({ queryKey });
+            const rollbackQueue = queryClient.getQueryData(queryKey);
+
+            const tempQueueTrack = toQueueTrackWithQueueId(track, -1); //typecast to a QueueTrack with -1 default queueId field
+
+            queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
+                return [...(old || []), tempQueueTrack];
+            });
+
+            return { rollbackQueue };
+        },
+        onError: (err, track, context) => {
+            if (context?.rollbackQueue) {
+                queryClient.setQueryData(queryKey, context.rollbackQueue);
+            }
+            console.log("Optimistic push queue failed, rolling back.");
+        },
         onSuccess: (data) => {
             queryClient.setQueryData(queryKey, data.queue);
         },
     });
 
+    // remove a track from the queue
     const popMutation = useMutation({
         mutationFn: async (queueTrack: QueueTrack) => {
             const response = await fetch(`/queue/pop?queue_id=${queueTrack.queueId}`, { method: "POST" });
@@ -82,6 +98,22 @@ export const useQueue = () => {
 
             const data = await response.json();
             return data;
+        },
+        onMutate: async (queueTrack: QueueTrack) => {
+            await queryClient.cancelQueries({ queryKey });
+            const rollbackQueue = queryClient.getQueryData(queryKey);
+
+            queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
+                return old?.filter(t => t.queueId !== queueTrack.queueId); //filter out by the unique queueId
+            });
+
+            return { rollbackQueue };
+        },
+        onError: (err, queueTrack, context) => {
+            if (context?.rollbackQueue) {
+                queryClient.setQueryData(queryKey, context.rollbackQueue);
+            }
+            console.log("Optimistic pop queue failed, rolling back.");
         },
         onSuccess: (data) => {
             queryClient.setQueryData(queryKey, data.queue);

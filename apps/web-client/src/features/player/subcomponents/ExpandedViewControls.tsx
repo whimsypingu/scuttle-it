@@ -54,7 +54,7 @@ export const ExpandedViewControls = () => {
     const handleValueChange = (val: number[]) => {
         console.log(`VALUE: ${val[0]}`)
         setIsDragging(true);
-        setLocalValue(val[0]);        
+        setLocalValue(val[0]);
     }
 
     const handleValueCommit = () => {
