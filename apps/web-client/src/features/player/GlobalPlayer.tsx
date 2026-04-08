@@ -41,7 +41,7 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
             id="global-player-outer-container"
             animate={{
                 height: isExpanded ? PLAYER_CONFIG.expandedHeight : `${PLAYER_CONFIG.collapsedHeight}px`,
-                bottom: isExpanded ? 0 : `${NAV_CONFIG.height + PLAYER_CONFIG.marginBottom}px`, // Sits above your nav bar
+                bottom: isExpanded ? 0 : `${NAV_CONFIG.height + PLAYER_CONFIG.marginBottom}px`, // Sits above nav bar
                 left: isExpanded ? 0 : `${PLAYER_CONFIG.marginSide}px`,
                 right: isExpanded ? 0 : `${PLAYER_CONFIG.marginSide}px`,
                 borderRadius: isExpanded ? '0px' : `${PLAYER_CONFIG.borderRadius}px`,

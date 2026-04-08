@@ -1,6 +1,6 @@
 import { motion } from "framer-motion"
 
-import { FastForwardIcon, PlayIcon, RepeatIcon, RewindIcon, ShuffleIcon } from '@phosphor-icons/react';
+import { FastForwardIcon, PlayIcon, PauseIcon, RepeatIcon, RewindIcon, ShuffleIcon } from '@phosphor-icons/react';
 import { Slider } from '@/components/ui/slider';
 
 import { PLAYER_CONFIG } from '@/features/player/player.constants';
@@ -9,6 +9,32 @@ import { useAudioEngine } from "@/features/audio/useAudioEngine";
 import { formatTime } from "@/features/audio/audio.utils";
 import { useEffect, useState } from "react";
 import { audioEngine } from "@/features/audio/audioEngine";
+import { useQueue } from "@/store/hooks/useQueue";
+
+
+//used inside the ExpandedViewControls major subcomponent
+const ExpandedViewPlayPauseButton = () => {
+    const { queue } = useQueue(); //get the latest queue from tanstack
+    const currentTrack = queue?.[0];
+
+    const { isPaused } = useAudioEngine();
+
+    return (
+        <>
+        {/* PLAY/PAUSE */}
+        <button
+            className="p-2 transition-transform active:scale-95"
+            onClick={() => audioEngine.playPauseTrack(currentTrack?.id)}
+        >
+            {isPaused ? (
+                <PlayIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
+            ) : (
+                <PauseIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
+            )}
+        </button>
+        </>
+    );
+};
 
 
 export const ExpandedViewControls = () => {
@@ -32,6 +58,7 @@ export const ExpandedViewControls = () => {
     }
 
     const handleValueCommit = () => {
+        if (!isDragging) return; //prevent double firing
         console.log(`VALUE COMMITTED: ${localValue}`)
         audioEngine.seek(localValue);
         setIsDragging(false);
@@ -76,26 +103,40 @@ export const ExpandedViewControls = () => {
             {/* BUTTON ROW */}
             <motion.div
                 layout
-                className={`relative flex flex-row items-center w-full px-2`}
+                className={`relative flex flex-row items-center w-full`}
             >
-                <div className="flex-shrink-0">
+                <button className="p-2 flex-shrink-0">
                     <ShuffleIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
-                </div>
+                </button>
                 
                 {/* mighty jank to reduce glitchy look when compact/uncompacting */}
                 <motion.div 
                     layout 
                     layoutId="center-control-group" 
-                    className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center gap-4"
+                    className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center"
                 >
-                    <RewindIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
-                    <PlayIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
-                    <FastForwardIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
+                    {/* REWIND */}
+                    <button
+                        className="p-2 transition-transform active:scale-95"
+                        onClick={() => null}
+                    >
+                        <RewindIcon size={PLAYER_CONFIG.iconSize} weight="fill" />                    
+                    </button>
+
+                    <ExpandedViewPlayPauseButton />
+
+                    {/* SKIP */}
+                    <button
+                        className="p-2 transition-transform active:scale-95"
+                        onClick={() => null}
+                    >
+                        <FastForwardIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
+                    </button>
                 </motion.div>
 
-                <div className="ml-auto flex-shrink-0">
+                <button className="p-2 ml-auto flex-shrink-0">
                     <RepeatIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
-                </div>
+                </button>
             </motion.div>
         </motion.div>
         </>

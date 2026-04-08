@@ -38,9 +38,22 @@ class AudioEngine implements IAudioEngine  {
         await this.strategy.play();
     }
 
-    public async playPauseTrack(trackId: string) {
+    //very forgiving function that attempts to play or pause depending on state, and uses best effort for trackId
+    public async playPauseTrack(trackId?: string) {
+        const targetId = trackId ?? this.strategy.getCurrentTrackId();
+
         if (this.strategy.isPaused()) {
-            await this.strategy.load(trackId);
+
+            //guard for trying to start a new track but have no ID and nothing is currently loaded or paused
+            if (!targetId) {
+                console.error("AudioEngine Error: No trackId provided and no track currently ready");
+                return;
+            }
+
+            //only load if a new trackId or default to the old existing trackId
+            if (targetId) {
+                await this.strategy.load(targetId);
+            }
             await this.strategy.play();
         } else {
             this.strategy.pause();

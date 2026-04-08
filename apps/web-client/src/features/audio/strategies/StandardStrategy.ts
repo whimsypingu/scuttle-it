@@ -43,6 +43,10 @@ export class StandardStrategy implements AudioStrategy {
         return StandardStrategy.instance;
     }
 
+    public getCurrentTrackId(): string | null {
+        return this.currentTrackId;
+    }
+
     async load(trackId: string): Promise<void> {
         const fullUrl = `/audio/stream/${trackId}`;
 

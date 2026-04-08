@@ -12,6 +12,8 @@ export interface AudioStrategy {
 
     subscribe(callbackFn: AudioSubscriber): () => void;
 
+    getCurrentTrackId(): string | null; //current validity of playing
+
     load(trackId: string): Promise<void>;
     
     play(): Promise<void>;
