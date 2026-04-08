@@ -1,15 +1,16 @@
 import { motion } from "framer-motion"
 
+import { useEffect, useState } from "react";
+import { useQueue } from "@/store/hooks/useQueue";
+import { useAudioEngine } from "@/features/audio/useAudioEngine";
+
+import { formatTime } from "@/features/audio/audio.utils";
+import { audioEngine } from "@/features/audio/audioEngine";
+
 import { FastForwardIcon, PlayIcon, PauseIcon, RepeatIcon, RewindIcon, ShuffleIcon } from '@phosphor-icons/react';
 import { Slider } from '@/components/ui/slider';
 
 import { PLAYER_CONFIG } from '@/features/player/player.constants';
-
-import { useAudioEngine } from "@/features/audio/useAudioEngine";
-import { formatTime } from "@/features/audio/audio.utils";
-import { useEffect, useState } from "react";
-import { audioEngine } from "@/features/audio/audioEngine";
-import { useQueue } from "@/store/hooks/useQueue";
 
 
 //used inside the ExpandedViewControls major subcomponent
@@ -29,7 +30,7 @@ const ExpandedViewButtons = () => {
         console.log(`REWINDING TRACK: ${currentTrack.title}`);
 
         //rewind only if at least 1 second has passed in audio playback
-        if (audioEngine.currentTime() >= 1) {
+        if (audioEngine.getCurrentTime() >= 1) {
             audioEngine.seek(0);
         }
     }

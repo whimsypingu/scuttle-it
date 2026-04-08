@@ -64,12 +64,12 @@ class AudioEngine implements IAudioEngine  {
         this.strategy.seek(time);
     }
 
-    public currentTime() {
-        return this.strategy.currentTime();
+    public getCurrentTime() {
+        return this.strategy.getCurrentTime();
     }
 
-    public duration() {
-        return this.strategy.duration();
+    public getDuration() {
+        return this.strategy.getDuration();
     }
 }
 

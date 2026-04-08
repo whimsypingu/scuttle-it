@@ -119,11 +119,11 @@ export class StandardStrategy implements AudioStrategy {
         this.audioEl.currentTime = targetTime;
     }
 
-    currentTime(): number {
+    getCurrentTime(): number {
         return this.audioEl.currentTime || 0;
     }
 
-    duration(): number {
+    getDuration(): number {
         return this.audioEl.duration || 0;
     }
 
