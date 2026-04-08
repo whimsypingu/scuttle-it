@@ -46,7 +46,7 @@ const ExpandedViewButtons = () => {
 
         //continue playing the next track if playing audio and next track is available
         if (!isPaused && nextTrack) {
-            audioEngine.playTrack(nextTrack.id, true);
+            audioEngine.playTrack({ trackId: nextTrack.id, forceRestart: true });
         }
     }
 
@@ -78,7 +78,7 @@ const ExpandedViewButtons = () => {
                 {/* PLAY/PAUSE */}
                 <button
                     className="p-2 transition-transform active:scale-95"
-                    onClick={() => audioEngine.playPauseTrack(currentTrack?.id)}
+                    onClick={() => audioEngine.playPauseTrack({ trackId: currentTrack?.id })}
                 >
                     {isPaused ? (
                         <PlayIcon size={PLAYER_CONFIG.iconSize} weight="fill" />

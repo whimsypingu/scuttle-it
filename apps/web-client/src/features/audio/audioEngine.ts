@@ -1,4 +1,4 @@
-import type { AudioStrategy, AudioSubscriber, IAudioEngine } from "./audio.types";
+import type { AudioStrategy, AudioSubscriber, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions } from "./audio.types";
 import { StandardStrategy } from "./strategies/StandardStrategy";
 
 class AudioEngine implements IAudioEngine  {
@@ -28,7 +28,7 @@ class AudioEngine implements IAudioEngine  {
         return this.strategy.subscribe(callbackFn);
     }
 
-    public async playTrack(trackId: string, forceRestart: boolean = false) {
+    public async playTrack({ trackId, forceRestart = false }: PlayTrackOptions) {
         await this.strategy.load(trackId);
 
         if (forceRestart) {
@@ -39,7 +39,7 @@ class AudioEngine implements IAudioEngine  {
     }
 
     //very forgiving function that attempts to play or pause depending on state, and uses best effort for trackId
-    public async playPauseTrack(trackId?: string) {
+    public async playPauseTrack({ trackId }: PlayPauseTrackOptions) {
         const targetId = trackId ?? this.strategy.getCurrentTrackId();
 
         if (this.strategy.isPaused()) {

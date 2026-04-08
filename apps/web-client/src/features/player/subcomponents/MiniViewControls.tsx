@@ -24,7 +24,7 @@ export const MiniViewPlayPauseButton = () => {
             className="p-2 transition-transform active:scale-95"
             onClick={(e) => {
                 e.stopPropagation();
-                audioEngine.playPauseTrack(currentTrack?.id);
+                audioEngine.playPauseTrack({ trackId: currentTrack?.id });
             }}
         >
             {isPaused ? (

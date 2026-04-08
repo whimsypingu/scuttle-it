@@ -25,6 +25,7 @@ export interface AudioStrategy {
     seek(time: number): void;
 
     currentTime(): number;
+    
     duration(): number;
 
     cleanup(): void;
@@ -32,5 +33,17 @@ export interface AudioStrategy {
 
 export interface IAudioEngine {
     subscribe(callbackFn: AudioSubscriber): () => void;
-    playTrack(trackId: string, forceRestart: boolean): Promise<void>;
+
+    playTrack(options: PlayTrackOptions): Promise<void>;
+
+    playPauseTrack(options: PlayPauseTrackOptions): Promise<void>;
+}
+
+//interfaces for functions within IAudioEngine
+export interface PlayTrackOptions {
+    trackId: string;
+    forceRestart?: boolean;
+}
+export interface PlayPauseTrackOptions {
+    trackId?: string;
 }
