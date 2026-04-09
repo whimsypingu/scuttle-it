@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import type { QueueTrack, TrackBase } from "@/model/model.types";
-import { toQueueTrackWithQueueId } from "@/model/model.utils";
+import { trackBaseToQueueTrack } from "@/model/model.utils";
 
 
 export const useQueue = () => {
@@ -38,7 +38,7 @@ export const useQueue = () => {
 
             const rollbackQueue = queryClient.getQueryData(queryKey); //get the rollback state
 
-            const tempQueueTrack = toQueueTrackWithQueueId(track, -1); //typecast to a QueueTrack with -1 default queueId field
+            const tempQueueTrack = trackBaseToQueueTrack(track, -1); //typecast to a QueueTrack with -1 default queueId field
 
             queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
                 return [tempQueueTrack, ...(old?.slice(1) || [])];
@@ -70,7 +70,7 @@ export const useQueue = () => {
             await queryClient.cancelQueries({ queryKey });
             const rollbackQueue = queryClient.getQueryData(queryKey);
 
-            const tempQueueTrack = toQueueTrackWithQueueId(track, -1); //typecast to a QueueTrack with -1 default queueId field
+            const tempQueueTrack = trackBaseToQueueTrack(track, -1); //typecast to a QueueTrack with -1 default queueId field
 
             queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
                 return [...(old || []), tempQueueTrack];

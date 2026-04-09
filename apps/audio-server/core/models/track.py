@@ -18,3 +18,4 @@ class TrackBase(ScuttleBase):
 
 class QueueTrack(TrackBase):
     queue_id: int
+    position: float

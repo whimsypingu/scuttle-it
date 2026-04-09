@@ -11,16 +11,6 @@ export interface ArtistBase {
 }
 
 
-//deprecated?
-export interface TrackNorm { //zustand storage format
-    id: TrackId;
-    title: string;
-    titleDisplay?: string;
-    artistIds: ArtistId[];
-    duration: number;
-}
-
-
 export interface TrackBase {
     id: TrackId;
     title: string;
@@ -30,6 +20,7 @@ export interface TrackBase {
 }
 export interface QueueTrack extends TrackBase {
     queueId: QueueId;
+    position: number;
 }
 
 //all available track actions with their required properties to execute the functions

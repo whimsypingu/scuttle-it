@@ -45,10 +45,12 @@ export const useTrackActionHandler = () => {
 };
 
 
-export const toQueueTrackWithQueueId = (
+export const trackBaseToQueueTrack = (
     track: TrackBase, 
-    queueId: QueueId = -1
+    queueId: QueueId = -1,
+    position: number = -1,
 ): QueueTrack => ({
     ...track,
     queueId,
+    position
 });

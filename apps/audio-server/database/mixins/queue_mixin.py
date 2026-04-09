@@ -150,7 +150,8 @@ class PlayQueueMixin:
                     return [
                         QueueTrack(
                             **row_to_trackbase(row).model_dump(),
-                            queue_id=row["queue_id"]
+                            queue_id=row["queue_id"],
+                            position=row["position"]
                         ) for row in rows
                     ]
 
