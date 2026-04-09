@@ -30,7 +30,7 @@ async def get_settings(
 
 @SettingsRouter.post("/set-loopmode")
 async def set_loopmode(
-    loopmode: int = Query(..., ge=0, le=2, description="0=None, 1=One, 2=All"),
+    loopmode: int = Query(..., ge=0, le=2, description="0=None, 1=All, 2=One"),
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:

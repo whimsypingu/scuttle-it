@@ -5,12 +5,13 @@ import { useEffect } from "react";
 import { audioEngine } from "./audioEngine";
 
 export const AudioLogic = () => {
-    const { queue, pop } = useQueue(); //get the latest queue from tanstack
+    const { queue, pop, reorder } = useQueue(); //get the latest queue from tanstack
     const { settings } = useSettings();
     
     //current track
     const currentTrack = queue?.[0];
     const nextTrack = queue?.[1];
+    const lastTrack = queue?.at(-1);
     
     console.log(`[AudioLogic] Current track: ${currentTrack}`);
     
@@ -31,12 +32,18 @@ export const AudioLogic = () => {
                     }
                     break;
                 
-                case 1: //loop one
-                    audioEngine.seek(0);
+                case 1: //loop all
+                    if (queue.length > 1 && nextTrack && lastTrack) {
+                        const newTargetPosition = lastTrack.position + 1;
+                        reorder({ queueTrack: currentTrack, targetPosition: newTargetPosition }); //replace with reorder to end
+                        audioEngine.playTrack({ trackId: nextTrack.id, forceRestart: true }) //play
+                    } else {
+                        audioEngine.playTrack({ trackId: currentTrack.id, forceRestart: true }) //play
+                    }
                     break;
 
-                case 2: //loop all
-                    pop(currentTrack); //replace with reorder to end
+                case 2: //loop one
+                    audioEngine.playTrack({ trackId: currentTrack.id, forceRestart: true }) //play
                     break;
             }
         });

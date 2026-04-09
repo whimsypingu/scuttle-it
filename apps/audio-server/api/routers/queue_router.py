@@ -34,11 +34,11 @@ async def set_first_play_queue(
 @QueueRouter.post("/reorder")
 async def reorder_queue(
     queue_id: int = Query(..., description="Unique instance ID of the queued track to reorder"),
-    new_position: float = Query(..., description="New position float"),
+    target_position: float = Query(..., description="Target position float"),
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.reorder_queue(queue_id, new_position) #status after attempting reorder
+        success = await db_manager.reorder_queue(queue_id, target_position) #status after attempting reorder
         updated_queue = await db_manager.get_play_queue() #get the updated queue
 
         return {

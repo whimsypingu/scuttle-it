@@ -42,23 +42,55 @@ class PlayQueueMixin:
             raise
 
 
-    async def reorder_queue(self, queue_id, new_position: float) -> bool:
+    async def reorder_queue(self, queue_id, target_position: float) -> bool:
+        """
+        Intelligent self-healing reordering with three-zone logic:
+        1. < min: Min - 100
+        2. >= max: Max + 100
+        3. between: midpoint of nearest previous and next position
+        """
         """Universal reordering: moves track to a new position. can be used for a loop all move to end"""
-        logger.info(f"Reordering track with queue_id {queue_id} to position {new_position} in the Play Queue")
+        logger.info(f"Reordering track with queue_id {queue_id} to position {target_position} in the Play Queue")
 
         try:
             async with self.session() as db:
+                cursor = await db.execute("""
+                    SELECT
+                        MIN(position) AS min_pos,
+                        MAX(position) AS max_pos,
+                        (SELECT position FROM play_queue WHERE position < ? ORDER BY position DESC LIMIT 1) AS prev_pos,
+                        (SELECT position FROM play_queue WHERE position > ? ORDER BY position ASC LIMIT 1) AS next_pos
+                    FROM play_queue
+                    WHERE queue_id != ?;
+                """, (target_position, target_position, queue_id))
+                row = await cursor.fetchone() 
+                min_pos, max_pos, prev_pos, next_pos = tuple(row) #extract positions within queue
+
+                if min_pos is None: #empty queue (not including current track) edge case
+                    final_position = 100.0
+
+                if target_position < min_pos: #target position becomes first (current track)
+                    final_position = min_pos - 100.0
+                
+                elif target_position >= max_pos: #target position is last
+                    final_position = max_pos + 100.0
+
+                else: #gap found, put it in the best possible spot numerically
+                    p = prev_pos if prev_pos is not None else min_pos
+                    n = next_pos if next_pos is not None else max_pos
+                    final_position = (p + n) / 2
+
                 await db.execute("""
                     UPDATE play_queue
                     SET position = ?
                     WHERE queue_id = ?
-                """, (queue_id, new_position))
+                """, (final_position, queue_id))
 
-                logger.info(f"Successfully reordered track with queue_id {queue_id} to position {new_position} in Play Queue")
+                logger.info(f"Successfully reordered track with queue_id {queue_id} to position {final_position} in Play Queue")
                 return True
         
         except Exception:
-            logger.exception(f"Failed to reorder track with queue_id {queue_id} to position {new_position} in Play Queue")
+            logger.exception(f"Failed to reorder track with queue_id {queue_id} to position {target_position} in Play Queue")
             raise
 
 

@@ -57,6 +57,39 @@ export const useQueue = () => {
         }
     });
 
+    const reorderMutation = useMutation({
+        mutationFn: async ({ queueTrack, targetPosition }: { queueTrack: QueueTrack; targetPosition: number }) => {
+            const response = await fetch(`/queue/reorder?queue_id=${queueTrack.queueId}&new_position=${targetPosition}`, { method: "POST" });
+
+            if (!response.ok) throw new Error("Failed to reorder within queue");
+
+            const data = await response.json();
+            return data;
+        },
+        onMutate: async ({ queueTrack, targetPosition }: { queueTrack: QueueTrack; targetPosition: number }) => {
+            await queryClient.cancelQueries({ queryKey });
+            const rollbackQueue = queryClient.getQueryData(queryKey);
+
+            queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
+                if (!old) return []; //handle undefined, then replace position of the track and try saving the newly sorted queue
+                return old
+                    .map(t => t.queueId === queueTrack.queueId ? { ...t, position: targetPosition } : t)
+                    .sort((a, b) => a.position - b.position);
+            });
+
+            return { rollbackQueue };
+        },
+        onError: (err, queueTrack, context) => {
+            if (context?.rollbackQueue) {
+                queryClient.setQueryData(queryKey, context.rollbackQueue);
+            }
+            console.log("Optimistic reorder queue failed, rolling back.");
+        },
+        onSuccess: (data) => {
+            queryClient.setQueryData(queryKey, data.queue);
+        },
+    });
+
     const pushMutation = useMutation({
         mutationFn: async (track: TrackBase) => {
             const response = await fetch(`/queue/push?track_id=${track.id}`, { method: "POST" });
@@ -125,6 +158,7 @@ export const useQueue = () => {
         isLoading,
         error,
         setFirst: setFirstMutation.mutate,
+        reorder: reorderMutation.mutate,
         push: pushMutation.mutate,
         pop: popMutation.mutate,
         isPushing: pushMutation.isPending,
