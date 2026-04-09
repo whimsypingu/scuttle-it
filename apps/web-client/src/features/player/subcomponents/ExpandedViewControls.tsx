@@ -11,6 +11,9 @@ import { FastForwardIcon, PlayIcon, PauseIcon, RepeatIcon, RewindIcon, ShuffleIc
 import { Slider } from '@/components/ui/slider';
 
 import { PLAYER_CONFIG } from '@/features/player/player.constants';
+import { useSettings } from "@/store/hooks/useSettings";
+import { cycleLoopmode } from "@/settings/settings.utils";
+import { LOOPMODE_CONFIG } from "@/settings/settings.constants";
 
 
 //used inside the ExpandedViewControls major subcomponent
@@ -20,6 +23,8 @@ const ExpandedViewButtons = () => {
     const nextTrack = queue?.[1];
 
     const { isPaused } = useAudioPlayback();
+
+    const { settings, setLoopmode } = useSettings();
 
     const handleRewind = () => {
         if (!currentTrack) {
@@ -50,6 +55,17 @@ const ExpandedViewButtons = () => {
             audioEngine.playTrack({ trackId: nextTrack.id, forceRestart: true });
         }
     }
+
+    const handleLoopmode = () => {
+        const nextLoopmode = cycleLoopmode(settings.loopmode);
+        console.log(`SETTING LOOPING MODE: ${nextLoopmode}`)
+
+        setLoopmode(nextLoopmode);
+    }
+
+    const config = LOOPMODE_CONFIG[settings.loopmode];
+	const IconComponent = config.icon;
+	const color = config.color;
 
     return (
         <>
@@ -97,8 +113,12 @@ const ExpandedViewButtons = () => {
                 </button>
             </motion.div>
 
-            <button className="p-2 ml-auto flex-shrink-0">
-                <RepeatIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
+            <button
+                className="p-2 ml-auto flex-shrink-0 transition-transform active:scale-95"
+                onClick={handleLoopmode}
+                style={{ color }}
+            >
+                <IconComponent size={PLAYER_CONFIG.iconSize} weight="fill" />
             </button>
         </motion.div>
         </>

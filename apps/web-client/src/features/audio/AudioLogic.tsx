@@ -42,7 +42,7 @@ export const AudioLogic = () => {
         });
 
         return unsubscribe; //clean up the listener
-    }, [currentTrack?.queueId, settings.loopmode, pop]);
+    }, [currentTrack?.queueId, settings.loopmode]);
 
     return null;
 };
