@@ -2,7 +2,7 @@ import { motion } from "framer-motion"
 
 import { useEffect, useState } from "react";
 import { useQueue } from "@/store/hooks/useQueue";
-import { useAudioEngine } from "@/features/audio/useAudioEngine";
+import { useAudioPlayback, useAudioTime } from "@/features/audio/useAudioEngine";
 
 import { formatTime } from "@/features/audio/audio.utils";
 import { audioEngine } from "@/features/audio/audioEngine";
@@ -19,7 +19,7 @@ const ExpandedViewButtons = () => {
     const currentTrack = queue?.[0];
     const nextTrack = queue?.[1];
 
-    const { isPaused } = useAudioEngine();
+    const { isPaused } = useAudioPlayback();
 
     const handleRewind = () => {
         if (!currentTrack) {
@@ -107,7 +107,7 @@ const ExpandedViewButtons = () => {
 
 
 export const ExpandedViewControls = () => {
-    const { rawTime, rawDuration } = useAudioEngine();
+    const { time, duration } = useAudioTime();
 
     //local state for the slider
     const [isDragging, setIsDragging] = useState(false);
@@ -116,9 +116,9 @@ export const ExpandedViewControls = () => {
     //sync local value with engine time  only when NOT dragging
     useEffect(() => {
         if (!isDragging) {
-            setLocalValue(rawTime);
+            setLocalValue(time);
         }
-    }, [rawTime, isDragging]);
+    }, [time, isDragging]);
 
     const handleValueChange = (val: number[]) => {
         console.log(`VALUE: ${val[0]}`)
@@ -144,7 +144,7 @@ export const ExpandedViewControls = () => {
             {/* SLIDER */}
             <Slider 
                 value={[localValue]} 
-                max={rawDuration} 
+                max={duration} 
                 step={0.1}
                 onValueChange={handleValueChange}
                 onValueCommit={handleValueCommit}
@@ -164,7 +164,7 @@ export const ExpandedViewControls = () => {
 
                 <div className="flex-shrink-0">
                     <span className={`text-[10px] font-medium tabular-nums text-white/40`}>
-                        {formatTime(rawDuration)}
+                        {formatTime(duration)}
                     </span>
                 </div>
             </motion.div>

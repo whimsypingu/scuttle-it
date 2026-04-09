@@ -1,10 +1,16 @@
-import type { AudioStatus, AudioStrategy, AudioSubscriber } from "@/features/audio/audio.types";
+import type { AudioCallback, AudioEvent, AudioEventListeners, AudioEventMap, AudioStrategy } from "@/features/audio/audio.types";
 
 export class StandardStrategy implements AudioStrategy {
     readonly strategy = "standard";
 
     private static instance: StandardStrategy
-    private subscribers: Set<AudioSubscriber> = new Set();
+    private listeners: AudioEventListeners = {
+        play: new Set(),
+        pause: new Set(),
+        timeupdate: new Set(),
+        durationchange: new Set(),
+        ended: new Set(),
+    };
 
     private currentTrackId: string | null = null;
     private audioEl: HTMLAudioElement = new Audio();
@@ -12,28 +18,40 @@ export class StandardStrategy implements AudioStrategy {
     private constructor() {
         console.log("[StandardStrategy] Constructor triggered.");
 
-        const notify = () => {
-            console.log(`[StandardStrategy] Notify to ${this.subscribers.size} subscribers with currentTime: ${this.audioEl.currentTime}`);
-            
-            const status: AudioStatus = {
-                src: this.audioEl.currentSrc,
-                isPaused: this.audioEl.paused,
-                currentTime: this.audioEl.currentTime,
-                duration: this.audioEl.duration
-            };
-            this.subscribers.forEach(callbackFn => callbackFn(status));
-        };
-
-        this.audioEl.addEventListener("play", notify);
-        this.audioEl.addEventListener("pause", notify);
-        this.audioEl.addEventListener("timeupdate", notify);
-        this.audioEl.addEventListener("durationchange", notify);
-        this.audioEl.addEventListener("ended", notify);
+        this.audioEl.addEventListener("play", () => {
+            console.log("[StandardStrategy] play");
+            this.emit("play", false); //isPaused = false
+        });
+        this.audioEl.addEventListener("pause", () => {
+            console.log("[StandardStrategy] pause");
+            this.emit("pause", true); //isPaused = true
+        });
+        this.audioEl.addEventListener("timeupdate", () => {
+            console.log(`[StandardStrategy] timeupdate: ${this.audioEl.currentTime}`);
+            this.emit("timeupdate", this.audioEl.currentTime);
+        });
+        this.audioEl.addEventListener("durationchange", () => {
+            console.log(`[StandardStrategy] durationchange: ${this.audioEl.duration}`);
+            this.emit("durationchange", this.audioEl.duration);
+        });
+        this.audioEl.addEventListener("ended", () => {
+            console.log("[StandardStrategy] ended");
+            this.emit("ended", undefined);
+        });
     }
 
-    public subscribe(callbackFn: AudioSubscriber) {
-        this.subscribers.add(callbackFn);
-        return () => this.subscribers.delete(callbackFn);
+    //hook the set of functions to call on the actual audio element
+    private emit<K extends AudioEvent>(event: K, data: AudioEventMap[K]) {
+        const eventSet = this.listeners[event];
+        if (eventSet) {
+            eventSet.forEach((callback) => callback(data));
+        }
+    }
+
+    //subscription to an event with the function to call
+    public on<K extends AudioEvent>(event: K, callback: AudioCallback<K>) {
+        this.listeners[event].add(callback);
+        return () => this.listeners[event].delete(callback);
     }
 
     public static getInstance(): StandardStrategy {

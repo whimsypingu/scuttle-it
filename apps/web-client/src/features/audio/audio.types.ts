@@ -3,21 +3,36 @@ export interface AudioStatus {
     isPaused: boolean;
     currentTime: number;
     duration: number;
+    ended: boolean;
 }
 
-export type AudioSubscriber = (status: AudioStatus) => void; //callback to trigger
+export type AudioEventMap = {
+    play: boolean;
+    pause: boolean;
+    timeupdate: number;
+    durationchange: number;
+    ended: void;
+};
+export type AudioEvent = keyof AudioEventMap;
+
+export type AudioCallback<K extends AudioEvent> = (data: AudioEventMap[K]) => void; //generic callback type
+
+export type AudioEventListeners = {
+    [K in AudioEvent]: Set<AudioCallback<K>>;
+};
+
 
 export interface AudioStrategy {
     /** Discriminator for identifying the current strategy implementation */
     strategy: "ios-stream" | "standard";
 
     /**
-     * Internal event emitter
-     * Should broadcast when time updates, duration changes, playback state changes, or ends.
-     * @param callbackFn - Function receiving the AudioStatus
-     * @returns Cleanup function to remove the listener
+     * Registers a listener for a specific audio event. Use for granular updates per event
+     * @param event - The specific AudioEvent to listen for
+     * @param callback - Function receiving event-specific data to trigger
+     * @returns An unsubscribe function to clean up the effect
      */
-    subscribe(callbackFn: AudioSubscriber): () => void;
+    on<K extends AudioEvent>(event: K, callback: AudioCallback<K>): () => void;
 
     /**
      * Returns the ID of the track currently loaded in the media element.
@@ -75,11 +90,11 @@ export interface AudioStrategy {
 
 export interface IAudioEngine {
     /**
-     * Subscribes a callback to audio state changes (time, duration, play, pause, ended)
-     * @param callbackFn - Function receiving the latest AudioStatus
-     * @returns An unsubscribe function to clean up the effect
+     * Registers a listener for a specific audio event. Use for granular updates per event
+     * @param event - The specific AudioEvent to listen for
+     * @param callback - Function receiving event-specific data to trigger
      */
-    subscribe(callbackFn: AudioSubscriber): () => void;
+    on<K extends AudioEvent>(event: K, callback: AudioCallback<K>): () => void;
 
     /**
      * Loads and plays a specific track
@@ -93,6 +108,11 @@ export interface IAudioEngine {
      * @param options.trackId (Optional) - If no trackId is provided, it toggles the current strategy's state
      */
     playPauseTrack(options: PlayPauseTrackOptions): Promise<void>;
+
+    /**
+     * @returns True if the audio is explicitly paused or hasn't been started.
+     */
+    isPaused(): boolean;
 
     /**
      * Moves the playback head to a timestamp within an already loaded track

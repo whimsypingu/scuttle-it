@@ -1,4 +1,4 @@
-import type { AudioStrategy, AudioSubscriber, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions } from "./audio.types";
+import type { AudioCallback, AudioEvent, AudioStrategy, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions } from "./audio.types";
 import { StandardStrategy } from "./strategies/StandardStrategy";
 
 class AudioEngine implements IAudioEngine  {
@@ -24,8 +24,8 @@ class AudioEngine implements IAudioEngine  {
         return AudioEngine.instance;
     }
 
-    public subscribe(callbackFn: AudioSubscriber) {
-        return this.strategy.subscribe(callbackFn);
+    public on<K extends AudioEvent>(event: K, callback: AudioCallback<K>) {
+        return this.strategy.on(event, callback);
     }
 
     public async playTrack({ trackId, forceRestart = false }: PlayTrackOptions) {
@@ -60,7 +60,11 @@ class AudioEngine implements IAudioEngine  {
         }
     }
 
-    public seek(time: number): void {
+    public isPaused() {
+        return this.strategy.isPaused();
+    }
+
+    public seek(time: number) {
         this.strategy.seek(time);
     }
 

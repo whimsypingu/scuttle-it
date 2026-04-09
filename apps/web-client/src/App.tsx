@@ -8,6 +8,7 @@ import { Toast } from '@/features/toast/Toast';
 
 import type { Tab } from '@/features/player/player.types';
 import { queryClient } from '@/store/queryClient';
+import { AudioLogic } from '@/features/audio/AudioLogic';
 
 
 const GlobalPlayer = lazy(() => import('@/features/player/GlobalPlayer').then(m => ({ default: m.GlobalPlayer })));
@@ -49,6 +50,7 @@ function App() {
 
 	return (
 		<QueryClientProvider client={queryClient}>
+			<AudioLogic />
 			<div className="relative h-dvh w-full overflow-hidden bg-surface">
 
 				{!isPlayerExpanded && (

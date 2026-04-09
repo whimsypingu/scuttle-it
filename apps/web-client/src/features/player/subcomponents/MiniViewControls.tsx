@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAudioEngine } from "@/features/audio/useAudioEngine";
+import { useAudioPlayback, useAudioTime } from "@/features/audio/useAudioEngine";
 import { useQueue } from "@/store/hooks/useQueue";
 
 import { PlayIcon, PauseIcon } from "@phosphor-icons/react";
@@ -15,7 +15,7 @@ export const MiniViewPlayPauseButton = () => {
     const { queue } = useQueue(); //get the latest queue from tanstack
     const currentTrack = queue?.[0];
 
-    const { isPaused } = useAudioEngine();
+    const { isPaused } = useAudioPlayback();
 
     return (
         <>
@@ -39,7 +39,7 @@ export const MiniViewPlayPauseButton = () => {
 
 
 export const MiniViewSlider = () => {
-    const { rawTime, rawDuration } = useAudioEngine();
+    const { time, duration } = useAudioTime();
 
     //local state for the slider
     const [isDragging, setIsDragging] = useState(false);
@@ -48,9 +48,9 @@ export const MiniViewSlider = () => {
     //sync local value with engine time  only when NOT dragging
     useEffect(() => {
         if (!isDragging) {
-            setLocalValue(rawTime);
+            setLocalValue(time);
         }
-    }, [rawTime, isDragging]);
+    }, [time, isDragging]);
 
     const handleValueChange = (val: number[]) => {
         console.log(`VALUE: ${val[0]}`)
@@ -69,7 +69,7 @@ export const MiniViewSlider = () => {
         {/* SLIDER */}
         <MiniSlider
             value={[localValue]} 
-            max={rawDuration} 
+            max={duration} 
             step={0.1}
             onClick={(e) => e.stopPropagation()}
             onValueChange={handleValueChange}

@@ -10,7 +10,7 @@ export const useSettings = () => {
     const queryKey = ["settings"];
     
     //fetch settings
-    const { data: settings = {}, isLoading, error } = useQuery({
+    const { data: settings = DEFAULT_SETTINGS, isLoading, error } = useQuery({
         queryKey,
         queryFn: async () => {
             console.log("useSettings triggered");
