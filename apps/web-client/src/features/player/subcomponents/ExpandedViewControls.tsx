@@ -50,6 +50,11 @@ const ExpandedViewButtons = () => {
 
         pop(currentTrack);
 
+        //nothing next in queue then dismantle audio components
+        if (!nextTrack) {
+            audioEngine.clear();
+        }
+
         //continue playing the next track if playing audio and next track is available
         if (!isPaused && nextTrack) {
             audioEngine.playTrack({ trackId: nextTrack.id, forceRestart: true });

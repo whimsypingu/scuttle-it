@@ -85,7 +85,10 @@ export interface AudioStrategy {
      */
     getDuration(): number;
 
-    cleanup(): void;
+    /**
+     * Behavior: delete all audio stuff and set to blank.
+     */
+    clear(): void;
 }
 
 export interface IAudioEngine {
@@ -130,6 +133,11 @@ export interface IAudioEngine {
      * @returns the total length of the currently loaded track in seconds
      */
     getDuration(): number;
+
+    /**
+     * Behavior: delete all audio stuff and set to blank.
+     */
+    clear(): void;
 }
 
 //interfaces for functions within IAudioEngine

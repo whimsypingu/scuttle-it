@@ -75,6 +75,10 @@ class AudioEngine implements IAudioEngine  {
     public getDuration() {
         return this.strategy.getDuration();
     }
+
+    public clear() {
+        this.strategy.clear();
+    }
 }
 
 export const audioEngine = AudioEngine.getInstance();

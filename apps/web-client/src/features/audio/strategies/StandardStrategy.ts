@@ -145,7 +145,7 @@ export class StandardStrategy implements AudioStrategy {
         return this.audioEl.duration || 0;
     }
 
-    cleanup(): void {
+    clear(): void {
         this.pause();
 
         this.audioEl.removeAttribute("src");

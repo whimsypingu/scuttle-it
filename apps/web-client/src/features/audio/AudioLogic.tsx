@@ -29,6 +29,8 @@ export const AudioLogic = () => {
 
                     if (nextTrack) {
                         audioEngine.playTrack({ trackId: nextTrack.id, forceRestart: true });
+                    } else {
+                        audioEngine.clear();
                     }
                     break;
                 
