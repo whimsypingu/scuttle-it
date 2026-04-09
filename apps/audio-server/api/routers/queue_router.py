@@ -26,10 +26,29 @@ async def set_first_play_queue(
             "success": success,
             "queue": updated_queue
         }
-    
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException
+
+
+@QueueRouter.post("/reorder")
+async def reorder_queue(
+    queue_id: int = Query(..., description="Unique instance ID of the queued track to reorder"),
+    new_position: float = Query(..., description="New position float"),
+    db_manager: DatabaseManager = Depends(get_db_manager)
+):
+    try:
+        success = await db_manager.reorder_queue(queue_id, new_position) #status after attempting reorder
+        updated_queue = await db_manager.get_play_queue() #get the updated queue
+
+        return {
+            "success": success,
+            "queue": updated_queue
+        }
+    except Exception as e:
+        traceback.print_exc()
+        raise DefaultCrashException
+
 
 @QueueRouter.post("/push")
 async def push_play_queue(
@@ -44,11 +63,11 @@ async def push_play_queue(
             "success": success,
             "queue": updated_queue
         }
-    
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException
     
+
 @QueueRouter.post("/pop")
 async def pop_play_queue(
     queue_id: int = Query(..., description="Unique instance ID of the queued track to pop"),
@@ -62,11 +81,11 @@ async def pop_play_queue(
             "success": success,
             "queue": updated_queue
         }
-    
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException
     
+
 @QueueRouter.get("/get")
 async def get_play_queue(
     db_manager: DatabaseManager = Depends(get_db_manager)
@@ -77,7 +96,6 @@ async def get_play_queue(
             "success": True,
             "queue": results
         }
-    
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException

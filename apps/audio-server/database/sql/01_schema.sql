@@ -86,3 +86,11 @@ CREATE TABLE IF NOT EXISTS play_queue (
 -- play queue position index
 CREATE INDEX IF NOT EXISTS idx_play_queue_position
 ON play_queue(position);
+
+-- settings
+CREATE TABLE IF NOT EXISTS settings (
+    id INTEGER PRIMARY KEY CHECK (id = 1), --ensures only one row
+    loopmode INTEGER DEFAULT 0 --loop modes: 0 = None, 1 = One, 2 = All 
+)
+
+INSERT OR IGNORE INTO settings (id, loop_mode) VALUES (1, 0);

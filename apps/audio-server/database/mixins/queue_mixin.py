@@ -42,6 +42,26 @@ class PlayQueueMixin:
             raise
 
 
+    async def reorder_queue(self, queue_id, new_position: float) -> bool:
+        """Universal reordering: moves track to a new position. can be used for a loop all move to end"""
+        logger.info(f"Reordering track with queue_id {queue_id} to position {new_position} in the Play Queue")
+
+        try:
+            async with self.session() as db:
+                await db.execute("""
+                    UPDATE play_queue
+                    SET position = ?
+                    WHERE queue_id = ?
+                """, (queue_id, new_position))
+
+                logger.info(f"Successfully reordered track with queue_id {queue_id} to position {new_position} in Play Queue")
+                return True
+        
+        except Exception:
+            logger.exception(f"Failed to reorder track with queue_id {queue_id} to position {new_position} in Play Queue")
+            raise
+
+
     async def push_play_queue(self, track_id) -> bool:
         """Push to the end of the Play Queue"""
         logger.info(f"Pushing track_id {track_id} to the end of the Play Queue...")
@@ -66,6 +86,7 @@ class PlayQueueMixin:
         except Exception:
             logger.exception(f"Failed to push track_id {track_id} to end of the Play Queue")
             raise
+
 
     async def pop_play_queue(self, queue_id) -> bool:
         """Pop a specific item from the Play Queue"""
