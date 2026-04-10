@@ -6,6 +6,8 @@ import { audioEngine } from "./audioEngine";
 import { getTrackDisplayMetadata } from "@/model/model.utils";
 import { useAudioPlayback } from "./useAudioEngine";
 
+import defaultMediaSessionLogo from "@/assets/defaultMediaSessionLogo.png";
+
 export const AudioLogic = () => {
     const { queue, pop, reorder } = useQueue(); //get the latest queue from tanstack
     const { settings } = useSettings();
@@ -74,6 +76,11 @@ export const AudioLogic = () => {
             artist: currentArtist,
             album: "Scuttle",
             artwork: [
+                {
+                    src: defaultMediaSessionLogo,
+                    sizes: "512x512",
+                    type: "image/png"
+                }
             ]
         });
 
