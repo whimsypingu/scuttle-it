@@ -3,7 +3,7 @@ import { motion, useMotionValue, useMotionValueEvent, useTransform } from 'frame
 
 import { MusicNoteIcon } from '@phosphor-icons/react';
 
-import { useTrackActionHandler } from '@/model/model.utils';
+import { getTrackDisplayMetadata, useTrackActionHandler } from '@/model/model.utils';
 import { useQueue } from '@/store/hooks/useQueue';
 
 import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/model/model.constants';
@@ -119,6 +119,8 @@ export const TrackItem = ({
 		}
     };
 
+	const { titleDisplay, artistDisplay } = getTrackDisplayMetadata(track); //get metadata for display of this track
+
 	return (
 		<>
 		<div className="relative group overflow-hidden rounded-lg">
@@ -168,10 +170,10 @@ export const TrackItem = ({
 
 				<div className="flex-1 min-w-0 text-left flex flex-col">
 					<span className="font-medium text-sm truncate text-white">
-						{track.titleDisplay ?? track.title}
+						{titleDisplay}
 					</span>
 					<span className="text-xs text-white/40 truncate">
-						{track.artists.map(a => a.nameDisplay ?? a.name).join(", ")}
+						{artistDisplay}
 					</span>
 				</div>
 			</motion.div>

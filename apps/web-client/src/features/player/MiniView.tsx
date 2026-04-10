@@ -1,13 +1,11 @@
 import { motion } from 'framer-motion';
 
-import { PlayIcon } from '@phosphor-icons/react';
+import { useQueue } from '@/store/hooks/useQueue';
 
-import { PLAYER_CONFIG } from '@/features/player/player.constants';
+import { MiniViewPlayPauseButton, MiniViewSlider } from '@/features/player/subcomponents/MiniViewControls';
+import { getTrackDisplayMetadata } from '@/model/model.utils';
 
 import type { MiniViewProps } from '@/features/player/player.types';
-import { useQueue } from '@/store/hooks/useQueue';
-import { MiniSlider } from '@/components/ui/mini-slider';
-import { MiniViewPlayPauseButton, MiniViewSlider } from './subcomponents/MiniViewControls';
 
 
 export const MiniView = ({ onExpand }: MiniViewProps) => {
@@ -16,10 +14,12 @@ export const MiniView = ({ onExpand }: MiniViewProps) => {
     const currentTrack = queue?.[0];
     console.log(currentTrack);
 
-    const currentTitle = currentTrack?.titleDisplay ?? currentTrack?.title ?? "---";
-    console.log(`title: ${currentTitle}`);
+    const { 
+        titleDisplay: currentTitle,
+        artistDisplay: currentArtist
+    } = getTrackDisplayMetadata(currentTrack);
 
-    const currentArtist = currentTrack?.artists.map(a => a.nameDisplay ?? a.name) ?? "---";
+    console.log(`title: ${currentTitle}`);
     console.log(`artist: ${currentArtist}`);
 
     return (

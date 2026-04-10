@@ -3,6 +3,8 @@ import { useSettings } from "@/store/hooks/useSettings";
 import { useEffect } from "react";
 
 import { audioEngine } from "./audioEngine";
+import { getTrackDisplayMetadata } from "@/model/model.utils";
+import { useAudioPlayback } from "./useAudioEngine";
 
 export const AudioLogic = () => {
     const { queue, pop, reorder } = useQueue(); //get the latest queue from tanstack
@@ -15,6 +17,7 @@ export const AudioLogic = () => {
     
     console.log(`[AudioLogic] Current track: ${currentTrack}`);
     
+    //autoplay logic
     useEffect(() => {
         if (!currentTrack) return; //no track, dont register a listener
         
@@ -52,6 +55,30 @@ export const AudioLogic = () => {
 
         return unsubscribe; //clean up the listener
     }, [currentTrack?.queueId, settings.loopmode]);
+
+
+    const { isPaused } = useAudioPlayback(); //hook into playstate
+
+    //mediaSession
+    useEffect(() => {
+        if (!("mediaSession" in navigator) || !currentTrack) return;
+
+        //get and update mediaSession metadata
+        const { 
+            titleDisplay: currentTitle,
+            artistDisplay: currentArtist
+        } = getTrackDisplayMetadata(currentTrack);
+    
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: currentTitle,
+            artist: currentArtist,
+            album: "Scuttle",
+            artwork: [
+            ]
+        });
+
+        navigator.mediaSession.playbackState = isPaused ? "paused" : "playing";
+    }, [currentTrack, isPaused]); //trigger whenever currentTrack or play state changes
 
     return null;
 };

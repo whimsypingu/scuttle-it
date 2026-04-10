@@ -10,6 +10,7 @@ import { QueueList } from '@/features/queue/QueueList';
 import { PLAYER_CONFIG } from '@/features/player/player.constants';
 
 import type { ExpandedViewProps } from '@/features/player/player.types';
+import { getTrackDisplayMetadata } from '@/model/model.utils';
 
 
 
@@ -20,10 +21,12 @@ export const ExpandedView = ({ isCompact, setIsCompact, onClose, playerDragContr
     const currentTrack = queue?.[0];
     console.log(currentTrack);
 
-    const currentTitle = currentTrack?.titleDisplay ?? currentTrack?.title ?? "---";
-    console.log(`title: ${currentTitle}`);
+    const { 
+        titleDisplay: currentTitle,
+        artistDisplay: currentArtist
+    } = getTrackDisplayMetadata(currentTrack);
 
-    const currentArtist = currentTrack?.artists.map(a => a.nameDisplay ?? a.name) ?? "---";
+    console.log(`title: ${currentTitle}`);
     console.log(`artist: ${currentArtist}`);
 
     return (

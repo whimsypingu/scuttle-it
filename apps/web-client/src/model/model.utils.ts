@@ -45,6 +45,7 @@ export const useTrackActionHandler = () => {
 };
 
 
+//convert a TrackBase to a QueueTrack object, inflating with default -1 values for fields queueId and position
 export const trackBaseToQueueTrack = (
     track: TrackBase, 
     queueId: QueueId = -1,
@@ -54,3 +55,16 @@ export const trackBaseToQueueTrack = (
     queueId,
     position
 });
+
+
+// extract the best display title and artist string
+export const getTrackDisplayMetadata = (track?: TrackBase): { titleDisplay: string, artistDisplay: string } => {
+    if (!track) { //handle null tracks
+        return { titleDisplay: "---", artistDisplay: "---" }
+    }
+
+    const titleDisplay = track.titleDisplay ?? track.title ?? "---";
+    const artistDisplay = track.artists?.map(a => a.nameDisplay ?? a.name).join(", ") ?? "---";
+
+    return { titleDisplay, artistDisplay };
+}
