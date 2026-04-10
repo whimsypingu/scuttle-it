@@ -27,3 +27,6 @@ dist-ssr/
 
 *.cpuprofile
 bundle-analysis.html
+
+# --- Binaries ---
+*.exe
