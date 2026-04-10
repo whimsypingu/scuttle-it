@@ -1,3 +1,3 @@
-export interface SearchViewProps {
+export interface SearchTabProps {
     tabResetSignal: number;
 }

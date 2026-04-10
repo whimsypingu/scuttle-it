@@ -14,9 +14,9 @@ import { AudioLogic } from '@/features/audio/AudioLogic';
 const GlobalPlayer = lazy(() => import('@/features/player/GlobalPlayer').then(m => ({ default: m.GlobalPlayer })));
 
 const MockHome = lazy(() => import('@/features/home/HomeView').then(m => ({ default: m.MockHome })));
-const MockSearch = lazy(() => import('@/features/search/SearchView').then(m => ({ default: m.MockSearch })));
+const SearchTab = lazy(() => import('@/features/search/SearchTab').then(m => ({ default: m.SearchTab })));
 const MockLibrary = lazy(() => import('@/features/library/LibraryView').then(m => ({ default: m.MockLibrary })));
-const MockProfile = lazy(() => import('@/features/profile/ProfileView').then(m => ({ default: m.MockProfile })));
+const ProfileTab = lazy(() => import('@/features/profile/ProfileTab').then(m => ({ default: m.ProfileTab })));
 
 
 function App() {
@@ -36,9 +36,9 @@ function App() {
 	const renderContent = () => {
 		const TabComponent = {
 			home: MockHome,
-			search: MockSearch,
+			search: SearchTab,
 			library: MockLibrary,
-			profile: MockProfile
+			profile: ProfileTab
 		}[activeTab] || MockHome
 
 		return (

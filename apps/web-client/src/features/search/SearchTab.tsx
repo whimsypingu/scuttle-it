@@ -1,23 +1,21 @@
 import { useEffect, useRef, useState } from "react";
+import { useSearch } from "@/store/hooks/useSearch";
 
 import { motion, AnimatePresence } from "framer-motion";
 
 import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { PlaylistList } from "@/features/playlist/PlaylistList";
 
 import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
-import type { SearchViewProps } from "@/features/search/search.types";
-import type { TrackBase } from "@/model/model.types";
-
-import { useSearch } from "@/store/hooks/useSearch";
+import type { SearchTabProps } from "@/features/search/search.types";
 
 
-export const MockSearch = ({
+export const SearchTab = ({
     tabResetSignal
-}: SearchViewProps) => {
+}: SearchTabProps) => {
     //query handling
     const [query, setQuery] = useState("");
     const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -79,9 +77,7 @@ export const MockSearch = ({
                         }
                     }}
                 >
-                    <h1 className="tab-heading truncate pr-4">
-                        Search
-                    </h1>
+                    <h1 className="tab-heading truncate pr-4">Search</h1>
 
                     {isSearching && (
                         <>

@@ -1,3 +1,3 @@
-export interface ProfileViewProps {
+export interface ProfileTabProps {
     tabResetSignal: number;
 }
