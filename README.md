@@ -19,6 +19,7 @@ scuttle-it/
 │   ├── audio-server/           # SQLite + FastAPI backend
 │   ├── desktop-launcher/       # Launcher
 │   └── web-client/             # React + vite frontend
+├── .gitattributes
 ├── .gitignore
 └── workspace.json
 ```
