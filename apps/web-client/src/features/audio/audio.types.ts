@@ -113,6 +113,11 @@ export interface IAudioEngine {
     playPauseTrack(options: PlayPauseTrackOptions): Promise<void>;
 
     /**
+     * Forces audio to pause no matter what
+     */
+    pauseTrack(): void;
+
+    /**
      * @returns True if the audio is explicitly paused or hasn't been started.
      */
     isPaused(): boolean;

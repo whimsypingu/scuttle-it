@@ -80,21 +80,53 @@ export const AudioLogic = () => {
             artistDisplay: currentArtist
         } = getTrackDisplayMetadata(currentTrack);
     
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title: currentTitle,
-            artist: currentArtist,
-            album: "Scuttle",
-            artwork: [
-                {
-                    src: defaultMediaSessionLogo,
-                    sizes: "512x512",
-                    type: "image/png"
-                }
-            ]
+        try {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: currentTitle,
+                artist: currentArtist,
+                album: "Scuttle",
+                artwork: [
+                    {
+                        src: new URL(defaultMediaSessionLogo, window.location.origin).href,
+                        sizes: "512x512",
+                        type: "image/png"
+                    }
+                ]
+            });
+        } catch (err) {
+            console.error("[AudioLogic - MediaSession] Metadata update failed", err);
+        }
+
+        // mediaSession functionality
+        navigator.mediaSession.setActionHandler("nexttrack", () => {
+            if (nextTrack) {
+                console.log("[AudioLogic - MediaSession] Manual skip");
+                pop(currentTrack);
+                audioEngine.playTrack({ trackId: nextTrack.id, forceRestart: true });
+            } else {
+                console.log("[AudioLogic - MediaSession] Manual skip but no tracks remaining. Pausing and restarting.");
+                audioEngine.pauseTrack();
+                audioEngine.seek(0);
+            }
         });
 
+        navigator.mediaSession.setActionHandler("previoustrack", () => {
+            console.log("[AudioLogic - MediaSession] Manual previous");
+            audioEngine.playTrack({ trackId: currentTrack.id, forceRestart: true });
+        });
+
+        navigator.mediaSession.setActionHandler("play", () => audioEngine.playTrack({ trackId: currentTrack.id, forceRestart: false }));
+        navigator.mediaSession.setActionHandler("pause", () => audioEngine.pauseTrack());
+
         navigator.mediaSession.playbackState = isPaused ? "paused" : "playing";
-    }, [currentTrack, isPaused]); //trigger whenever currentTrack or play state changes
+
+        return () => {
+            navigator.mediaSession.setActionHandler("nexttrack", null);
+            navigator.mediaSession.setActionHandler("previoustrack", null);
+            navigator.mediaSession.setActionHandler("play", null);
+            navigator.mediaSession.setActionHandler("pause", null);
+        };
+    }, [currentTrack, nextTrack, isPaused]); //trigger whenever currentTrack or play state changes
 
     return null;
 };

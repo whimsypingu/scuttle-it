@@ -60,6 +60,10 @@ class AudioEngine implements IAudioEngine  {
         }
     }
 
+    public pauseTrack() {
+        this.strategy.pause();
+    }
+
     public isPaused() {
         return this.strategy.isPaused();
     }

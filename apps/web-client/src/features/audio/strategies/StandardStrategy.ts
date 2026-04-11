@@ -27,7 +27,7 @@ export class StandardStrategy implements AudioStrategy {
             this.emit("pause", true); //isPaused = true
         });
         this.audioEl.addEventListener("timeupdate", () => {
-            console.log(`[StandardStrategy] timeupdate: ${this.audioEl.currentTime}`);
+            console.debug(`[StandardStrategy] timeupdate: ${this.audioEl.currentTime}`); //too noisy send to debug logs
             this.emit("timeupdate", this.audioEl.currentTime);
         });
         this.audioEl.addEventListener("durationchange", () => {
