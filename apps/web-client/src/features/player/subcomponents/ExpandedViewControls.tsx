@@ -28,11 +28,11 @@ const ExpandedViewButtons = () => {
 
     const handleRewind = () => {
         if (!currentTrack) {
-            console.warn("No track in queue to rewind.");
+            console.warn("[ExpandingViewControls] No track in queue to rewind.");
             return;
         }
 
-        console.log(`REWINDING TRACK: ${currentTrack.title}`);
+        console.log(`[ExpandingViewControls] Rewinding track: ${currentTrack.title}`);
 
         //rewind only if at least 1 second has passed in audio playback
         if (audioEngine.getCurrentTime() >= 1) {
@@ -42,29 +42,25 @@ const ExpandedViewButtons = () => {
 
     const handleSkip = () => {
         if (!currentTrack) {
-            console.warn("No track in queue to skip.");
+            console.warn("[ExpandingViewControls] No track in queue to skip.");
             return;
         };
 
-        console.log(`SKIPPING TRACK: ${currentTrack.title}`);
-
-        pop(currentTrack);
-
-        //nothing next in queue then dismantle audio components
-        if (!nextTrack) {
-            audioEngine.clear();
-        }
-
-        //continue playing the next track if playing audio and next track is available
-        if (!isPaused && nextTrack) {
+        //plays a next track right away if available (ignores pause status), otherwise reset if no next track
+        if (nextTrack) {
+            console.log(`[ExpandingViewControls] Skipping track: ${currentTrack.title}`);
+            pop(currentTrack);
             audioEngine.playTrack({ trackId: nextTrack.id, forceRestart: true });
+        } else {
+            console.log("[ExpandingViewControls] Skip but no tracks remaining. Pausing and resetting.");
+            audioEngine.pauseTrack();
+            audioEngine.seek(0);
         }
     }
 
     const handleLoopmode = () => {
         const nextLoopmode = cycleLoopmode(settings.loopmode);
-        console.log(`SETTING LOOPING MODE: ${nextLoopmode}`)
-
+        console.log(`[ExpandingViewControls] Setting looping mode: ${nextLoopmode}`)
         setLoopmode(nextLoopmode);
     }
 

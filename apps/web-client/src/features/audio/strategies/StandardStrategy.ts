@@ -152,6 +152,6 @@ export class StandardStrategy implements AudioStrategy {
         this.audioEl.load(); //reset
 
         this.currentTrackId = null;
-        console.debug("[StandardStrategy] Cleaned up.");
+        console.log("[StandardStrategy] Cleaned up.");
     }
 }
