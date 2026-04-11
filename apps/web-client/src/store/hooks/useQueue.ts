@@ -59,7 +59,7 @@ export const useQueue = () => {
 
     const reorderMutation = useMutation({
         mutationFn: async ({ queueTrack, targetPosition }: { queueTrack: QueueTrack; targetPosition: number }) => {
-            const response = await fetch(`/queue/reorder?queue_id=${queueTrack.queueId}&new_position=${targetPosition}`, { method: "POST" });
+            const response = await fetch(`/queue/reorder?queue_id=${queueTrack.queueId}&target_position=${targetPosition}`, { method: "POST" });
 
             if (!response.ok) throw new Error("Failed to reorder within queue");
 

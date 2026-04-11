@@ -1,6 +1,6 @@
 import { useQueue } from "@/store/hooks/useQueue";
 import { useSettings } from "@/store/hooks/useSettings";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { audioEngine } from "./audioEngine";
 import { getTrackDisplayMetadata } from "@/model/model.utils";
@@ -20,6 +20,53 @@ export const AudioLogic = () => {
     console.log(`[AudioLogic] Current track: ${currentTrack}`);
     
     //autoplay logic
+    // const onEndedHandlerRef = useRef<(() => void) | null>(null);
+
+    // useEffect(() => {
+    //     onEndedHandlerRef.current = () => {
+    //         console.log(`[AudioLogic] Executing end logic for: ${currentTrack?.title}`);
+            
+    //         switch (settings.loopmode) {
+    //             case 0: // No loop
+    //                 pop(currentTrack);
+    //                 if (nextTrack) {
+    //                     audioEngine.playTrack({ trackId: nextTrack.id, forceRestart: true });
+    //                 } else {
+    //                     audioEngine.clear();
+    //                 }
+    //                 break;
+    //             case 1: // Loop all
+    //                 if (queue.length > 1 && nextTrack && lastTrack) {
+    //                     const newTargetPosition = lastTrack.position + 1;
+    //                     reorder({ queueTrack: currentTrack, targetPosition: newTargetPosition }); //replace with reorder to end
+    //                     audioEngine.playTrack({ trackId: nextTrack.id, forceRestart: true }) //play
+    //                 } else {
+    //                     audioEngine.playTrack({ trackId: currentTrack.id, forceRestart: true }) //play
+    //                 }
+    //                 break;
+    //             case 2: // Loop one
+    //                 audioEngine.playTrack({ trackId: currentTrack.id, forceRestart: true });
+    //                 break;
+    //         }        
+    //     };
+    // }, [currentTrack, nextTrack, lastTrack, settings.loopmode]);
+
+    // //attach the listener ONCE on mount
+    // useEffect(() => {
+    //     console.log("[AudioLogic] Subscribing to audioEngine ONLY ONCE");
+        
+    //     const unsubscribe = audioEngine.on("ended", () => {
+    //         if (onEndedHandlerRef.current) { // When the event fires, call whatever is currently in the Ref
+    //             onEndedHandlerRef.current();
+    //         }
+    //     });
+
+    //     return () => {
+    //         console.log("[AudioLogic] Cleaning up permanent listener");
+    //         unsubscribe();
+    //     };
+    // }, []); //runs once and never again
+
     useEffect(() => {
         if (!currentTrack) return; //no track, dont register a listener
         
