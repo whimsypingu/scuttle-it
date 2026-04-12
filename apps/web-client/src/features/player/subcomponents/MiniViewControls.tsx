@@ -52,14 +52,15 @@ export const MiniViewSlider = () => {
         }
     }, [time, isDragging]);
 
-    const handleValueChange = (val: number[]) => {
-        console.log(`VALUE: ${val[0]}`)
+    const handleValueChange = (val: number[]) => { //do this while dragging the slider
+        console.debug(`Scrubbing value: ${val[0]}`)
         setIsDragging(true);
         setLocalValue(val[0]);        
     }
 
-    const handleValueCommit = () => {
-        console.log(`VALUE COMMITTED: ${localValue}`)
+    const handleValueCommit = () => { //do this when slider is released
+        if (!isDragging) return; //prevent double firing
+        console.log(`Committing scrubbed value: ${localValue}`)
         audioEngine.seek(localValue);
         setIsDragging(false);
     }

@@ -141,15 +141,15 @@ export const ExpandedViewControls = () => {
         }
     }, [time, isDragging]);
 
-    const handleValueChange = (val: number[]) => {
-        console.log(`VALUE: ${val[0]}`)
+    const handleValueChange = (val: number[]) => { //do this while dragging the slider
+        console.debug(`Scrubbing value: ${val[0]}`)
         setIsDragging(true);
         setLocalValue(val[0]);
     }
 
-    const handleValueCommit = () => {
+    const handleValueCommit = () => { //do this when slider is released
         if (!isDragging) return; //prevent double firing
-        console.log(`VALUE COMMITTED: ${localValue}`)
+        console.log(`Committing scrubbed value: ${localValue}`)
         audioEngine.seek(localValue);
         setIsDragging(false);
     }

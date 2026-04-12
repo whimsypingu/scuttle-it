@@ -1,6 +1,8 @@
-import type { AudioCallback, AudioEvent, AudioStrategy, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions } from "./audio.types";
-import { IOSStrategy } from "./strategies/IOSStrategy";
-import { StandardStrategy } from "./strategies/StandardStrategy";
+import { IOSStrategy } from "@/features/audio/strategies/IOSStrategy";
+import { StandardStrategy } from "@/features/audio/strategies/StandardStrategy";
+
+import type { AudioCallback, AudioEvent, AudioStrategy, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions } from "@/features/audio/audio.types";
+
 
 class AudioEngine implements IAudioEngine  {
     private static instance: AudioEngine;
