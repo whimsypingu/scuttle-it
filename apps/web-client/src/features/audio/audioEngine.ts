@@ -1,28 +1,33 @@
-import { IOSStrategy } from "@/features/audio/strategies/IOSStrategy";
-import { StandardStrategy } from "@/features/audio/strategies/StandardStrategy";
-
 import type { AudioCallback, AudioEvent, AudioStrategy, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions } from "@/features/audio/audio.types";
 
 
 class AudioEngine implements IAudioEngine  {
     private static instance: AudioEngine;
-    private strategy: AudioStrategy;
+    private strategy!: AudioStrategy; //! set in initialization
     
-    private constructor() {
-        console.log("Audio Engine initialized");
+    private constructor() { null }
 
-        const isIOS = true; //EMERGENCY: temporary set to ios
+    //dynamic import the strategy to prevent downloading extra logic
+    private async initializeStrategy() {
+        const isAppleMobile = /iPhone|iPad|iPod/.test(navigator.userAgent);
 
-        this.strategy = isIOS 
-            ? IOSStrategy.getInstance()
-            : StandardStrategy.getInstance();
-        // this.strategy = StandardStrategy.getInstance();
+        if (isAppleMobile) {
+            const { IOSStrategy } = await import("@/features/audio/strategies/IOSStrategy");
+            this.strategy = IOSStrategy.getInstance();
+        } else {
+            const { StandardStrategy } = await import("@/features/audio/strategies/StandardStrategy");
+            this.strategy = StandardStrategy.getInstance();
+        }
+
+        console.log(`[AudioEngine] Strategy loaded: ${this.strategy.strategy}`);
     }
 
-    //ensure only one AudioEngine exists
-    public static getInstance(): AudioEngine {
+    //ensure only one AudioEngine exists, singleton creation must be awaited now due to dynamic imports
+    public static async getInstance(): Promise<AudioEngine> {
         if (!AudioEngine.instance) {
-            AudioEngine.instance = new AudioEngine();
+            const engine = new AudioEngine();
+            await engine.initializeStrategy();
+            AudioEngine.instance = engine;
         }
         return AudioEngine.instance;
     }
@@ -88,4 +93,5 @@ class AudioEngine implements IAudioEngine  {
     }
 }
 
-export const audioEngine = AudioEngine.getInstance();
+//create the singleton with lazy import
+export const audioEngine = await AudioEngine.getInstance();
