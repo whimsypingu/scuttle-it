@@ -1,4 +1,5 @@
 import type { AudioCallback, AudioEvent, AudioStrategy, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions } from "./audio.types";
+import { IOSStrategy } from "./strategies/IOSStrategy";
 import { StandardStrategy } from "./strategies/StandardStrategy";
 
 class AudioEngine implements IAudioEngine  {
@@ -8,12 +9,12 @@ class AudioEngine implements IAudioEngine  {
     private constructor() {
         console.log("Audio Engine initialized");
 
-        const isIOS = false; //EMERGENCY: temporary set to non-ios
+        const isIOS = true; //EMERGENCY: temporary set to ios
 
-        // this.strategy = isIOS 
-        //     ? IOSStrategy.getInstance()
-        //     : StandardStrategy.getInstance();
-        this.strategy = StandardStrategy.getInstance();
+        this.strategy = isIOS 
+            ? IOSStrategy.getInstance()
+            : StandardStrategy.getInstance();
+        // this.strategy = StandardStrategy.getInstance();
     }
 
     //ensure only one AudioEngine exists
