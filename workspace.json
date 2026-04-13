@@ -13,7 +13,9 @@
             "data": "apps/audio-server/data",
             "database": "apps/audio-server/database",
 
-            "toml": "apps/audio-server/pyproject.toml"
+            "toml": "apps/audio-server/pyproject.toml",
+
+            "install": "apps/audio-server/install.py"
         },
         "web_client": {
             "root": "apps/web-client",
