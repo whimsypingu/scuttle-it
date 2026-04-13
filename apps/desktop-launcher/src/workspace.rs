@@ -1,9 +1,12 @@
 // src/workspace.rs -> holds the same info as the workspace.json in the root
+// helper file for reading and modifying .env file and workspace.json file
 
 use serde::Deserialize;
 use std::env;
 use std::fs;
 use std::path::PathBuf;
+
+use crate::constants;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Workspace {
@@ -56,7 +59,7 @@ impl Workspace {
 
     pub fn load() -> Result<Self, String> {
         //build path to workspace.json at root of the project
-        let workspace_path = Self::resolve_path("workspace.json")?;
+        let workspace_path = Self::resolve_path(constants::files::WORKSPACE)?;
 
         //read to string
         let workspace_content = fs::read_to_string(&workspace_path)
@@ -70,7 +73,7 @@ impl Workspace {
     }
 
     pub fn update_env(key: &str, value: &str) -> Result<(), String> {        
-        let env_path = Self::resolve_path(".env")?;
+        let env_path = Self::resolve_path(constants::files::ENV)?;
 
         let env_content = fs::read_to_string(&env_path)
             .unwrap_or_else(|_| String::new()); //fallback if file doesnt exist
@@ -97,7 +100,7 @@ impl Workspace {
     }
 
     pub fn retrieve_env(key: &str) -> Option<String> {
-        let env_path = Self::resolve_path(".env").ok()?;
+        let env_path = Self::resolve_path(constants::files::ENV).ok()?;
         let env_content = fs::read_to_string(&env_path).ok()?;
 
         for line in env_content.lines() {

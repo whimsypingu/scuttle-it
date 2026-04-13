@@ -3,6 +3,7 @@ use iced::widget::{text};
 
 mod core;
 mod types;
+mod constants;
 mod workspace;
 
 use types::{SetupStatus, ServiceStatus, Message};
@@ -32,7 +33,7 @@ impl App {
         let initial_setup_status = if setup_done { SetupStatus::Done } else { SetupStatus::Required };
 
         //load in initial webhook status
-        let initial_env_webhook = Workspace::retrieve_env("WEBHOOK_URL")
+        let initial_env_webhook = Workspace::retrieve_env(constants::env_keys::WEBHOOK)
             .unwrap_or_default();
 
         let app = App {
@@ -78,8 +79,7 @@ impl App {
             }
             Message::LockWebhook(save_text) => {
                 self.webhook_locked = true;
-                
-                println!("Official webhook set: {}", save_text);
+                Workspace::update_env(constants::env_keys::WEBHOOK, &save_text); //save to env
                 Task::none()
             }
         }
