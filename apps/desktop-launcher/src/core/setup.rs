@@ -60,13 +60,7 @@ pub fn view_setup_running(app: &App) -> Element<Message> {
 
 
 pub fn run_setup_logic() -> impl Stream<Item = Message> {
-
-    println!("DEBUG 1: run_setup_logic function called");
-
     stream::channel(100, |mut output: mpsc::Sender<Message>| async move {
-
-        println!("DEBUG 2: Async block started");
-
         let workspace = match Workspace::load() {
             Ok(w) => w,
             Err(e) => {
@@ -75,8 +69,7 @@ pub fn run_setup_logic() -> impl Stream<Item = Message> {
             }
         };
 
-        println!("DEBUG 3: Spawning python process"); //this part works fine
-
+        //spawns the process as a tokio Command
         let mut child = match Command::new("python")
             .arg("-u")
             .arg(Workspace::resolve_path(&workspace.apps.audio_server.install).unwrap())
@@ -92,21 +85,14 @@ pub fn run_setup_logic() -> impl Stream<Item = Message> {
             }
         };
 
-        let stderr = child.stderr.take().unwrap();
+        let stderr = child.stderr.take().unwrap(); //python pipes log results to STDERR!!! can't believe i forgot ts
         let mut reader = BufReader::new(stderr).lines();
 
-        println!("DEBUG 4: Entering read loop"); //works fine, python command is also working in the background
-
         while let Ok(Some(line)) = reader.next_line().await {
-
-            println!("PYTHON LOG: {}", line); //why is this not triggering? I don't see anything in my console
-
-            let _ = output.send(Message::SetupLog(line)).await; //send a Message to the stream output
+            let _ = output.send(Message::SetupLog(line)).await; //send a Message with the logs to the stream output
         }
 
         let status = child.wait().await;
-
-        println!("DEBUG 5: Read loop finished"); //also triggers correctly, and sends a SetupFinished(Ok(())) after
 
         match status {
             Ok(s) if s.success() => {

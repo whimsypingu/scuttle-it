@@ -43,13 +43,11 @@ impl App {
         match message {
             // --- setup logic ---
             Message::StartSetup => {
-                println!("DEBUG: StartSetup clicked");
                 self.setup_status = SetupStatus::Running;
                 self.setup_logs.clear();
-                Task::stream(core::setup::run_setup_logic()) //triggers the setup run logic, but doesn't find any Message::SetupLog(line)s?
+                Task::stream(core::setup::run_setup_logic()) //triggers the setup run logic which sends SetupLogs
             }
             Message::SetupLog(line) => {
-                println!(">>> UI RECEIVED LOG: {}", line); //never triggers :(
                 self.setup_logs.push(line);
                 Task::none()
             }
@@ -67,14 +65,6 @@ impl App {
             }
         }
     }
-
-    // pub fn subscription(&self) -> Subscription<Message> {
-    //     match self.setup_status {
-    //         SetupStatus::Running => {
-    //             Subscription::run(core::setup::run_setup_logic())
-    //         }
-    //     }
-    // }
 
     fn view(&self) -> Element<Message> {
         match &self.setup_status {
