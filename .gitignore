@@ -33,3 +33,4 @@ bundle-analysis.html
 
 # --- Launcher ---
 target/
+.install_done

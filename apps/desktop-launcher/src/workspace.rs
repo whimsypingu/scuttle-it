@@ -18,6 +18,7 @@ pub struct Apps {
 #[derive(Debug, Clone, Deserialize)]
 pub struct AudioServer {
     pub install: String,
+    pub installed: String,
 }
 
 impl Workspace {
@@ -48,11 +49,14 @@ impl Workspace {
         Ok(project_root_dir)
     }
 
-    pub fn load() -> Result<Self, String> {
+    pub fn resolve_path(relative_path: &str) -> Result<PathBuf, String> {
         let project_root_dir = Self::get_project_root_dir()?;
-    
+        Ok(project_root_dir.join(relative_path))
+    }
+
+    pub fn load() -> Result<Self, String> {
         //build path to workspace.json at root of the project
-        let workspace_path = project_root_dir.join("workspace.json");
+        let workspace_path = Self::resolve_path("workspace.json")?;
 
         //read to string
         let workspace_content = fs::read_to_string(&workspace_path)
@@ -65,8 +69,48 @@ impl Workspace {
         Ok(workspace)
     }
 
-    pub fn resolve_path(relative_path: &str) -> Result<PathBuf, String> {
-        let project_root_dir = Self::get_project_root_dir()?;
-        Ok(project_root_dir.join(relative_path))
+    pub fn update_env(key: &str, value: &str) -> Result<(), String> {        
+        let env_path = Self::resolve_path(".env")?;
+
+        let env_content = fs::read_to_string(&env_path)
+            .unwrap_or_else(|_| String::new()); //fallback if file doesnt exist
+
+        let mut new_lines = Vec::new();
+        let mut found = false;
+        let new_entry = format!("{}={}", key, value);
+
+        for line in env_content.lines() {
+            if line.starts_with(&format!("{}=", key)) {
+                new_lines.push(new_entry.as_str());
+                found = true;
+            } else {
+                new_lines.push(line);
+            }
+        }
+
+        if !found {
+            new_lines.push(new_entry.as_str());
+        }
+
+        fs::write(&env_path, new_lines.join("\n"))
+            .map_err(|e| format!("Failed to write to .env: {}", e))
+    }
+
+    pub fn retrieve_env(key: &str) -> Option<String> {
+        let env_path = Self::resolve_path(".env").ok()?;
+        let env_content = fs::read_to_string(&env_path).ok()?;
+
+        for line in env_content.lines() {
+            let line = line.trim();
+            if line.starts_with("#") || line.is_empty() { continue; }
+
+            if let Some((k, v)) = line.split_once("=") {
+                if k.trim() == key {
+                    return Some(v.trim().trim_matches('"').to_string());
+                }
+            }
+        }
+
+        None
     }
 }

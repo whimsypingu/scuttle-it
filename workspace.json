@@ -15,7 +15,8 @@
 
             "toml": "apps/audio-server/pyproject.toml",
 
-            "install": "apps/audio-server/install.py"
+            "install": "apps/audio-server/install.py",
+            "installed": ".install_done"
         },
         "web_client": {
             "root": "apps/web-client",

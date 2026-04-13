@@ -6,6 +6,7 @@ pub enum SetupStatus {
     Errored(String),
 }
 
+
 #[derive(Debug, Clone)]
 pub enum ServiceStatus {
     Idle,
@@ -14,11 +15,17 @@ pub enum ServiceStatus {
     Errored(String),
 }
 
+
 #[derive(Debug, Clone)]
-pub enum Message {
+pub enum Message {    
     // --- setup ---
     StartSetup,
     SetupFinished(Result<(), String>),
+
+    // --- dashboard ---
+    WebhookChanged(String),
+    UnlockWebhook,
+    LockWebhook(String),
 
     // --- logs ---
     SetupLog(String),
