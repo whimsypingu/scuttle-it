@@ -30,3 +30,6 @@ bundle-analysis.html
 
 # --- Binaries ---
 *.exe
+
+# --- Launcher ---
+target/
