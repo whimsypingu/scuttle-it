@@ -19,7 +19,7 @@ pub enum ServiceStatus {
 #[derive(Debug, Clone)]
 pub enum Message {
     None,
-    
+
     // --- setup ---
     StartSetup,
     SetupFinished(Result<(), String>),
@@ -34,7 +34,7 @@ pub enum Message {
     WebhookChanged(String),
     UnlockWebhook,
     LockWebhook(String),
-    WebhookSaved,
+    SaveWebhook(Result<(), String>),
 
     // --- logs ---
     SetupLog(String),

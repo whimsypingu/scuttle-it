@@ -107,14 +107,16 @@ impl App {
             }
             Message::LockWebhook(save_text) => {
                 self.is_webhook_locked = true;
-                Task::perform(core::dashboard::run_save_webhook(save_text), |result| {
-                    match result {
-                        Ok(_) => Message::WebhookSaved,
-                        Err(_) => Message::UnlockWebhook,
-                    }
-                })
+                Task::perform(
+                    core::dashboard::run_save_webhook(save_text),
+                    Message::SaveWebhook
+                )
             }
-            Message::WebhookSaved => {
+            Message::SaveWebhook(result) => {
+                match result {
+                    Ok(_) => {}
+                    Err(_) => self.is_webhook_locked = false
+                }
                 Task::none()
             }
 
