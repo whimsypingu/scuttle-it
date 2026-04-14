@@ -22,6 +22,10 @@ pub enum Message {
     StartSetup,
     SetupFinished(Result<(), String>),
 
+    // --- server ---
+    StartServer,
+    StopServer(Result<(), String>),
+
     // --- dashboard ---
     WebhookChanged(String),
     UnlockWebhook,
@@ -29,4 +33,5 @@ pub enum Message {
 
     // --- logs ---
     SetupLog(String),
+    ServerLog(String),
 }

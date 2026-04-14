@@ -1,4 +1,4 @@
-use iced::{Theme, Element, Task};
+use iced::{Theme, Element, Task, Subscription};
 use iced::widget::{text};
 
 mod core;
@@ -11,6 +11,7 @@ use workspace::{Workspace};
 
 fn main() -> iced::Result {
     iced::application(App::new, App::update, App::view)
+        .subscription(App::subscription)
         .theme(Theme::Dark)
         .run()
 }
@@ -69,6 +70,8 @@ impl App {
                 }
                 Task::none()
             }
+
+            // --- webhook ---
             Message::WebhookChanged(new_text) => {
                 self.webhook = new_text;
                 Task::none()
@@ -82,7 +85,36 @@ impl App {
                 Workspace::update_env(constants::env_keys::WEBHOOK, &save_text); //save to env
                 Task::none()
             }
+
+            // --- server ---
+            Message::StartServer => {
+                self.server_status = ServiceStatus::Starting;
+                Task::none()
+            }
+            Message::ServerLog(line) => {
+                self.logs.push(line);
+                Task::none()
+            }
+            Message::StopServer(result) => {
+                match result {
+                    Ok(_) => self.server_status = ServiceStatus::Idle,
+                    Err(e) => self.server_status = ServiceStatus::Errored(e)
+                }
+                Task::none()
+            }
         }
+    }
+
+    fn subscription(&self) -> Subscription<Message> {
+        println!(">>> Subscription: Requesting server_subscription");
+        // Subscription::batch(vec![
+        match self.server_status {
+            ServiceStatus::Starting | ServiceStatus::Running => {
+                core::server::server_subscription()
+            }
+            _ => Subscription::none()
+        }
+        // ])
     }
 
     fn view(&self) -> Element<Message> {

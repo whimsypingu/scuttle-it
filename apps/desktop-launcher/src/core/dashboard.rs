@@ -1,4 +1,4 @@
-use iced::widget::{button, row, column, text, text_input, container};
+use iced::widget::{theme, button, row, column, text, text_input, container, Column, scrollable};
 use iced::{Alignment, Element, Length, Color};
 
 use crate::{App};
@@ -13,6 +13,8 @@ pub fn view_dashboard(app: &App) -> Element<Message> {
         _ => Color::from_rgb(0.5, 0.5, 0.5), //gray
     };
 
+    let is_running = matches!(app.server_status, ServiceStatus::Starting | ServiceStatus::Running);
+
     let controls = row![
         column![
             row![
@@ -22,7 +24,17 @@ pub fn view_dashboard(app: &App) -> Element<Message> {
             .spacing(10)
             .align_y(Alignment::Center),
         
-            button("Toggle Server")
+            button(if is_running { "Stop" } else { "Start" })
+                .on_press(if is_running {
+                    Message::StopServer(Ok(()))
+                } else {
+                    Message::StartServer
+                })
+                // .style(if is_running {
+                //     theme::Button::Destructive
+                // } else {
+                //     theme::Button::Primary
+                // })
         ]
         .spacing(10)
         .align_x(Alignment::Center),
@@ -67,10 +79,25 @@ pub fn view_dashboard(app: &App) -> Element<Message> {
     .spacing(10)
     .width(Length::Fixed(400.0));
 
+
+    let mut log_column: Column<'_, Message> = Column::new()
+        .spacing(5)
+        .width(Length::Fill);
+    for line in &app.logs {
+        log_column = log_column.push(
+            text(line)
+                .size(14)
+                .font(iced::Font::MONOSPACE)
+                .color(Color::from_rgb(0.8, 0.8, 0.8))
+        );
+    }
+
+
     let content = column![
         text("Scuttle Dashboard").size(32),
         controls,
         webhook_input,
+        scrollable(log_column).height(Length::Fixed(300.0)),
     ]
     .spacing(40)
     .align_x(Alignment::Center);

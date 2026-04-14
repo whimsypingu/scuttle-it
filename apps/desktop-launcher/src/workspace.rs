@@ -26,7 +26,7 @@ pub struct AudioServer {
 
 impl Workspace {
     //gets the root of the monorepo, not the rust launcher
-    fn get_project_root_dir() -> Result<PathBuf, String> {
+    pub fn get_project_root_dir() -> Result<PathBuf, String> {
         //locate this launcher executable folder
         let launcher_path = 
             if cfg!(debug_assertions) {
