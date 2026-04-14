@@ -60,7 +60,7 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
         text("Webhook").size(16),
         row![
             text_input("https://discord.com/api/webhooks/...", &app.webhook)
-                .on_input_maybe(if app.webhook_locked {
+                .on_input_maybe(if app.is_webhook_locked {
                     None
                 } else {
                     Some(Message::WebhookChanged)
@@ -68,8 +68,8 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
                 .padding(10)
                 .size(14),
 
-            button(if app.webhook_locked { "Edit" } else { "Save" })
-                .on_press(if app.webhook_locked {
+            button(if app.is_webhook_locked { "Edit" } else { "Save" })
+                .on_press(if app.is_webhook_locked {
                     Message::UnlockWebhook
                 } else {
                     Message::LockWebhook(app.webhook.clone())

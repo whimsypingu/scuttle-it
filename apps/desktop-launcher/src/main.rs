@@ -24,7 +24,9 @@ struct App {
     logs: Vec<String>,
 
     webhook: String,
-    webhook_locked: bool,
+    is_webhook_locked: bool,
+
+    // checking_
 }
 
 impl App {
@@ -45,7 +47,7 @@ impl App {
             logs: Vec::new(),
 
             webhook: initial_env_webhook.clone(),
-            webhook_locked: !initial_env_webhook.is_empty(),
+            is_webhook_locked: !initial_env_webhook.is_empty(),
         };
 
         (app, Task::none())
@@ -77,11 +79,11 @@ impl App {
                 Task::none()
             }
             Message::UnlockWebhook => {
-                self.webhook_locked = false;
+                self.is_webhook_locked = false;
                 Task::none()
             }
             Message::LockWebhook(save_text) => {
-                self.webhook_locked = true;
+                self.is_webhook_locked = true;
                 Task::perform(core::dashboard::run_save_webhook(save_text), |result| {
                     match result {
                         Ok(_) => Message::WebhookSaved,
@@ -109,19 +111,29 @@ impl App {
                 }
                 Task::none()
             }
+            Message::ServerHealthTick => {
+                println!("TICK");
+                Task::none()
+            }
+
+
+            _ => Task::none()
         }
     }
 
     fn subscription(&self) -> Subscription<Message> {
-        println!(">>> Subscription: Requesting server_subscription");
-        // Subscription::batch(vec![
-        match self.server_status {
-            ServiceStatus::Starting | ServiceStatus::Running => {
-                core::server::server_subscription()
-            }
-            _ => Subscription::none()
-        }
-        // ])
+        Subscription::batch(vec![
+            // match self.server_status {
+            //     ServiceStatus::Starting | ServiceStatus::Running => {
+            //         core::server::server_subscription()
+            //     }
+            //     _ => Subscription::none()
+            // },
+
+            core::server::server_subscription(&self.server_status),
+
+            core::server::server_health_subscription(&self.server_status),
+        ])
     }
 
     fn view(&self) -> Element<'_, Message> {

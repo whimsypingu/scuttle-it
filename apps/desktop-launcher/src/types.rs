@@ -25,6 +25,8 @@ pub enum Message {
     // --- server ---
     StartServer,
     StopServer(Result<(), String>),
+    ServerHealthTick,
+    ServerHealth(bool),
 
     // --- dashboard ---
     WebhookChanged(String),

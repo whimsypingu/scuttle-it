@@ -1,4 +1,4 @@
-use iced::{Subscription, stream};
+use iced::{Subscription, stream, time};
 use iced::futures::{Stream, SinkExt};
 use iced::futures::channel::mpsc;
 
@@ -7,7 +7,7 @@ use tokio::process::Command;
 use tokio::io::{BufReader, AsyncBufReadExt};
 
 use crate::constants;
-use crate::types::{Message};
+use crate::types::{Message, ServiceStatus};
 use crate::workspace::{Workspace};
 
 struct ChildGuard(tokio::process::Child);
@@ -19,8 +19,34 @@ impl Drop for ChildGuard {
 }
 
 
-pub fn server_subscription() -> Subscription<Message> {
-    Subscription::run(server_worker) 
+pub fn server_health_subscription(server_status: &ServiceStatus) -> Subscription<Message> {
+    let interval = match server_status {
+        ServiceStatus::Starting => Some(time::Duration::from_secs(1)),
+        ServiceStatus::Running => Some(time::Duration::from_secs(60)),
+        _ => None, //no timer
+    };
+
+    if let Some(duration) = interval {
+        time::every(duration).map(|_| Message::ServerHealthTick)
+    } else {
+        Subscription::none()
+    }
+}
+
+pub fn server_subscription(server_status: &ServiceStatus) -> Subscription<Message> {
+            // match self.server_status {
+            //     ServiceStatus::Starting | ServiceStatus::Running => {
+            //         core::server::server_subscription()
+            //     }
+            //     _ => Subscription::none()
+            // },
+
+    match server_status {
+        ServiceStatus::Starting | ServiceStatus::Running => {
+            Subscription::run(server_worker)
+        }
+        _ => Subscription::none()
+    }
 }
 
 pub fn server_worker() -> impl Stream<Item = Message> {
