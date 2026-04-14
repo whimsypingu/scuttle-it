@@ -2,6 +2,7 @@ use iced::{Subscription, stream, time};
 use iced::futures::{Stream, SinkExt};
 use iced::futures::channel::mpsc;
 
+use reqwest;
 use std::process::Stdio;
 use tokio::process::Command;
 use tokio::io::{BufReader, AsyncBufReadExt};
@@ -39,6 +40,7 @@ pub fn server_worker() -> impl Stream<Item = Message> {
             .and_then(|(py, h, p)| Workspace::get_project_root_dir()
                 .map_err(|_| "Could not find project root directory").map(|r| (py, h, p, r)));
 
+        //if any gathrered required env vars failed error and bail
         let (python_bin, host, port, root_dir) = match config {
             Ok(values) => values,
             Err(e) => {
@@ -93,11 +95,19 @@ pub fn server_health_subscription(server_status: &ServiceStatus) -> Subscription
     }
 }
 
-// pub async fn run_server_health_check() -> bool {
-//     let client = reqwest::Client::builder()
-//         .timeout(std::time::Duration::from_millis(800)) //fast timeout
-//         .build()
-//         .unwrap_or_default();
+pub async fn run_server_health_check(client: reqwest::Client, host: String, port: String) -> Result<(), String> {
+    //check if host is the any address switch to loopback address for request
+    let target_host = if host == "0.0.0.0" {
+        "127.0.0.1"
+    } else {
+        &host
+    };
 
-//     let url = format!("http://{}:{}/status", host, port);
-// }
+    let url = format!("http://{}:{}/status", target_host, port);
+
+    match client.get(url).send().await {
+        Ok(resp) if resp.status().is_success() => Ok(()),
+        Ok(resp) => Err(format!("Server returned status: {}", resp.status())),
+        Err(e) => Err(format!("Connection failed: {}", e)),
+    }
+}

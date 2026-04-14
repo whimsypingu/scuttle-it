@@ -1,6 +1,9 @@
 use iced::{Theme, Element, Task, Subscription};
 use iced::widget::{text};
 
+use reqwest;
+use std::time::Duration;
+
 mod core;
 mod types;
 mod constants;
@@ -26,7 +29,11 @@ struct App {
     webhook: String,
     is_webhook_locked: bool,
 
-    // checking_
+    host: String,
+    port: String,
+
+    client: reqwest::Client,
+    is_checking_server_health: bool,
 }
 
 impl App {
@@ -39,6 +46,13 @@ impl App {
         let initial_env_webhook = Workspace::retrieve_env(constants::env_keys::WEBHOOK)
             .unwrap_or_default();
 
+        //other initial env vars
+        let initial_env_host = Workspace::retrieve_env(constants::env_keys::HOST)
+            .unwrap_or_else(|| constants::DEFAULT_HOST.to_string());
+
+        let initial_env_port = Workspace::retrieve_env(constants::env_keys::PORT)
+            .unwrap_or_else(|| constants::DEFAULT_PORT.to_string());
+
         let app = App {
             setup_status: initial_setup_status,
             server_status: ServiceStatus::Idle,
@@ -48,6 +62,15 @@ impl App {
 
             webhook: initial_env_webhook.clone(),
             is_webhook_locked: !initial_env_webhook.is_empty(),
+
+            host: initial_env_host,
+            port: initial_env_port,
+
+            client: reqwest::Client::builder()
+                .timeout(Duration::from_millis(5000))
+                .build()
+                .unwrap_or_default(),
+            is_checking_server_health: false,
         };
 
         (app, Task::none())
@@ -112,10 +135,28 @@ impl App {
                 Task::none()
             }
             Message::ServerHealthTick => {
-                println!("TICK");
+                if self.is_checking_server_health { //check guard preventing too many ticks piling up
+                    return Task::none();
+                }
+                self.is_checking_server_health = true;
+
+                //run a server health check and wrap the result into a Message::ServerHealth
+                let client = self.client.clone(); 
+                let host = self.host.clone();
+                let port = self.port.clone();
+                Task::perform(
+                    core::server::run_server_health_check(client, host, port),
+                    Message::ServerHealth
+                )
+            }
+            Message::ServerHealth(result) => {
+                self.is_checking_server_health = false; //reset check guard
+                match result {
+                    Ok(_) => if self.server_status != ServiceStatus::Running { self.server_status = ServiceStatus::Running; }
+                    Err(e) => self.server_status = ServiceStatus::Errored(e)
+                }
                 Task::none()
             }
-
 
             _ => Task::none()
         }

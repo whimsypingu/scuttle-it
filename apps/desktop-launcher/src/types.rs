@@ -7,7 +7,7 @@ pub enum SetupStatus {
 }
 
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ServiceStatus {
     Idle,
     Starting,
@@ -17,7 +17,9 @@ pub enum ServiceStatus {
 
 
 #[derive(Debug, Clone)]
-pub enum Message {    
+pub enum Message {
+    None,
+    
     // --- setup ---
     StartSetup,
     SetupFinished(Result<(), String>),
@@ -26,7 +28,7 @@ pub enum Message {
     StartServer,
     StopServer(Result<(), String>),
     ServerHealthTick,
-    ServerHealth(bool),
+    ServerHealth(Result<(), String>),
 
     // --- dashboard ---
     WebhookChanged(String),

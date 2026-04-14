@@ -9,3 +9,6 @@ pub mod env_keys {
     pub const HOST: &str = "HOST";
     pub const PORT: &str = "PORT";
 }
+
+pub const DEFAULT_HOST: &str = "127.0.0.1";
+pub const DEFAULT_PORT: &str = "8000";
