@@ -60,6 +60,15 @@ pub fn view_setup_running(app: &App) -> Element<'_, Message> {
 }
 
 
+/// Determines if the application setup has been completed.
+///
+/// This is a synchronous check that:
+/// 1. Attempts to load the current workspace configuration.
+/// 2. Resolves the path to the "installed" marker file (defined in the workspace).
+/// 3. Verifies if that file actually exists on the local filesystem.
+///
+/// Returns `true` if the marker file exists, indicating setup is finished. 
+/// Returns `false` if the workspace cannot be loaded, the path is invalid, or the file is missing.
 pub fn run_setup_done_check() -> bool {
     let workspace = match Workspace::load() {
         Ok(w) => w,
@@ -75,8 +84,24 @@ pub fn run_setup_done_check() -> bool {
 }
 
 
+/// Executes the application setup process by running an external Python installation script.
+///
+/// This worker spawns a Python process to perform the heavy lifting (e.g., environment 
+/// creation, dependency installation). It streams the installation logs back to the 
+/// UI in real-time.
+///
+/// ### Process Details:
+/// - **Command**: Runs `python -u <install_script_path>`. The `-u` flag ensures 
+///   unbuffered output so logs appear in the UI immediately.
+/// - **Log Capture**: Captures `stderr` (standard for Python's diagnostic/installation logs) 
+///   and sends each line as a `Message::SetupLog`.
+/// - **Completion**: Waits for the process to exit and returns `Message::SetupFinished` 
+///   with either an `Ok` or an `Err` based on the exit status.
+///
+/// Returns a `Stream` of `Message` variants to drive the Setup UI progress.
 pub fn run_setup_logic() -> impl Stream<Item = Message> {
     stream::channel(100, |mut output: mpsc::Sender<Message>| async move {
+        // --- 1. Workspace Preparation ---
         let workspace = match Workspace::load() {
             Ok(w) => w,
             Err(e) => {
@@ -85,7 +110,7 @@ pub fn run_setup_logic() -> impl Stream<Item = Message> {
             }
         };
 
-        //spawns the process as a tokio Command
+        // --- 2. Spawning the Installation Script ---
         let mut child = match Command::new("python")
             .arg("-u")
             .arg(Workspace::resolve_path(&workspace.apps.audio_server.install).unwrap())
@@ -101,14 +126,16 @@ pub fn run_setup_logic() -> impl Stream<Item = Message> {
             }
         };
 
-        let stderr = child.stderr.take().unwrap(); //python pipes log results to STDERR!!! can't believe i forgot ts
+        // --- 3. Streaming Diagnostic Logs ---
+        let stderr = child.stderr.take().unwrap(); //python pipes log results to stderr, consider piping both
         let mut reader = BufReader::new(stderr).lines();
 
         while let Ok(Some(line)) = reader.next_line().await {
             let _ = output.send(Message::SetupLog(line)).await; //send a Message with the logs to the stream output
         }
 
-        let status = child.wait().await;
+        // --- 4. Finalizing ---
+        let status = child.wait().await; //unlike the server worker wait for this process to finish naturally
 
         match status {
             Ok(s) if s.success() => {

@@ -18,8 +18,6 @@ pub enum ServiceStatus {
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    None,
-
     // --- setup ---
     StartSetup,
     SetupFinished(Result<(), String>),

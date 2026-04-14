@@ -113,6 +113,16 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
 }
 
 
+/// Updates the application's environment configuration with a new webhook URL.
+///
+/// This function persists the provided string to the local `.env` file
+///
+/// ### Arguments
+/// * `w` - The new webhook URL string to be saved.
+///
+/// ### Returns
+/// * `Ok(())` if the write operation was successful.
+/// * `Err(String)` if the workspace was unable to update the environment file.
 pub async fn run_save_webhook(w: String) -> Result<(), String> {
     Workspace::update_env(constants::env_keys::WEBHOOK, &w)
         .map_err(|e| format!("Failed to save webhook: {}", e))
