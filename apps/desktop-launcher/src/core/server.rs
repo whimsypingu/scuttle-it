@@ -30,30 +30,21 @@ pub fn server_subscription(server_status: &ServiceStatus) -> Subscription<Messag
 pub fn server_worker() -> impl Stream<Item = Message> {
     stream::channel(100, |mut output: mpsc::Sender<Message>| async move {
         //spawns the process as a tokio Command
-        
+        let config = Workspace::retrieve_env(constants::env_keys::PYTHON)   
+            .ok_or("Python executable not setup correctly in env")
+            .and_then(|py| Workspace::retrieve_env(constants::env_keys::HOST)
+                .ok_or("Host not setup correctly in env").map(|h| (py, h)))
+            .and_then(|(py, h)| Workspace::retrieve_env(constants::env_keys::PORT)
+                .ok_or("Port not setup correctly in env").map(|p| (py, h, p)))
+            .and_then(|(py, h, p)| Workspace::get_project_root_dir()
+                .map_err(|_| "Could not find project root directory").map(|r| (py, h, p, r)));
 
-        let Some(python_bin) = Workspace::retrieve_env(constants::env_keys::PYTHON) else {
-            let err_msg = "Python executable not setup correctly in env".to_string();
-            let _ = output.send(Message::StopServer(Err(err_msg))).await;
-            return;
-        };
-
-        let Some(host) = Workspace::retrieve_env(constants::env_keys::HOST) else {
-            let err_msg = "Host not setup correctly in env".to_string();
-            let _ = output.send(Message::StopServer(Err(err_msg))).await;
-            return;
-        };
-
-        let Some(port) = Workspace::retrieve_env(constants::env_keys::PORT) else {
-            let err_msg = "Port not setup correctly in env".to_string();
-            let _ = output.send(Message::StopServer(Err(err_msg))).await;
-            return;
-        };        
-
-        let Ok(root_dir) = Workspace::get_project_root_dir() else {
-            let err_msg = "Could not find project root directory".to_string();
-            let _ = output.send(Message::StopServer(Err(err_msg))).await;
-            return;
+        let (python_bin, host, port, root_dir) = match config {
+            Ok(values) => values,
+            Err(e) => {
+                let _ = output.send(Message::StopServer(Err(e.to_string()))).await;
+                return;
+            }
         };
 
         let mut cmd = Command::new(python_bin);
