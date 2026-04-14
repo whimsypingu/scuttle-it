@@ -2,10 +2,12 @@ use iced::widget::{theme, button, row, column, text, text_input, container, Colu
 use iced::{Alignment, Element, Length, Color};
 
 use crate::{App};
+use crate::constants;
 use crate::types::{Message, ServiceStatus};
+use crate::workspace::{Workspace};
 
 
-pub fn view_dashboard(app: &App) -> Element<Message> {
+pub fn view_dashboard(app: &App) -> Element<'_, Message> {
 
     let status_color = |status: &ServiceStatus| match status {
         ServiceStatus::Running => Color::from_rgb(0.0, 0.8, 0.0), //green
@@ -108,4 +110,10 @@ pub fn view_dashboard(app: &App) -> Element<Message> {
         .center_x(Length::Fill)
         .center_y(Length::Fill)
         .into()
+}
+
+
+pub async fn run_save_webhook(w: String) -> Result<(), String> {
+    Workspace::update_env(constants::env_keys::WEBHOOK, &w)
+        .map_err(|e| format!("Failed to save webhook: {}", e))
 }

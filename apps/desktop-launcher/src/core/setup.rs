@@ -12,7 +12,7 @@ use crate::types::{Message};
 use crate::workspace::{Workspace};
 
 
-pub fn view_setup_required(_app: &App) -> Element<Message> {
+pub fn view_setup_required(_app: &App) -> Element<'_, Message> {
     let content = column![
         text("Setup required!").size(30),
         button("Setup")
@@ -30,7 +30,7 @@ pub fn view_setup_required(_app: &App) -> Element<Message> {
         .into()
 }
 
-pub fn view_setup_running(app: &App) -> Element<Message> {
+pub fn view_setup_running(app: &App) -> Element<'_, Message> {
     let mut log_column: Column<'_, Message> = Column::new()
         .spacing(5)
         .width(Length::Fill);

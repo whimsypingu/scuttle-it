@@ -82,7 +82,14 @@ impl App {
             }
             Message::LockWebhook(save_text) => {
                 self.webhook_locked = true;
-                Workspace::update_env(constants::env_keys::WEBHOOK, &save_text); //save to env
+                Task::perform(core::dashboard::run_save_webhook(save_text), |result| {
+                    match result {
+                        Ok(_) => Message::WebhookSaved,
+                        Err(_) => Message::UnlockWebhook,
+                    }
+                })
+            }
+            Message::WebhookSaved => {
                 Task::none()
             }
 
@@ -117,7 +124,7 @@ impl App {
         // ])
     }
 
-    fn view(&self) -> Element<Message> {
+    fn view(&self) -> Element<'_, Message> {
         match &self.setup_status {
             SetupStatus::Required => {
                 core::setup::view_setup_required(self)

@@ -30,6 +30,7 @@ pub enum Message {
     WebhookChanged(String),
     UnlockWebhook,
     LockWebhook(String),
+    WebhookSaved,
 
     // --- logs ---
     SetupLog(String),
