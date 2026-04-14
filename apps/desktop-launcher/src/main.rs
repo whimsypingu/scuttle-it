@@ -123,16 +123,8 @@ impl App {
 
     fn subscription(&self) -> Subscription<Message> {
         Subscription::batch(vec![
-            // match self.server_status {
-            //     ServiceStatus::Starting | ServiceStatus::Running => {
-            //         core::server::server_subscription()
-            //     }
-            //     _ => Subscription::none()
-            // },
-
-            core::server::server_subscription(&self.server_status),
-
-            core::server::server_health_subscription(&self.server_status),
+            core::server::server_subscription(&self.server_status), //start the server based on server_status
+            core::server::server_health_subscription(&self.server_status), //check server health if applicable
         ])
     }
 
