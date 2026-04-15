@@ -1,4 +1,4 @@
-use iced::widget::{theme, button, row, column, text, text_input, container, Column, scrollable};
+use iced::widget::{button, row, column, text, text_input, container, Column, scrollable};
 use iced::{Alignment, Element, Length, Color};
 
 use crate::{App};
@@ -15,7 +15,8 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
         _ => Color::from_rgb(0.5, 0.5, 0.5), //gray
     };
 
-    let is_running = matches!(app.server_status, ServiceStatus::Starting | ServiceStatus::Running);
+    let is_server_running = matches!(app.server_status, ServiceStatus::Starting | ServiceStatus::Running);
+    let is_tunnel_running = matches!(app.tunnel_status, ServiceStatus::Starting | ServiceStatus::Running);
 
     let controls = row![
         column![
@@ -26,17 +27,12 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
             .spacing(10)
             .align_y(Alignment::Center),
         
-            button(if is_running { "Stop" } else { "Start" })
-                .on_press(if is_running {
+            button(if is_server_running { "Stop" } else { "Start" })
+                .on_press(if is_server_running {
                     Message::StopServer(Ok(()))
                 } else {
                     Message::StartServer
                 })
-                // .style(if is_running {
-                //     theme::Button::Destructive
-                // } else {
-                //     theme::Button::Primary
-                // })
         ]
         .spacing(10)
         .align_x(Alignment::Center),
@@ -49,9 +45,15 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
             .spacing(10)
             .align_y(Alignment::Center),
             
-            button("Toggle Tunnel")
+            button(if is_tunnel_running { "Stop" } else { "Start" })
+                .on_press(if is_tunnel_running {
+                    Message::StopTunnel(Ok(()))
+                } else {
+                    Message::StartTunnel
+                })
         ]
-        .spacing(10).align_x(Alignment::Center),
+        .spacing(10)
+        .align_x(Alignment::Center),
     ]
     .spacing(50)
     .align_y(Alignment::Center);
@@ -82,6 +84,23 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
     .width(Length::Fixed(400.0));
 
 
+    let url_display = if let Some(url) = &app.tunnel_url {
+        column![
+            text("Public Tunnel URL:").size(12),
+            text_input(
+                "Tunnel URL will appear here...",
+                url,
+            )
+            .padding(10)
+        ]
+    } else {
+        column![
+            text("Tunnel URL:").size(12),
+            text("Waiting for tunnel to initialize...").color([0.5, 0.5, 0.5])
+        ]
+    };
+
+
     let mut log_column: Column<'_, Message> = Column::new()
         .spacing(5)
         .width(Length::Fill);
@@ -99,6 +118,7 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
         text("Scuttle Dashboard").size(32),
         controls,
         webhook_input,
+        url_display,
         scrollable(log_column).height(Length::Fixed(300.0)),
     ]
     .spacing(40)

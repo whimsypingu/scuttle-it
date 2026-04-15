@@ -34,6 +34,9 @@ struct App {
 
     client: reqwest::Client,
     is_checking_server_health: bool,
+    is_checking_tunnel_health: bool,
+
+    tunnel_url: Option<String>,
 }
 
 impl App {
@@ -71,6 +74,9 @@ impl App {
                 .build()
                 .unwrap_or_default(),
             is_checking_server_health: false,
+            is_checking_tunnel_health: false,
+
+            tunnel_url: None,
         };
 
         (app, Task::none())
@@ -115,7 +121,24 @@ impl App {
             Message::SaveWebhook(result) => {
                 match result {
                     Ok(_) => {}
-                    Err(_) => self.is_webhook_locked = false
+                    Err(_) => {
+                        self.is_webhook_locked = false;
+                    }
+                }
+
+                let client = self.client.clone();
+                let tunnel_url = self.tunnel_url.clone();
+                Task::perform(
+                    core::tunnel::notify_webhook(client, tunnel_url),
+                    Message::WebhookSent
+                )
+            }
+            Message::WebhookSent(result) => {
+                match result {
+                    Ok(_) => {}
+                    Err(_) => {
+                        println!("Please set a webhook");
+                    }
                 }
                 Task::none()
             }
@@ -131,12 +154,19 @@ impl App {
             }
             Message::StopServer(result) => {
                 match result {
-                    Ok(_) => self.server_status = ServiceStatus::Idle,
-                    Err(e) => self.server_status = ServiceStatus::Errored(e)
+                    Ok(_) => {
+                        self.server_status = ServiceStatus::Idle;
+                        self.tunnel_status = ServiceStatus::Idle;
+                    }
+                    Err(e) => {
+                        self.server_status = ServiceStatus::Errored(e)
+                    }
                 }
                 Task::none()
             }
             Message::ServerHealthTick => {
+                println!("Message::ServerHealthTick");
+
                 if self.is_checking_server_health { //check guard preventing too many ticks piling up
                     return Task::none();
                 }
@@ -154,11 +184,78 @@ impl App {
             Message::ServerHealth(result) => {
                 self.is_checking_server_health = false; //reset check guard
                 match result {
-                    Ok(_) => if self.server_status != ServiceStatus::Running { self.server_status = ServiceStatus::Running; }
-                    Err(e) => self.server_status = ServiceStatus::Errored(e)
+                    Ok(_) => {
+                        if self.server_status != ServiceStatus::Running { self.server_status = ServiceStatus::Running };
+                    }
+                    Err(e) => {
+                        self.server_status = ServiceStatus::Starting;
+
+                        println!("Server health check failed: {}. Restarting...", e);
+                    }
                 }
                 Task::none()
             }
+
+            // --- tunnel ---
+            Message::StartTunnel => {
+                self.tunnel_status = ServiceStatus::Starting;
+                if self.server_status != ServiceStatus::Running { self.server_status = ServiceStatus::Starting };
+                Task::none()
+            }
+            Message::TunnelLog(line) => {
+                self.logs.push(line);
+                Task::none()
+            }
+            Message::StopTunnel(result) => {
+                self.tunnel_url = None;
+                match result {
+                    Ok(_) => self.tunnel_status = ServiceStatus::Idle,
+                    Err(e) => self.tunnel_status = ServiceStatus::Errored(e)
+                }
+                Task::none()
+            }
+            Message::SetTunnelUrl(url) => {
+                self.tunnel_url = Some(url);
+                self.tunnel_status = ServiceStatus::Running;
+
+                let client = self.client.clone();
+                let tunnel_url = self.tunnel_url.clone();
+                Task::perform(
+                    core::tunnel::notify_webhook(client, tunnel_url),
+                    Message::WebhookSent
+                )
+            }
+            Message::TunnelHealthTick => {
+                println!("Message::TunnelHealthTick");
+
+                if self.is_checking_tunnel_health { //check guard preventing too many ticks piling up
+                    return Task::none();
+                }
+                self.is_checking_tunnel_health = true;
+
+                //run a tunnel health check and wrap the result into a Message::TunnelHealth
+                let client = self.client.clone();
+                let tunnel_url = self.tunnel_url.clone();
+                Task::perform(
+                    core::tunnel::run_tunnel_health_check(client, tunnel_url),
+                    Message::TunnelHealth
+                )
+            }
+            Message::TunnelHealth(result) => {
+                self.is_checking_tunnel_health = false; //reset check guard
+                match result {
+                    Ok(_) => {} //bing chilling
+                    Err(e) => {
+                        self.tunnel_url = None;                        
+                        self.tunnel_status = ServiceStatus::Starting;
+                        if self.server_status != ServiceStatus::Running { self.server_status = ServiceStatus::Starting };
+
+                        println!("Tunnel health check failed: {}. Restarting...", e);
+                    }
+                }
+                Task::none()
+            }
+
         }
     }
 
@@ -166,6 +263,9 @@ impl App {
         Subscription::batch(vec![
             core::server::server_subscription(&self.server_status), //start the server based on server_status
             core::server::server_health_subscription(&self.server_status), //check server health if applicable
+
+            core::tunnel::tunnel_subscription(&self.server_status, &self.tunnel_status), //doesnt start tunnel until a url is found is started
+            core::tunnel::tunnel_health_subscription(&self.server_status, &self.tunnel_status),
         ])
     }
 

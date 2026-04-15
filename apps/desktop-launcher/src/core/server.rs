@@ -118,8 +118,8 @@ pub fn server_worker() -> impl Stream<Item = Message> {
 /// Returns a `Message::ServerHealthTick` which triggers a background health check task.
 pub fn server_health_subscription(server_status: &ServiceStatus) -> Subscription<Message> {
     let interval = match server_status {
-        ServiceStatus::Starting => Some(time::Duration::from_secs(constants::SERVER_HEALTH_CHECK_STARTING_INTERVAL)),
-        ServiceStatus::Running => Some(time::Duration::from_secs(constants::SERVER_HEALTH_CHECK_RUNNING_INTERVAL)),
+        ServiceStatus::Starting => Some(time::Duration::from_secs(constants::HEALTH_CHECK_STARTING_INTERVAL)),
+        ServiceStatus::Running => Some(time::Duration::from_secs(constants::HEALTH_CHECK_RUNNING_INTERVAL)),
         _ => None, //no timer
     };
 
@@ -149,10 +149,10 @@ pub async fn run_server_health_check(client: reqwest::Client, host: String, port
         &host
     };
 
-    let url = format!("http://{}:{}/status", target_host, port); //server status endpoint
+    let status_endpoint = format!("http://{}:{}/status", target_host, port); //server status endpoint
 
     //just return whether request worked or not for returning Ok or not
-    match client.get(url).send().await {
+    match client.get(status_endpoint).send().await {
         Ok(resp) if resp.status().is_success() => Ok(()), //200-299 status codes
         Ok(resp) => Err(format!("Server returned status: {}", resp.status())), //server up but erroring
         Err(e) => Err(format!("Connection failed: {}", e)),

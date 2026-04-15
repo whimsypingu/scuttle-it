@@ -28,13 +28,22 @@ pub enum Message {
     ServerHealthTick,
     ServerHealth(Result<(), String>),
 
-    // --- dashboard ---
+    // --- tunnel ---
+    StartTunnel,
+    StopTunnel(Result<(), String>),
+    SetTunnelUrl(String),
+    TunnelHealthTick,
+    TunnelHealth(Result<(), String>),
+
+    // --- webhook ---
     WebhookChanged(String),
     UnlockWebhook,
     LockWebhook(String),
     SaveWebhook(Result<(), String>),
+    WebhookSent(Result<(), String>),
 
     // --- logs ---
     SetupLog(String),
     ServerLog(String),
+    TunnelLog(String),
 }
