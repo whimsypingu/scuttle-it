@@ -139,7 +139,7 @@ pub fn run_setup_logic() -> impl Stream<Item = Message> {
 
         let final_result = match status {
             Ok(s) if s.success() => {
-                finalize_install().await
+                finalize_install().await //create sentinel file to indicate setup not needed anymore
                     .map_err(|e| format!("Install succeeded but sentinel file creation failed: {}", e))
             }
             Ok(s) => Err(format!("Installer exited with code: {}", s)),
@@ -147,21 +147,22 @@ pub fn run_setup_logic() -> impl Stream<Item = Message> {
         };
 
         let _ = output.send(Message::SetupFinished(final_result)).await;
-
-        // match status {
-        //     Ok(s) if s.success() => {
-        //         let _ = output.send(Message::SetupFinished(Ok(()))).await;
-        //     }
-        //     _ => {
-        //         let _ = output.send(Message::SetupFinished(Err("Failed".into()))).await;
-        //     }
-        // }
     })
 }
 
 
+/// Finalizes the installation by creating a sentinel manifest file.
+///
+/// This function loads the workspace configuration to resolve the installation 
+/// path, generates a JSON manifest containing deployment metadata (date, 
+/// version, and platform), and persists it to disk. This file serves as 
+/// the "source of truth" for the `run_setup_done_check`.
+///
+/// ### Errors
+/// Returns an error if the workspace cannot be loaded, the sentinel path 
+/// cannot be resolved, or the filesystem write operation fails.
 async fn finalize_install() -> Result<(), String> {
-
+    //get the path to the sentinel file
     let workspace = Workspace::load()
         .map_err(|e| e.to_string())?;
 
