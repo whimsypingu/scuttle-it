@@ -88,6 +88,11 @@ pub fn server_worker() -> impl Stream<Item = Message> {
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
 
+        #[cfg(windows)]
+        {
+            cmd.creation_flags(constants::CREATE_NO_WINDOW);
+        }
+
         // --- 3. Process Execution & Monitoring ---
         match cmd.spawn() {
             Ok(child) => {

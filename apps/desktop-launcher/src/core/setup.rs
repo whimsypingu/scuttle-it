@@ -8,6 +8,7 @@ use tokio::process::Command;
 use tokio::io::{BufReader, AsyncBufReadExt};
 
 use crate::{App};
+use crate::constants;
 use crate::types::{Message};
 use crate::workspace::{Workspace};
 
@@ -111,13 +112,23 @@ pub fn run_setup_logic() -> impl Stream<Item = Message> {
         };
 
         // --- 2. Spawning the Installation Script ---
-        let mut child = match Command::new("python")
-            .arg("-u")
-            .arg(Workspace::resolve_path(&workspace.apps.audio_server.install).unwrap())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()
+        let mut cmd = Command::new("python");
+        cmd.args([
+            "-u",
+            &Workspace::resolve_path(&workspace.apps.audio_server.install) //pathbuf to &str
+                .unwrap()
+                .display()
+                .to_string(),
+        ])
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
+
+        #[cfg(windows)]
         {
+            cmd.creation_flags(constants::CREATE_NO_WINDOW);
+        }
+
+        let mut child = match cmd.spawn() {
             Ok(c) => c,
             Err(e) => {
                 let err_msg = format!("Spawn failed: {e}");

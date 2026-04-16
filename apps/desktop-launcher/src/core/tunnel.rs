@@ -86,6 +86,11 @@ pub fn tunnel_worker() -> impl Stream<Item = Message> {
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
 
+        #[cfg(windows)]
+        {
+            cmd.creation_flags(constants::CREATE_NO_WINDOW);
+        }
+        
         // --- 3. Process Execution & Monitoring ---
         let mut url_detected = false;
         match cmd.spawn() {

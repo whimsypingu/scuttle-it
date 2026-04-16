@@ -1,4 +1,4 @@
-use iced::widget::{button, row, column, text, text_input, container, Column, scrollable};
+use iced::widget::{button, row, column, text, text_input, container}; //, Column, scrollable};
 use iced::{Alignment, Element, Length, Color};
 
 use crate::{App};
@@ -74,7 +74,6 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
                 } else {
                     Message::LockWebhook(app.webhook.clone())
                 })
-                .padding(10),
         ]
         .spacing(10),
     ]
@@ -91,36 +90,42 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
             )
             .padding(10)
         ]
+        .spacing(10)
+        .width(Length::Fixed(400.0))
     } else {
         column![
             text("Tunnel URL:").size(12),
             text("Waiting for tunnel to initialize...").color([0.5, 0.5, 0.5])
         ]
+        .spacing(10)
+        .width(Length::Fixed(400.0))
     };
 
 
-    let mut log_column: Column<'_, Message> = Column::new()
-        .spacing(5)
-        .width(Length::Fill);
-    for line in &app.logs {
-        log_column = log_column.push(
-            text(line)
-                .size(14)
-                .font(iced::Font::MONOSPACE)
-                .color(Color::from_rgb(0.8, 0.8, 0.8))
-        );
-    }
+    // let mut log_column: Column<'_, Message> = Column::new()
+    //     .spacing(5)
+    //     .width(Length::Fill);
+    // for line in &app.logs {
+    //     log_column = log_column.push(
+    //         text(line)
+    //             .size(14)
+    //             .font(iced::Font::MONOSPACE)
+    //             .color(Color::from_rgb(0.8, 0.8, 0.8))
+    //     );
+    // }
 
 
     let content = column![
-        text("Scuttle Dashboard").size(32),
+        text("Scuttle").size(32),
         controls,
         webhook_input,
         url_display,
-        scrollable(log_column).height(Length::Fixed(300.0)),
+        // scrollable(log_column).height(Length::Fixed(300.0)),
     ]
+    .padding(40)
     .spacing(40)
-    .align_x(Alignment::Center);
+    .align_x(Alignment::Center)
+    .height(Length::Fill);
 
     container(content)
         .width(Length::Fill)
