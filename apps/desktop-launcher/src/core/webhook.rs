@@ -59,6 +59,31 @@ pub async fn notify_webhook(
 /// Helper functions for generating standardized Markdown messages for external notifications.
 pub mod notifications {
 
+    /// Generates a status message for the local server access URL.
+    ///
+    /// This function attempts to retrieve the system's hostname to provide a 
+    /// user-friendly `.local` address (mDNS). If the hostname is successfully 
+    /// retrieved, it returns a success message; otherwise, it returns a 
+    /// warning indicating that the hostname could not be determined.
+    ///
+    /// ### Returns
+    /// A formatted string intended for notifications (e.g., via Webhooks).
+    pub fn server_url_access(port: String) -> String {
+        let host = hostname::get()
+            .ok()
+            .and_then(|h| h.into_string().ok());
+
+        match host {
+            Some(h) => {
+                let u = format!("http://{}.local:{}", h, port);
+                format!("Server Online - [Scuttle Locally]({})", u)
+            }
+            None => {
+                ("Server Warning - The server worker reported a start, but no local hostname was found.").to_string()
+            }
+        }
+    }
+
     /// Formats a message indicating the network tunnel is live.
     ///
     /// If `url` is `None`, it generates a warning message suggesting a parsing failure.
@@ -69,10 +94,10 @@ pub mod notifications {
     pub fn tunnel_url_access(url: Option<String>) -> String {
         match url {
             Some(u) => {
-                format!("**Tunnel Online**\nURL: `{}`", u)
+                format!("Tunnel Online - [Scuttle]({})", u)
             }
             None => {
-                ("**Tunnel Warning**\nThe tunnel worker reported a start, but no URL was found.").to_string()
+                ("Tunnel Warning - The tunnel worker reported a start, but no URL was found.").to_string()
             }
         }
     }
@@ -83,6 +108,6 @@ pub mod notifications {
     /// * `name` - The name of the service (e.g., "Audio Server" or "Tunnel").
     /// * `err` - The error message or status code received.    
     pub fn health_check_failed(name: &str, err: &str) -> String {
-        format!("**Health Check Failed**: `{}` is unresponsive.\n**{} Error**\nAttempting restart.", name, err)
+        format!("Health Check Failed: `{}` is unresponsive.\n{} Error\nAttempting restart...", name, err)
     }
 }

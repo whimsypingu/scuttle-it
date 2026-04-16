@@ -126,12 +126,20 @@ impl App {
                     }
                 }
 
-                let client = self.client.clone();
-                let msg = core::webhook::notifications::tunnel_url_access(self.tunnel_url.clone());
-                Task::perform(
-                    core::webhook::notify_webhook(client, msg),
+                //notifications about server local access and server tunnel access
+                let msg_server = core::webhook::notifications::server_url_access(self.port.clone());
+                let task_server = Task::perform(
+                    core::webhook::notify_webhook(self.client.clone(), msg_server),
                     Message::WebhookSent
-                )
+                );
+
+                let msg_tunnel = core::webhook::notifications::tunnel_url_access(self.tunnel_url.clone());
+                let task_tunnel = Task::perform(
+                    core::webhook::notify_webhook(self.client.clone(), msg_tunnel),
+                    Message::WebhookSent
+                );
+
+                Task::batch(vec![task_server, task_tunnel])
             }
             Message::WebhookSent(result) => {
                 match result {
@@ -146,7 +154,12 @@ impl App {
             // --- SERVER ---
             Message::StartServer => {
                 self.server_status = ServiceStatus::Starting;
-                Task::none()
+
+                let msg = core::webhook::notifications::server_url_access(self.port.clone());
+                Task::perform(
+                    core::webhook::notify_webhook(self.client.clone(), msg),
+                    Message::WebhookSent
+                )
             }
             Message::ServerLog(line) => {
                 self.logs.push(line);
@@ -165,7 +178,7 @@ impl App {
                 Task::none()
             }
             Message::ServerHealthTick => {
-                println!("Message::ServerHealthTick");
+                //println!("Message::ServerHealthTick"); //DEBUG
 
                 if self.is_checking_server_health { //check guard preventing too many ticks piling up
                     return Task::none();
@@ -173,11 +186,8 @@ impl App {
                 self.is_checking_server_health = true;
 
                 //run a server health check and wrap the result into a Message::ServerHealth
-                let client = self.client.clone(); 
-                let host = self.host.clone();
-                let port = self.port.clone();
                 Task::perform(
-                    core::server::run_server_health_check(client, host, port),
+                    core::server::run_server_health_check(self.client.clone(), self.host.clone(), self.port.clone()),
                     Message::ServerHealth
                 )
             }
@@ -192,7 +202,6 @@ impl App {
                         self.server_status = ServiceStatus::Starting;
 
                         let msg = core::webhook::notifications::health_check_failed("Audio Server", &e);
-                        println!("{}", msg.clone());
                         Task::perform(
                             core::webhook::notify_webhook(self.client.clone(), msg),
                             Message::WebhookSent
@@ -223,15 +232,14 @@ impl App {
                 self.tunnel_url = Some(url);
                 self.tunnel_status = ServiceStatus::Running;
 
-                let client = self.client.clone();
                 let msg = core::webhook::notifications::tunnel_url_access(self.tunnel_url.clone());
                 Task::perform(
-                    core::webhook::notify_webhook(client, msg),
+                    core::webhook::notify_webhook(self.client.clone(), msg),
                     Message::WebhookSent
                 )
             }
             Message::TunnelHealthTick => {
-                println!("Message::TunnelHealthTick");
+                //println!("Message::TunnelHealthTick"); //DEBUG
 
                 if self.is_checking_tunnel_health { //check guard preventing too many ticks piling up
                     return Task::none();
@@ -239,10 +247,8 @@ impl App {
                 self.is_checking_tunnel_health = true;
 
                 //run a tunnel health check and wrap the result into a Message::TunnelHealth
-                let client = self.client.clone();
-                let tunnel_url = self.tunnel_url.clone();
                 Task::perform(
-                    core::tunnel::run_tunnel_health_check(client, tunnel_url),
+                    core::tunnel::run_tunnel_health_check(self.client.clone(), self.tunnel_url.clone()),
                     Message::TunnelHealth
                 )
             }
@@ -259,7 +265,6 @@ impl App {
 
                         //notify via webhook of unhealthy tunnel
                         let msg = core::webhook::notifications::health_check_failed("Tunnel", &e);
-                        println!("{}", msg.clone());
                         Task::perform(
                             core::webhook::notify_webhook(self.client.clone(), msg),
                             Message::WebhookSent
