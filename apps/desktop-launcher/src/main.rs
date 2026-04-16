@@ -114,7 +114,7 @@ impl App {
             Message::LockWebhook(save_text) => {
                 self.is_webhook_locked = true;
                 Task::perform(
-                    core::dashboard::run_save_webhook(save_text),
+                    core::webhook::run_save_webhook(save_text),
                     Message::SaveWebhook
                 )
             }
@@ -127,9 +127,9 @@ impl App {
                 }
 
                 let client = self.client.clone();
-                let tunnel_url = self.tunnel_url.clone();
+                let msg = core::webhook::notifications::tunnel_url_access(self.tunnel_url.clone());
                 Task::perform(
-                    core::tunnel::notify_webhook(client, tunnel_url),
+                    core::webhook::notify_webhook(client, msg),
                     Message::WebhookSent
                 )
             }
@@ -186,14 +186,19 @@ impl App {
                 match result {
                     Ok(_) => {
                         if self.server_status != ServiceStatus::Running { self.server_status = ServiceStatus::Running };
+                        Task::none()
                     }
                     Err(e) => {
                         self.server_status = ServiceStatus::Starting;
 
-                        println!("Server health check failed: {}. Restarting...", e);
+                        let msg = core::webhook::notifications::health_check_failed("Audio Server", &e);
+                        println!("{}", msg.clone());
+                        Task::perform(
+                            core::webhook::notify_webhook(self.client.clone(), msg),
+                            Message::WebhookSent
+                        )
                     }
                 }
-                Task::none()
             }
 
             // --- tunnel ---
@@ -219,9 +224,9 @@ impl App {
                 self.tunnel_status = ServiceStatus::Running;
 
                 let client = self.client.clone();
-                let tunnel_url = self.tunnel_url.clone();
+                let msg = core::webhook::notifications::tunnel_url_access(self.tunnel_url.clone());
                 Task::perform(
-                    core::tunnel::notify_webhook(client, tunnel_url),
+                    core::webhook::notify_webhook(client, msg),
                     Message::WebhookSent
                 )
             }
@@ -244,16 +249,22 @@ impl App {
             Message::TunnelHealth(result) => {
                 self.is_checking_tunnel_health = false; //reset check guard
                 match result {
-                    Ok(_) => {} //bing chilling
+                    Ok(_) => { //bing chilling
+                        Task::none()
+                    }
                     Err(e) => {
                         self.tunnel_url = None;                        
                         self.tunnel_status = ServiceStatus::Starting;
                         if self.server_status != ServiceStatus::Running { self.server_status = ServiceStatus::Starting };
 
-                        println!("Tunnel health check failed: {}. Restarting...", e);
+                        let msg = core::webhook::notifications::health_check_failed("Tunnel", &e);
+                        println!("{}", msg.clone());
+                        Task::perform(
+                            core::webhook::notify_webhook(self.client.clone(), msg),
+                            Message::WebhookSent
+                        )
                     }
                 }
-                Task::none()
             }
 
         }

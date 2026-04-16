@@ -3,7 +3,6 @@ use iced::futures::{Stream, SinkExt};
 use iced::futures::channel::mpsc;
 
 use reqwest;
-use serde_json;
 use std::process::Stdio;
 use tokio::process::Command;
 use tokio::io::{BufReader, AsyncBufReadExt};
@@ -175,27 +174,3 @@ pub async fn run_tunnel_health_check(client: reqwest::Client, url: Option<String
     }
 }
 
-
-pub async fn notify_webhook(client: reqwest::Client, tunnel_url: Option<String>) -> Result<(), String> {
-    //bail early if no tunnel url to post to
-    let url = match tunnel_url {
-        Some(u) => u,
-        None => return Ok(()),
-    };
-
-    let body = serde_json::json!({ 
-        "content": format!("Tunnel is live! URL: {}", url)
-    });
-
-    //bail if no webhook found
-    let webhook = Workspace::retrieve_env(constants::env_keys::WEBHOOK)
-        .ok_or("Webhook not found in environment")?;
-
-    client.post(webhook)
-        .json(&body)
-        .send()
-        .await
-        .map_err(|e| e.to_string())?;
-
-    Ok(())
-}
