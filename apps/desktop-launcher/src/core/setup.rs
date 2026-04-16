@@ -32,8 +32,10 @@ pub fn view_setup_required(_app: &App) -> Element<'_, Message> {
 }
 
 pub fn view_setup_running(app: &App) -> Element<'_, Message> {
+
     let mut log_column: Column<'_, Message> = Column::new()
         .spacing(5)
+        .padding(40)
         .width(Length::Fill);
     for line in &app.logs {
         log_column = log_column.push(
@@ -43,12 +45,20 @@ pub fn view_setup_running(app: &App) -> Element<'_, Message> {
                 .color(Color::from_rgb(0.8, 0.8, 0.8))
         );
     }
+
+    let cancel_button = button(
+        text("Cancel")
+            .size(14)
+            .align_x(Alignment::Center)
+    )
+    .on_press(Message::CancelSetup);
+
     let content = column![
         text("Setting up...").size(20),
-        scrollable(log_column).height(Length::Fixed(300.0)),
-        text("End of logs.").size(10)
+        scrollable(log_column).height(Length::Fixed(200.0)),
+        cancel_button,
     ]
-    .spacing(20)
+    .spacing(10)
     .align_x(Alignment::Center)
     .width(Length::Fill);
 

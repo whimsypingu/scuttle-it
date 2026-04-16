@@ -2,6 +2,7 @@
 
 use iced::{Theme, Element, Task, Subscription};
 use iced::widget::{text};
+use iced::task::Handle;
 
 use reqwest;
 use std::time::Duration;
@@ -28,6 +29,8 @@ struct App {
     setup_status: SetupStatus,
     server_status: ServiceStatus,
     tunnel_status: ServiceStatus,
+
+    setup_handle: Option<Handle>,
 
     logs: Vec<String>,
 
@@ -66,6 +69,8 @@ impl App {
             server_status: ServiceStatus::Idle,
             tunnel_status: ServiceStatus::Idle,
 
+            setup_handle: None,
+
             logs: Vec::new(),
 
             webhook: initial_env_webhook.clone(),
@@ -93,7 +98,20 @@ impl App {
             Message::StartSetup => {
                 self.setup_status = SetupStatus::Running;
                 self.logs.clear();
-                Task::stream(core::setup::run_setup_logic()) //triggers the setup run logic which sends SetupLogs
+                let (task, handle) = Task::stream(core::setup::run_setup_logic()) //triggers the setup run logic which sends SetupLogs
+                    .abortable();
+
+                self.setup_handle = Some(handle);
+
+                task
+            }
+            Message::CancelSetup => {
+                if let Some(handle) = self.setup_handle.take() {
+                    handle.abort();
+                }
+
+                self.setup_status = SetupStatus::Required;
+                Task::none()
             }
             Message::SetupLog(line) => {
                 self.logs.push(line);

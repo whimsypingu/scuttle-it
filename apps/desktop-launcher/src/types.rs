@@ -20,6 +20,7 @@ pub enum ServiceStatus {
 pub enum Message {
     // --- setup ---
     StartSetup,
+    CancelSetup,
     SetupFinished(Result<(), String>),
 
     // --- server ---
