@@ -30,3 +30,7 @@ bundle-analysis.html
 
 # --- Binaries ---
 *.exe
+
+# --- Launcher ---
+target/
+.install_done

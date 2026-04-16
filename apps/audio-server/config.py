@@ -11,7 +11,6 @@ class Settings(BaseSettings):
     # --- SERVER CONFIG ---
     HOST: str = "0.0.0.0"
     PORT: int = 8000
-    DEBUG: bool = False
 
     # --- ENV PATH VALIDATION ---
     BIN_DIR: DirectoryPath #validates that this directory actually exists
