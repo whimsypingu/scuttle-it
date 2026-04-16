@@ -84,7 +84,7 @@ impl App {
 
     fn update(&mut self, message: Message) -> Task<Message> {
         match message {
-            // --- setup logic ---
+            // --- SETUP ---
             Message::StartSetup => {
                 self.setup_status = SetupStatus::Running;
                 self.logs.clear();
@@ -102,7 +102,7 @@ impl App {
                 Task::none()
             }
 
-            // --- webhook ---
+            // --- WEBHOOK ---
             Message::WebhookChanged(new_text) => {
                 self.webhook = new_text;
                 Task::none()
@@ -143,7 +143,7 @@ impl App {
                 Task::none()
             }
 
-            // --- server ---
+            // --- SERVER ---
             Message::StartServer => {
                 self.server_status = ServiceStatus::Starting;
                 Task::none()
@@ -201,7 +201,7 @@ impl App {
                 }
             }
 
-            // --- tunnel ---
+            // --- TUNNEL ---
             Message::StartTunnel => {
                 self.tunnel_status = ServiceStatus::Starting;
                 if self.server_status != ServiceStatus::Running { self.server_status = ServiceStatus::Starting };
@@ -253,10 +253,11 @@ impl App {
                         Task::none()
                     }
                     Err(e) => {
-                        self.tunnel_url = None;                        
+                        self.tunnel_url = None; //no valid url because tunnel isnt healthy
                         self.tunnel_status = ServiceStatus::Starting;
-                        if self.server_status != ServiceStatus::Running { self.server_status = ServiceStatus::Starting };
+                        if self.server_status != ServiceStatus::Running { self.server_status = ServiceStatus::Starting }; //start server if applicable
 
+                        //notify via webhook of unhealthy tunnel
                         let msg = core::webhook::notifications::health_check_failed("Tunnel", &e);
                         println!("{}", msg.clone());
                         Task::perform(
@@ -272,10 +273,16 @@ impl App {
 
     fn subscription(&self) -> Subscription<Message> {
         Subscription::batch(vec![
-            core::server::server_subscription(&self.server_status), //start the server based on server_status
-            core::server::server_health_subscription(&self.server_status), //check server health if applicable
+            //requires server = STARTING | RUNNING
+            core::server::server_subscription(&self.server_status),
 
-            core::tunnel::tunnel_subscription(&self.server_status, &self.tunnel_status), //doesnt start tunnel until a url is found is started
+            //requires server = STARTING | RUNNING with varying ping frequency
+            core::server::server_health_subscription(&self.server_status),
+
+            //requires server = RUNNING, and tunnel = STARTING | RUNNING
+            core::tunnel::tunnel_subscription(&self.server_status, &self.tunnel_status),
+
+            //requires server = RUNNING, and tunnel = RUNNING
             core::tunnel::tunnel_health_subscription(&self.server_status, &self.tunnel_status),
         ])
     }

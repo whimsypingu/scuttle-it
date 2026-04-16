@@ -33,7 +33,7 @@ impl Drop for ChildGuard {
 /// Iced will automatically drop the existing worker, triggering the `ChildGuard` 
 /// to terminate the tunnel process.
 pub fn tunnel_subscription(server_status: &ServiceStatus, tunnel_status: &ServiceStatus) -> Subscription<Message> {
-    //server must be running, and tunnel must be in a state where its trying to exist
+    //requires server = RUNNING and tunnel = STARTING | RUNNING
     let should_run = matches!(server_status, ServiceStatus::Running) && matches!(tunnel_status, ServiceStatus::Starting | ServiceStatus::Running);
 
     if should_run {
@@ -140,7 +140,8 @@ fn extract_cloudflared_url(line: &str) -> Option<String> {
 ///
 /// Returns a `Message::TunnelHealthTick` which triggers a background health check task.
 pub fn tunnel_health_subscription(server_status: &ServiceStatus, tunnel_status: &ServiceStatus) -> Subscription<Message> {
-    let is_active = matches!(server_status, ServiceStatus::Running) && matches!(tunnel_status, ServiceStatus::Running); //reqiures both to be running
+    //requires server = RUNNING and tunnel = RUNNING
+    let is_active = matches!(server_status, ServiceStatus::Running) && matches!(tunnel_status, ServiceStatus::Running);
 
     if is_active {
         let duration = time::Duration::from_secs(constants::HEALTH_CHECK_RUNNING_INTERVAL);

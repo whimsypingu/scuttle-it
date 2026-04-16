@@ -33,11 +33,13 @@ impl Drop for ChildGuard {
 /// Iced will automatically drop the existing worker, triggering the `ChildGuard` 
 /// to terminate the Python process.
 pub fn server_subscription(server_status: &ServiceStatus) -> Subscription<Message> {
-    match server_status {
-        ServiceStatus::Starting | ServiceStatus::Running => {
-            Subscription::run(server_worker) //uniquely identifies the worker internally
-        }
-        _ => Subscription::none()
+    //requires server = STARTING | RUNNING
+    let should_run = matches!(server_status, ServiceStatus::Starting | ServiceStatus::Running);
+
+    if should_run {
+        Subscription::run(server_worker)
+    } else {
+        Subscription::none()
     }
 }
 
@@ -117,6 +119,7 @@ pub fn server_worker() -> impl Stream<Item = Message> {
 ///
 /// Returns a `Message::ServerHealthTick` which triggers a background health check task.
 pub fn server_health_subscription(server_status: &ServiceStatus) -> Subscription<Message> {
+    //requires server = STARTING | RUNNING with varying ping frequency
     let interval = match server_status {
         ServiceStatus::Starting => Some(time::Duration::from_secs(constants::HEALTH_CHECK_STARTING_INTERVAL)),
         ServiceStatus::Running => Some(time::Duration::from_secs(constants::HEALTH_CHECK_RUNNING_INTERVAL)),
