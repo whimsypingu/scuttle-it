@@ -21,8 +21,19 @@ pub async fn run_save_webhook(w: String) -> Result<(), String> {
 }
 
 
-
-
+/// Sends a JSON-formatted notification message to the configured webhook.
+///
+/// This function retrieves the webhook URL from the environment on every call to ensure
+/// it uses the most recently saved configuration.
+///
+/// ### Arguments
+/// * `client` - A shared `reqwest::Client` (reusing a client is recommended for connection pooling).
+/// * `content` - The raw string message to send (typically formatted with Markdown).
+///
+/// ### Errors
+/// Returns an error if:
+/// * The webhook URL is missing from the environment.
+/// * The network request fails or times out.
 pub async fn notify_webhook(
     client: reqwest::Client,
     content: String 
@@ -45,7 +56,16 @@ pub async fn notify_webhook(
 }
 
 
+/// Helper functions for generating standardized Markdown messages for external notifications.
 pub mod notifications {
+
+    /// Formats a message indicating the network tunnel is live.
+    ///
+    /// If `url` is `None`, it generates a warning message suggesting a parsing failure.
+    /// 
+    /// ### Output Example
+    /// **Tunnel Online**
+    /// URL: `https://example.trycloudflare.com`
     pub fn tunnel_url_access(url: Option<String>) -> String {
         match url {
             Some(u) => {
@@ -57,10 +77,11 @@ pub mod notifications {
         }
     }
 
-    pub fn service_error(name: &str, err: &str) -> String {
-        format!("**{} Error **\n```\n{}```", name, err)
-    }
-
+    /// Formats an error message when a service fails a health check.
+    ///
+    /// ### Arguments
+    /// * `name` - The name of the service (e.g., "Audio Server" or "Tunnel").
+    /// * `err` - The error message or status code received.    
     pub fn health_check_failed(name: &str, err: &str) -> String {
         format!("**Health Check Failed**: `{}` is unresponsive.\n**{} Error**\nAttempting restart.", name, err)
     }
