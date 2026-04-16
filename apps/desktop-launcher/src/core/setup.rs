@@ -137,13 +137,52 @@ pub fn run_setup_logic() -> impl Stream<Item = Message> {
         // --- 4. Finalizing ---
         let status = child.wait().await; //unlike the server worker wait for this process to finish naturally
 
-        match status {
+        let final_result = match status {
             Ok(s) if s.success() => {
-                let _ = output.send(Message::SetupFinished(Ok(()))).await;
+                finalize_install().await
+                    .map_err(|e| format!("Install succeeded but sentinel file creation failed: {}", e))
             }
-            _ => {
-                let _ = output.send(Message::SetupFinished(Err("Failed".into()))).await;
-            }
-        }
+            Ok(s) => Err(format!("Installer exited with code: {}", s)),
+            Err(e) => Err(format!("Process error: {}", e)),
+        };
+
+        let _ = output.send(Message::SetupFinished(final_result)).await;
+
+        // match status {
+        //     Ok(s) if s.success() => {
+        //         let _ = output.send(Message::SetupFinished(Ok(()))).await;
+        //     }
+        //     _ => {
+        //         let _ = output.send(Message::SetupFinished(Err("Failed".into()))).await;
+        //     }
+        // }
     })
 }
+
+
+async fn finalize_install() -> Result<(), String> {
+
+    let workspace = Workspace::load()
+        .map_err(|e| e.to_string())?;
+
+    let sentinel_path = Workspace::resolve_path(&workspace.apps.audio_server.installed)
+        .map_err(|e| format!("Path resolution for sentinel file failed: {}", e))?;
+
+    //prepare sentinel file data
+    let manifest = serde_json::json!({
+        "install_date": chrono::Utc::now().to_rfc3339(),
+        "app_version": env!("CARGO_PKG_VERSION"),
+        "platform": std::env::consts::OS
+    });
+
+    let data = serde_json::to_string_pretty(&manifest)
+        .map_err(|e| e.to_string())?;
+
+    tokio::fs::write(sentinel_path, data)
+        .await
+        .map_err(|e| format!("IO Error: {}", e))?;
+
+    Ok(())
+}
+
+

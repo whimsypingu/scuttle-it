@@ -20,14 +20,14 @@ logger = logging.getLogger(__name__)
 logger.info("Audio Server setup initialized")
 
 try:
-    set_env_defaults(overwrite=False)
-    python_exe = ensure_venv()
-    run_pip_install()
-    install_ytdlp()
+    set_env_defaults(overwrite=False)       #set env variables
+    python_exe = ensure_venv()              #build the python venv and get the venv executable
+    run_pip_install()                       #install pip and requirements
+    install_ytdlp()                         #get best ytdlp nightly version (will be updated automatically)
 
-    download_deno(force=False)
-    download_ffmpeg(force=False)
-    download_cloudflared(force=False)
+    download_deno(force=False)              #js runtime (for ytdlp)
+    download_ffmpeg(force=False)            #ffmpeg
+    download_cloudflared(force=False)       #cloudflared (default tunnel)
 
     
 except SetupError as e:
