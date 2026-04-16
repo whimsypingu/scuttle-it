@@ -3,11 +3,11 @@ use iced::window::icon;
 
 pub fn window_settings() -> window::Settings {
     window::Settings {
-        size: (900, 650).into(),
+        size: (600, 450).into(),
         position: window::Position::Centered,
         min_size: Some((600, 450).into()),
         resizable: true,
-        decorations: true,
+        // decorations: true,
         icon: load_icon(),
         ..window::Settings::default()
     }

@@ -3,7 +3,7 @@ fn main() {
         let mut res = winresource::WindowsResource::new();
 
         //this must be a .ico file
-        res.set_icon("assets/favicon.ico");
+        res.set_icon("assets/logo_transparent_background.ico");
 
         res.set("ProductName", "Scuttle");
         res.set("FileDescription", "Scuttle");
