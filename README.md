@@ -16,9 +16,9 @@ The project is organized as a monorepo to separate the concerns of data manageme
 ```bash
 scuttle-it/
 ├── apps/
-│   ├── audio-server/           # SQLite + FastAPI backend
-│   ├── desktop-launcher/       # Launcher
-│   └── web-client/             # React + vite frontend
+│   ├── audio-server/           # SQLite + FastAPI backend (Python)
+│   ├── desktop-launcher/       # iced orchestrator (Rust)
+│   └── web-client/             # React + vite frontend (TS)
 ├── .gitattributes
 ├── .gitignore
 └── workspace.json
