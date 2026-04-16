@@ -14,7 +14,7 @@ pub fn window_settings() -> window::Settings {
 }
 
 fn load_icon() -> Option<icon::Icon> {
-    let icon_bytes = include_bytes!("../assets/white_logo_transparent_background_small.png");
+    let icon_bytes = include_bytes!("../assets/black_logo_transparent_background_small.png");
 
     image::load_from_memory(icon_bytes)
         .ok()

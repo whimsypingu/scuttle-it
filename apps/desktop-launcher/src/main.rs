@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use iced::{Theme, Element, Task, Subscription};
 use iced::widget::{text};
 
