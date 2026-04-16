@@ -7,6 +7,7 @@ use std::time::Duration;
 mod core;
 mod types;
 mod constants;
+mod styles;
 mod workspace;
 
 use types::{SetupStatus, ServiceStatus, Message};
@@ -15,6 +16,8 @@ use workspace::{Workspace};
 fn main() -> iced::Result {
     iced::application(App::new, App::update, App::view)
         .subscription(App::subscription)
+        .title("Scuttle")
+        .window(styles::window_settings())
         .theme(Theme::Dark)
         .run()
 }
@@ -195,17 +198,21 @@ impl App {
                 self.is_checking_server_health = false; //reset check guard
                 match result {
                     Ok(_) => {
-                        if self.server_status != ServiceStatus::Running { self.server_status = ServiceStatus::Running };
+                        if self.server_status != ServiceStatus::Running { self.server_status = ServiceStatus::Running }; //server is running, set it to Running
                         Task::none()
                     }
                     Err(e) => {
-                        self.server_status = ServiceStatus::Starting;
+                        if self.server_status == ServiceStatus::Running { //if server is in a running state but errors, reboot it and send a failure notification
+                            self.server_status = ServiceStatus::Starting;
 
-                        let msg = core::webhook::notifications::health_check_failed("Audio Server", &e);
-                        Task::perform(
-                            core::webhook::notify_webhook(self.client.clone(), msg),
-                            Message::WebhookSent
-                        )
+                            let msg = core::webhook::notifications::health_check_failed("Audio Server", &e);
+                            Task::perform(
+                                core::webhook::notify_webhook(self.client.clone(), msg),
+                                Message::WebhookSent
+                            )
+                        } else {
+                            Task::none() //server is starting, just keep waiting until we get an ok
+                        }
                     }
                 }
             }
