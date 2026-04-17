@@ -222,14 +222,21 @@ impl App {
                         Task::none()
                     }
                     Err(e) => {
-                        if self.server_status == ServiceStatus::Running { //if server is in a running state but errors, reboot it and send a failure notification
-                            self.server_status = ServiceStatus::Starting;
+                        if self.server_status == ServiceStatus::Running { //if server is in a running state but errors, reboot it
+                            self.server_status = ServiceStatus::Errored(e.clone());
 
                             let msg = core::webhook::notifications::health_check_failed("Audio Server", &e);
-                            Task::perform(
-                                core::webhook::notify_webhook(self.client.clone(), msg),
-                                Message::WebhookSent
-                            )
+
+                            Task::batch(vec![
+                                Task::perform(
+                                    core::webhook::notify_webhook(self.client.clone(), msg),
+                                    Message::WebhookSent
+                                ),
+                                Task::perform( //restart server after a 2 second delay
+                                    core::utils::delay(2),
+                                    |_| Message::StartServer
+                                ),
+                            ])
                         } else {
                             Task::none() //server is starting, just keep waiting until we get an ok
                         }
@@ -287,15 +294,21 @@ impl App {
                     }
                     Err(e) => {
                         self.tunnel_url = None; //no valid url because tunnel isnt healthy
-                        self.tunnel_status = ServiceStatus::Starting;
-                        if self.server_status != ServiceStatus::Running { self.server_status = ServiceStatus::Starting }; //start server if applicable
+                        self.tunnel_status = ServiceStatus::Errored(e.clone());
 
                         //notify via webhook of unhealthy tunnel
                         let msg = core::webhook::notifications::health_check_failed("Tunnel", &e);
-                        Task::perform(
-                            core::webhook::notify_webhook(self.client.clone(), msg),
-                            Message::WebhookSent
-                        )
+
+                        Task::batch(vec![
+                            Task::perform(
+                                core::webhook::notify_webhook(self.client.clone(), msg),
+                                Message::WebhookSent
+                            ),
+                            Task::perform(
+                                core::utils::delay(2),
+                                |_| Message::StartTunnel
+                            )
+                        ])
                     }
                 }
             }
