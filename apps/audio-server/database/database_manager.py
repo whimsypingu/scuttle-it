@@ -8,6 +8,7 @@ from config import settings
 
 from database.mixins.seed_mixin import SeedMixin
 from database.mixins.register_mixin import RegisterMixin
+from database.mixins.retrieval_mixin import RetrievalMixin
 from database.mixins.search_mixin import SearchMixin
 from database.mixins.settings_mixin import SettingsMixin
 from database.mixins.queue_mixin import PlayQueueMixin
@@ -16,7 +17,14 @@ from database.mixins.queue_mixin import PlayQueueMixin
 logger = logging.getLogger(__name__)
 
 
-class DatabaseManager(SeedMixin, RegisterMixin, SearchMixin, SettingsMixin, PlayQueueMixin):
+class DatabaseManager(
+    SeedMixin, 
+    RegisterMixin, 
+    RetrievalMixin, 
+    SearchMixin, 
+    SettingsMixin, 
+    PlayQueueMixin
+):
     def __init__(
         self,
         **overrides

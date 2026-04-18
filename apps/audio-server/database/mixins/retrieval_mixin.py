@@ -12,6 +12,18 @@ logger = logging.getLogger(__name__)
 class RetrievalMixin:
     """Handles database retrievals"""
 
+    async def count_downloads(self) -> int:
+        """Total number of downloaded tracks"""
+        try:
+            async with self.session() as db:
+                async with db.execute("SELECT COUNT(*) FROM downloads") as cursor:
+                    row = await cursor.fetchone()
+                    return row[0] if row else 0
+        except Exception:
+            logger.exception("Failed to retrieve Download contents")
+            raise
+
+
     async def retrieve_downloads(self, offset: int, limit: int) -> list[TrackBase]:
         """Retrieve a sublist of tracks from the Downloads table"""
         logger.info(f"Retrieving tracks from Downloads with offset {offset} and limit {limit}")
@@ -20,8 +32,8 @@ class RetrievalMixin:
         RECORD_SEP = "\x1e"
 
         query = f'''
-            WITH download_tracks AS (
-                -- Get track sublist
+            WITH downloaded_subset_tracks AS (
+                -- Get track subset
                 SELECT * 
                 FROM downloads
                 ORDER BY downloaded_at DESC
@@ -43,7 +55,7 @@ class RetrievalMixin:
                     COALESCE(a.name_display, ''), 
                     '{RECORD_SEP}'
                 ) AS artist_blob
-            FROM download_tracks d
+            FROM downloaded_subset_tracks d
             JOIN tracks t ON t.internal_id = d.track_internal_id
             JOIN track_artists ta ON ta.track_internal_id = t.internal_id
             JOIN artists a ON ta.artist_internal_id = a.internal_id
