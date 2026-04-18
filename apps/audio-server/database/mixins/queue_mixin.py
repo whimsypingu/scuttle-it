@@ -29,10 +29,13 @@ class PlayQueueMixin:
                 row = await cursor.fetchone() #returns None if empty
                 first_position = row[0] if row is not None else 100.0
 
+                #insert
                 await db.execute('''
-                    INSERT INTO play_queue (track_id, position)
-                    VALUES (?, ?);
-                ''', (track_id, first_position))
+                    INSERT INTO play_queue (track_internal_id, position)
+                    SELECT internal_id, ?
+                    FROM tracks
+                    WHERE id = ?;
+                ''', (first_position, track_id))
 
                 logger.info(f"Successfully set track_id {track_id} as the first entry of the Play Queue with position value: {first_position}")
                 return True
@@ -108,9 +111,11 @@ class PlayQueueMixin:
                 
                 #insert
                 await db.execute('''
-                    INSERT INTO play_queue (track_id, position)
-                    VALUES (?, ?);
-                ''', (track_id, new_position))
+                    INSERT INTO play_queue (track_internal_id, position)
+                    SELECT internal_id, ?
+                    FROM tracks
+                    WHERE id = ?;
+                ''', (new_position, track_id))
 
                 logger.info(f"Successfully pushed track_id {track_id} to the end of the Play Queue with position value: {new_position}")
                 return True
@@ -167,7 +172,7 @@ class PlayQueueMixin:
                 pq.queue_id,
                 pq.position
             FROM play_queue pq
-            JOIN tracks t ON pq.track_id = t.id
+            JOIN tracks t ON pq.track_internal_id = t.internal_id
             JOIN track_artists ta ON ta.track_internal_id = t.internal_id
             JOIN artists a ON a.internal_id = ta.artist_internal_id
             GROUP BY pq.position

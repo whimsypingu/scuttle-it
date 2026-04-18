@@ -8,6 +8,7 @@ from core.models.track import TrackBase
 
 logger = logging.getLogger(__name__)
 
+
 class SearchMixin:
     """Handles database search"""
 
@@ -51,6 +52,37 @@ class SearchMixin:
         RECORD_SEP = "\x1e"
 
         query = f'''
+            WITH candidates AS (
+                -- FTS lookup and scoring
+                SELECT
+                    t.internal_id,
+                    t.id,
+                    t.pref_weight AS track_pref,
+                    sub.score,
+                    CASE WHEN d.track_internal_id IS NOT NULL THEN 10.0 ELSE 1.0 END AS dl_boost
+                FROM (
+                    SELECT 
+                        rowid AS row_id,
+                        bm25(catalog_fts, 1.0, 1.5) AS score
+                    FROM catalog_fts
+                    WHERE catalog_fts MATCH ?
+                    LIMIT {internal_scan_limit}
+                ) AS sub
+                JOIN tracks t ON t.internal_id = sub.row_id
+                LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
+            ),
+            ranked_track_ids AS (
+                -- Finalize ranking
+                SELECT
+                    c.internal_id,
+                    c.score * c.track_pref * MAX(COALESCE(a.pref_weight, 1.0)) * c.dl_boost AS final_rank
+                FROM candidates c
+                JOIN track_artists ta ON ta.track_internal_id = c.internal_id
+                JOIN artists a ON a.internal_id = ta.artist_internal_id
+                GROUP BY c.internal_id
+                ORDER BY final_rank ASC
+                LIMIT {results_limit}
+            )
             SELECT
                 -- TrackBase fields
                 t.internal_id,
@@ -67,26 +99,14 @@ class SearchMixin:
                     COALESCE(a.name_display, ''), 
                     '{RECORD_SEP}'
                 ) AS artist_blob,
-                
-                -- Scoring logic: BM25 * preferences * download boost
-                sub.score * t.pref_weight * MAX(a.pref_weight) *
-                    CASE WHEN d.track_id IS NOT NULL THEN 10.0 ELSE 1.0
-                    END AS final_rank
-            FROM (
-                SELECT
-                    rowid AS internal_id,
-                    bm25(catalog_fts, 1.0, 1.5) AS score
-                FROM catalog_fts
-                WHERE catalog_fts MATCH ?
-                LIMIT {internal_scan_limit}
-            ) AS sub
-            JOIN tracks t ON t.internal_id = sub.internal_id
+
+                r.final_rank
+            FROM ranked_track_ids r
+            JOIN tracks t ON t.internal_id = r.internal_id
             JOIN track_artists ta ON ta.track_internal_id = t.internal_id
             JOIN artists a ON a.internal_id = ta.artist_internal_id
-            LEFT JOIN downloads d ON d.track_id = t.id
             GROUP BY t.internal_id
-            ORDER BY final_rank ASC
-            LIMIT {results_limit};
+            ORDER BY r.final_rank ASC;
         '''
 
         try:
