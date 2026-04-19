@@ -80,9 +80,9 @@ export const OtherHomeContentView = ({
                     className="flex flex-col gap-0"
                     style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
                 >
-                    <PlaylistList
+                    {/* <PlaylistList
                         tracks={[]}
-                    />
+                    /> */}
                 </div>
             </div>
         </motion.div>

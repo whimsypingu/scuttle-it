@@ -11,6 +11,7 @@ import { PlaylistList } from "@/features/playlist/PlaylistList";
 import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
 import type { SearchTabProps } from "@/features/search/search.types";
+import type { InfiniteScrollContext } from "../playlist/playlist.types";
 
 
 export const SearchTab = ({
@@ -39,6 +40,14 @@ export const SearchTab = ({
 
     // search hook
     const { results, isLoading, isError, triggerYoutubeSearch } = useSearch(debouncedQuery);
+    const dummySearchScrollContext: InfiniteScrollContext = ({
+        tracks: results,
+        fetchNextPage: () => {},
+        hasNextPage: false,
+        isFetchingNextPage: false,
+        isLoading: false,
+        totalCount: results.length
+    });
 
     // for checking where the user taps to close the search results
     const [isSearching, setIsSearching] = useState(false);
@@ -144,7 +153,7 @@ export const SearchTab = ({
                         >
                             {/* CONTENT AREA */}
                             <div 
-                                className="flex-1 overflow-y-auto no-scrollbar"
+                                className="flex-1 no-scrollbar"
                                 onPointerDown={(e) => {
                                     inputRef.current?.blur();
 
@@ -155,14 +164,11 @@ export const SearchTab = ({
                                     setIsSearching(false);
                                 }}                            
                             >
-                                <div 
-                                    className="flex flex-col gap-0"
-                                    style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
-                                >
-                                    <PlaylistList
-                                        tracks={results}
-                                    />
-                                </div>
+                                <PlaylistList
+                                    scrollContext={dummySearchScrollContext}
+                                    bottomSpacing={BOTTOM_SHELF.totalHeight}
+                                    actions={["like", "queueLast", "delete", "delete"]}
+                                />
                             </div>
                         </motion.div>
                         </>

@@ -10,11 +10,15 @@ import { NAV_CONFIG, BOTTOM_SHELF } from "@/features/player/player.constants";
 
 import type { Playlist } from "@/features/playlist/playlist.types";
 import type { LibraryViewProps } from "@/features/library/library.types";
+import { useDownloads } from "@/store/hooks/useDownloads";
 
 
 export const MockLibrary = ({
     tabResetSignal
 }: LibraryViewProps) => {
+
+    const scrollContext = useDownloads();
+    
     const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
 
     // Reset when the signal changes
@@ -126,8 +130,9 @@ export const MockLibrary = ({
                         {/* CONTENT AREA */}
                         <div className="flex-1 no-scrollbar">
                             <PlaylistList
-                                tracks={[]}
+                                scrollContext={scrollContext}
                                 bottomSpacing={BOTTOM_SHELF.totalHeight}
+                                actions={["like", "queueLast", "delete", "delete"]}
                             />
                         </div>
 

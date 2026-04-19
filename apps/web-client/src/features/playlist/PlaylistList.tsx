@@ -8,9 +8,16 @@ import { Virtuoso } from 'react-virtuoso';
 
 
 export const PlaylistList = ({
-    tracks = [],
-    bottomSpacing = 0
+    scrollContext,
+    bottomSpacing = 0,
+    actions = ["like", "queueLast", "delete", "delete"]
 }: PlaylistListProps) => {
+    const {
+        tracks,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage
+    } = scrollContext;
 
     const handleTrackSelect = (track: TrackBase) => {
         console.log("Selected track:", track.title);
@@ -18,19 +25,25 @@ export const PlaylistList = ({
 
     return (
         <motion.div
-            key="playlist-content"
-            className="flex flex-col min-h-0 gap-1 w-full h-full pt-2"
+            key="virtualized-playlist-content"
+            className="min-h-0 w-full h-full"
         >
             <Virtuoso
-                style={{ height: "100%" }}
-                data={MOCK_TRACK_LIST_200}
-                components={{
-                    Footer: () => <div style={{ height: `${bottomSpacing}px` }} />
-                }}
+                data={tracks}
                 overscan={10}
-                // endReached={() => {
-                //     if (hasNextPage)
-                // }}
+                endReached={() => {
+                    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+                }}
+                components={{
+                    Footer: () => (
+                        <div 
+                            style={{ height: `${bottomSpacing}px` }} 
+                            className="flex justify-center pt-4"
+                        >
+                            {isFetchingNextPage && <div className="animate-spin h-6 w-6 border-2 border-primary rounded-full border-t-transparent" />}
+                        </div>
+                    )
+                }}
                 itemContent={(index, track) => (
                     <motion.div
                         key={track.id}
@@ -46,7 +59,7 @@ export const PlaylistList = ({
                             track={track}
                             onSelect={handleTrackSelect}
                             index={index}
-                            actions={["like", "queueLast", "delete", "delete"]}
+                            actions={actions}
                         />  
                     </motion.div>
                 )}

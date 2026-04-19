@@ -23,12 +23,12 @@ export const useDownloads = (limit = 30) => {
         staleTime: 1000 * 60 * 5,
     });
 
-    const allDownloads = useMemo(() =>
+    const tracks = useMemo(() =>
         getDownloads.data?.pages.flatMap(page => page.results) ?? [],
     [getDownloads.data]);
     
     return {
-        downloads: allDownloads,
+        tracks,
         totalCount: getDownloads.data?.pages[0]?.total ?? 0,
         fetchNextPage: getDownloads.fetchNextPage,
         hasNextPage: getDownloads.hasNextPage,

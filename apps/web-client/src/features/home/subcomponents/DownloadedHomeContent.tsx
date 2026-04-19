@@ -4,6 +4,7 @@ import { XIcon } from '@phosphor-icons/react';
 import type { HomeContent } from '../home.types';
 import { BOTTOM_SHELF } from '@/features/player/player.constants';
 import { PlaylistList } from '@/features/playlist/PlaylistList';
+import { useDownloads } from '@/store/hooks/useDownloads';
 
 
 interface DownloadedHomeContentViewProps {
@@ -15,6 +16,8 @@ export const DownloadedHomeContentView = ({
     contentData,
     onClose
 }: DownloadedHomeContentViewProps) => {
+
+    const scrollContext = useDownloads();
 
     return (
         <>
@@ -78,8 +81,9 @@ export const DownloadedHomeContentView = ({
             {/* CONTENT AREA */}
             <div className="flex-1 no-scrollbar">
                 <PlaylistList
-                    tracks={[]}
+                    scrollContext={scrollContext}
                     bottomSpacing={BOTTOM_SHELF.totalHeight}
+                    actions={["like", "queueLast", "delete", "delete"]}
                 />
             </div>
         </motion.div>
