@@ -22,6 +22,7 @@ from api.routers.settings_router import SettingsRouter
 
 from core.youtube.youtube_client import YouTubeClient
 from database.database_manager import DatabaseManager
+from sync.websocket_manager import WebsocketManager
 from core.download.download_queue import DownloadQueue
 from core.download.download_worker import DownloadWorker
 
@@ -38,6 +39,9 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     db_manager = DatabaseManager()
     app.state.db_manager = db_manager
+
+    ws_manager = WebsocketManager()
+    app.state.ws_manager = ws_manager
 
     #global
     dl_queue = DownloadQueue()
