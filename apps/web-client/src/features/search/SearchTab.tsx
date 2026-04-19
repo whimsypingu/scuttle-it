@@ -40,7 +40,7 @@ export const SearchTab = ({
 
     // search hook
     const { results, isLoading, isError, triggerYoutubeSearch } = useSearch(debouncedQuery);
-    const dummySearchScrollContext: InfiniteScrollContext = ({
+    const dummySearchScrollContext: InfiniteScrollContext = ({ //EMERGENCY: consider adding backend support for paginated/virtualized scroll
         tracks: results,
         fetchNextPage: () => {},
         hasNextPage: false,
@@ -181,7 +181,7 @@ export const SearchTab = ({
     );
 };
 
-const MOCK_SEARCH_PLAYLIST = { id: "s1", name: "Search Playlist", trackCount: 42, color: "#581c87" };
+// const MOCK_SEARCH_PLAYLIST = { id: "s1", name: "Search Playlist", trackCount: 42, color: "#581c87" };
 
 const GENRES = [
     { name: 'Podcasts', color: '#E13300' },

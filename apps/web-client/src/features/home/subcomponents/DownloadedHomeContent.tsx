@@ -47,32 +47,31 @@ export const DownloadedHomeContentView = ({
                 </div>
     
                 {/* ABOUT / METADATA SECTION */}
-                <div className="flex flex-col gap-1 pb-2">
-                    <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-2 mx-1">
+                    <div className="flex items-start gap-2">
                         <div 
-                            className="w-2 h-2 rounded-full animate-pulse" 
+                            className="w-2 h-2 rounded-full animate-pulse mt-1" 
                             style={{ backgroundColor: contentData.color }} 
                         />
-                        <span className="text-[10px] uppercase tracking-[0.15em] font-black text-white/60">
-                            Local Storage Archive
-                        </span>
+                        <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
+                            {contentData.description}
+                        </p>
                     </div>
                     
-                    <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
-                        {contentData.description || "Your collection of tracks saved for offline playback."}
-                    </p>
-                       
-                    <div className="flex gap-6 mt-1">
+                    <div className="flex gap-4">
                         <div className="flex flex-col gap-0.5">
                             <span className="text-[9px] text-zinc-600 uppercase font-bold tracking-wider">Tracks</span>
-                            <span className="text-sm font-medium text-white/90">
-                                {/* Eventually replace with real length: tracks.length */}
-                                128 
+                            <span className="text-sm font-medium text-white/70">
+                                {scrollContext.totalCount}
                             </span>
                         </div>
-                        <div className="flex flex-col gap-0.5">
-                            <span className="text-[9px] text-zinc-600 uppercase font-bold tracking-wider">Storage</span>
-                            <span className="text-sm font-medium text-white/90">1.2 GB</span>
+                        <div className="flex flex-col">
+                            <span className="text-[10px] text-zinc-600 uppercase font-medium">Storage</span>
+                            <span className="text-xs text-white/70">N/A</span>
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-[10px] text-zinc-600 uppercase font-medium">Duration</span>
+                            <span className="text-xs text-white/70">N/A</span>
                         </div>
                     </div>
                 </div>

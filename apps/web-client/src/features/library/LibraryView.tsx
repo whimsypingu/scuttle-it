@@ -17,7 +17,7 @@ export const MockLibrary = ({
     tabResetSignal
 }: LibraryViewProps) => {
 
-    const scrollContext = useDownloads();
+    const scrollContext = useDownloads(); //EMERGENCY: replace this with playlist specific infinite scroll data
     
     const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
 
@@ -98,7 +98,7 @@ export const MockLibrary = ({
                             </div>
     
                             {/* ABOUT / METADATA SECTION */}
-                            <div className="flex flex-col gap-1 pb-2">
+                            <div className="flex flex-col gap-2 mx-1">
                                 {/* <div className="flex items-center gap-2">
                                     <div 
                                         className="w-3 h-3 rounded-full" 
@@ -114,7 +114,7 @@ export const MockLibrary = ({
                                     renders and curated selections from the {selectedPlaylist.name} sessions.
                                 </p>
                                  */}
-                                <div className="flex gap-4 mx-1">
+                                <div className="flex gap-4">
                                     <div className="flex flex-col">
                                         <span className="text-[10px] text-zinc-600 uppercase font-medium">Tracks</span>
                                         <span className="text-xs text-white/70">{selectedPlaylist.trackCount}</span>
