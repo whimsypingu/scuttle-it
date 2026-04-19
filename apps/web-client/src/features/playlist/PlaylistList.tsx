@@ -20,8 +20,6 @@ export const PlaylistList = ({
         <motion.div
             key="playlist-content"
             className="flex flex-col min-h-0 gap-1 w-full h-full pt-2"
-            // initial={{ opacity: 0 }}
-            // animate={{ opacity: 1 }}
         >
             <Virtuoso
                 style={{ height: "100%" }}
@@ -34,55 +32,27 @@ export const PlaylistList = ({
                 //     if (hasNextPage)
                 // }}
                 itemContent={(index, track) => (
-                    <TrackItem
+                    <motion.div
                         key={track.id}
-                        track={track}
-                        onSelect={handleTrackSelect}
-                        index={index}
-                        actions={["like", "queueLast", "delete", "delete"]}
-                    />  
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{
+                            duration: 0.2,
+                            delay: Math.min(index * 0.02, 0.1)
+                        }}
+                    >
+                        <TrackItem
+                            key={track.id}
+                            track={track}
+                            onSelect={handleTrackSelect}
+                            index={index}
+                            actions={["like", "queueLast", "delete", "delete"]}
+                        />  
+                    </motion.div>
                 )}
             />
         </motion.div>
     );
-
-    // return (
-    //     <>
-    //     <motion.div
-    //         key="playlist-content"
-    //         initial="hidden"
-    //         animate="show"
-    //         exit="hidden"
-    //         variants={{
-    //             show: {
-    //                 transition: {
-    //                     staggerChildren: 0.05
-    //                 }
-    //             }
-    //         }}
-    //         className="flex flex-col gap-1 w-full"
-    //     >
-    //         {/* TRACK LIST */}
-    //         {MOCK_TRACK_LIST_400.map((track, i) => (
-    //             <>
-    //             <motion.div
-    //                 key={track.id}
-    //                 variants={{
-    //                     hidden: { opacity: 0, y: 15 },
-    //                     show: { opacity: 1, y: 0, transition: { type: "spring", damping: 20 } }
-    //                 }}
-    //             >
-    //                 <TrackItem 
-    //                     track={track}
-    //                     onSelect={(track) => handleTrackSelect(track)}
-    //                     index={i}
-    //                 />
-    //             </motion.div>
-    //             </>
-    //         ))}
-    //     </motion.div>
-    //     </>
-    // );
 };
 
 const MOCK_TRACK_LIST_200: TrackBase[] = Array.from({ length: 200 }, (_, i) => ({
