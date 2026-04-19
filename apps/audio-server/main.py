@@ -53,7 +53,8 @@ async def lifespan(app: FastAPI):
             worker_id=f"Worker-{i+1}",
             dl_queue=dl_queue,
             yt_client=YouTubeClient(),
-            db_manager=db_manager
+            db_manager=db_manager,
+            ws_manager=ws_manager
         )
         workers.append(dl_worker)
 
