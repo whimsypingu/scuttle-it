@@ -24,4 +24,5 @@ export interface PlaylistItemProps {
 
 export interface PlaylistListProps {
     tracks?: TrackBase[];
+    bottomSpacing?: number;
 }

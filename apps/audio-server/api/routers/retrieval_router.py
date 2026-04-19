@@ -19,6 +19,8 @@ async def retrieve_downloads(
         return {
             "count": len(results),
             "total": total,
+            "offset": offset,
+            "limit": limit,
             "results": results
         }
     

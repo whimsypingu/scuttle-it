@@ -76,15 +76,11 @@ export const DownloadedHomeContentView = ({
             </div>
 
             {/* CONTENT AREA */}
-            <div className="flex-1 overflow-y-auto no-scrollbar">
-                <div 
-                    className="flex flex-col gap-0"
-                    style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
-                >
-                    <PlaylistList
-                        tracks={[]}
-                    />
-                </div>
+            <div className="flex-1 no-scrollbar">
+                <PlaylistList
+                    tracks={[]}
+                    bottomSpacing={BOTTOM_SHELF.totalHeight}
+                />
             </div>
         </motion.div>
         </>
