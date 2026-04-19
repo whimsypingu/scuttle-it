@@ -7,11 +7,11 @@ class WSPokeType(str, Enum):
     DOWNLOAD_JOB_SUCCESS = "DOWNLOAD_JOB_SUCCESS"
     DOWNLOAD_JOB_ERROR = "DOWNLOAD_JOB_ERROR"
 
-class WSMessage(BaseModel):
+class WSPoke(BaseModel):
     type: WSPokeType
     payload: Optional[Any] = None
 
-class WSMessageFactory:
+class WSPokeFactory:
     @staticmethod
     def download_job_success():
         return {

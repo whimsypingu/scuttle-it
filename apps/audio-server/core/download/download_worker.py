@@ -3,7 +3,7 @@ import logging
 from core.download.download_queue import DownloadQueue
 from core.youtube.youtube_client import YouTubeClient
 from database.database_manager import DatabaseManager
-from sync.pokes import WSMessageFactory, WSPokeType
+from sync.pokes import WSPokeFactory
 from sync.websocket_manager import WebsocketManager
 
 logger = logging.getLogger(__name__)
@@ -58,13 +58,13 @@ class DownloadWorker:
 
                 #poke the frontend with update status
                 await self.ws_manager.broadcast(
-                    WSMessageFactory.download_job_success()
+                    WSPokeFactory.download_job_success()
                 )
                 logger.info(f"[{self.worker_id}] Successfully finished {job.identifier}")
 
             except Exception as e:
                 await self.ws_manager.broadcast(
-                    WSMessageFactory.download_job_error()
+                    WSPokeFactory.download_job_error()
                 )
                 logger.error(f"[{self.worker_id}] Error: {str(e)}")
             
