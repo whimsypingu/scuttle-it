@@ -9,7 +9,7 @@ export const useQueue = () => {
     const queryKey = ["play_queue"];
     
     //fetch queue
-    const { data: queue = [], isLoading, error } = useQuery({
+    const getQueue = useQuery({
         queryKey,
         queryFn: async () => {
             console.log("useQueue triggered");
@@ -20,7 +20,7 @@ export const useQueue = () => {
             const data = await response.json();
             return data.queue as QueueTrack[];
         },
-        staleTime: Infinity, 
+        staleTime: 1000 * 60 * 5, 
     });
 
     //set the first track in the queue
@@ -154,9 +154,9 @@ export const useQueue = () => {
     });
 
     return {
-        queue,
-        isLoading,
-        error,
+        queue: getQueue.data ?? [],
+        isLoading: getQueue.isLoading,
+        error: getQueue.error,
         setFirst: setFirstMutation.mutate,
         reorder: reorderMutation.mutate,
         push: pushMutation.mutate,

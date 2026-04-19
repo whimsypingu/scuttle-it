@@ -99,9 +99,12 @@ class RegisterMixin:
         try:
             async with self.session() as db:
                 await db.execute('''
-                    INSERT OR IGNORE INTO downloads (track_id, downloaded_at)
-                    VALUES (?, unixepoch());
+                    INSERT OR IGNORE INTO downloads (track_internal_id, downloaded_at)
+                    SELECT internal_id, unixepoch()
+                    FROM tracks
+                    WHERE id = ?;
                 ''', (track_id,))
+                logger.info(f"Registered download track_id: {track_id}")
                 return True
         
         except sqlite3.IntegrityError:
@@ -116,7 +119,10 @@ class RegisterMixin:
         """Unregister a download. Returns True on success."""
         try:
             async with self.session() as db:
-                await db.execute('DELETE FROM downloads WHERE track_id = ?;', (track_id,))
+                await db.execute('''
+                    DELETE FROM downloads 
+                    WHERE track_internal_id = (SELECT internal_id FROM tracks WHERE id = ?);
+                ''', (track_id,))
                 logger.info(f"Unregistered download track_id: {track_id}")
                 return True
         
@@ -126,9 +132,16 @@ class RegisterMixin:
 
     async def is_track_downloaded(self, track_id: str) -> bool:
         """Check if a track_id is registered to downloaded. Returns True or False based on existence."""
+
+        query = '''
+            SELECT 1 FROM downloads d
+            JOIN tracks t ON t.internal_id = d.track_internal_id
+            WHERE t.id = ? LIMIT 1;
+        '''
+
         try: 
             async with self.session() as db:
-                async with await db.execute('SELECT 1 FROM downloads WHERE track_id = ? LIMIT 1;', (track_id,)) as cursor:
+                async with await db.execute(query, (track_id,)) as cursor:
                     row = await cursor.fetchone()
                     return row is not None
                 

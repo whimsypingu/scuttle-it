@@ -10,11 +10,15 @@ import { NAV_CONFIG, BOTTOM_SHELF } from "@/features/player/player.constants";
 
 import type { Playlist } from "@/features/playlist/playlist.types";
 import type { LibraryViewProps } from "@/features/library/library.types";
+import { useDownloads } from "@/store/hooks/useDownloads";
 
 
 export const MockLibrary = ({
     tabResetSignal
 }: LibraryViewProps) => {
+
+    const scrollContext = useDownloads(); //EMERGENCY: replace this with playlist specific infinite scroll data
+    
     const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
 
     // Reset when the signal changes
@@ -94,7 +98,7 @@ export const MockLibrary = ({
                             </div>
     
                             {/* ABOUT / METADATA SECTION */}
-                            <div className="flex flex-col gap-1 pb-2">
+                            <div className="flex flex-col gap-2 mx-1">
                                 {/* <div className="flex items-center gap-2">
                                     <div 
                                         className="w-3 h-3 rounded-full" 
@@ -110,7 +114,7 @@ export const MockLibrary = ({
                                     renders and curated selections from the {selectedPlaylist.name} sessions.
                                 </p>
                                  */}
-                                <div className="flex gap-4 mx-1">
+                                <div className="flex gap-4">
                                     <div className="flex flex-col">
                                         <span className="text-[10px] text-zinc-600 uppercase font-medium">Tracks</span>
                                         <span className="text-xs text-white/70">{selectedPlaylist.trackCount}</span>
@@ -124,15 +128,12 @@ export const MockLibrary = ({
                         </div>
 
                         {/* CONTENT AREA */}
-                        <div className="flex-1 overflow-y-auto no-scrollbar">
-                            <div 
-                                className="flex flex-col gap-0"
-                                style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
-                            >
-                                <PlaylistList
-                                    tracks={[]}
-                                />
-                            </div>
+                        <div className="flex-1 no-scrollbar">
+                            <PlaylistList
+                                scrollContext={scrollContext}
+                                bottomSpacing={BOTTOM_SHELF.totalHeight}
+                                actions={["like", "queueLast", "delete", "delete"]}
+                            />
                         </div>
 
                     </motion.div>

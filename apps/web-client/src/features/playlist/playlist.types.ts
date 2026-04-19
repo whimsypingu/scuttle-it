@@ -1,6 +1,6 @@
 import type { IconProps } from "@phosphor-icons/react";
 
-import type { TrackBase } from "@/model/model.types";
+import type { TrackAction, TrackBase } from "@/model/model.types";
 
 export type PlaylistActionType = "pin" | "delete";
 
@@ -22,6 +22,18 @@ export interface PlaylistItemProps {
     actions?: [PlaylistActionType, PlaylistActionType];
 }
 
+
+export interface InfiniteScrollContext {
+    tracks: TrackBase[];
+    fetchNextPage: () => void;
+    hasNextPage: boolean;
+    isFetchingNextPage: boolean;
+    totalCount?: number;
+    isLoading: boolean;
+}
+
 export interface PlaylistListProps {
-    tracks?: TrackBase[];
+    scrollContext: InfiniteScrollContext;
+    bottomSpacing?: number;
+    actions: [TrackAction, TrackAction, TrackAction, TrackAction];
 }
