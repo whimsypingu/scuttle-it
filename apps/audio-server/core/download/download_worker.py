@@ -1,9 +1,10 @@
-import asyncio
 import logging
 
 from core.download.download_queue import DownloadQueue
 from core.youtube.youtube_client import YouTubeClient
 from database.database_manager import DatabaseManager
+from sync.pokes import WSPokeFactory
+from sync.websocket_manager import WebsocketManager
 
 logger = logging.getLogger(__name__)
 
@@ -14,13 +15,15 @@ class DownloadWorker:
         worker_id: str,
         dl_queue: DownloadQueue,
         yt_client: YouTubeClient,
-        db_manager: DatabaseManager
+        db_manager: DatabaseManager,
+        ws_manager: WebsocketManager
     ):
         self.worker_id = worker_id
 
         self.dl_queue = dl_queue
         self.yt_client = yt_client
         self.db_manager = db_manager
+        self.ws_manager = ws_manager
 
         self.is_running = True
         self.current_job = None
@@ -47,12 +50,22 @@ class DownloadWorker:
                     top_search_result = search_results[0]
                     await self.yt_client.download_by_youtube_id(top_search_result.id)
                     await self.db_manager.register_download(top_search_result.id)
+                    await self.db_manager.push_play_queue(top_search_result.id) #push to play queue immediately for now
+
+                #EMERGENCY: not yet implemented for non-search-queries
                 else:
                     await self.yt_client.download_by_youtube_id(job.track_id)
 
+                #poke the frontend with update status
+                await self.ws_manager.broadcast(
+                    WSPokeFactory.download_job_success()
+                )
                 logger.info(f"[{self.worker_id}] Successfully finished {job.identifier}")
 
             except Exception as e:
+                await self.ws_manager.broadcast(
+                    WSPokeFactory.download_job_error()
+                )
                 logger.error(f"[{self.worker_id}] Error: {str(e)}")
             
             finally:

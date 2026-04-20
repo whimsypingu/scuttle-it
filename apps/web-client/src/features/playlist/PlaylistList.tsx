@@ -50,8 +50,8 @@ export const PlaylistList = ({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{
-                            duration: 0.2,
-                            delay: Math.min(index * 0.02, 0.1)
+                            duration: 0.3,
+                            delay: Math.min(index * 0.1, 0.1) //not perfect but it has a nice effect initially
                         }}
                     >
                         <TrackItem

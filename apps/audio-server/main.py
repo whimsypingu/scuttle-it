@@ -19,9 +19,11 @@ from api.routers.queue_router import QueueRouter
 from api.routers.retrieval_router import RetrievalRouter
 from api.routers.search_router import SearchRouter
 from api.routers.settings_router import SettingsRouter
+from api.routers.websocket_router import WebsocketRouter
 
 from core.youtube.youtube_client import YouTubeClient
 from database.database_manager import DatabaseManager
+from sync.websocket_manager import WebsocketManager
 from core.download.download_queue import DownloadQueue
 from core.download.download_worker import DownloadWorker
 
@@ -39,6 +41,9 @@ async def lifespan(app: FastAPI):
     db_manager = DatabaseManager()
     app.state.db_manager = db_manager
 
+    ws_manager = WebsocketManager()
+    app.state.ws_manager = ws_manager
+
     #global
     dl_queue = DownloadQueue()
     app.state.dl_queue = dl_queue
@@ -49,7 +54,8 @@ async def lifespan(app: FastAPI):
             worker_id=f"Worker-{i+1}",
             dl_queue=dl_queue,
             yt_client=YouTubeClient(),
-            db_manager=db_manager
+            db_manager=db_manager,
+            ws_manager=ws_manager
         )
         workers.append(dl_worker)
 
@@ -82,6 +88,7 @@ app.include_router(QueueRouter)
 app.include_router(RetrievalRouter)
 app.include_router(SearchRouter)
 app.include_router(SettingsRouter)
+app.include_router(WebsocketRouter)
 
 
 @app.get("/")
