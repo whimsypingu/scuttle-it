@@ -21,7 +21,7 @@ async def websocket_endpoint(
     try: 
         while True:
             # Just keep connection alive, do not expect messages from client
-            await ws.receive()
+            await ws.receive_text() #just ws.receive() writes a ton of error logs and raises a RuntimeError trying to receive after a disconnect
     except WebSocketDisconnect:
         pass
     finally:
