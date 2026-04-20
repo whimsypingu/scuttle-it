@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from api.dependencies import get_ws_manager
 from sync.websocket_manager import WebsocketManager
 
-router = APIRouter(prefix="/websocket")
+WebsocketRouter = APIRouter(prefix="/websocket", tags=["Websocket"])
 
-@router.websocket("")
+@WebsocketRouter.websocket("")
 async def websocket_endpoint(
     ws: WebSocket,
     ws_manager: WebsocketManager = Depends(get_ws_manager)
