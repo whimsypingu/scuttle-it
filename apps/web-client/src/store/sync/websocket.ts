@@ -1,4 +1,6 @@
+import { handleWSPoke } from '@/store/sync/pokeHandler';
 import { MIN_RECONNECT_DELAY, MAX_RECONNECT_DELAY, WEBSOCKET_CLOSE_CODE, RECONNECT_DELAY_FACTOR } from '@/store/sync/sync.constants';
+
 import type { WSPoke } from '@/store/sync/sync.types';
 
 
@@ -29,7 +31,9 @@ export function getWebSocket(): WebSocket | null {
     socket.onmessage = (event: MessageEvent) => {
         try {
             const poke = JSON.parse(event.data) as WSPoke;
-            console.log(poke);
+            console.log(poke); //
+
+            handleWSPoke(poke);
         } catch (err) {
             console.log("WebSocket parse error:", err);
         }
