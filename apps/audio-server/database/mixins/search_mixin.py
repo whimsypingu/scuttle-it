@@ -42,8 +42,11 @@ class SearchMixin:
             return []
         
         #prepare fts query (prefix matching on all tokens)
-        tokens = q.split()
-        fts_query = " AND ".join(f"{t}*" for t in tokens)
+        clean_q = q.replace('"', '') #remove double quotes so user cant break query
+        tokens = clean_q.split()
+
+        fts_tokens = [f'"{t}"*' for t in tokens] #wrap each token in double quotes and put * outside the quotes for prefix wildcarding
+        fts_query = " AND ".join(fts_tokens) #join with AND between each "fts_token"*
 
         internal_scan_limit = 1000 #how many to ensure we catch all relevant downloads to reduce the number of JOIN operations
         results_limit = 30
