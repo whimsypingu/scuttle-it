@@ -65,7 +65,7 @@ export const DownloadedHomeContentView = ({
                     <div className="flex gap-4">
                         <div className="flex flex-col gap-0.5">
                             <span className="text-[9px] text-zinc-600 uppercase font-bold tracking-wider">Tracks</span>
-                            <span className="text-sm font-medium text-white/70">
+                            <span className="text-xs text-white/70">
                                 {scrollContext.totalCount}
                             </span>
                         </div>
