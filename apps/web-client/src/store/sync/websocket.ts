@@ -1,5 +1,5 @@
-import { MIN_RECONNECT_DELAY, MAX_RECONNECT_DELAY, WEBSOCKET_CLOSE_CODE } from '@/store/sync/sync.constants';
-import type { WSPoke } from './sync.types';
+import { MIN_RECONNECT_DELAY, MAX_RECONNECT_DELAY, WEBSOCKET_CLOSE_CODE, RECONNECT_DELAY_FACTOR } from '@/store/sync/sync.constants';
+import type { WSPoke } from '@/store/sync/sync.types';
 
 
 let socket: WebSocket | null = null;
@@ -44,7 +44,7 @@ export function getWebSocket(): WebSocket | null {
             setTimeout(getWebSocket, reconnectDelay);
 
             //exponential backoff
-            reconnectDelay = Math.min(reconnectDelay * 1.5, MAX_RECONNECT_DELAY);
+            reconnectDelay = Math.min(reconnectDelay * RECONNECT_DELAY_FACTOR, MAX_RECONNECT_DELAY);
         }
     };
 
