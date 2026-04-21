@@ -1,12 +1,14 @@
 const CACHE_NAME = "audio-cache-v1";
 const AUDIO_ROUTER_PATH_PREFIX = "/audio/stream";
+const STATIC_FILES_PATH_PREFIX = "/static";
 
 //console logging on desktop
 function swLog(...args) {
-    console.log("[SW]", args.map(a => String(a)).join(" "));
+    const msg = `[SW] ${args.map(a => String(a)).join(" ")}`;
+    //console.log(msg); //debugging duplicated log.
     self.clients.matchAll().then(clients => {
         clients.forEach(client => {
-            client.postMessage({ type: "log", msg: args.map(a => String(a)).join(" ") });
+            client.postMessage({ type: "log", msg: msg });
         });
     });
 }
@@ -43,13 +45,13 @@ self.addEventListener("fetch", (event) => {
     }
 });
 
-const archiving = new Set(); //audios being fetched in full currently
+let lastFetchedUrl = null; //most recently fetched audio url, to be used as a guard for freshly cached audio (this url will require a network fetch)
 async function handleAudioStreamRequest(request) {
     const url = request.url;
 
-    // case 1: currently pending archival - exit early with regular backend fetch req with Range
-    if (archiving.has(url)) {
-        swLog(`Archive In-Progress: Passing through range request for ${url.split('/').pop()}`);
+    // case 1: freshly cached guard, if the song was just put in the cache, continue using network fetches to prevent stream lock glitches
+    if (url === lastFetchedUrl) {
+        swLog(`Freshly Cached: Staying on network for stability: ${url.split('/').pop()}`);
         return fetch(request);
     }
 
@@ -59,32 +61,25 @@ async function handleAudioStreamRequest(request) {
 
     if (cachedResponse) {
         swLog(`Cache Hit: Serving local copy of ${url.split('/').pop()}`);
+        lastFetchedUrl = null;
         return serveManualCachedResponse(cachedResponse, request);
     }
 
     // case 3: new audio - trigger background archive of full audio with stripped headers for a 200 OK response
     swLog(`Archive Start: Fetching full audio for ${url.split('/').pop()}`);
-    archiving.add(url);
+    lastFetchedUrl = url;
 
     const triggerArchival = async () => { //run this in the background
         try {
-            const res = await fetch(url);
+            const res = await fetch(url, { cache: "no-store" });
             if (!res.ok) throw new Error(`Fetch failed with status ${res.status}`);
 
             const cache = await caches.open(CACHE_NAME);
             await cache.put(url, res.clone());
 
-            swLog(`Archive Complete: ${url.split('/').pop()} is now offline-ready`);
+            swLog(`Archiving: ${url.split('/').pop()} cached`);
         } catch (err) {
             swLog(`Archival Failed: ${url.split('/').pop()}: ${err.message}`);
-        } finally {
-            const SETTLE_TIME_MS = 30000
-            swLog(`Waiting ${SETTLE_TIME_MS / 1000}s for cache to settle before using...`);
-
-            setTimeout(() => {
-                archiving.delete(url);
-                swLog(`Lock Released: ${url.split('/').pop()} is ready for cached playback`);
-            }, SETTLE_TIME_MS);
         }
     }
     triggerArchival();
