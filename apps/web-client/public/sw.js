@@ -1,5 +1,7 @@
-const CACHE_NAME = "audio-cache-v1";
+const AUDIO_CACHE_NAME = "audio-cache-v1";
 const AUDIO_ROUTER_PATH_PREFIX = "/audio/stream";
+
+const STATIC_CACHE_NAME = "static-cache-v1";
 const STATIC_FILES_PATH_PREFIX = "/static";
 
 //console logging on desktop
@@ -40,46 +42,56 @@ self.addEventListener("fetch", (event) => {
 
     //only intercept /audio/stream requests
     if (url.pathname.startsWith(AUDIO_ROUTER_PATH_PREFIX)) {
-        swLog("Fetch found");
-        event.respondWith(handleAudioStreamRequest(event.request));
+        swLog("Audio fetch intercepted");
+        const cleanUrl = url.origin + url.pathname; //removed ?t= to extract the useful identifier part as the cache key
+        event.respondWith(handleAudioStreamRequest(event.request, cleanUrl));
+    }
+
+    //only intercept /static requests
+    if (url.pathname.startsWith(STATIC_FILES_PATH_PREFIX)) {
+        event.respondWith(handleStaticFileRequest(event.request));
     }
 });
 
+
+// --- AUDIO REQUESTS ---
+
 let lastFetchedUrl = null; //most recently fetched audio url, to be used as a guard for freshly cached audio (this url will require a network fetch)
-async function handleAudioStreamRequest(request) {
+async function handleAudioStreamRequest(request, cleanUrl) {
     const url = request.url;
 
     // case 1: freshly cached guard, if the song was just put in the cache, continue using network fetches to prevent stream lock glitches
     if (url === lastFetchedUrl) {
-        swLog(`Freshly Cached: Staying on network for stability: ${url.split('/').pop()}`);
+        swLog(`Freshly Cached: Staying on network for stability: ${cleanUrl.split('/').pop()}`);
         return fetch(request);
     }
 
     // case 2: already cached - check cache for audio and serve manually if available
-    const cache = await caches.open(CACHE_NAME);
-    const cachedResponse = await cache.match(url);
+    const cache = await caches.open(AUDIO_CACHE_NAME);
+    const cachedResponse = await cache.match(cleanUrl);
 
     if (cachedResponse) {
-        swLog(`Cache Hit: Serving local copy of ${url.split('/').pop()}`);
+        swLog(`Cache Hit: Serving local copy of ${cleanUrl.split('/').pop()}`);
         lastFetchedUrl = null;
         return serveManualCachedResponse(cachedResponse, request);
     }
 
     // case 3: new audio - trigger background archive of full audio with stripped headers for a 200 OK response
-    swLog(`Archive Start: Fetching full audio for ${url.split('/').pop()}`);
-    lastFetchedUrl = url;
+    swLog(`Archive Start: Fetching full audio for ${cleanUrl.split('/').pop()}`);
 
     const triggerArchival = async () => { //run this in the background
         try {
             const res = await fetch(url, { cache: "no-store" });
             if (!res.ok) throw new Error(`Fetch failed with status ${res.status}`);
 
-            const cache = await caches.open(CACHE_NAME);
-            await cache.put(url, res.clone());
+            const cache = await caches.open(AUDIO_CACHE_NAME);
+            await cache.put(cleanUrl, res.clone()); //put into cache without the ?t=
 
-            swLog(`Archiving: ${url.split('/').pop()} cached`);
+            lastFetchedUrl = url;
+        
+            swLog(`Archiving: ${cleanUrl.split('/').pop()} cached`);
         } catch (err) {
-            swLog(`Archival Failed: ${url.split('/').pop()}: ${err.message}`);
+            swLog(`Archival Failed: ${cleanUrl.split('/').pop()}: ${err.message}`);
         }
     }
     triggerArchival();
@@ -128,5 +140,26 @@ async function serveManualCachedResponse(cachedResponse, request) {
     } catch (err) {
         swLog(`Cache Read Failed. Falling through to network: ${err}`);
         return fetch(request);
+    }
+}
+
+
+// --- STATIC REQUESTS ---
+async function handleStaticFileRequest(request) {
+    const cache = await caches.open(STATIC_CACHE_NAME);
+
+    const cachedResponse = await cache.match(request);
+    if (cachedResponse) return cachedResponse;
+
+    try {
+        const networkResponse = await fetch(request);
+
+        if (networkResponse && networkResponse.status === 200) {
+            await cache.put(request, networkResponse.clone());
+        }
+
+        return networkResponse;
+    } catch (err) {
+        swLog(`Static Network Fetch Failed: ${err}`);
     }
 }
