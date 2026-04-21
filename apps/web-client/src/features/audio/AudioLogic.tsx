@@ -6,8 +6,6 @@ import { audioEngine } from "./audioEngine";
 import { getTrackDisplayMetadata } from "@/model/model.utils";
 import { useAudioPlayback } from "./useAudioEngine";
 
-import defaultMediaSessionLogo from "@/assets/defaultMediaSessionLogo.png";
-
 export const AudioLogic = () => {
     const { queue, pop, reorder } = useQueue(); //get the latest queue from tanstack
     const { settings } = useSettings();
@@ -87,7 +85,7 @@ export const AudioLogic = () => {
                 album: "Scuttle",
                 artwork: [
                     {
-                        src: new URL(defaultMediaSessionLogo, window.location.origin).href,
+                        src: "/static/defaultMediaSessionLogo.png", //new URL(defaultMediaSessionLogo, window.location.origin).href,
                         sizes: "512x512",
                         type: "image/png"
                     }
