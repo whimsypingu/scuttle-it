@@ -156,19 +156,28 @@ export const useQueue = () => {
 
     //prefetching
     useEffect(() => {
-        if (!("serviceWorker" in navigator) || !navigator.serviceWorker.controller) {
-            return; //requires service worker to be available to do this
+        if (!("serviceWorker" in navigator)) return;
+
+        const sendQueueToSW = () => {
+            if (navigator.serviceWorker.controller && getQueue.data?.length) {
+                const prefetchWindow = getQueue.data.slice(0, 10); //EMERGENCY: don't hardcode 10 items to prefetch, either dynamically changed or a defined constant
+                navigator.serviceWorker.controller.postMessage({
+                    type: "UPDATE_PREFETCH_QUEUE", //see: sw.js -> eventListener("message")
+                    tracks: prefetchWindow
+                });
+
+                console.log("Sent prefetch window to Service Worker:", prefetchWindow.length);
+            }
         }
 
-        //grab the first few items in the queue to the service worker to pre-fetch based on cache state
-        if (getQueue.data && getQueue.data.length > 0) {
-            const prefetchWindow = getQueue.data.slice(0, 10); //EMERGENCY: don't hardcode 10 items to prefetch, either dynamically changed or a defined constant
-            navigator.serviceWorker.controller.postMessage({
-                type: "UPDATE_PREFETCH_QUEUE", //see: sw.js -> eventListener("message")
-                tracks: prefetchWindow
-            });
+        sendQueueToSW(); //try sending immediately
 
-            console.log("Sent prefetch window to Service Worker:", prefetchWindow.length);
+        //initial load, as soon as a service worker claims the page
+        if (!navigator.serviceWorker.controller) {
+            navigator.serviceWorker.addEventListener("controllerchange", sendQueueToSW);
+            return () => {
+                navigator.serviceWorker.removeEventListener("controllerchange", sendQueueToSW);
+            };
         }
     }, [getQueue.data]);
 
