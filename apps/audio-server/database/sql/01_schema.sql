@@ -90,7 +90,7 @@ ON play_queue(position);
 -- settings
 CREATE TABLE IF NOT EXISTS settings (
     id INTEGER PRIMARY KEY CHECK (id = 1), --ensures only one row
-    loopmode INTEGER DEFAULT 0 --loop modes: 0=None, 1=All, 2=One 
+    loopmode INTEGER DEFAULT 1 --loop modes: 0=None, 1=All, 2=One 
 );
 
 INSERT OR IGNORE INTO settings (id) VALUES (1); --initialize settings

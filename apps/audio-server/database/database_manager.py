@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 from config import settings
 
 from database.mixins.seed_mixin import SeedMixin
+from database.mixins.maintenance_mixin import MaintenanceMixin
 from database.mixins.register_mixin import RegisterMixin
 from database.mixins.retrieval_mixin import RetrievalMixin
 from database.mixins.search_mixin import SearchMixin
@@ -19,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 class DatabaseManager(
     SeedMixin, 
+    MaintenanceMixin, 
     RegisterMixin, 
     RetrievalMixin, 
     SearchMixin, 
