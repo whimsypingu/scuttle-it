@@ -83,11 +83,11 @@ class PlayQueueMixin:
                     n = next_pos if next_pos is not None else max_pos
                     final_position = (p + n) / 2
 
-                await db.execute("""
+                await db.execute('''
                     UPDATE play_queue
                     SET position = ?
                     WHERE queue_id = ?
-                """, (final_position, queue_id))
+                ''', (final_position, queue_id))
 
                 logger.info(f"Successfully reordered track with queue_id {queue_id} to position {final_position} in Play Queue")
                 return True
@@ -122,6 +122,43 @@ class PlayQueueMixin:
         
         except Exception:
             logger.exception(f"Failed to push track_id {track_id} to end of the Play Queue")
+            raise
+
+
+    async def push_next_play_queue(self, track_id) -> bool:
+        """Push to the second spot in the Play Queue"""
+        logger.info(f"Pushing track_id {track_id} into the next position of the Play Queue...")
+
+        try:
+            async with self.session() as db:
+                cursor = await db.execute('''
+                    SELECT position
+                    FROM play_queue
+                    ORDER BY position ASC
+                    LIMIT 2;
+                ''')
+                rows = await cursor.fetchall()
+
+                if not rows:                                                                #empty queue, set to first
+                    new_position = 100.0
+                elif len(rows) == 1:                                                        #only one item, set to next
+                    new_position = rows[0]["position"] + 100.0
+                else:                                                                       #insert in second position
+                    new_position = (rows[0]["position"] + rows[1]["position"]) / 2.0 
+                
+                #insert
+                await db.execute('''
+                    INSERT INTO play_queue (track_internal_id, position)
+                    SELECT internal_id, ?
+                    FROM tracks
+                    WHERE id = ?;
+                ''', (new_position, track_id))
+
+                logger.info(f"Successfully pushed track_id {track_id} to the next position of the Play Queue with position value: {new_position}")
+                return True
+        
+        except Exception:
+            logger.exception(f"Failed to push track_id {track_id} to next position in the Play Queue")
             raise
 
 
