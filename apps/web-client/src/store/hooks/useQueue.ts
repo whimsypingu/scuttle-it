@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import type { QueueTrack, TrackBase } from "@/model/model.types";
 import { trackBaseToQueueTrack } from "@/model/model.utils";
-import { useEffect } from "react";
 
 
 export const useQueue = () => {
@@ -191,33 +190,6 @@ export const useQueue = () => {
             queryClient.setQueryData(queryKey, data.queue);
         },
     });
-
-    // //prefetching --this should be debounced to prevent spamming the service worker and recalculating stuff, but I can't figure it out
-    // useEffect(() => {
-    //     if (!("serviceWorker" in navigator)) return;
-
-    //     const sendQueueToSW = () => {
-    //         if (navigator.serviceWorker.controller && getQueue.data?.length) {
-    //             const prefetchWindow = getQueue.data.slice(0, 10); //EMERGENCY: don't hardcode 10 items to prefetch, either dynamically changed or a defined constant
-    //             navigator.serviceWorker.controller.postMessage({
-    //                 type: "UPDATE_PREFETCH_QUEUE", //see: sw.js -> eventListener("message")
-    //                 tracks: prefetchWindow
-    //             });
-
-    //             console.log("Sent prefetch window to Service Worker:", prefetchWindow.length);
-    //         }
-    //     }
-
-    //     sendQueueToSW(); //try sending immediately
-
-    //     //initial load, as soon as a service worker claims the page
-    //     if (!navigator.serviceWorker.controller) {
-    //         navigator.serviceWorker.addEventListener("controllerchange", sendQueueToSW);
-    //         return () => {
-    //             navigator.serviceWorker.removeEventListener("controllerchange", sendQueueToSW);
-    //         };
-    //     }
-    // }, [getQueue.data]);
 
     return {
         queue: getQueue.data ?? [],

@@ -66,14 +66,14 @@ self.addEventListener("message", (event) => {
             prefetchDebounce = setTimeout(() => {
                 swLog("New prefetch queue received from frontend");
 
-                prefetchQueue = event.data.tracks; //see: apps/web-client/src/store/hooks/useQueue.ts
+                prefetchQueue = event.data.tracks; //see: apps/web-client/src/features/audio/useAudioEngine.ts -> usePrefetchSync
                 processQueue().catch(err => {
                     swLog(`Prefetch Queue Error: ${err.message}`);
                 });
             
                 prefetchDebounce = null;
             }, 1000);
-            
+
             break;
         
         default:

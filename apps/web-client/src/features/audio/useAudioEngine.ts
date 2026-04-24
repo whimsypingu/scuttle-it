@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { audioEngine } from "@/features/audio/audioEngine"
 import { useQueue } from "@/store/hooks/useQueue";
 
@@ -92,10 +92,12 @@ export const usePrefetchSync = () => {
         }
     };
 
+    //cache prefetches whenever the queue contents change
     useEffect(() => {
         prefetchSync();
     }, [queue]);
 
+    //initial load, wait for service worker to establish and then begin caching asap
     useEffect(() => {
         if (!("serviceWorker" in navigator)) return;
 
@@ -104,19 +106,4 @@ export const usePrefetchSync = () => {
             navigator.serviceWorker.removeEventListener("controllerchange", prefetchSync);
         };
     })
-
-    // useEffect(() => {
-    //     //send
-    //     if (!("serviceWorker" in navigator) || !navigator.serviceWorker.controller) return;
-
-    //     if (queue.length > 0) {
-    //         // Just send it. We'll let the Service Worker handle the "spam" check.
-    //         navigator.serviceWorker.controller.postMessage({
-    //             type: "UPDATE_PREFETCH_QUEUE",
-    //             tracks: queue.slice(0, 10)
-    //         });
-            
-    //         console.log("[Sync] Queue change detected, message sent to SW.");
-    //     }
-    // }, [queue]);
 }
