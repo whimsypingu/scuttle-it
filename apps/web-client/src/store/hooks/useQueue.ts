@@ -221,6 +221,7 @@ export const useQueue = () => {
 
     return {
         queue: getQueue.data ?? [],
+        refetch: getQueue.refetch,
         isLoading: getQueue.isLoading,
         error: getQueue.error,
         setFirst: setFirstMutation.mutate,
