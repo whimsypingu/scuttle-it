@@ -66,7 +66,7 @@ export class StandardStrategy implements AudioStrategy {
     }
 
     async load(trackId: string): Promise<void> {
-        const fullUrl = `/audio/stream/${trackId}`;
+        const fullUrl = `/audio/stream/${trackId}?t=${Date.now()}`;
 
         //prevent reloading if the same track is already set
         if (this.currentTrackId === trackId && this.audioEl.src.includes(fullUrl)) {

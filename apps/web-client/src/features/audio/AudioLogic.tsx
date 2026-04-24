@@ -6,8 +6,6 @@ import { audioEngine } from "./audioEngine";
 import { getTrackDisplayMetadata } from "@/model/model.utils";
 import { useAudioPlayback } from "./useAudioEngine";
 
-import defaultMediaSessionLogo from "@/assets/defaultMediaSessionLogo.png";
-
 export const AudioLogic = () => {
     const { queue, pop, reorder } = useQueue(); //get the latest queue from tanstack
     const { settings } = useSettings();
@@ -17,14 +15,14 @@ export const AudioLogic = () => {
     const nextTrack = queue?.[1];
     const lastTrack = queue?.at(-1);
     
-    console.log(`[AudioLogic] Current track: ${currentTrack}`);
+    console.log(`%c[AudioLogic]%c Current track: ${currentTrack}`, "color: #ff00ff;", "color: inherit;");
     
     //autoplay logic
     const onEndedHandlerRef = useRef<(() => void) | null>(null);
 
     useEffect(() => {
         onEndedHandlerRef.current = () => {
-            console.log(`[AudioLogic] Executing end logic for: ${currentTrack?.title}`);
+            console.log(`%c[AudioLogic]%c Executing end logic for: ${currentTrack?.title}`, "color: #ff00ff;", "color: inherit;");
             
             switch (settings.loopmode) {
                 case 0: // No loop
@@ -53,7 +51,7 @@ export const AudioLogic = () => {
 
     //attach the listener ONCE on mount
     useEffect(() => {
-        console.log("[AudioLogic] Subscribing to audioEngine ONLY ONCE");
+        console.log("%c[AudioLogic]%c Subscribing to audioEngine ONLY ONCE", "color: #ff00ff;", "color: inherit;");
         
         const unsubscribe = audioEngine.on("ended", () => {
             if (onEndedHandlerRef.current) { // When the event fires, call whatever is currently in the Ref
@@ -62,7 +60,7 @@ export const AudioLogic = () => {
         });
 
         return () => {
-            console.log("[AudioLogic] Cleaning up permanent listener");
+            console.log("%c[AudioLogic]%c Cleaning up permanent listener", "color: #ff00ff;", "color: inherit;");
             unsubscribe();
         };
     }, []); //runs once and never again
@@ -87,31 +85,31 @@ export const AudioLogic = () => {
                 album: "Scuttle",
                 artwork: [
                     {
-                        src: new URL(defaultMediaSessionLogo, window.location.origin).href,
+                        src: "/static/defaultMediaSessionLogo.png", //new URL(defaultMediaSessionLogo, window.location.origin).href,
                         sizes: "512x512",
                         type: "image/png"
                     }
                 ]
             });
         } catch (err) {
-            console.error("[AudioLogic - MediaSession] Metadata update failed", err);
+            console.error(`%c[AudioLogic - MediaSession]%c Metadata update failed: ${err}`, "color: #ff00ff;", "color: inherit;");
         }
 
         // mediaSession functionality
         navigator.mediaSession.setActionHandler("nexttrack", () => {
             if (nextTrack) {
-                console.log("[AudioLogic - MediaSession] Manual skip");
+                console.log("%c[AudioLogic - MediaSession]%c Manual skip", "color: #ff00ff;", "color: inherit;");
                 pop(currentTrack);
                 audioEngine.playTrack({ trackId: nextTrack.id, forceRestart: true });
             } else {
-                console.log("[AudioLogic - MediaSession] Manual skip but no tracks remaining. Pausing and restarting.");
+                console.log("%c[AudioLogic - MediaSession]%c Manual skip but no tracks remaining. Pausing and restarting.", "color: #ff00ff;", "color: inherit;");
                 audioEngine.pauseTrack();
                 audioEngine.seek(0);
             }
         });
 
         navigator.mediaSession.setActionHandler("previoustrack", () => {
-            console.log("[AudioLogic - MediaSession] Manual previous");
+            console.log("%c[AudioLogic - MediaSession]%c Manual previous", "color: #ff00ff;", "color: inherit;");
             audioEngine.playTrack({ trackId: currentTrack.id, forceRestart: true });
         });
 

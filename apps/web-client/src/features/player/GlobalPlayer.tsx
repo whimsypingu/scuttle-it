@@ -32,7 +32,7 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
     const dragControls = useDragControls();
 
     // scrolling shrinking the size of the album art and moving it around
-    const [isCompact, setIsCompact] = useState(false);
+    const [isCompact, setIsCompact] = useState(true); //show queue contents when isCompact
 
     return (
         <>

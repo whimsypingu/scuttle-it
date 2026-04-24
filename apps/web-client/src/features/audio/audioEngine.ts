@@ -37,13 +37,19 @@ class AudioEngine implements IAudioEngine  {
     }
 
     public async playTrack({ trackId, forceRestart = false }: PlayTrackOptions) {
+        const startTime = performance.now(); //diagnostic for how long it takes to load and play audio
+
         await this.strategy.load(trackId);
 
         if (forceRestart) {
             this.strategy.seek(0); //reset
         }
 
-        await this.strategy.play();
+        await this.strategy.play(); 
+
+        const playTime = performance.now() - startTime; //diagnostic printing
+        console.log(`%c[Scuttle Metrics] ID: ${trackId}`, 'color: #3b82f6; font-weight: bold');
+        console.log(`  └─ Total to Play: ${playTime.toFixed(2)}ms`);
     }
 
     //very forgiving function that attempts to play or pause depending on state, and uses best effort for trackId

@@ -207,7 +207,7 @@ export class IOSStrategy implements AudioStrategy {
         // Safety and type check: ensure infrastructure is not null before attempting to wire stuff up
         if (!this.audioCtx || !this.dest) throw new Error("[IOSStrategy] Audio infrastructure (audioCtx | dest) missing");
 
-        const fullUrl = `/audio/stream/${trackId}`;
+        const fullUrl = `/audio/stream/${trackId}?t=${Date.now()}`;
 
         this.removeInternalAudio(); //destroy the previous internal audio element to prevent overlapping audio
 

@@ -7,7 +7,6 @@ import logging
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
 
 from config import settings #triggers validation here
@@ -79,8 +78,6 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-app.mount("/assets", StaticFiles(directory=(settings.DIST_DIR / "assets")), name="assets")
-
 app.include_router(TestRouter)
 
 app.include_router(AudioRouter)
@@ -90,14 +87,12 @@ app.include_router(SearchRouter)
 app.include_router(SettingsRouter)
 app.include_router(WebsocketRouter)
 
-
-@app.get("/")
-async def root():
-    return FileResponse(settings.DIST_DIR / "index.html")
-
 @app.get("/status")
 async def get_status():
     return {"status": "online", "version": "0.1.0"}
+
+app.mount("/", StaticFiles(directory=(settings.DIST_DIR), html=True), name="static")
+
 
 
 
