@@ -157,13 +157,14 @@ export const useQueue = () => {
     //prefetching
     useEffect(() => {
         if (!("serviceWorker" in navigator) || !navigator.serviceWorker.controller) {
-            return;
+            return; //requires service worker to be available to do this
         }
 
+        //grab the first few items in the queue to the service worker to pre-fetch based on cache state
         if (getQueue.data && getQueue.data.length > 0) {
-            const prefetchWindow = getQueue.data.slice(0, 10);
+            const prefetchWindow = getQueue.data.slice(0, 10); //EMERGENCY: don't hardcode 10 items to prefetch, either dynamically changed or a defined constant
             navigator.serviceWorker.controller.postMessage({
-                type: "UPDATE_PREFETCH_QUEUE",
+                type: "UPDATE_PREFETCH_QUEUE", //see: sw.js -> eventListener("message")
                 tracks: prefetchWindow
             });
 

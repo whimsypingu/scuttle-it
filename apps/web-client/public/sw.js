@@ -43,7 +43,7 @@ self.addEventListener("fetch", (event) => {
     //only intercept /audio/stream requests
     if (url.pathname.startsWith(AUDIO_ROUTER_PATH_PREFIX)) {
         swLog("Audio fetch intercepted");
-        const cleanUrl = url.origin + url.pathname; //removed ?t= to extract the useful identifier part as the cache key
+        const cleanUrl = url.origin + url.pathname; //cleanUrl has a removed ?t= to extract the useful identifier url part as the cache key
         event.respondWith(handleAudioStreamRequest(event.request, cleanUrl));
     }
 
@@ -79,10 +79,12 @@ let currentFetch = null; //stores { track, controller }
 
 async function processQueue() {
     const cache = await caches.open(AUDIO_CACHE_NAME);
-    let targetTrack = null;
+    let targetTrack = null; //next TrackBase item to attempt to pre-cache
+    let cleanUrl = null; //cleanUrl of a TrackBase
 
-    for (const track of prefetchQueue) {
-        const cleanUrl = `/audio/stream/${track.id}`;
+    //look through the prefetchQueue and stop after finding the first TrackBase to attempt pre-caching for
+    for (const track of prefetchQueue) { 
+        cleanUrl = `/audio/stream/${track.id}`; 
         const isCached = await cache.match(cleanUrl);
         if (!isCached) {
             targetTrack = track;
@@ -91,20 +93,26 @@ async function processQueue() {
     }
 
     if (!targetTrack) return; //everything cached
-    if (currentFetch && prefetchQueue.some(t => t.id === currentFetch.track.id)) return; //track being prefetched is somewhere in the prefetchQueue, dont cancel
-    if (currentFetch) currentFetch.controller.abort(); //something else is being prefetched but is no longer in the prefetchQUeue, kill it to prioritize new
+    if (currentFetch) {
+        //track being prefetched is somewhere in the prefetchQueue -- don't cancel it since it's still useful
+        if (prefetchQueue.some(t => t.id === currentFetch.track.id)) {
+            return;
+        }
 
-    await startFetch(targetTrack);
+        //something is being prefetched but it is no longer in the prefetchQueue, kill the prefetch to prioritize something more useful
+        currentFetch.controller.abort();
+    }
+
+    await startFetch(targetTrack, cleanUrl);
 }
 
-async function startFetch(track) {
-    const controller = new AbortController();
-    currentFetch = { track: track, controller: controller };
+async function startFetch(track, cleanUrl) {
+    const controller = new AbortController(); 
+    currentFetch = { track: track, controller: controller }; //set currentFetch to the current fetch request
 
     try {
         swLog(`Starting Prefetch: ${track.id}`);
-        const cleanUrl = `/audio/stream/${track.id}`;
-        const dirtyUrl = `${cleanUrl}?t=${Date.now()}`;
+        const dirtyUrl = `${cleanUrl}?t=${Date.now()}`; //date embedded fetch url for preventing browser auto-caching behavior
 
         const res = await fetch(dirtyUrl, {
             signal: controller.signal,
@@ -113,7 +121,7 @@ async function startFetch(track) {
         if (!res.ok) throw new Error(`Prefetch failed: ${res.status}`);
 
         const cache = await caches.open(AUDIO_CACHE_NAME);
-        await cache.put(cleanUrl, res.clone());
+        await cache.put(cleanUrl, res.clone()); //cache with the cleanUrl path for future streams to match
 
         swLog(`Prefetch Complete: ${track.id}`);
     } catch (err) {
@@ -123,7 +131,7 @@ async function startFetch(track) {
             swLog(`Prefetch Error for ${track.id}: ${err.message}`);
         }
     } finally {
-        if (currentFetch.track.id === track.id) currentFetch = null;
+        if (currentFetch.track.id === track.id) currentFetch = null; //set currentFetch to null when fetch completes and is the current one
         processQueue();
     }
 }
@@ -131,7 +139,7 @@ async function startFetch(track) {
 async function handleAudioStreamRequest(request, cleanUrl) {
     //check cache
     const cache = await caches.open(AUDIO_CACHE_NAME);
-    const cachedResponse = await cache.match(cleanUrl);
+    const cachedResponse = await cache.match(cleanUrl); //match cache on cleanUrl -- without embedded date
 
     if (cachedResponse) {
         swLog(`Cache Hit: Serving local copy of ${cleanUrl.split('/').pop()}`);
