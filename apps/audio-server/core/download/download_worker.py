@@ -50,7 +50,7 @@ class DownloadWorker:
                     top_search_result = search_results[0]
                     await self.yt_client.download_by_youtube_id(top_search_result.id)
                     await self.db_manager.register_download(top_search_result.id)
-                    await self.db_manager.push_play_queue(top_search_result.id) #push to play queue immediately for now
+                    await self.db_manager.push_next_play_queue(top_search_result.id) #push to play queue immediately for now
 
                 #EMERGENCY: not yet implemented for non-search-queries
                 else:
