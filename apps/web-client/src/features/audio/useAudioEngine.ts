@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { audioEngine } from "@/features/audio/audioEngine"
 import { useQueue } from "@/store/hooks/useQueue";
 
@@ -73,5 +73,50 @@ export const useBackupSync = () => {
             setHasSynced(true);
             refetch(); //for now, refetch the queue data. insignificant compared to actual audio data anyway, but could be optimized later
         }
+    });
+}
+
+
+export const usePrefetchSync = () => {
+    const { queue } = useQueue();
+
+    const prefetchSync = () => {
+        if (navigator.serviceWorker.controller && queue.length) {
+            const prefetchWindow = queue.slice(0, 10); //EMERGENCY: don't hardcode 10 items to prefetch, either dynamically changed or a defined constant
+            navigator.serviceWorker.controller.postMessage({
+                type: "UPDATE_PREFETCH_QUEUE", //see: sw.js -> eventListener("message")
+                tracks: prefetchWindow
+            });
+
+            console.log("Sent prefetch window to Service Worker:", prefetchWindow.length);
+        }
+    };
+
+    useEffect(() => {
+        prefetchSync();
+    }, [queue]);
+
+    useEffect(() => {
+        if (!("serviceWorker" in navigator)) return;
+
+        navigator.serviceWorker.addEventListener("controllerchange", prefetchSync);
+        return () => {
+            navigator.serviceWorker.removeEventListener("controllerchange", prefetchSync);
+        };
     })
+
+    // useEffect(() => {
+    //     //send
+    //     if (!("serviceWorker" in navigator) || !navigator.serviceWorker.controller) return;
+
+    //     if (queue.length > 0) {
+    //         // Just send it. We'll let the Service Worker handle the "spam" check.
+    //         navigator.serviceWorker.controller.postMessage({
+    //             type: "UPDATE_PREFETCH_QUEUE",
+    //             tracks: queue.slice(0, 10)
+    //         });
+            
+    //         console.log("[Sync] Queue change detected, message sent to SW.");
+    //     }
+    // }, [queue]);
 }
