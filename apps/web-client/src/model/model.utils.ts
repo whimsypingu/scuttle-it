@@ -22,6 +22,11 @@ export const useTrackActionHandler = () => {
                 push(props.track);
                 break;
 
+            case "queueNext": //push next
+                makeToast(props.action);
+                //pushNext(props.track);
+                break;
+
             case "delete":
                 makeToast(props.action);
                 break;

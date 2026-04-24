@@ -10,7 +10,7 @@ import { Virtuoso } from 'react-virtuoso';
 export const PlaylistList = ({
     scrollContext,
     bottomSpacing = 0,
-    actions = ["like", "queueLast", "delete", "delete"]
+    actions = ["queueNext", "queueLast", "delete", "delete"]
 }: PlaylistListProps) => {
     const {
         tracks,

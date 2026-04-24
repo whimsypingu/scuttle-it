@@ -167,7 +167,7 @@ export const SearchTab = ({
                                 <PlaylistList
                                     scrollContext={dummySearchScrollContext}
                                     bottomSpacing={BOTTOM_SHELF.totalHeight}
-                                    actions={["like", "queueLast", "delete", "delete"]}
+                                    actions={["queueNext", "queueLast", "delete", "delete"]}
                                 />
                             </div>
                         </motion.div>
