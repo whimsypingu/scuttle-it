@@ -5,7 +5,7 @@ import App from './App.tsx'
 
 // --- SW registration ---
 if ("serviceWorker" in navigator) {
-    console.log("[SW] Service worker in navigator");
+    console.log("%c[SW] Service worker in navigator", "color: #ff9800; font-weight: bold;");
 
     const register = async () => {
         try {
@@ -14,16 +14,16 @@ if ("serviceWorker" in navigator) {
                 scope: "/",
                 updateViaCache: "none", // Force browser to check for new SW script
             });
-            console.log("[SW] registered with scope:", registration.scope);
+            console.log(`%c[SW] registered with scope: ${registration.scope}`, "color: #ff9800; font-weight: bold;");
 
             // Listen for logs from the SW
             navigator.serviceWorker.addEventListener("message", (event) => {
                 if (event.data?.type === "log") {
-                    console.log(event.data.msg, "(Echo)");
+                    console.log(`%c[SW]%c ${event.data.msg}`, "color: #ff9800; font-weight: bold;", "color: inherit;");
                 }
             });
         } catch (err) {
-            console.error("[SW] registration failed:", err);
+            console.error(`%c[SW] registration failed: ${err}`, "color: #ff9800; font-weight: bold;");
         }
     };
 
@@ -34,7 +34,7 @@ if ("serviceWorker" in navigator) {
         window.addEventListener("load", register);
     }
 } else {
-    console.log("[SW] Service worker not supported");
+    console.log("%c[SW] Service worker not supported", "color: #ff9800; font-weight: bold;");
 }
 
 createRoot(document.getElementById('root')!).render(

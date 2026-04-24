@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import type { QueueTrack, TrackBase } from "@/model/model.types";
 import { trackBaseToQueueTrack } from "@/model/model.utils";
+import { useEffect } from "react";
 
 
 export const useQueue = () => {
@@ -152,6 +153,23 @@ export const useQueue = () => {
             queryClient.setQueryData(queryKey, data.queue);
         },
     });
+
+    //prefetching
+    useEffect(() => {
+        if (!("serviceWorker" in navigator) || !navigator.serviceWorker.controller) {
+            return;
+        }
+
+        if (getQueue.data && getQueue.data.length > 0) {
+            const prefetchWindow = getQueue.data.slice(0, 10);
+            navigator.serviceWorker.controller.postMessage({
+                type: "UPDATE_PREFETCH_QUEUE",
+                tracks: prefetchWindow
+            });
+
+            console.log("Sent prefetch window to Service Worker:", prefetchWindow.length);
+        }
+    }, [getQueue.data]);
 
     return {
         queue: getQueue.data ?? [],

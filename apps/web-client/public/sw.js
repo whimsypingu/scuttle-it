@@ -6,8 +6,8 @@ const STATIC_FILES_PATH_PREFIX = "/static";
 
 //console logging on desktop
 function swLog(...args) {
-    const msg = `[SW] ${args.map(a => String(a)).join(" ")}`;
-    //console.log(msg); //debugging duplicated log.
+    const msg = args.map(a => String(a)).join(" ");
+    //console.log(`[SW] ${msg}`); //debugging duplicated log.
     self.clients.matchAll().then(clients => {
         clients.forEach(client => {
             client.postMessage({ type: "log", msg: msg });
@@ -54,49 +54,92 @@ self.addEventListener("fetch", (event) => {
 });
 
 
+self.addEventListener("message", (event) => {
+    if (!event.data || !event.data.type) return;
+
+    switch (event.data.type) {
+        case "UPDATE_PREFETCH_QUEUE":
+            swLog("New prefetch queue received from frontend");
+            prefetchQueue = event.data.tracks; //see: apps/web-client/src/store/hooks/useQueue.ts
+
+            processQueue().catch(err => {
+                swLog(`Prefetch Queue Error: ${err.message}`);
+            });
+            break;
+        
+        default:
+            swLog(`Unknown Service Worker message type received: ${event.data.type}`);
+    }
+});
+
+
 // --- AUDIO REQUESTS ---
+let prefetchQueue = []; //array of TrackBases
+let currentFetch = null; //stores { track, controller }
 
-let lastFetchedUrl = null; //most recently fetched audio url, to be used as a guard for freshly cached audio (this url will require a network fetch)
-async function handleAudioStreamRequest(request, cleanUrl) {
-    const url = request.url;
+async function processQueue() {
+    const cache = await caches.open(AUDIO_CACHE_NAME);
+    let targetTrack = null;
 
-    // case 1: freshly cached guard, if the song was just put in the cache, continue using network fetches to prevent stream lock glitches
-    if (url === lastFetchedUrl) {
-        swLog(`Freshly Cached: Staying on network for stability: ${cleanUrl.split('/').pop()}`);
-        return fetch(request);
+    for (const track of prefetchQueue) {
+        const cleanUrl = `/audio/stream/${track.id}`;
+        const isCached = await cache.match(cleanUrl);
+        if (!isCached) {
+            targetTrack = track;
+            break;
+        }
     }
 
-    // case 2: already cached - check cache for audio and serve manually if available
+    if (!targetTrack) return; //everything cached
+    if (currentFetch && prefetchQueue.some(t => t.id === currentFetch.track.id)) return; //track being prefetched is somewhere in the prefetchQueue, dont cancel
+    if (currentFetch) currentFetch.controller.abort(); //something else is being prefetched but is no longer in the prefetchQUeue, kill it to prioritize new
+
+    await startFetch(targetTrack);
+}
+
+async function startFetch(track) {
+    const controller = new AbortController();
+    currentFetch = { track: track, controller: controller };
+
+    try {
+        swLog(`Starting Prefetch: ${track.id}`);
+        const cleanUrl = `/audio/stream/${track.id}`;
+        const dirtyUrl = `${cleanUrl}?t=${Date.now()}`;
+
+        const res = await fetch(dirtyUrl, {
+            signal: controller.signal,
+            cache: "no-store"
+        });
+        if (!res.ok) throw new Error(`Prefetch failed: ${res.status}`);
+
+        const cache = await caches.open(AUDIO_CACHE_NAME);
+        await cache.put(cleanUrl, res.clone());
+
+        swLog(`Prefetch Complete: ${track.id}`);
+    } catch (err) {
+        if (err.name === "AbortError") {
+            swLog(`Prefetch Aborted: ${track.id}`);
+        } else {
+            swLog(`Prefetch Error for ${track.id}: ${err.message}`);
+        }
+    } finally {
+        if (currentFetch.track.id === track.id) currentFetch = null;
+        processQueue();
+    }
+}
+
+async function handleAudioStreamRequest(request, cleanUrl) {
+    //check cache
     const cache = await caches.open(AUDIO_CACHE_NAME);
     const cachedResponse = await cache.match(cleanUrl);
 
     if (cachedResponse) {
         swLog(`Cache Hit: Serving local copy of ${cleanUrl.split('/').pop()}`);
-        lastFetchedUrl = null;
         return serveManualCachedResponse(cachedResponse, request);
     }
 
-    // case 3: new audio - trigger background archive of full audio with stripped headers for a 200 OK response
-    swLog(`Archive Start: Fetching full audio for ${cleanUrl.split('/').pop()}`);
-
-    const triggerArchival = async () => { //run this in the background
-        try {
-            const res = await fetch(url, { cache: "no-store" });
-            if (!res.ok) throw new Error(`Fetch failed with status ${res.status}`);
-
-            const cache = await caches.open(AUDIO_CACHE_NAME);
-            await cache.put(cleanUrl, res.clone()); //put into cache without the ?t=
-
-            lastFetchedUrl = url;
-        
-            swLog(`Archiving: ${cleanUrl.split('/').pop()} cached`);
-        } catch (err) {
-            swLog(`Archival Failed: ${cleanUrl.split('/').pop()}: ${err.message}`);
-        }
-    }
-    triggerArchival();
-
     // fallthru: get the audio playing as soon as possible via standard request
+    swLog(`Cache Miss: Streaming from network ${cleanUrl.split('/').pop()}`);
     return fetch(request);
 }
 
@@ -131,10 +174,11 @@ async function serveManualCachedResponse(cachedResponse, request) {
             status: 206,
             statusText: "Partial Content",
             headers: {
+                ...Object.fromEntries(cachedResponse.headers.entries()), //copy original headers
                 "Content-Range": `bytes ${chunkStart}-${chunkEnd}/${totalSize}`,
                 "Accept-Ranges": "bytes",
                 "Content-Length": chunk.size,
-                "Content-Type": cachedResponse.headers.get("Content-Type") || "audio/mpeg"
+                "Status": 206
             }
         });
     } catch (err) {
