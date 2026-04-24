@@ -59,12 +59,21 @@ self.addEventListener("message", (event) => {
 
     switch (event.data.type) {
         case "UPDATE_PREFETCH_QUEUE":
-            swLog("New prefetch queue received from frontend");
-            prefetchQueue = event.data.tracks; //see: apps/web-client/src/store/hooks/useQueue.ts
+            if (prefetchDebounce) {
+                clearTimeout(prefetchDebounce);
+            }
 
-            processQueue().catch(err => {
-                swLog(`Prefetch Queue Error: ${err.message}`);
-            });
+            prefetchDebounce = setTimeout(() => {
+                swLog("New prefetch queue received from frontend");
+
+                prefetchQueue = event.data.tracks; //see: apps/web-client/src/features/audio/useAudioEngine.ts -> usePrefetchSync
+                processQueue().catch(err => {
+                    swLog(`Prefetch Queue Error: ${err.message}`);
+                });
+            
+                prefetchDebounce = null;
+            }, 1000);
+
             break;
         
         default:
@@ -75,6 +84,7 @@ self.addEventListener("message", (event) => {
 
 // --- AUDIO REQUESTS ---
 let prefetchQueue = []; //array of TrackBases
+let prefetchDebounce = null;
 let currentFetch = null; //stores { track, controller }
 
 async function processQueue() {

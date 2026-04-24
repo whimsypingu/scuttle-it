@@ -12,6 +12,7 @@ export default defineConfig({
 		visualizer({ open: true, filename: "bundle-analysis.html", template: "treemap", gzipSize: true, brotliSize: true })
 	],
 	build: {
+		sourcemap: true,
 		rollupOptions: {
 			treeshake: {
 				moduleSideEffects: false

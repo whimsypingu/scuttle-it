@@ -27,6 +27,7 @@ export interface QueueTrack extends TrackBase {
 export type TrackActionProps = 
     | { action: "setFirst"; track: TrackBase }
     | { action: "queueLast"; track: TrackBase }
+    | { action: "queueNext"; track: TrackBase }
     | { action: "like"; track: TrackBase }
     | { action: "delete"; track: TrackBase }
     | { action: "deleteQueue"; queueTrack: QueueTrack }

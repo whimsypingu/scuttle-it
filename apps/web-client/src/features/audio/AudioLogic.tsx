@@ -4,9 +4,12 @@ import { useEffect, useRef } from "react";
 
 import { audioEngine } from "./audioEngine";
 import { getTrackDisplayMetadata } from "@/model/model.utils";
-import { useAudioPlayback } from "./useAudioEngine";
+import { useAudioPlayback, useBackupSync, usePrefetchSync } from "./useAudioEngine";
 
 export const AudioLogic = () => {
+    useBackupSync(); //syncs to server backed queue a few seconds before a track ends to ensure data integrity. in the future we could add a flag for this
+    usePrefetchSync();
+
     const { queue, pop, reorder } = useQueue(); //get the latest queue from tanstack
     const { settings } = useSettings();
     

@@ -68,6 +68,24 @@ async def push_play_queue(
         raise DefaultCrashException
     
 
+@QueueRouter.post("/push-next")
+async def push_next_play_queue(
+    track_id: str = Query(..., min_length=1, description="Track ID to push next"),
+    db_manager: DatabaseManager = Depends(get_db_manager)
+):
+    try:
+        success = await db_manager.push_next_play_queue(track_id) #status after attempting push
+        updated_queue = await db_manager.get_play_queue() #get the updated queue
+
+        return {
+            "success": success,
+            "queue": updated_queue
+        }
+    except Exception as e:
+        traceback.print_exc()
+        raise DefaultCrashException
+
+
 @QueueRouter.post("/pop")
 async def pop_play_queue(
     queue_id: int = Query(..., description="Unique instance ID of the queued track to pop"),

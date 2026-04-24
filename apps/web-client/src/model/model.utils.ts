@@ -7,7 +7,7 @@ import type { QueueId, QueueTrack, TrackActionProps, TrackBase } from '@/model/m
 
 export const useTrackActionHandler = () => {
     //access the mutations from the tanstack query hook
-    const { setFirst, push, pop } = useQueue();
+    const { setFirst, push, pushNext, pop } = useQueue();
 
     const handleAction = (props: TrackActionProps) => {
         console.log(props.action);
@@ -20,6 +20,11 @@ export const useTrackActionHandler = () => {
             case "queueLast": //add to queue
                 makeToast(props.action);
                 push(props.track);
+                break;
+
+            case "queueNext": //push next
+                makeToast(props.action);
+                pushNext(props.track);
                 break;
 
             case "delete":
