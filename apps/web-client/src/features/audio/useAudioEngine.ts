@@ -78,6 +78,8 @@ export const useBackupSync = () => {
 
 
 export const usePrefetchSync = () => {
+    if (!("serviceWorker" in navigator)) return; //guard clause for if service workers are unsupported or blocked
+
     const { queue } = useQueue();
 
     const prefetchSync = () => {
@@ -99,8 +101,6 @@ export const usePrefetchSync = () => {
 
     //initial load, wait for service worker to establish and then begin caching asap
     useEffect(() => {
-        if (!("serviceWorker" in navigator)) return;
-
         navigator.serviceWorker.addEventListener("controllerchange", prefetchSync);
         return () => {
             navigator.serviceWorker.removeEventListener("controllerchange", prefetchSync);
