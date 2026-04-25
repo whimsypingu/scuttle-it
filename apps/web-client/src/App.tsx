@@ -11,6 +11,10 @@ import { queryClient } from '@/store/queryClient';
 import { AudioLogic } from '@/features/audio/AudioLogic';
 import { SyncLogic } from '@/store/sync/SyncLogic';
 
+//
+import { EditPopup } from './features/edit/EditPopup';
+import { EditTrackProvider } from './features/edit/EditProvider';
+
 const GlobalPlayer = lazy(() => import('@/features/player/GlobalPlayer').then(m => ({ default: m.GlobalPlayer })));
 
 const MockHome = lazy(() => import('@/features/home/HomeView').then(m => ({ default: m.MockHome })));
@@ -52,6 +56,8 @@ function App() {
 		<QueryClientProvider client={queryClient}>
 			<AudioLogic />
 			<SyncLogic />
+
+			<EditTrackProvider>
 			<div className="relative h-dvh w-full overflow-hidden bg-surface">
 
 				{!isPlayerExpanded && (
@@ -75,7 +81,10 @@ function App() {
 				</Suspense>
 				
 				<Toast isExpanded={isPlayerExpanded} />
-			</div>
+				
+				<EditPopup />
+			</div>				
+			</EditTrackProvider>
 		</QueryClientProvider>
 	);
 }

@@ -3,11 +3,13 @@ import { makeToast } from '@/features/toast/Toast';
 import { useQueue } from '@/store/hooks/useQueue';
 
 import type { QueueId, QueueTrack, TrackActionProps, TrackBase } from '@/model/model.types';
+import { useEditTrack } from '@/features/edit/EditProvider';
 
 
 export const useTrackActionHandler = () => {
     //access the mutations from the tanstack query hook
     const { setFirst, push, pushNext, pop } = useQueue();
+    const { setEditTrack } = useEditTrack();
 
     const handleAction = (props: TrackActionProps) => {
         console.log(props.action);
@@ -38,6 +40,7 @@ export const useTrackActionHandler = () => {
 
             case "edit":
                 makeToast(props.action);
+                setEditTrack(props.track);
                 break;
 
             case "like":
