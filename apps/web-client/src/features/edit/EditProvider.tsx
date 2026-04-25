@@ -1,28 +1,24 @@
 import React, { createContext, useContext, useState } from "react";
-import type { TrackBase } from "@/model/model.types";
+import type { EditContextValue, EditTarget } from "@/features/edit/edit.types";
 
-interface IEditTrackContext {
-    editTrack: TrackBase | null;
-    setEditTrack: (track: TrackBase | null) => void;
-}
 
-const EditTrackContext = createContext<IEditTrackContext | undefined>(undefined);
+const EditContext = createContext<EditContextValue | undefined>(undefined);
 
-export const useEditTrack = () => {
-    const context = useContext(EditTrackContext);
+export const useEdit = () => {
+    const context = useContext(EditContext);
     if (context === undefined) {
-        throw new Error("useEditTrack must be used within an EditTrackProvider");
+        throw new Error("useEdit must be used within an EditProvider");
     }
     return context;
 }
 
-export const EditTrackProvider = ({ children }: { children: React.ReactNode }) => {
-    const [editTrack, setEditTrack] = useState<TrackBase | null>(null);
+export const EditProvider = ({ children }: { children: React.ReactNode }) => {
+    const [editTarget, setEditTarget] = useState<EditTarget>(null);
 
     return (
-        <EditTrackContext.Provider value={{ editTrack, setEditTrack }}>
+        <EditContext.Provider value={{ editTarget, setEditTarget }}>
             {children}
-        </EditTrackContext.Provider>
+        </EditContext.Provider>
     );
 }
 

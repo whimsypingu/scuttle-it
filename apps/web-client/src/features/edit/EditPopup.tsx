@@ -1,21 +1,22 @@
+import { useEdit } from "@/features/edit/EditProvider";
+
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useEditTrack } from "@/features/edit/EditProvider";
 
 
 export const EditPopup = () => {
-    const { editTrack, setEditTrack } = useEditTrack();
+    const { editTarget, setEditTarget } = useEdit(); //access our custom Provider
 
-    const isOpen = !!editTrack;
+    const isOpen = !!editTarget; //check for non-null editTarget
 
     const handleClose = () => {
-        setEditTrack(null);
+        setEditTarget(null);
     };
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Edit Track</DialogTitle>
+                    <DialogTitle>Edit</DialogTitle>
                     <DialogDescription>Make changes</DialogDescription>
                 </DialogHeader>
 
