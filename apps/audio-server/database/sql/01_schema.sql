@@ -53,7 +53,7 @@ ON likes(position);
 
 -- playlists table
 CREATE TABLE IF NOT EXISTS playlists (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
     created_at INTEGER DEFAULT (unixepoch())
 );
@@ -76,7 +76,7 @@ ON playlist_tracks (playlist_id, position, track_internal_id);
 
 -- play queue
 CREATE TABLE IF NOT EXISTS play_queue (
-    queue_id INTEGER PRIMARY KEY AUTOINCREMENT, --used for state management
+    queue_id INTEGER PRIMARY KEY, --used for state management
     track_internal_id TEXT NOT NULL,
     position REAL NOT NULL UNIQUE,
     added_at INTEGER DEFAULT (unixepoch()),
@@ -90,7 +90,7 @@ ON play_queue(position);
 -- settings
 CREATE TABLE IF NOT EXISTS settings (
     id INTEGER PRIMARY KEY CHECK (id = 1), --ensures only one row
-    loopmode INTEGER DEFAULT 0 --loop modes: 0=None, 1=All, 2=One 
+    loopmode INTEGER DEFAULT 1 --loop modes: 0=None, 1=All, 2=One 
 );
 
 INSERT OR IGNORE INTO settings (id) VALUES (1); --initialize settings

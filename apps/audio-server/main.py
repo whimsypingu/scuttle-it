@@ -63,6 +63,7 @@ async def lifespan(app: FastAPI):
 
     await db_manager.build_from_directory()
     await db_manager.build_search_index()
+    await db_manager.normalize_play_queue_positions()
 
     yield
 
