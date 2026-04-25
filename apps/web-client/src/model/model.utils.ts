@@ -39,7 +39,6 @@ export const useTrackActionHandler = () => {
                 break;
 
             case "edit": //open a track editing popup
-                makeToast(props.action);
                 setEditTarget({ 
                     type: "track", 
                     data: props.track 

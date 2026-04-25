@@ -1,6 +1,7 @@
 import { useEdit } from "@/features/edit/EditProvider";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { EDIT_CONFIG } from "@/features/edit/edit.constants";
 
 
 export const EditPopup = () => {
@@ -12,16 +13,23 @@ export const EditPopup = () => {
         setEditTarget(null);
     };
 
+    //lookup the config details based on the type of editTarget
+    const config = editTarget ? EDIT_CONFIG[editTarget.type] : null;
+
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Edit</DialogTitle>
-                    <DialogDescription>Make changes</DialogDescription>
+                    <DialogTitle>
+                        {config?.title ?? "Edit"}
+                    </DialogTitle>
+                    <DialogDescription>
+                        {config?.description ?? "Make changes."}
+                    </DialogDescription>
                 </DialogHeader>
 
                 <div>
-                    Hello world
+                    {editTarget?.data?.title}
                 </div>
             </DialogContent>
         </Dialog>
