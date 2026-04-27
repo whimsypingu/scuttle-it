@@ -7,4 +7,3 @@ export const EDIT_CONFIG: Record<EditableType, EditPopupMetadata> = {
         description: "Update the metadata for this track.",
     },
 };
-

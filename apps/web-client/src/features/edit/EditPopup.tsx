@@ -1,7 +1,9 @@
 import { useEdit } from "@/features/edit/EditProvider";
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EDIT_CONFIG } from "@/features/edit/edit.constants";
+import { EditTrackForm } from "./subcomponents/EditTrackForm";
+import { Button } from "@/components/ui/button";
 
 
 export const EditPopup = () => {
@@ -16,6 +18,23 @@ export const EditPopup = () => {
     //lookup the config details based on the type of editTarget
     const config = editTarget ? EDIT_CONFIG[editTarget.type] : null;
 
+    //pick the right form to display
+    const activeEditForm = () => {
+        if (!editTarget) return null;
+
+        switch (editTarget.type) {
+            case "track":
+                return (
+                    <EditTrackForm
+                        track={editTarget.data}
+                        onSave={()=>{}}
+                    />
+                );
+            default:
+                return null;
+        }
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
             <DialogContent>
@@ -28,9 +47,8 @@ export const EditPopup = () => {
                     </DialogDescription>
                 </DialogHeader>
 
-                <div>
-                    {editTarget?.data?.title}
-                </div>
+                {activeEditForm()}
+
             </DialogContent>
         </Dialog>
     );
