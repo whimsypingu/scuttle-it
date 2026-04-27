@@ -1,6 +1,6 @@
-from pydantic import Field
+from pydantic import BaseModel, Field
 from core.models.base import ScuttleBase
-from core.models.artist import ArtistBase
+from core.models.artist import ArtistBase, EditArtist
 
 class TrackBase(ScuttleBase):
     internal_id: int | None = None
@@ -19,3 +19,10 @@ class TrackBase(ScuttleBase):
 class QueueTrack(TrackBase):
     queue_id: int
     position: float
+
+
+class EditTrack(BaseModel):
+    id: str | None = None
+    title_display: str | None = None
+
+    artists: list[EditArtist] = Field(default_factory=list)

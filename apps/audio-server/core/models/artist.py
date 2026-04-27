@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from core.models.base import ScuttleBase
 
 class ArtistBase(ScuttleBase):
@@ -9,3 +10,7 @@ class ArtistBase(ScuttleBase):
     @property
     def display(self) -> str:
         return self.name_display or self.name
+    
+class EditArtist(BaseModel):
+    id: str | None = None
+    name_display: str | None = None
