@@ -6,7 +6,7 @@ import { trackBaseToQueueTrack } from "@/model/model.utils";
 
 export const useQueue = () => {
     const queryClient = useQueryClient();
-    const queryKey = ["play_queue"];
+    const queryKey = ["tracks", "play_queue"];
     
     //fetch queue
     const getQueue = useQuery({

@@ -1,8 +1,8 @@
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 export const useDownloads = (limit = 30) => {
-    const queryKey = ["downloads"];
+    const queryKey = ["tracks", "downloads"];
 
     const getDownloads = useInfiniteQuery({
         queryKey,
