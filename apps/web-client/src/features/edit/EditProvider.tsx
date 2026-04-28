@@ -4,7 +4,7 @@ import type { EditContextValue, EditTarget } from "@/features/edit/edit.types";
 
 const EditContext = createContext<EditContextValue | undefined>(undefined);
 
-export const useEdit = () => {
+export const useEditTarget = () => {
     const context = useContext(EditContext);
     if (context === undefined) {
         throw new Error("useEdit must be used within an EditProvider");

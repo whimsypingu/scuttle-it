@@ -1,13 +1,12 @@
-import { useEdit } from "@/features/edit/EditProvider";
+import { useEditTarget } from "@/features/edit/EditProvider";
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EDIT_CONFIG } from "@/features/edit/edit.constants";
 import { EditTrackForm } from "./subcomponents/EditTrackForm";
-import { Button } from "@/components/ui/button";
 
 
 export const EditPopup = () => {
-    const { editTarget, setEditTarget } = useEdit(); //access our custom Provider
+    const { editTarget, setEditTarget } = useEditTarget(); //access our custom Provider
 
     const isOpen = !!editTarget; //check for non-null editTarget
 
@@ -27,7 +26,7 @@ export const EditPopup = () => {
                 return (
                     <EditTrackForm
                         track={editTarget.data}
-                        onSave={()=>{}}
+                        onSave={handleClose}
                     />
                 );
             default:

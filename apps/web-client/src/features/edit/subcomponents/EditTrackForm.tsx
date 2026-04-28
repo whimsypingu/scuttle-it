@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import type { TrackBase } from "@/model/model.types";
-import { getTrackDisplayMetadata } from "@/model/model.utils";
 import { Button } from "@/components/ui/button";
+
+import { getTrackDisplayMetadata } from "@/model/model.utils";
+
+import type { TrackBase } from "@/model/model.types";
+import { useEdit } from "@/store/hooks/useEdit";
+import type { EditArtistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
 
 
 interface EditTrackFormProps {
@@ -19,6 +23,23 @@ export const EditTrackForm = ({
     const [artistInput, setArtistInput] = useState("");
 
     const { titleDisplay, artistDisplay } = getTrackDisplayMetadata(track);
+
+    //edit hook
+    const { editTrack } = useEdit();
+
+    const handleSave = () => { //use temp edit payload strategy -- migrate to artist selection in the future
+        const artistPayload: EditArtistPayload = {
+            nameDisplay: artistInput || undefined,
+        };
+        const payload: EditTrackPayload = {
+            id: track.id, 
+            titleDisplay: titleInput || undefined,
+            artists: artistInput ? [artistPayload] : undefined,
+        };
+
+        editTrack({ payload });
+        onSave();
+    }
 
     return (
         <div className="flex flex-col gap-2">
@@ -48,7 +69,7 @@ export const EditTrackForm = ({
                 <Button
                     className="min-w-[80px]"
                     variant="secondary"
-                    onClick={onSave}
+                    onClick={handleSave}
                 >
                     Save
                 </Button>
