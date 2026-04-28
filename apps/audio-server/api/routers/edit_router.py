@@ -21,6 +21,9 @@ async def edit_track_endpoint(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
+        if not edit.id: #require track id
+            raise DefaultCrashException
+        
         success = await db_manager.edit_track(edit) #status after attempting push
 
         return {

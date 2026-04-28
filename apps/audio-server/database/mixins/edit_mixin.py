@@ -32,10 +32,10 @@ class EditMixin:
 
                 #flush and fill artists -- temp strategy, will require further logic in the future
                 if edit.artists:
-                    await db.execute("DELETE FROM track_artists WHERE track_id = ?;", (edit.id,))
+                    await db.execute("DELETE FROM track_artists WHERE track_internal_id = ?;", (track_internal_id,))
 
                     for artist in edit.artists:
-                        cursor = await db.execute("INSERT INTO artists (name, name_display) VALUES (?, ?) RETURNING internal_id;", (artist.name_display, edit.name_display))
+                        cursor = await db.execute("INSERT INTO artists (name, name_display) VALUES (?, ?) RETURNING internal_id;", (artist.name_display, artist.name_display))
                         row = await cursor.fetchone()
                         if not row:
                             logger.error(f"Failed to get internal_id for edit_artist: {artist.name_display}")
