@@ -162,7 +162,7 @@ export const TrackItem = ({
 			>
 				<div className={`
 					w-12 h-12 
-					${isActive ? "bg-brand text-white" : "bg-zinc-800 text-white/40"}
+					${isActive ? "bg-brand/70 text-white" : "bg-zinc-800 text-white/40"}
 					rounded flex items-center justify-center shrink-0
 				`}>
 					<MusicNoteIcon size={ICON_SIZE_PX} />
