@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*' # only triggers when a tag like v1.0.0 is pushed
+  workflow_dispatch: 
 
 permissions:
   contents: write
