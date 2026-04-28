@@ -27,4 +27,9 @@ export const useEdit = () => {
             console.error("Edit track failed.");
         }
     });
+
+    
+    return {
+        editTrack: editTrackMutation.mutate
+   };
 }
