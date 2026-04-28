@@ -13,6 +13,7 @@ from database.mixins.retrieval_mixin import RetrievalMixin
 from database.mixins.search_mixin import SearchMixin
 from database.mixins.settings_mixin import SettingsMixin
 from database.mixins.queue_mixin import PlayQueueMixin
+from database.mixins.edit_mixin import EditMixin
 
 
 logger = logging.getLogger(__name__)
@@ -25,7 +26,8 @@ class DatabaseManager(
     RetrievalMixin, 
     SearchMixin, 
     SettingsMixin, 
-    PlayQueueMixin
+    PlayQueueMixin,
+    EditMixin
 ):
     def __init__(
         self,

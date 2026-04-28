@@ -16,7 +16,7 @@ export const TrackItem = ({
 	track,
 	onSelect,
 	index = 0,
-	actions = ["queueNext", "queueLast", "delete", "edit"] //default setup
+	actions = ["queueNext", "queueLast", "like", "edit"] //default setup
 }: TrackItemProps) => {
 
 	/* DRAG ACTION HANDLING */

@@ -86,7 +86,7 @@ export const DownloadedHomeContentView = ({
                 <PlaylistList
                     scrollContext={scrollContext}
                     bottomSpacing={BOTTOM_SHELF.totalHeight}
-                    actions={["queueNext", "queueLast", "delete", "delete"]}
+                    actions={["queueNext", "queueLast", "like", "edit"]}
                 />
             </div>
         </motion.div>

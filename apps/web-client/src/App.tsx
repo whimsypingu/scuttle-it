@@ -11,6 +11,9 @@ import { queryClient } from '@/store/queryClient';
 import { AudioLogic } from '@/features/audio/AudioLogic';
 import { SyncLogic } from '@/store/sync/SyncLogic';
 
+import { EditPopup } from '@/features/edit/EditPopup';
+import { EditProvider } from '@/features/edit/EditProvider';
+
 const GlobalPlayer = lazy(() => import('@/features/player/GlobalPlayer').then(m => ({ default: m.GlobalPlayer })));
 
 const MockHome = lazy(() => import('@/features/home/HomeView').then(m => ({ default: m.MockHome })));
@@ -52,30 +55,35 @@ function App() {
 		<QueryClientProvider client={queryClient}>
 			<AudioLogic />
 			<SyncLogic />
-			<div className="relative h-dvh w-full overflow-hidden bg-surface">
 
-				{!isPlayerExpanded && (
-					<>
-					<MainLayout
-						activeTab={activeTab}
-						onTabChange={handleTabChange}
-					>
-						{renderContent()}
-					</MainLayout>
+			<EditProvider>
+				<div className="relative h-dvh w-full overflow-hidden bg-surface">
 
-					<NavBar
-						activeTab={activeTab}
-						onTabChange={handleTabChange}
-					/>
-					</>
-				)}
+					{!isPlayerExpanded && (
+						<>
+						<MainLayout
+							activeTab={activeTab}
+							onTabChange={handleTabChange}
+						>
+							{renderContent()}
+						</MainLayout>
 
-				<Suspense fallback={null}>
-					<GlobalPlayer isExpanded={isPlayerExpanded} setIsExpanded={setIsPlayerExpanded} />
-				</Suspense>
-				
-				<Toast isExpanded={isPlayerExpanded} />
-			</div>
+						<NavBar
+							activeTab={activeTab}
+							onTabChange={handleTabChange}
+						/>
+						</>
+					)}
+
+					<Suspense fallback={null}>
+						<GlobalPlayer isExpanded={isPlayerExpanded} setIsExpanded={setIsPlayerExpanded} />
+					</Suspense>
+					
+					<Toast isExpanded={isPlayerExpanded} />
+					
+					<EditPopup />
+				</div>				
+			</EditProvider>
 		</QueryClientProvider>
 	);
 }

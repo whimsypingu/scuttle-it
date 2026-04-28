@@ -36,7 +36,7 @@ export const QueueList = () => {
                         track={track}
                         onSelect={handleTrackSelect}
                         index={index}
-                        actions={["queueNext", "queueLast", "deleteQueue", "deleteQueue"]}
+                        actions={["queueNext", "queueLast", "deleteQueue", "edit"]}
                     />
                 )}
             

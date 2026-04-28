@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
-import type { QueueTrack, TrackBase } from "@/model/model.types";
 import { trackBaseToQueueTrack } from "@/model/model.utils";
+
+import type { QueueTrack, TrackBase } from "@/model/model.types";
 
 
 export const useQueue = () => {
     const queryClient = useQueryClient();
-    const queryKey = ["play_queue"];
+    const queryKey = ["tracks", "play_queue"];
     
     //fetch queue
     const getQueue = useQuery({
