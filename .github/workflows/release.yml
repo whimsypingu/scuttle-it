@@ -50,9 +50,9 @@ jobs:
         run: |
           mkdir scuttle-package
           cp workspace.json scuttle-package/
-          Get-ChildItem -Path "**/target/release/scuttle.exe" | Copy-Item -Destination "scuttle-package/scuttle.exe"
-          cp -r apps/web-client/dist scuttle-package/dist
-          cp -r apps/audio-server scuttle-package/audio-server
+          Get-ChildItem -Path . -Filter "scuttle.exe" -Recurse | Select-Object -First 1 | Copy-Item -Destination "scuttle-package/scuttle.exe"
+          cp -r apps/web-client/dist scuttle-package/apps/web-client/dist
+          cp -r apps/audio-server scuttle-package/apps/audio-server
           Compress-Archive -Path scuttle-package/* -DestinationPath scuttle-win-x64.zip
 
       # --- RELEASE ---
