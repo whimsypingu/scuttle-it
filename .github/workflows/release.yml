@@ -1,0 +1,53 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*' # only triggers when a tag like v1.0.0 is pushed
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build Windows Binary
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+    
+      # --- WEB CLIENT BUILD ---
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/web-client/package-lock.json
+
+      - name: Build Web Client
+        working-directory: apps/web-client
+        run: |
+          npm install
+          npm run build
+
+      # --- DESKTOP LAUNCHER BUILD ---
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop-launcher -> target
+      
+      - name: Build Desktop Launcher
+        working-directory: apps/desktop-launcher
+        run: cargo build --release
+
+      # --- RELEASE ---
+      - name: Create Github Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: apps/desktop-launcher/target/release/scuttle.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
