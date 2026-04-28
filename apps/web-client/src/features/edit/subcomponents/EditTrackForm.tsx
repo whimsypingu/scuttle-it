@@ -1,11 +1,12 @@
 import { useState } from "react";
+import { useEdit } from "@/store/hooks/useEdit";
+
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
 import { getTrackDisplayMetadata } from "@/model/model.utils";
 
 import type { TrackBase } from "@/model/model.types";
-import { useEdit } from "@/store/hooks/useEdit";
 import type { EditArtistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
 
 
@@ -22,7 +23,7 @@ export const EditTrackForm = ({
     //const [artists, setArtists] = useState<string[]>(track.artists.map(a => a.nameDisplay ?? a.name)); //EMERGENCY: use this with shadcn badges? to make artists selectable in the future
     const [artistInput, setArtistInput] = useState("");
 
-    const { titleDisplay, artistDisplay } = getTrackDisplayMetadata(track);
+    const { titleDisplay, artistDisplay } = getTrackDisplayMetadata(track); //placeholders
 
     //edit hook
     const { editTrack } = useEdit();

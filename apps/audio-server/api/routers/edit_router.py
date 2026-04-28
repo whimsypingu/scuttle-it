@@ -1,6 +1,6 @@
 import traceback
 
-from fastapi import APIRouter, Body, Depends, Query, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
 

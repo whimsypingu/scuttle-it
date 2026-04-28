@@ -1,8 +1,9 @@
 import { useEditTarget } from "@/features/edit/EditProvider";
 
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { EditTrackForm } from "@/features/edit/subcomponents/EditTrackForm";
+
 import { EDIT_CONFIG } from "@/features/edit/edit.constants";
-import { EditTrackForm } from "./subcomponents/EditTrackForm";
 
 
 export const EditPopup = () => {

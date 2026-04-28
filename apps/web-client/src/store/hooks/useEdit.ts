@@ -1,13 +1,14 @@
 import { useMutation } from "@tanstack/react-query"
-import { queryClient } from "../queryClient"
+import { queryClient } from "@/store/queryClient"
 
 import type { EditTrackPayload } from "@/store/hooks/hooks.types";
+
 
 export const useEdit = () => {
 
     const editTrackMutation = useMutation({
         mutationFn: async ({ payload }: { payload: EditTrackPayload }) => {
-            console.log(payload);
+            //see: apps/audio-server/api/routers/edit_router.py
             const response = await fetch(`/edit/track`, {
                 method: "POST",
                 headers: {
@@ -22,7 +23,8 @@ export const useEdit = () => {
             return data;
         },
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: ["tracks"] });
+            //refetch all data that could possibly have the edited track. consider a better bounded approach to this
+            queryClient.invalidateQueries({ queryKey: ["tracks"] }); 
         },
         onError: (err) => {
             console.error("Edit track failed.");
