@@ -12,7 +12,7 @@ export const MockHome = ({
 }: HomeViewProps) => {
     const [selectedHomeContent, setSelectedHomeContent] = useState<HomeContent | null>(null);
 
-        // Reset when the signal changes
+    // Reset when the signal changes
     useEffect(() => {
         if (tabResetSignal > 0) {
             setSelectedHomeContent(null);
