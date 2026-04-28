@@ -72,9 +72,14 @@ export const ExpandedView = ({ isCompact, setIsCompact, onClose, playerDragContr
                         <motion.div
                             layout
                             layoutId="album-art"
-                            className={`bg-brand shadow-2xl flex-shrink-0 ${isCompact ? "w-12 h-12 rounded" : "w-48 h-48 rounded-2xl"}`}
+                            className={`bg-brand shadow-2xl flex items-center justify-center overflow-hidden flex-shrink-0 ${isCompact ? "w-12 h-12 rounded" : "w-48 h-48 rounded-2xl"}`}
                             onClick={() => setIsCompact(!isCompact)}
-                        />
+                        >
+                            <img
+                                src="/static/logo_transparent_background.svg"
+                                className="select-none pointer-events-none"
+                            />
+                        </motion.div>
 
                         {/* SHARED: TEXT BLOCK */}
                         <motion.div

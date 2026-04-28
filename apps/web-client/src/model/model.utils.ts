@@ -17,17 +17,17 @@ export const useTrackActionHandler = () => {
         
         switch (props.action) {
             case "setFirst": //set first in queue
-                setFirst(props.track);
+                setFirst({ track: props.track });
                 break;
 
             case "queueLast": //add to queue
                 makeToast(props.action);
-                push(props.track);
+                push({ track: props.track });
                 break;
 
             case "queueNext": //push next
                 makeToast(props.action);
-                pushNext(props.track);
+                pushNext({ track: props.track });
                 break;
 
             case "delete":
@@ -36,7 +36,7 @@ export const useTrackActionHandler = () => {
 
             case "deleteQueue": //delete from queue
                 makeToast(props.action);
-                pop(props.queueTrack);
+                pop({ queueTrack: props.queueTrack });
                 break;
 
             case "edit": //open a track editing popup

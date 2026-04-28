@@ -40,8 +40,13 @@ export const MiniView = ({ onExpand }: MiniViewProps) => {
                     <motion.div
                         layout
                         layoutId="album-art"
-                        className="w-10 h-10 bg-black/20 rounded"
-                    />
+                        className="w-10 h-10 bg-black/20 rounded flex items-center justify-center overflow-hidden flex-shrink-0"
+                    >
+                        <img
+                            src="/static/logo_transparent_background.svg"
+                            className="select-none pointer-events-none"
+                        />
+                    </motion.div>
 
                     {/* SHARED: TEXT BLOCK */}
                     <motion.div

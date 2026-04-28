@@ -29,7 +29,7 @@ export const AudioLogic = () => {
             
             switch (settings.loopmode) {
                 case 0: // No loop
-                    pop(currentTrack);
+                    pop({ queueTrack: currentTrack });
                     if (nextTrack) {
                         audioEngine.playTrack({ trackId: nextTrack.id, forceRestart: true });
                     } else {
@@ -102,7 +102,7 @@ export const AudioLogic = () => {
         navigator.mediaSession.setActionHandler("nexttrack", () => {
             if (nextTrack) {
                 console.log("%c[AudioLogic - MediaSession]%c Manual skip", "color: #ff00ff;", "color: inherit;");
-                pop(currentTrack);
+                pop({ queueTrack: currentTrack });
                 audioEngine.playTrack({ trackId: nextTrack.id, forceRestart: true });
             } else {
                 console.log("%c[AudioLogic - MediaSession]%c Manual skip but no tracks remaining. Pausing and restarting.", "color: #ff00ff;", "color: inherit;");
