@@ -6,7 +6,8 @@ import type { EditTrackPayload } from "@/store/hooks/hooks.types";
 export const useEdit = () => {
 
     const editTrackMutation = useMutation({
-        mutationFn: async (payload: EditTrackPayload) => {
+        mutationFn: async ({ payload }: { payload: EditTrackPayload }) => {
+            console.log(payload);
             const response = await fetch(`/edit/track`, {
                 method: "POST",
                 headers: {

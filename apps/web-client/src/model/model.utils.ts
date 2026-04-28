@@ -3,13 +3,13 @@ import { makeToast } from '@/features/toast/Toast';
 import { useQueue } from '@/store/hooks/useQueue';
 
 import type { QueueId, QueueTrack, TrackActionProps, TrackBase } from '@/model/model.types';
-import { useEdit } from '@/features/edit/EditProvider';
+import { useEditTarget } from '@/features/edit/EditProvider';
 
 
 export const useTrackActionHandler = () => {
     //access the mutations from the tanstack query hook
     const { setFirst, push, pushNext, pop } = useQueue();
-    const { setEditTarget } = useEdit();
+    const { setEditTarget } = useEditTarget();
 
     const handleAction = (props: TrackActionProps) => {
         console.log(props.action);
