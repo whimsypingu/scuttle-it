@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
 from core.models.base import ScuttleBase
 from core.models.artist import ArtistBase, EditArtist
 
@@ -21,8 +21,10 @@ class QueueTrack(TrackBase):
     position: float
 
 
-class EditTrack(BaseModel):
-    id: str | None = None
+#see: apps/web-client/src/store/hooks/hooks.types.ts
+class EditTrack(ScuttleBase):
+    id: str | None = None #optional external source ID to identify which track to edit
+    new_id: str | None = None
     title_display: str | None = None
 
-    artists: list[EditArtist] = Field(default_factory=list)
+    artists: list[EditArtist] | None = None

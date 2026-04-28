@@ -16,13 +16,12 @@ DefaultCrashException = HTTPException(
 
 
 @EditRouter.post("/track")
-async def edit_track_data(
-    track_id: str = Query(..., min_length=1, description="Track ID to edit"),
-    edit_track: EditTrack = Body(...), #automatically parse JSON body into pydantic model
+async def edit_track_endpoint(
+    edit: EditTrack = Body(...), #automatically parse JSON body into pydantic model
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.edit_track(track_id, edit_track) #status after attempting push
+        success = await db_manager.edit_track(edit) #status after attempting push
 
         return {
             "success": success,
