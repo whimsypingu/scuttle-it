@@ -42,12 +42,22 @@ jobs:
       
       - name: Build Desktop Launcher
         working-directory: apps/desktop-launcher
-        run: cargo build --release
+        run: cargo build --release --target x86_64-pc-windows-msvc
+        
+      # --- STAGING ---
+      - name: Prepare Release Folder
+        run: |
+          mkdir scuttle-package
+          cp workspace.json scuttle-package/
+          cp apps/desktop-launcher/target/release/scuttle.exe scuttle-package/
+          cp -r apps/web-client/dist scuttle-package/dist
+          cp -r apps/audio-server scuttle-package/audio-server
+          Compress-Archive -Path scuttle-package/* -DestinationPath scuttle-win-x64.zip
 
       # --- RELEASE ---
       - name: Create Github Release
         uses: softprops/action-gh-release@v2
         with:
-          files: apps/desktop-launcher/target/release/scuttle.exe
+          files: scuttle-win-x64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
