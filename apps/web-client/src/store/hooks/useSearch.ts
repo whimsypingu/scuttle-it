@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 
 import type { TrackBase } from "@/model/model.types";
+import type { YTSearchMutationProps } from "@/store/hooks/hooks.types";
 
 
 export const useSearch = (query: string) => {
@@ -17,7 +18,7 @@ export const useSearch = (query: string) => {
     });
 
     const ytSearch = useMutation({
-        mutationFn: async ({ q, limit = 1 }: { q: string; limit?: number }) => {
+        mutationFn: async ({ q, limit = 1 }: YTSearchMutationProps) => {
             const response = await fetch(`/search/yt-search?q=${encodeURIComponent(q)}&query_limit=${limit}`, { method: "POST" });
             if (!response.ok) throw new Error("YouTube request failed");
 

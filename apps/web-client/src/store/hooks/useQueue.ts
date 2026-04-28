@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { trackBaseToQueueTrack } from "@/model/model.utils";
 
-import type { QueueTrack, TrackBase } from "@/model/model.types";
+import type { QueueTrack } from "@/model/model.types";
+import type { PopMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
 
 
 export const useQueue = () => {
@@ -26,7 +27,7 @@ export const useQueue = () => {
 
     //set the first track in the queue
     const setFirstMutation = useMutation({
-        mutationFn: async (track: TrackBase) => {
+        mutationFn: async ({ track }: SetFirstMutationProps) => {
             const response = await fetch(`/queue/set-first?track_id=${track.id}`, { method: "POST" });
 
             if (!response.ok) throw new Error("Failed to set first entry in queue");
@@ -34,7 +35,7 @@ export const useQueue = () => {
             const data = await response.json();
             return data;
         },
-        onMutate: async (track: TrackBase) => {
+        onMutate: async ({ track }) => {
             await queryClient.cancelQueries({ queryKey }); // cancel outgoing refetches so they dont rewrite optimistic changes
 
             const rollbackQueue = queryClient.getQueryData(queryKey); //get the rollback state
@@ -59,7 +60,7 @@ export const useQueue = () => {
     });
 
     const reorderMutation = useMutation({
-        mutationFn: async ({ queueTrack, targetPosition }: { queueTrack: QueueTrack; targetPosition: number }) => {
+        mutationFn: async ({ queueTrack, targetPosition }: ReorderMutationProps) => {
             const response = await fetch(`/queue/reorder?queue_id=${queueTrack.queueId}&target_position=${targetPosition}`, { method: "POST" });
 
             if (!response.ok) throw new Error("Failed to reorder within queue");
@@ -67,7 +68,7 @@ export const useQueue = () => {
             const data = await response.json();
             return data;
         },
-        onMutate: async ({ queueTrack, targetPosition }: { queueTrack: QueueTrack; targetPosition: number }) => {
+        onMutate: async ({ queueTrack, targetPosition }) => {
             await queryClient.cancelQueries({ queryKey });
             const rollbackQueue = queryClient.getQueryData(queryKey);
 
@@ -93,7 +94,7 @@ export const useQueue = () => {
 
     //push a track to the end of the queue
     const pushMutation = useMutation({
-        mutationFn: async (track: TrackBase) => {
+        mutationFn: async ({ track }: PushMutationProps) => {
             const response = await fetch(`/queue/push?track_id=${track.id}`, { method: "POST" });
 
             if (!response.ok) throw new Error("Failed to push to queue");
@@ -101,7 +102,7 @@ export const useQueue = () => {
             const data = await response.json();
             return data;
         },
-        onMutate: async (track: TrackBase) => {
+        onMutate: async ({ track }) => {
             await queryClient.cancelQueries({ queryKey });
             const rollbackQueue = queryClient.getQueryData(queryKey);
 
@@ -126,7 +127,7 @@ export const useQueue = () => {
 
     //push a track to the front of the queue
     const pushNextMutation = useMutation({
-        mutationFn: async (track: TrackBase) => {
+        mutationFn: async ({ track }: PushNextMutationProps) => {
             const response = await fetch(`/queue/push-next?track_id=${track.id}`, { method: "POST" });
 
             if (!response.ok) throw new Error("Failed to push to queue");
@@ -134,7 +135,7 @@ export const useQueue = () => {
             const data = await response.json();
             return data;
         },
-        onMutate: async (track: TrackBase) => {
+        onMutate: async ({ track }) => {
             await queryClient.cancelQueries({ queryKey });
             const rollbackQueue = queryClient.getQueryData(queryKey);
 
@@ -163,7 +164,7 @@ export const useQueue = () => {
 
     // remove a track from the queue
     const popMutation = useMutation({
-        mutationFn: async (queueTrack: QueueTrack) => {
+        mutationFn: async ({ queueTrack }: PopMutationProps) => {
             const response = await fetch(`/queue/pop?queue_id=${queueTrack.queueId}`, { method: "POST" });
 
             if (!response.ok) throw new Error("Failed to pop from queue");
@@ -171,7 +172,7 @@ export const useQueue = () => {
             const data = await response.json();
             return data;
         },
-        onMutate: async (queueTrack: QueueTrack) => {
+        onMutate: async ({ queueTrack }) => {
             await queryClient.cancelQueries({ queryKey });
             const rollbackQueue = queryClient.getQueryData(queryKey);
 
