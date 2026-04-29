@@ -86,7 +86,7 @@ export const LikedHomeContentView = ({
                 <PlaylistList
                     scrollContext={scrollContext}
                     bottomSpacing={BOTTOM_SHELF.totalHeight}
-                    actions={["queueNext", "queueLast", "like", "edit"]}
+                    actions={["queueNext", "queueLast", "unlike", "edit"]}
                 />
             </div>
         </motion.div>

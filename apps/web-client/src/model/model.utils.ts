@@ -54,6 +54,13 @@ export const useTrackActionHandler = () => {
                     liked: true,
                 });
                 break;
+
+            case "unlike": //unlike a track
+                setLike({
+                    track: props.track,
+                    liked: false,
+                });
+                break;
         }
     };
 

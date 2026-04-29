@@ -32,6 +32,7 @@ export type TrackActionProps =
     | { action: "queueLast"; track: TrackBase }
     | { action: "queueNext"; track: TrackBase }
     | { action: "like"; track: TrackBase }
+    | { action: "unlike"; track: TrackBase }
     | { action: "delete"; track: TrackBase }
     | { action: "deleteQueue"; queueTrack: QueueTrack }
     | { action: "edit"; track: TrackBase };
