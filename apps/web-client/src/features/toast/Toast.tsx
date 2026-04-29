@@ -7,15 +7,33 @@ import { toastBaseStyle } from "@/features/toast/toast.constants";
 
 import type { ToastProps } from "@/features/toast/toast.types";
 
+
 export const Toast = ({ isExpanded }: ToastProps) => {
     const minimumOffset = PLAYER_CONFIG.marginBottom; //minimum required offset
-    const liftAmount = BOTTOM_SHELF.totalHeight; //how much to lift the toasts by when the player is expanded
+    const liftAmount = BOTTOM_SHELF.totalHeight; //how much to lift the toasts by when the player is closed
+
+    // const dynamicOffset = isExpanded ? minimumOffset : (minimumOffset + liftAmount);
+    
+    // return (
+    //     <Toaster 
+    //         position="bottom-center"
+    //         offset={dynamicOffset}
+    //         mobileOffset={dynamicOffset}
+    //         visibleToasts={1}
+    //         toastOptions={{
+    //             style: {
+    //                 zIndex: isExpanded ? 40 : 60
+    //             }
+    //         }}
+    //     />
+    // );
 
     return (
         <motion.div
             initial={false}
             animate={{
-                y: isExpanded ? 0 : -liftAmount,
+                y: isExpanded ? 0 : -(liftAmount),
+                zIndex: isExpanded ? 60 : 40,
             }}
             transition={{
                 type: "spring",
@@ -24,7 +42,12 @@ export const Toast = ({ isExpanded }: ToastProps) => {
                 mass: 1,
             }} // same transition values as GlobalPlayer
             style={{
-                zIndex: isExpanded ? 40 : 60 
+                position: "fixed",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                // zIndex: 9999, //isExpanded ? 40 : 60 
+                pointerEvents: "none",
             }} // sandwiches the zIndex of the GlobalPlayer so it hides behind the MiniView but is still above the ExpandedView
         >
             <Toaster 
@@ -32,19 +55,14 @@ export const Toast = ({ isExpanded }: ToastProps) => {
                 offset={minimumOffset}
                 mobileOffset={minimumOffset}
                 visibleToasts={1}
-            />            
+            />
         </motion.div>
-    )
+    );
 }
 
 // makeToast wrapper
 const makeToastBase = (msg: string) => {
-    toast(msg, {
-        style: {
-            ...toastBaseStyle,
-            color: "var(--color-muted-foreground)",
-        }
-    })
+    toast(msg);
 }
 //makeToastBase.error = (msg: string) => {} //specialized versions
 

@@ -1,15 +1,20 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
-import { trackBaseToPlaylistTrack } from '@/model/model.utils';
+import { makeToast } from '@/features/toast/Toast';
+import { getTrackDisplayMetadata, trackBaseToPlaylistTrack } from '@/model/model.utils';
 
 import type { InfiniteData } from '@tanstack/react-query';
 import type { PlaylistTrack } from '@/model/model.types';
 import type { SetLikeMutationProps } from '@/store/hooks/hooks.types';
 
 
+/**
+ * useLikes
+ * 
+ * Hook to get the contents of the liked tracks
+ */
 export const useLikes = (limit = 30) => {
-    const queryClient = useQueryClient();
     const queryKey = ["tracks", "likes"];
 
     //fetch likes
@@ -48,10 +53,14 @@ export const useLikes = (limit = 30) => {
 };
 
 
+/**
+ * useLikesMutations
+ * 
+ * Performs mutations without immediately re-fetching liked content to reduce overall network requests when unnecessary
+ */
 export const useLikesMutations = () => {
     const queryClient = useQueryClient();
     const queryKey = ["tracks", "likes"];
-
 
     //set a track to liked or unliked state
     const setLikeMutation = useMutation({
@@ -105,13 +114,19 @@ export const useLikesMutations = () => {
 
             return { rollbackLikes };
         },
-        onError: (err, track, context) => {
+        onError: (err, variables, context) => {
+            const msg = `Error`;
+            makeToast(msg);
+
             if (context?.rollbackLikes) {
                 queryClient.setQueryData(queryKey, context.rollbackLikes);
             }
             console.log("Optimistic setting like/unlike failed, rolling back.");
         },
-        onSuccess: (data) => {
+        onSuccess: (data, variables) => {
+            const msg = `${variables.liked ? "Liked" : "Removed"} ${getTrackDisplayMetadata(variables.track).titleDisplay}`;
+            makeToast(msg);
+
             queryClient.invalidateQueries({ queryKey });
         },
     });
