@@ -34,7 +34,7 @@ export const QueueList = () => {
         }
 
         return (
-            <div className="flex flex-col gap-1 items-center justify-center p-4 text-center">
+            <div className="flex flex-col gap-1 items-center justify-center px-2 py-4 text-center">
                 <p className="text-sm font-medium text-muted-foreground">
                     {headline}
                 </p>

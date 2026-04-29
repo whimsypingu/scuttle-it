@@ -5,7 +5,6 @@ import { TrackItem } from '@/model/TrackItem';
 import type { PlaylistListProps } from '@/features/playlist/playlist.types';
 import type { TrackBase } from '@/model/model.types';
 import { Virtuoso } from 'react-virtuoso';
-import { useEffect, useRef } from 'react';
 
 
 export const PlaylistList = ({
@@ -20,6 +19,24 @@ export const PlaylistList = ({
         isFetchingNextPage
     } = scrollContext;
 
+    //nothing to show
+    if (tracks.length === 0) {
+        return (
+            <div className="min-h-0 w-full h-full">                
+                <div className="flex flex-col gap-1 items-center justify-center px-4 py-16 text-center">
+                    <p className="text-sm font-medium text-muted-foreground">
+                        No Tracks
+                    </p>
+                    
+                    <p className="text-xs text-muted-foreground/60">
+                        Add some tracks!
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    //temp debugging logic
     const handleTrackSelect = (track: TrackBase) => {
         console.log("Selected track:", track.title);
     }
