@@ -1,6 +1,7 @@
 // src/model/model.utils.ts
 import { useQueue } from '@/store/hooks/useQueue';
 import { useEditTarget } from '@/features/edit/EditProvider';
+import { useLikesMutations } from '@/store/hooks/useLikes';
 
 import { makeToast } from '@/features/toast/Toast';
 
@@ -11,6 +12,7 @@ export const useTrackActionHandler = () => {
     //access the mutations from the tanstack query hook
     const { setFirst, push, pushNext, pop } = useQueue();
     const { setEditTarget } = useEditTarget();
+    const { setLike } = useLikesMutations();
 
     const handleAction = (props: TrackActionProps) => {
         console.log(props.action);
@@ -46,8 +48,11 @@ export const useTrackActionHandler = () => {
                 });
                 break;
 
-            case "like":
-                makeToast(props.action);
+            case "like": //like a track
+                setLike({
+                    track: props.track,
+                    liked: true,
+                });
                 break;
         }
     };

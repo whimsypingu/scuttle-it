@@ -32,9 +32,25 @@ export const useLikes = (limit = 30) => {
         staleTime: 1000 * 60 * 5,
     });
 
-    const likedTracks = useMemo(() =>
+    const tracks = useMemo(() =>
         getLikes.data?.pages.flatMap(page => page.results) ?? [],
     [getLikes.data]);
+
+
+    return {
+        tracks,
+        totalCount: getLikes.data?.pages[0]?.total ?? 0,
+        fetchNextPage: getLikes.fetchNextPage,
+        hasNextPage: getLikes.hasNextPage,
+        isLoading: getLikes.isLoading,
+        isFetchingNextPage: getLikes.isFetchingNextPage,
+    };
+};
+
+
+export const useLikesMutations = () => {
+    const queryClient = useQueryClient();
+    const queryKey = ["tracks", "likes"];
 
 
     //set a track to liked or unliked state
@@ -56,14 +72,20 @@ export const useLikes = (limit = 30) => {
             queryClient.setQueryData<InfiniteData<any>>(queryKey, (old) => {
                 if (!old) return old; //not opened yet, no need to even bother with an optimistic update
 
+                //check if the track already exists anywhere in the infinite cache
+                const isAlreadyInCache = old.pages.some(page => 
+                    page.results.some((t: PlaylistTrack) => t.id === track.id)
+                );
+
                 return {
                     ...old,
                     pages: old.pages.map((page, index) => {
                         // LIKING: add it to the top of the first page
-                        if (liked && index === 0) {
+                        if (liked && !isAlreadyInCache && index === 0) {
                             return {
                                 ...page,
                                 results: [tempLikedTrack, ...page.results],
+                                total: page.total + 1,
                             };
                         }
 
@@ -72,6 +94,7 @@ export const useLikes = (limit = 30) => {
                             return {
                                 ...page,
                                 results: page.results.filter((t: PlaylistTrack) => t.id !== track.id),
+                                total: Math.max(0, page.total - 1),
                             };
                         }
 
@@ -94,13 +117,6 @@ export const useLikes = (limit = 30) => {
     });
 
     return {
-        likedTracks,
-        totalLikedCount: getLikes.data?.pages[0]?.total ?? 0,
-        fetchNextPage: getLikes.fetchNextPage,
-        hasNextPage: getLikes.hasNextPage,
-        isLoading: getLikes.isLoading,
-        isFetchingNextPage: getLikes.isFetchingNextPage,
-
         setLike: setLikeMutation.mutate,
     };
 };
