@@ -5,6 +5,7 @@ import { TrackItem } from '@/model/TrackItem';
 import type { PlaylistListProps } from '@/features/playlist/playlist.types';
 import type { TrackBase } from '@/model/model.types';
 import { Virtuoso } from 'react-virtuoso';
+import { useEffect, useRef } from 'react';
 
 
 export const PlaylistList = ({
@@ -44,18 +45,19 @@ export const PlaylistList = ({
                         </div>
                     )
                 }}
+                computeItemKey={(index, track) => track.id} //https://virtuoso.dev/message-list/item-keys/ this helped
                 itemContent={(index, track) => (
                     <motion.div
                         key={track.id}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
                         transition={{
                             duration: 0.3,
                             delay: Math.min(index * 0.1, 0.1) //not perfect but it has a nice effect initially
                         }}
                     >
                         <TrackItem
-                            key={track.id}
                             track={track}
                             onSelect={handleTrackSelect}
                             index={index}
