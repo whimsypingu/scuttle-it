@@ -81,14 +81,14 @@ class RetrievalMixin:
 
     #LIKES
     async def count_likes(self) -> int:
-        """Total number of downloaded tracks"""
+        """Total number of liked tracks"""
         try:
             async with self.session() as db:
-                async with db.execute("SELECT COUNT(*) FROM downloads") as cursor:
+                async with db.execute("SELECT COUNT(*) FROM likes") as cursor:
                     row = await cursor.fetchone()
                     return row[0] if row else 0
         except Exception:
-            logger.exception("Failed to retrieve Download contents")
+            logger.exception("Failed to retrieve Liked contents")
             raise
 
 
