@@ -7,15 +7,6 @@ const TOAST_PADDING_Y = 6;
 const TOAST_PADDING_X = 8;
 
 
-export const toastBaseStyle: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    textAlign: "center",
-    padding: `${TOAST_PADDING_Y}px`,
-    borderRadius: "var(--radius-md)",
-};
-
 export const toastCustomStyle: React.CSSProperties = {
     display: "flex",
     alignItems: "center",
@@ -34,4 +25,14 @@ export const toastCustomStyle: React.CSSProperties = {
     overflow: "hidden", //cut off
     textOverflow: "ellipsis", //...
     whiteSpace: "nowrap", //oneline
+};
+
+//deprecated
+export const toastBaseStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+    padding: `${TOAST_PADDING_Y}px`,
+    borderRadius: "var(--radius-md)",
 };

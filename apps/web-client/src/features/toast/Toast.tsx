@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 
 import { BOTTOM_SHELF, PLAYER_CONFIG } from "@/features/player/player.constants";
-import { toastBaseStyle, toastCustomStyle } from "@/features/toast/toast.constants";
+import { toastCustomStyle } from "@/features/toast/toast.constants";
 
 import type { ToastProps } from "@/features/toast/toast.types";
 
@@ -16,7 +16,7 @@ export const Toast = ({ isExpanded }: ToastProps) => {
         <motion.div
             initial={false}
             animate={{
-                y: isExpanded ? -(minimumOffset) : -(minimumOffset + liftAmount),
+                y: isExpanded ? -(minimumOffset) : -(minimumOffset + liftAmount), //this is the minimumOffset here
                 zIndex: isExpanded ? 60 : 40,
             }}
             transition={{
@@ -35,8 +35,8 @@ export const Toast = ({ isExpanded }: ToastProps) => {
         >
             <Toaster 
                 position="bottom-center"
-                offset={0}
-                mobileOffset={0}
+                offset={0} //ignore the margins on the sides because we handle that within each individual toast for dynamic sizing based on content
+                mobileOffset={0} //return this to { left: `${minimumOffset}px`, right... } for margins. see: https://sonner.emilkowal.ski/toaster#customizing-offsets
                 visibleToasts={1}
             />
         </motion.div>
@@ -62,12 +62,6 @@ const makeToastCustom = (msg: string) => {
             }
         }
     );
-    
-    // toast(msg, {
-    //     style: {
-    //         ...toastCustomStyle,
-    //     }
-    // });
 };
 //makeToastBase.error = (msg: string) => {} //specialized versions
 
