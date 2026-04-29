@@ -4,7 +4,7 @@ import { useEditTarget } from '@/features/edit/EditProvider';
 
 import { makeToast } from '@/features/toast/Toast';
 
-import type { QueueId, QueueTrack, TrackActionProps, TrackBase } from '@/model/model.types';
+import type { PlaylistTrack, QueueId, QueueTrack, TrackActionProps, TrackBase } from '@/model/model.types';
 
 
 export const useTrackActionHandler = () => {
@@ -54,6 +54,16 @@ export const useTrackActionHandler = () => {
 
     return handleAction;
 };
+
+
+//convert a TrackBase to a PlaylistTrack object, inflating with default -1 value for position
+export const trackBaseToPlaylistTrack = (
+    track: TrackBase, 
+    position: number = -1,
+): PlaylistTrack => ({
+    ...track,
+    position
+});
 
 
 //convert a TrackBase to a QueueTrack object, inflating with default -1 values for fields queueId and position

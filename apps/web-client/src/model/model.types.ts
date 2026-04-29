@@ -18,6 +18,9 @@ export interface TrackBase {
     artists: ArtistBase[];
     duration: number;
 }
+export interface PlaylistTrack extends TrackBase {
+    position: number;
+}
 export interface QueueTrack extends TrackBase {
     queueId: QueueId;
     position: number;

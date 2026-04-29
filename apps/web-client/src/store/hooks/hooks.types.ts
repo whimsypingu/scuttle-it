@@ -60,3 +60,12 @@ export interface YTSearchMutationProps {
     q: string;
     limit?: number;
 }
+
+
+/**
+ * useLikes
+ */
+export interface SetLikeMutationProps {
+    track: TrackBase;
+    liked: boolean;
+}
