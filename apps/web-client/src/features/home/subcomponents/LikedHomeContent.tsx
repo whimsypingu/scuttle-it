@@ -17,7 +17,7 @@ export const LikedHomeContentView = ({
     onClose
 }: LikedHomeContentViewProps) => {
 
-    const scrollContext = useLikes();
+    const likesScrollContext = useLikes();
 
     return (
         <>
@@ -66,7 +66,7 @@ export const LikedHomeContentView = ({
                         <div className="flex flex-col gap-0.5">
                             <span className="text-[9px] text-zinc-600 uppercase font-bold tracking-wider">Tracks</span>
                             <span className="text-xs text-white/70">
-                                {scrollContext.totalCount}
+                                {likesScrollContext.totalCount}
                             </span>
                         </div>
                         <div className="flex flex-col">
@@ -84,7 +84,7 @@ export const LikedHomeContentView = ({
             {/* CONTENT AREA */}
             <div className="flex-1 no-scrollbar">
                 <PlaylistList
-                    scrollContext={scrollContext}
+                    scrollContext={likesScrollContext}
                     bottomSpacing={BOTTOM_SHELF.totalHeight}
                     actions={["queueNext", "queueLast", "unlike", "edit"]}
                 />

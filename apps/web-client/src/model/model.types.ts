@@ -19,6 +19,7 @@ export interface TrackBase {
     duration: number;
 }
 export interface PlaylistTrack extends TrackBase {
+    addedAt: number;
     position: number;
 }
 export interface QueueTrack extends TrackBase {

@@ -1,10 +1,11 @@
 import logging
 import time
+from typing import Literal
 
-from database.mixins.mixin_utils import row_to_trackbase
+from database.mixins.mixin_utils import row_to_playlist_track, row_to_trackbase
 
 from core.models.artist import ArtistBase
-from core.models.track import TrackBase
+from core.models.track import PlaylistTrack, TrackBase
 
 logger = logging.getLogger(__name__)
 
@@ -92,19 +93,25 @@ class RetrievalMixin:
             raise
 
 
-    async def retrieve_likes(self, offset: int, limit: int) -> list[TrackBase]:
-        """Retrieve a sublist of tracks from the Likes table"""
-        logger.info(f"Retrieving tracks from Likes with offset {offset} and limit {limit}")
+    async def retrieve_likes(self, offset: int, limit: int, sort_by: Literal["position", "added_at"]) -> list[PlaylistTrack]:
+        """Retrieve a sublist of tracks from the Likes table""" #change sort_by field to enum
+        logger.info(f"Retrieving tracks from Likes with offset {offset} and limit {limit} sorting by {sort_by}")
 
         UNIT_SEP = "\x1f"
         RECORD_SEP = "\x1e"
+
+        #EMERGENCY: temp sort strategy mapping, consider moving this to an Enum elsewhere for playlist modularity and reusability
+        sort_mapping = {
+            "position": "position ASC",
+            "added_at": "liked_at DESC"
+        }
 
         query = f'''
             WITH liked_subset_tracks AS (
                 -- Get track subset
                 SELECT * 
                 FROM likes
-                ORDER BY liked_at DESC
+                ORDER BY {sort_mapping[sort_by]}
                 LIMIT :limit OFFSET :offset
             )
             SELECT
@@ -122,13 +129,16 @@ class RetrievalMixin:
                     a.name || '{UNIT_SEP}' ||
                     COALESCE(a.name_display, ''), 
                     '{RECORD_SEP}'
-                ) AS artist_blob
+                ) AS artist_blob,
+
+                l.liked_at AS added_at,
+                l.position
             FROM liked_subset_tracks l
             JOIN tracks t ON t.internal_id = l.track_internal_id
             JOIN track_artists ta ON ta.track_internal_id = t.internal_id
             JOIN artists a ON ta.artist_internal_id = a.internal_id
             GROUP BY t.internal_id
-            ORDER BY l.liked_at DESC;
+            ORDER BY l.{sort_mapping[sort_by]};
         '''
 
         try: 
@@ -137,7 +147,7 @@ class RetrievalMixin:
                 async with db.execute(query, params) as cursor:
                     rows = await cursor.fetchall()
                     return [
-                        row_to_trackbase(row) for row in rows
+                        row_to_playlist_track(row) for row in rows
                     ]
 
         except Exception:

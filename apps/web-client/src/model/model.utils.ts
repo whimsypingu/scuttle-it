@@ -68,12 +68,14 @@ export const useTrackActionHandler = () => {
 };
 
 
-//convert a TrackBase to a PlaylistTrack object, inflating with default -1 value for position
+//convert a TrackBase to a PlaylistTrack object, inflating with default -1 values for fields addedAt and for position
 export const trackBaseToPlaylistTrack = (
     track: TrackBase, 
+    addedAt: number = -1,
     position: number = -1,
 ): PlaylistTrack => ({
     ...track,
+    addedAt,
     position
 });
 

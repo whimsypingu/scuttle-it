@@ -1,11 +1,11 @@
 import sqlite3
 
 from core.models.artist import ArtistBase
-from core.models.track import TrackBase
+from core.models.track import PlaylistTrack, TrackBase
 
 def row_to_trackbase(
     row: sqlite3.Row
-):
+) -> TrackBase:
     UNIT_SEP = "\x1f"
     RECORD_SEP = "\x1e"
 
@@ -37,3 +37,13 @@ def row_to_trackbase(
         artists=artists
     )
     
+def row_to_playlist_track(
+    row: sqlite3.Row
+) -> PlaylistTrack:
+    trackbase = row_to_trackbase(row)
+
+    return PlaylistTrack(
+        **trackbase.__dict__,
+        added_at=row["added_at"],
+        position=row["position"]
+    )

@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS downloads (
 CREATE TABLE IF NOT EXISTS likes (
     track_internal_id INTEGER PRIMARY KEY,
     position REAL NOT NULL UNIQUE,
-    liked_at INTEGER DEFAULT (unixepoch()),
+    liked_at INTEGER DEFAULT (unixepoch()), --consider renaming to added_at for consistency
     FOREIGN KEY (track_internal_id) REFERENCES tracks(internal_id) ON DELETE CASCADE
 );
 
