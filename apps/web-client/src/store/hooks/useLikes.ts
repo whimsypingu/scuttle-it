@@ -1,12 +1,12 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import { makeToast } from '@/features/toast/Toast';
 import { getTrackDisplayMetadata, trackBaseToPlaylistTrack } from '@/model/model.utils';
 
 import type { InfiniteData } from '@tanstack/react-query';
 import type { PlaylistTrack } from '@/model/model.types';
-import type { SetLikeMutationProps } from '@/store/hooks/hooks.types';
+import type { SetLikeMutationProps, SortMode } from '@/store/hooks/hooks.types';
 
 
 /**
@@ -15,7 +15,9 @@ import type { SetLikeMutationProps } from '@/store/hooks/hooks.types';
  * Hook to get the contents of the liked tracks
  */
 export const useLikes = (limit = 30) => {
-    const queryKey = ["tracks", "likes"];
+    const [sortBy, setSortBy] = useState<SortMode>("position");
+
+    const queryKey = ["tracks", "likes", sortBy];
 
     //fetch likes
     const getLikes = useInfiniteQuery({
@@ -24,7 +26,7 @@ export const useLikes = (limit = 30) => {
         queryFn: async ({ pageParam }) => {
             console.log("useLikes triggered");
 
-            const response = await fetch(`/retrieve/likes?offset=${pageParam}&limit=${limit}`, { method: "GET" });
+            const response = await fetch(`/retrieve/likes?offset=${pageParam}&limit=${limit}&sort_by=${sortBy}`, { method: "GET" });
             if (!response.ok) throw new Error("Failed to fetch likes");
 
             const data = await response.json();
@@ -44,6 +46,8 @@ export const useLikes = (limit = 30) => {
 
     return {
         tracks,
+        sortBy,
+        setSortBy,
         totalCount: getLikes.data?.pages[0]?.total ?? 0,
         fetchNextPage: getLikes.fetchNextPage,
         hasNextPage: getLikes.hasNextPage,

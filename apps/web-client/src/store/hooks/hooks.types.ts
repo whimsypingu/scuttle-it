@@ -65,6 +65,8 @@ export interface YTSearchMutationProps {
 /**
  * useLikes
  */
+export type SortMode = "position" | "addedAt"; //see: apps/audio-server/database/mixins/retrieval_mixin.py --move to enum
+
 export interface SetLikeMutationProps {
     track: TrackBase;
     liked: boolean;
