@@ -5,6 +5,7 @@ import type { HomeContent } from '../home.types';
 import { BOTTOM_SHELF } from '@/features/player/player.constants';
 import { PlaylistList } from '@/features/playlist/PlaylistList';
 import { useLikes } from '@/store/hooks/useLikes';
+import { PlaylistInfo } from '@/features/playlist/PlaylistInfo';
 
 
 interface LikedHomeContentViewProps {
@@ -61,23 +62,8 @@ export const LikedHomeContentView = ({
                     <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
                         {contentData.description}
                     </p>
-
-                    <div className="flex gap-4">
-                        <div className="flex flex-col gap-0.5">
-                            <span className="text-[9px] text-zinc-600 uppercase font-bold tracking-wider">Tracks</span>
-                            <span className="text-xs text-white/70">
-                                {likesScrollContext.totalCount}
-                            </span>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-[10px] text-zinc-600 uppercase font-medium">Storage</span>
-                            <span className="text-xs text-white/70">N/A</span>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-[10px] text-zinc-600 uppercase font-medium">Duration</span>
-                            <span className="text-xs text-white/70">N/A</span>
-                        </div>
-                    </div>
+                    
+                    <PlaylistInfo scrollContext={likesScrollContext}/>
                 </div>
             </div>
 
