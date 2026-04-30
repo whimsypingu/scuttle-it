@@ -1,6 +1,4 @@
 import logging
-import time
-from typing import Literal
 
 from database.mixins.mixin_utils import row_to_playlist_track, row_to_trackbase
 
@@ -14,13 +12,25 @@ class RetrievalMixin:
     """Handles database retrievals"""
 
     #DOWNLOADS
-    async def count_downloads(self) -> int:
-        """Total number of downloaded tracks"""
+    async def retrieve_downloads_stats(self) -> dict:
+        """Total number and duration of downloaded tracks""" #consider caching this kind of stuff as a view?
+
+        query = f'''
+            SELECT
+                COUNT(d.track_internal_id) as total_count,
+                COALESCE(SUM(t.duration), 0) as total_duration
+            FROM downloads d
+            JOIN tracks t ON t.internal_id = d.track_internal_id;
+        '''
+        
         try:
             async with self.session() as db:
-                async with db.execute("SELECT COUNT(*) FROM downloads") as cursor:
-                    row = await cursor.fetchone()
-                    return row[0] if row else 0
+                async with db.execute(query) as cursor:
+                    row = await cursor.fetchone() #gets a row with (total_count, total_duration)
+                    return {
+                        "total_count": row["total_count"] if row else 0,
+                        "total_duration": row["total_duration"] if row else 0,
+                    }
         except Exception:
             logger.exception("Failed to retrieve Download contents")
             raise

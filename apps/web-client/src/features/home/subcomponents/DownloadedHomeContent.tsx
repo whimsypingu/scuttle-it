@@ -69,13 +69,12 @@ export const DownloadedHomeContentView = ({
                                 {scrollContext.totalCount}
                             </span>
                         </div>
-                        <div className="flex flex-col">
-                            <span className="text-[10px] text-zinc-600 uppercase font-medium">Storage</span>
-                            <span className="text-xs text-white/70">N/A</span>
-                        </div>
-                        <div className="flex flex-col">
+
+                        <div className="flex flex-col gap-0.5">
                             <span className="text-[10px] text-zinc-600 uppercase font-medium">Duration</span>
-                            <span className="text-xs text-white/70">N/A</span>
+                            <span className="text-xs text-white/70">
+                                {scrollContext.totalDuration}
+                            </span>
                         </div>
                     </div>
                 </div>

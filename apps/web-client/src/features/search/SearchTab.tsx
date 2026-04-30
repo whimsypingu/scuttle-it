@@ -46,7 +46,8 @@ export const SearchTab = ({
         hasNextPage: false,
         isFetchingNextPage: false,
         isLoading: false,
-        totalCount: results.length
+        totalCount: results.length,
+        totalDuration: 0,
     });
 
     // for checking where the user taps to close the search results
