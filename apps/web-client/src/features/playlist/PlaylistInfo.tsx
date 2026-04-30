@@ -1,8 +1,9 @@
 import type { PlaylistInfoProps } from '@/features/playlist/playlist.types';
-import { PlayIcon, ShuffleIcon, SortAscendingIcon } from '@phosphor-icons/react';
-import { PLAYER_CONFIG } from '../player/player.constants';
+import { PlayIcon, QuestionIcon, ShuffleIcon } from '@phosphor-icons/react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import type { Sortmode } from '@/store/hooks/hooks.types';
+import { SORTMODE_CONFIG } from '@/store/hooks/hooks.constants';
+import { PLAYLIST_CONFIG } from '@/features/playlist/playlist.constants';
 
 
 export const PlaylistInfo = ({
@@ -15,6 +16,7 @@ export const PlaylistInfo = ({
     } = scrollContext;
 
     const isSortable = (typeof sortmode === "number") && !!setSortmode; //check specifically for existence, not truthiness for sortmode because 0 is falsy
+    const CurrentIcon = isSortable ? SORTMODE_CONFIG[sortmode].icon : QuestionIcon; //precompute current Icon if available, otherwise see a QuestionIcon which should never happen
 
     return (
         <div className="flex gap-4">
@@ -31,23 +33,23 @@ export const PlaylistInfo = ({
             </div>
 
             {/* RIGHT ACTION GROUP */}
-            <div className="ml-auto flex items-end gap-2">
+            <div className="ml-auto flex items-end gap-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
                 {/* PLAY ALL */}
-                <button className="p-1 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
-                    <PlayIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
+                <button className="p-1">
+                    <PlayIcon size={PLAYLIST_CONFIG.iconSize} weight="fill" />
                 </button>
                 
                 {/* SHUFFLE */}
-                <button className="p-1 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
-                    <ShuffleIcon size={PLAYER_CONFIG.iconSize} weight="bold" />
+                <button className="p-1">
+                    <ShuffleIcon size={PLAYLIST_CONFIG.iconSize} weight="bold" />
                 </button>
 
                 {/* SORT TRIGGER */}
                 {isSortable && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <button className="p-1 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
-                                <SortAscendingIcon size={PLAYER_CONFIG.iconSize} weight="bold" />
+                            <button className="p-1">
+                                <CurrentIcon size={PLAYLIST_CONFIG.iconSize} weight="bold" />
                             </button>
                         </DropdownMenuTrigger>
 
@@ -56,19 +58,19 @@ export const PlaylistInfo = ({
                                 value={sortmode.toString()}
                                 onValueChange={(value) => setSortmode(parseInt(value) as Sortmode)}
                             >
-                                <DropdownMenuRadioItem
-                                    value="0"
-                                    className="text-[11px] uppercase tracking-widest focus:bg-white/10 focus:text-white cursor-pointer"
-                                >
-                                    Position
-                                </DropdownMenuRadioItem>
+                                {Object.entries(SORTMODE_CONFIG).map(([sortmodeKey, config]) => {
+                                    const Icon = config.icon;
 
-                                <DropdownMenuRadioItem
-                                    value="1"
-                                    className="text-[11px] uppercase tracking-widest focus:bg-white/10 focus:text-white cursor-pointer"
-                                >
-                                    Date Added
-                                </DropdownMenuRadioItem>
+                                    return (
+                                        <DropdownMenuRadioItem
+                                            value={sortmodeKey}
+                                            className="text-[11px] uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/10 rounded-full cursor-pointer"
+                                        >
+                                            <Icon size={PLAYLIST_CONFIG.dropdownIconSize} />
+                                            {config.detail}
+                                        </DropdownMenuRadioItem>
+                                    )
+                                })}
                             </DropdownMenuRadioGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>

@@ -5,8 +5,10 @@ import type { Sortmode, SortmodeConfig } from "./hooks.types";
 export const SORTMODE_CONFIG: Record<Sortmode, SortmodeConfig> = {
     0: { 
         icon: QueueIcon, 
+        detail: "Manual",
     },
     1: { 
         icon: SortAscendingIcon, //kind of the opposite?
+        detail: "Date",
     }
 };

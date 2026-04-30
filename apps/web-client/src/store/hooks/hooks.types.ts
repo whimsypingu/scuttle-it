@@ -73,6 +73,7 @@ export type Sortmode = SortmodeProps["sortmode"];
 
 export interface SortmodeConfig { //corresponding phosphor icon for each Sortmode
     icon: React.ComponentType<IconProps>;
+    detail: string;
 }
 
 
