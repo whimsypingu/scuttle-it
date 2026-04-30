@@ -36,12 +36,12 @@ async def retrieve_downloads(
 @RetrievalRouter.get("/likes")
 async def retrieve_likes(
     offset: int = Query(default=0, ge=0),
-    limit: int = Query(default=10, ge=1, le=30),
-    sort_by: Literal["position", "added_at"] = Query(default="position"),
+    limit: int = Query(default=10, ge=1, le=30), 
+    sortmode: int = Query(default=0, ge=0, le=1, description="0=position, 1=added_at"),
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        results = await db_manager.retrieve_likes(offset, limit, sort_by) #consider using asyncio.gather() for these read ops?
+        results = await db_manager.retrieve_likes(offset, limit, sortmode) #consider using asyncio.gather() for these read ops?
         total = await db_manager.count_likes()
         return {
             "count": len(results),

@@ -1,7 +1,8 @@
 import type { IconProps } from "@phosphor-icons/react";
 
 import type { TrackAction, TrackBase } from "@/model/model.types";
-import type { SortMode } from "@/store/hooks/hooks.types";
+import type { Sortmode } from "@/store/hooks/hooks.types";
+
 
 export type PlaylistActionType = "pin" | "delete";
 
@@ -32,8 +33,8 @@ export interface InfiniteScrollContext {
     totalCount?: number;
     isLoading: boolean;
 
-    sortBy?: SortMode;
-    setSortBy?: (sortBy: SortMode) => void;
+    sortmode?: Sortmode;
+    setSortmode?: (sortmode: Sortmode) => void;
 }
 
 export interface PlaylistInfoProps {

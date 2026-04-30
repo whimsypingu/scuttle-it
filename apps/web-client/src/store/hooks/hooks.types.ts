@@ -1,4 +1,5 @@
 import type { QueueTrack, TrackBase } from "@/model/model.types";
+import type { IconProps } from "@phosphor-icons/react";
 
 
 /**
@@ -63,10 +64,21 @@ export interface YTSearchMutationProps {
 
 
 /**
+ * Sorting Playlists
+ */
+export type SortmodeProps = 
+    | { sortmode: 0; desc: "Position descending" }
+    | { sortmode: 1; desc: "Date added descending" };
+export type Sortmode = SortmodeProps["sortmode"];
+
+export interface SortmodeConfig { //corresponding phosphor icon for each Sortmode
+    icon: React.ComponentType<IconProps>;
+}
+
+
+/**
  * useLikes
  */
-export type SortMode = "position" | "addedAt"; //see: apps/audio-server/database/mixins/retrieval_mixin.py --move to enum
-
 export interface SetLikeMutationProps {
     track: TrackBase;
     liked: boolean;

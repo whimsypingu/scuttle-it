@@ -93,25 +93,25 @@ class RetrievalMixin:
             raise
 
 
-    async def retrieve_likes(self, offset: int, limit: int, sort_by: Literal["position", "added_at"]) -> list[PlaylistTrack]:
+    async def retrieve_likes(self, offset: int, limit: int, sortmode: int) -> list[PlaylistTrack]:
         """Retrieve a sublist of tracks from the Likes table""" #change sort_by field to enum
-        logger.info(f"Retrieving tracks from Likes with offset {offset} and limit {limit} sorting by {sort_by}")
+        logger.info(f"Retrieving Liked tracks with offset {offset} and limit {limit} with sortmode {sortmode}")
+
+        #see: apps/audio-server/api/routers/retrieval_router.py for mapping
+        SORT_MAP = {
+            0: "position ASC",
+            1: "liked_at DESC",
+        }
 
         UNIT_SEP = "\x1f"
         RECORD_SEP = "\x1e"
-
-        #EMERGENCY: temp sort strategy mapping, consider moving this to an Enum elsewhere for playlist modularity and reusability
-        sort_mapping = {
-            "position": "position ASC",
-            "added_at": "liked_at DESC"
-        }
 
         query = f'''
             WITH liked_subset_tracks AS (
                 -- Get track subset
                 SELECT * 
                 FROM likes
-                ORDER BY {sort_mapping[sort_by]}
+                ORDER BY {SORT_MAP[sortmode]}
                 LIMIT :limit OFFSET :offset
             )
             SELECT
@@ -138,7 +138,7 @@ class RetrievalMixin:
             JOIN track_artists ta ON ta.track_internal_id = t.internal_id
             JOIN artists a ON ta.artist_internal_id = a.internal_id
             GROUP BY t.internal_id
-            ORDER BY l.{sort_mapping[sort_by]};
+            ORDER BY l.{SORT_MAP[sortmode]};
         '''
 
         try: 

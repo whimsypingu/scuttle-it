@@ -1,5 +1,8 @@
 import type { PlaylistInfoProps } from '@/features/playlist/playlist.types';
-import { XIcon } from '@phosphor-icons/react';
+import { PlayIcon, ShuffleIcon, SortAscendingIcon } from '@phosphor-icons/react';
+import { PLAYER_CONFIG } from '../player/player.constants';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import type { Sortmode } from '@/store/hooks/hooks.types';
 
 
 export const PlaylistInfo = ({
@@ -7,11 +10,11 @@ export const PlaylistInfo = ({
 }: PlaylistInfoProps) => {
     const { 
         totalCount, 
-        sortBy, 
-        setSortBy 
+        sortmode, 
+        setSortmode 
     } = scrollContext;
 
-    const isSortable = sortBy && setSortBy;
+    const isSortable = (typeof sortmode === "number") && !!setSortmode; //check specifically for existence, not truthiness for sortmode because 0 is falsy
 
     return (
         <div className="flex gap-4">
@@ -28,28 +31,47 @@ export const PlaylistInfo = ({
             </div>
 
             {/* RIGHT ACTION GROUP */}
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex items-end gap-2">
                 {/* PLAY ALL */}
-                <button className="flex items-center justify-center w-6 h-6 bg-white text-black rounded-full hover:bg-zinc-200 transition-colors">
-                    <XIcon size={16} weight="bold" />
+                <button className="p-1 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
+                    <PlayIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
                 </button>
                 
                 {/* SHUFFLE */}
-                <button className="flex items-center justify-center w-6 h-6 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
-                    <XIcon size={18} weight="bold" />
+                <button className="p-1 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
+                    <ShuffleIcon size={PLAYER_CONFIG.iconSize} weight="bold" />
                 </button>
 
                 {/* SORT TRIGGER */}
                 {isSortable && (
-                    <button 
-                        onClick={() => setSortBy(sortBy === 'position' ? 'addedAt' : 'position')}
-                        className="flex items-center gap-1.5 px-3 h-8 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all border-l border-white/10 ml-1"
-                    >
-                        <XIcon size={16} />
-                        <span className="text-[10px] uppercase font-black tracking-tighter">
-                            {sortBy === 'position' ? 'Manual' : 'Recent'}
-                        </span>
-                    </button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="p-1 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
+                                <SortAscendingIcon size={PLAYER_CONFIG.iconSize} weight="bold" />
+                            </button>
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent>
+                            <DropdownMenuRadioGroup
+                                value={sortmode.toString()}
+                                onValueChange={(value) => setSortmode(parseInt(value) as Sortmode)}
+                            >
+                                <DropdownMenuRadioItem
+                                    value="0"
+                                    className="text-[11px] uppercase tracking-widest focus:bg-white/10 focus:text-white cursor-pointer"
+                                >
+                                    Position
+                                </DropdownMenuRadioItem>
+
+                                <DropdownMenuRadioItem
+                                    value="1"
+                                    className="text-[11px] uppercase tracking-widest focus:bg-white/10 focus:text-white cursor-pointer"
+                                >
+                                    Date Added
+                                </DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 )}
             </div>
             
