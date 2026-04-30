@@ -34,7 +34,7 @@ export const useLikes = (limit = 30) => {
         },
         getNextPageParam: (lastPage) => {
             const nextOffset = lastPage.offset + lastPage.limit;
-            return nextOffset < lastPage.total ? nextOffset : undefined;
+            return nextOffset < lastPage.totalCount ? nextOffset : undefined;
         },
         staleTime: 1000 * 60 * 5,
     });
@@ -48,7 +48,8 @@ export const useLikes = (limit = 30) => {
         tracks,
         sortmode,
         setSortmode,
-        totalCount: getLikes.data?.pages[0]?.total ?? 0,
+        totalCount: getLikes.data?.pages[0]?.totalCount ?? 0,
+        totalDuration: getLikes.data?.pages[0]?.totalDuration ?? 0,
         fetchNextPage: getLikes.fetchNextPage,
         hasNextPage: getLikes.hasNextPage,
         isLoading: getLikes.isLoading,
@@ -98,7 +99,7 @@ export const useLikesMutations = () => {
                             return {
                                 ...page,
                                 results: [tempLikedTrack, ...page.results],
-                                total: page.total + 1,
+                                totalCount: page.totalCount + 1,
                             };
                         }
 
@@ -107,7 +108,7 @@ export const useLikesMutations = () => {
                             return {
                                 ...page,
                                 results: page.results.filter((t: PlaylistTrack) => t.id !== track.id),
-                                total: Math.max(0, page.total - 1),
+                                totalCount: Math.max(0, page.totalCount - 1),
                             };
                         }
 

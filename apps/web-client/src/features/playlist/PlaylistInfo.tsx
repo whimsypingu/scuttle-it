@@ -10,7 +10,8 @@ export const PlaylistInfo = ({
     scrollContext
 }: PlaylistInfoProps) => {
     const { 
-        totalCount, 
+        totalCount,
+        totalDuration, 
         sortmode, 
         setSortmode 
     } = scrollContext;
@@ -29,7 +30,9 @@ export const PlaylistInfo = ({
 
             <div className="flex flex-col gap-0.5">
                 <span className="text-[10px] text-zinc-600 uppercase font-medium">Duration</span>
-                <span className="text-xs text-white/70">N/A</span>
+                <span className="text-xs text-white/70">
+                    {totalDuration}
+                </span>
             </div>
 
             {/* RIGHT ACTION GROUP */}

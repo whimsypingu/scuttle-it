@@ -81,13 +81,25 @@ class RetrievalMixin:
 
 
     #LIKES
-    async def count_likes(self) -> int:
-        """Total number of liked tracks"""
+    async def retrieve_likes_stats(self) -> dict:
+        """Total number and duration of liked tracks"""
+        
+        query = f'''
+            SELECT
+                COUNT(l.track_internal_id) as total_count,
+                COALESCE(SUM(t.duration), 0) as total_duration
+            FROM likes l
+            JOIN tracks t ON t.internal_id = l.track_internal_id;
+        '''
+
         try:
             async with self.session() as db:
-                async with db.execute("SELECT COUNT(*) FROM likes") as cursor:
-                    row = await cursor.fetchone()
-                    return row[0] if row else 0
+                async with db.execute(query) as cursor:
+                    row = await cursor.fetchone() #gets a row with (total_count, total_duration)
+                    return {
+                        "total_count": row["total_count"] if row else 0,
+                        "total_duration": row["total_duration"] if row else 0,
+                    }
         except Exception:
             logger.exception("Failed to retrieve Liked contents")
             raise

@@ -31,6 +31,7 @@ export interface InfiniteScrollContext {
     hasNextPage: boolean;
     isFetchingNextPage: boolean;
     totalCount?: number;
+    totalDuration?: number;
     isLoading: boolean;
 
     sortmode?: Sortmode;
