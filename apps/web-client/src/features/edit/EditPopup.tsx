@@ -2,6 +2,7 @@ import { useEditTarget } from "@/features/edit/EditProvider";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EditTrackForm } from "@/features/edit/subcomponents/EditTrackForm";
+import { CreatePlaylistForm } from "@/features/edit/subcomponents/CreatePlaylistForm";
 
 import { EDIT_CONFIG } from "@/features/edit/edit.constants";
 
@@ -23,11 +24,17 @@ export const EditPopup = () => {
         if (!editTarget) return null;
 
         switch (editTarget.type) {
-            case "track":
+            case "editTrack":
                 return (
                     <EditTrackForm
                         track={editTarget.data}
                         onSave={handleClose}
+                    />
+                );
+            case "createPlaylist":
+                return (
+                    <CreatePlaylistForm 
+                        onSave={handleClose} 
                     />
                 );
             default:

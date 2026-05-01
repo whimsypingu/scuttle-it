@@ -6,6 +6,8 @@ import { useLikesMutations } from '@/store/hooks/useLikes';
 import { makeToast } from '@/features/toast/Toast';
 
 import type { PlaylistTrack, QueueId, QueueTrack, TrackActionProps, TrackBase } from '@/track/track.types';
+import type { ActiveEditTarget } from '@/features/edit/edit.types';
+import type { SetLikeMutationProps } from '@/store/hooks/hooks.types';
 
 
 export const useTrackActionHandler = () => {
@@ -42,25 +44,28 @@ export const useTrackActionHandler = () => {
                 break;
 
             case "edit": //open a track editing popup
-                setEditTarget({ 
-                    type: "track", 
-                    data: props.track 
-                });
+                const editTrackTarget: ActiveEditTarget = {
+                    type: "editTrack", 
+                    data: props.track,
+                };
+                setEditTarget(editTrackTarget);
                 break;
 
             case "like": //like a track
-                setLike({
+                const setLikePayload: SetLikeMutationProps = {
                     track: props.track,
                     liked: true,
-                });
+                };
+                setLike(setLikePayload);
                 break;
 
             case "unlike": //unlike a track
-                setLike({
+                const setUnlikePayload: SetLikeMutationProps = {
                     track: props.track,
                     liked: false,
-                });
-                break;
+                };
+                setLike(setUnlikePayload);
+                break; 
         }
     };
 

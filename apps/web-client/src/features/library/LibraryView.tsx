@@ -13,6 +13,8 @@ import type { PlaylistBase } from "@/playlist/playlist.types";
 import type { LibraryViewProps } from "@/features/library/library.types";
 import { usePlaylists } from "@/store/hooks/usePlaylists";
 import { formatReadableTime } from "../audio/audio.utils";
+import { useEditTarget } from "../edit/EditProvider";
+import type { ActiveEditTarget } from "../edit/edit.types";
 
 
 export const MockLibrary = ({
@@ -23,6 +25,16 @@ export const MockLibrary = ({
     const { playlists } = usePlaylists();
     
     const [selectedPlaylist, setSelectedPlaylist] = useState<PlaylistBase | null>(null);
+
+    // prep the 'create playlist' form popup function
+    const { setEditTarget } = useEditTarget();
+    const openCreatePlaylistForm = () => {
+        const createPlaylistTarget: ActiveEditTarget = {
+            type: "createPlaylist", 
+            data: null,
+        };
+        setEditTarget(createPlaylistTarget);
+    }
 
     // Reset when the signal changes
     useEffect(() => {
@@ -71,7 +83,10 @@ export const MockLibrary = ({
                                     {/* RIGHT ACTION GROUP */}
                                     <div className="ml-auto flex items-end gap-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
                                         {/* CREATE */}
-                                        <button className="p-1">
+                                        <button 
+                                            className="p-1"
+                                            onClick={openCreatePlaylistForm}
+                                        >
                                             <PlusIcon size={PLAYER_CONFIG.iconSize} weight="bold" />
                                         </button>
                                     </div>

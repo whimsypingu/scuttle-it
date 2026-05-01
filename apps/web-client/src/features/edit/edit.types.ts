@@ -3,7 +3,8 @@ import type { TrackBase } from "@/track/track.types";
 
 //flexible typing for what can be edited in a popup
 export type ActiveEditTarget = 
-    | { type: "track"; data: TrackBase };
+    | { type: "editTrack"; data: TrackBase }
+    | { type: "createPlaylist"; data: null };
     //add more things to edit later, like playlists
 export type EditableType = ActiveEditTarget["type"];
 
