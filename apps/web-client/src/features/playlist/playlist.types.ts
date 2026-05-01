@@ -46,4 +46,6 @@ export interface PlaylistListProps {
     scrollContext: InfiniteScrollContext;
     bottomSpacing?: number;
     actions: [TrackAction, TrackAction, TrackAction, TrackAction];
+    emptyText?: string;
+    emptySubtext?: string;
 }

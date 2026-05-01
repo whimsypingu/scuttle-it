@@ -169,6 +169,8 @@ export const SearchTab = ({
                                     scrollContext={dummySearchScrollContext}
                                     bottomSpacing={BOTTOM_SHELF.totalHeight}
                                     actions={["queueNext", "queueLast", "delete", "delete"]}
+                                    emptyText="No Results"
+                                    emptySubtext=""
                                 />
                             </div>
                         </motion.div>

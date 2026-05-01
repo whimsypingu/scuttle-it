@@ -1,11 +1,14 @@
 import { motion } from 'framer-motion';
-
 import { XIcon } from '@phosphor-icons/react';
-import type { HomeContent } from '../home.types';
-import { BOTTOM_SHELF } from '@/features/player/player.constants';
-import { PlaylistList } from '@/features/playlist/PlaylistList';
+
 import { useLikes } from '@/store/hooks/useLikes';
+
+import { PlaylistList } from '@/features/playlist/PlaylistList';
 import { PlaylistInfo } from '@/features/playlist/PlaylistInfo';
+
+import { BOTTOM_SHELF } from '@/features/player/player.constants';
+
+import type { HomeContent } from '@/features/home/home.types';
 
 
 interface LikedHomeContentViewProps {
@@ -73,6 +76,7 @@ export const LikedHomeContentView = ({
                     scrollContext={likesScrollContext}
                     bottomSpacing={BOTTOM_SHELF.totalHeight}
                     actions={["queueNext", "queueLast", "unlike", "edit"]}
+                    emptySubtext="Swipe left to like a track"
                 />
             </div>
         </motion.div>

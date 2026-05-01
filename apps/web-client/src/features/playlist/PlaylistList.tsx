@@ -10,7 +10,9 @@ import { Virtuoso } from 'react-virtuoso';
 export const PlaylistList = ({
     scrollContext,
     bottomSpacing = 0,
-    actions = ["queueNext", "queueLast", "like", "edit"]
+    actions = ["queueNext", "queueLast", "like", "edit"],
+    emptyText = "No Tracks",
+    emptySubtext = "Add some tracks!"
 }: PlaylistListProps) => {
     const {
         tracks,
@@ -25,11 +27,11 @@ export const PlaylistList = ({
             <div className="min-h-0 w-full h-full">                
                 <div className="flex flex-col gap-1 items-center justify-center px-4 py-16 text-center">
                     <p className="text-sm font-medium text-muted-foreground">
-                        No Tracks
+                        {emptyText}
                     </p>
                     
                     <p className="text-xs text-muted-foreground/60">
-                        Add some tracks!
+                        {emptySubtext}
                     </p>
                 </div>
             </div>
