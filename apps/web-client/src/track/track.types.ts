@@ -46,8 +46,8 @@ export interface TrackActionConfig { //corresponding phosphor icon and color pai
 
 //fields for a TrackItem
 export interface TrackItemProps {
-    track: TrackBase | QueueTrack; //technically just TrackBase works fine but for clarity it could be version of one
-    onSelect: (track: TrackBase | QueueTrack) => void;
+    track: TrackBase; //covers all kinds of TrackBase derived tracks
+    onSelect: (track: TrackBase) => void;
     index: number;
 	actions?: [TrackAction, TrackAction, TrackAction, TrackAction]; //leftmost action to rightmost action
 }

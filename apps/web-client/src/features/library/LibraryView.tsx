@@ -9,8 +9,9 @@ import { PlaylistList } from "@/playlist/PlaylistList";
 
 import { NAV_CONFIG, BOTTOM_SHELF } from "@/features/player/player.constants";
 
-import type { Playlist } from "@/playlist/playlist.types";
+import type { PlaylistBase } from "@/playlist/playlist.types";
 import type { LibraryViewProps } from "@/features/library/library.types";
+import { usePlaylists } from "@/store/hooks/usePlaylists";
 
 
 export const MockLibrary = ({
@@ -18,8 +19,9 @@ export const MockLibrary = ({
 }: LibraryViewProps) => {
 
     const scrollContext = useDownloads(); //EMERGENCY: replace this with playlist specific infinite scroll data
+    const { playlists } = usePlaylists();
     
-    const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
+    const [selectedPlaylist, setSelectedPlaylist] = useState<PlaylistBase | null>(null);
 
     // Reset when the signal changes
     useEffect(() => {
@@ -59,7 +61,7 @@ export const MockLibrary = ({
                                 style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
                             >
                                 {/* PLAYLIST LIST */}
-                                {MOCK_PLAYLISTS.map((p) => (
+                                {playlists.map((p) => (
                                     <PlaylistItem
                                         key={p.id}
                                         playlist={p}
@@ -117,7 +119,7 @@ export const MockLibrary = ({
                                 <div className="flex gap-4">
                                     <div className="flex flex-col">
                                         <span className="text-[10px] text-zinc-600 uppercase font-medium">Tracks</span>
-                                        <span className="text-xs text-white/70">{selectedPlaylist.trackCount}</span>
+                                        <span className="text-xs text-white/70">{selectedPlaylist.totalCount}</span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-[10px] text-zinc-600 uppercase font-medium">Duration</span>
@@ -145,19 +147,20 @@ export const MockLibrary = ({
     );
 };
 
-const MOCK_PLAYLISTS = [
-    { id: "p1", name: "Late Night Lo-fi", trackCount: 42, color: "#581c87" },
-    { id: "p2", name: "Vinyl Rips 2026", trackCount: 12, color: "#164e63" },
-    { id: "p3", name: "Driving Mix", trackCount: 128, color: "#701a75" },
-    { id: "p4", name: "Gym Energy", trackCount: 24, color: "#831843" },
-    { id: "p5", name: "Deep Focus", trackCount: 67, color: "#1e3a8a" },
-    { id: "p6", name: "Summer '24 Archives", trackCount: 89, color: "#ea580c" },
-    { id: "p7", name: "Acoustic Sessions", trackCount: 34, color: "#65a30d" },
-    { id: "p8", name: "Synthesizer Dreams", trackCount: 56, color: "#2563eb" },
-    { id: "p9", name: "Midnight City Pop", trackCount: 112, color: "#be185d" }, 
-    { id: "p10", name: "Field Recordings", trackCount: 45, color: "#15803d" },  
-    { id: "p11", name: "Neo-Soul Essentials", trackCount: 28, color: "#b45309" },
-    { id: "p12", name: "C64 Soundtracks", trackCount: 210, color: "#4338ca" },   
-    { id: "p13", name: "Lo-fi Beats to Archive", trackCount: 74, color: "#0f766e" },
-    { id: "p14", name: "Classical Favorites", trackCount: 18, color: "#7f1d1d" },
-];
+
+// const MOCK_PLAYLISTS = [
+//     { id: "p1", name: "Late Night Lo-fi", totalCount: 42, color: "#581c87" },
+//     { id: "p2", name: "Vinyl Rips 2026", totalCount: 12, color: "#164e63" },
+//     { id: "p3", name: "Driving Mix", totalCount: 128, color: "#701a75" },
+//     { id: "p4", name: "Gym Energy", totalCount: 24, color: "#831843" },
+//     { id: "p5", name: "Deep Focus", totalCount: 67, color: "#1e3a8a" },
+//     { id: "p6", name: "Summer '24 Archives", totalCount: 89, color: "#ea580c" },
+//     { id: "p7", name: "Acoustic Sessions", totalCount: 34, color: "#65a30d" },
+//     { id: "p8", name: "Synthesizer Dreams", totalCount: 56, color: "#2563eb" },
+//     { id: "p9", name: "Midnight City Pop", totalCount: 112, color: "#be185d" }, 
+//     { id: "p10", name: "Field Recordings", totalCount: 45, color: "#15803d" },  
+//     { id: "p11", name: "Neo-Soul Essentials", totalCount: 28, color: "#b45309" },
+//     { id: "p12", name: "C64 Soundtracks", totalCount: 210, color: "#4338ca" },   
+//     { id: "p13", name: "Lo-fi Beats to Archive", totalCount: 74, color: "#0f766e" },
+//     { id: "p14", name: "Classical Favorites", totalCount: 18, color: "#7f1d1d" },
+// ];

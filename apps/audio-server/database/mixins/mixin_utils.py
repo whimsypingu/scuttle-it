@@ -1,8 +1,11 @@
 import sqlite3
 
 from core.models.artist import ArtistBase
+from core.models.playlist import PlaylistBase
 from core.models.track import PlaylistTrack, TrackBase
 
+
+#validators for sql to custom types
 def row_to_trackbase(
     row: sqlite3.Row
 ) -> TrackBase:
@@ -46,4 +49,15 @@ def row_to_playlist_track(
         **trackbase.__dict__,
         added_at=row["added_at"],
         position=row["position"]
+    )
+
+def row_to_playlistbase(
+    row: sqlite3.Row
+) -> PlaylistBase:
+    return PlaylistBase(
+        internal_id=row["internal_id"],
+        id=row["id"],
+        name=row["name"],
+        total_count=row["total_count"],
+        total_duration=row["total_duration"]
     )

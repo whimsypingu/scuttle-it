@@ -12,6 +12,7 @@ from database.mixins.register_mixin import RegisterMixin
 from database.mixins.retrieval_mixin import RetrievalMixin
 from database.mixins.search_mixin import SearchMixin
 from database.mixins.settings_mixin import SettingsMixin
+from database.mixins.playlist_mixin import PlaylistMixin
 from database.mixins.queue_mixin import PlayQueueMixin
 from database.mixins.edit_mixin import EditMixin
 from database.mixins.like_mixin import LikeMixin
@@ -27,6 +28,7 @@ class DatabaseManager(
     RetrievalMixin, 
     SearchMixin, 
     SettingsMixin, 
+    PlaylistMixin,
     PlayQueueMixin,
     EditMixin,
     LikeMixin

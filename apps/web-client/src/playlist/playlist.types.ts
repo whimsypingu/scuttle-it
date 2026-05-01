@@ -11,16 +11,17 @@ export interface PlaylistActionConfig {
     color: string;
 }
 
-export interface Playlist {
+export interface PlaylistBase {
     id: string;
     name: string;
-    trackCount: number;
+    totalCount: number;
+    totalDuration: number;
     color?: string;
 }
 
 export interface PlaylistItemProps {
-    playlist: Playlist;
-    onSelect: (playlist: Playlist) => void;
+    playlist: PlaylistBase;
+    onSelect: (playlist: PlaylistBase) => void;
     actions?: [PlaylistActionType, PlaylistActionType];
 }
 

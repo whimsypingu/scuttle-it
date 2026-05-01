@@ -134,7 +134,7 @@ export const PlaylistItem = ({
                         {playlist.name}
                     </span>
                     <span className="text-[10px] text-white/40 truncate uppercase tracking-wider">
-                        {playlist.trackCount} tracks
+                        {playlist.totalCount} tracks
                     </span>
                 </div>
             </motion.div>
