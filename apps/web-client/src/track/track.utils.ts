@@ -7,7 +7,7 @@ import { makeToast } from '@/features/toast/Toast';
 
 import type { PlaylistTrack, QueueId, QueueTrack, TrackActionProps, TrackBase } from '@/track/track.types';
 import type { ActiveEditTarget } from '@/features/edit/edit.types';
-import type { SetLikeMutationProps } from '@/store/hooks/hooks.types';
+import type { PopMutationProps, PushMutationProps, PushNextMutationProps, SetFirstMutationProps, SetLikeMutationProps } from '@/store/hooks/hooks.types';
 
 
 export const useTrackActionHandler = () => {
@@ -21,17 +21,26 @@ export const useTrackActionHandler = () => {
         
         switch (props.action) {
             case "setFirst": //set first in queue
-                setFirst({ track: props.track });
+                const setFirstTrackPayload: SetFirstMutationProps = {
+                    track: props.track,
+                };
+                setFirst(setFirstTrackPayload);
                 break;
 
             case "queueLast": //add to queue
                 makeToast(props.action);
-                push({ track: props.track });
+                const pushTrackPayload: PushMutationProps = {
+                    track: props.track,
+                };
+                push(pushTrackPayload);
                 break;
 
             case "queueNext": //push next
                 makeToast(props.action);
-                pushNext({ track: props.track });
+                const pushNextTrackPayload: PushNextMutationProps = {
+                    track: props.track,
+                };
+                pushNext(pushNextTrackPayload);
                 break;
 
             case "delete":
@@ -40,7 +49,10 @@ export const useTrackActionHandler = () => {
 
             case "deleteQueue": //delete from queue
                 makeToast(props.action);
-                pop({ queueTrack: props.queueTrack });
+                const popTrackPayload: PopMutationProps = {
+                    queueTrack: props.queueTrack,
+                };
+                pop(popTrackPayload);
                 break;
 
             case "edit": //open a track editing popup
