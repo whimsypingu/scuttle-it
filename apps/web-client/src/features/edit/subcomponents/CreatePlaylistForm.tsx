@@ -1,14 +1,12 @@
 import { useState } from "react";
-import { useEdit } from "@/store/hooks/useEdit";
+import { usePlaylistsMutations } from "@/store/hooks/usePlaylists";
 
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
-import { getTrackDisplayMetadata } from "@/track/track.utils";
+import { generateUUID } from "@/lib/generate";
 
-import type { TrackBase } from "@/track/track.types";
-import type { CreatePlaylistMutationProps, EditArtistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
-import { usePlaylistsMutations } from "@/store/hooks/usePlaylists";
+import type { CreatePlaylistMutationProps } from "@/store/hooks/hooks.types";
 
 
 interface CreatePlaylistFormProps {
@@ -25,7 +23,7 @@ export const CreatePlaylistForm = ({
 
     const handleSave = () => {
         const createPlaylistVars: CreatePlaylistMutationProps = {
-            playlistId: crypto.randomUUID(), //generates a standard v4 UUID for the playlist ID
+            playlistId: generateUUID(), //generates a standard v4 UUID for the playlist ID if in a secure context, otherwise a custom `insecure-xxxx...` id
             name: nameInput,
         }
         createPlaylist(createPlaylistVars);

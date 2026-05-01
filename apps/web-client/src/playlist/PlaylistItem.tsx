@@ -6,7 +6,7 @@ import { MusicNoteIcon } from '@phosphor-icons/react';
 import { PLAYLIST_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/playlist/playlist.constants';
 
 import type { PlaylistAction, PlaylistItemProps } from '@/playlist/playlist.types';
-import { usePlaylistActionHandler } from './playlist.utils';
+import { usePlaylistActionHandler } from '@/playlist/playlist.utils';
 
 
 export const PlaylistItem = ({ 
