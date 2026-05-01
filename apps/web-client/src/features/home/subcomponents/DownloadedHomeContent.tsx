@@ -1,10 +1,14 @@
 import { motion } from 'framer-motion';
-
 import { XIcon } from '@phosphor-icons/react';
-import type { HomeContent } from '../home.types';
-import { BOTTOM_SHELF } from '@/features/player/player.constants';
-import { PlaylistList } from '@/features/playlist/PlaylistList';
+
 import { useDownloads } from '@/store/hooks/useDownloads';
+
+import { PlaylistList } from '@/features/playlist/PlaylistList';
+
+import { formatReadableTime } from '@/features/audio/audio.utils';
+import { BOTTOM_SHELF } from '@/features/player/player.constants';
+
+import type { HomeContent } from '@/features/home/home.types';
 
 
 interface DownloadedHomeContentViewProps {
@@ -64,7 +68,7 @@ export const DownloadedHomeContentView = ({
 
                     <div className="flex gap-4">
                         <div className="flex flex-col gap-0.5">
-                            <span className="text-[9px] text-zinc-600 uppercase font-bold tracking-wider">Tracks</span>
+                            <span className="text-[10px] text-zinc-600 uppercase font-medium">Tracks</span>
                             <span className="text-xs text-white/70">
                                 {scrollContext.totalCount}
                             </span>
@@ -73,7 +77,7 @@ export const DownloadedHomeContentView = ({
                         <div className="flex flex-col gap-0.5">
                             <span className="text-[10px] text-zinc-600 uppercase font-medium">Duration</span>
                             <span className="text-xs text-white/70">
-                                {scrollContext.totalDuration}
+                                {formatReadableTime(scrollContext.totalDuration)}
                             </span>
                         </div>
                     </div>

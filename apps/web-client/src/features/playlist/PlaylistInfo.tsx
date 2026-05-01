@@ -1,9 +1,13 @@
-import type { PlaylistInfoProps } from '@/features/playlist/playlist.types';
 import { PlayIcon, QuestionIcon, ShuffleIcon } from '@phosphor-icons/react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import type { Sortmode } from '@/store/hooks/hooks.types';
+
+import { formatReadableTime } from '@/features/audio/audio.utils';
+
 import { SORTMODE_CONFIG } from '@/store/hooks/hooks.constants';
 import { PLAYLIST_CONFIG } from '@/features/playlist/playlist.constants';
+
+import type { PlaylistInfoProps } from '@/features/playlist/playlist.types';
+import type { Sortmode } from '@/store/hooks/hooks.types';
 
 
 export const PlaylistInfo = ({
@@ -22,7 +26,7 @@ export const PlaylistInfo = ({
     return (
         <div className="flex gap-4">
             <div className="flex flex-col gap-0.5">
-                <span className="text-[9px] text-zinc-600 uppercase font-bold tracking-wider">Tracks</span>
+                <span className="text-[10px] text-zinc-600 uppercase font-medium">Tracks</span>
                 <span className="text-xs text-white/70">
                     {totalCount}
                 </span>
@@ -31,7 +35,7 @@ export const PlaylistInfo = ({
             <div className="flex flex-col gap-0.5">
                 <span className="text-[10px] text-zinc-600 uppercase font-medium">Duration</span>
                 <span className="text-xs text-white/70">
-                    {totalDuration}
+                    {formatReadableTime(totalDuration)}
                 </span>
             </div>
 
