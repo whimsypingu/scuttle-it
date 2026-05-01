@@ -17,9 +17,9 @@ class PlaylistMixin:
         try: 
             async with self.session() as db:
                 await db.execute('''
-                    INSERT OR IGNORE INTO playlists (id, name)
+                    INSERT INTO playlists (id, name)
                     VALUES (?, ?);
-                ''', (playlist_id, name))
+                ''', (playlist_id, name)) #raises exception if insertion fails due to colliding id
 
                 logger.info(f"Successfully created playlist {name} with playlist_id {playlist_id}")
                 return True
