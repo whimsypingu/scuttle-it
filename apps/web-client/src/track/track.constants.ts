@@ -1,9 +1,11 @@
 import { HeartBreakIcon, HeartIcon, PenIcon, PlusCircleIcon, RowsPlusTopIcon, TrashIcon } from '@phosphor-icons/react';
 import type { TrackAction, TrackActionConfig } from "@/track/track.types";
 
+
+//should match the values in playlist.constants.ts
 export const ICON_SIZE_PX = 20;
 
-export const SMALL_SWIPE_THRESHOLD_PX = 40; 
+export const SMALL_SWIPE_THRESHOLD_PX = 40; //should match the values in playlist.constants.ts
 export const LARGE_SWIPE_THRESHOLD_PX = 75;
 
 //all available track actions with their corresponding icons and colors on swipe

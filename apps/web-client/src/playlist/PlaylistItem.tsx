@@ -3,15 +3,16 @@ import { motion, useMotionValue, useMotionValueEvent, useTransform } from 'frame
 
 import { MusicNoteIcon } from '@phosphor-icons/react';
 
-import { PLAYLIST_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/playlist/playlist.constants';
+import { PLAYLIST_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/playlist/playlist.constants';
 
-import type { PlaylistItemProps } from '@/playlist/playlist.types';
+import type { PlaylistAction, PlaylistItemProps } from '@/playlist/playlist.types';
+import { usePlaylistActionHandler } from './playlist.utils';
 
 
 export const PlaylistItem = ({ 
     playlist,
     onSelect,
-    actions = ["pin", "delete"] //default setup
+    actions = ["shufflePlay", "play", "pin", "edit"] //default setup
 }: PlaylistItemProps) => {
 
     /* DRAG ACTION HANDLING */
@@ -19,18 +20,25 @@ export const PlaylistItem = ({
 
     const justify = useTransform(x, (latest) => (latest > 0 ? "flex-start" : "flex-end")); //which side to justify the icon
     const opacity = useTransform(x, [SMALL_SWIPE_THRESHOLD_PX, 0, -(SMALL_SWIPE_THRESHOLD_PX)], [1, 0, 1]);
-    const currentIndex = useTransform(
-        x, 
-        [SMALL_SWIPE_THRESHOLD_PX, -(SMALL_SWIPE_THRESHOLD_PX)],
-        [0, 1] //current action index
-    );
 
-    //get the closest action
+    //get the closest action (for display)
     const [activeIndex, setActiveIndex] = useState<number>(1); //which action to map to
-    useMotionValueEvent(currentIndex, "change", (latest) => {
-        const rounded = Math.round(latest);
-        if (rounded !== activeIndex) {
-            setActiveIndex(rounded);
+    // useMotionValueEvent(currentIndex, "change", (latest) => {
+    useMotionValueEvent(x, "change", (latest) => {
+        let newIndex = 1;
+
+        if (latest >= LARGE_SWIPE_THRESHOLD_PX) {
+            newIndex = 0; //large right swipe
+        } else if (latest >= 0) {
+            newIndex = 1; //right
+        } else if (latest <= -(LARGE_SWIPE_THRESHOLD_PX)) {
+            newIndex = 3; //large left swipe
+        } else {
+            newIndex = 2;
+        }
+
+        if (newIndex !== activeIndex) {
+            setActiveIndex(newIndex);
         }
     });
     const actionKey = actions[activeIndex];
@@ -46,45 +54,44 @@ export const PlaylistItem = ({
         setIsDragging(true);
     }
 
-    //handle the end of the drag. for now just console logs
-    const handleDragEnd = (_: any, info: any) => {
-        const offsetX = info.offset.x;
-        const offsetY = info.offset.y;
-
-        if (Math.abs(offsetX) < 5 && Math.abs(offsetY) < 5) {
-            onSelect(playlist);
-            console.log("TAP");
-            return;
+    //actual action execution via /playlist.utils action handler
+    const executeAction = usePlaylistActionHandler();
+    const triggerAction = (action: PlaylistAction) => {
+        switch (action) {
+            //fallthrough for all playlist actions (since they all accept the same variables of playlist itself)
+            default: {
+                executeAction({
+                    action,
+                    playlist
+                });
+                break;
+            }
         }
+    };
 
-        let msg = "ACTION: ";
-        if (Math.abs(offsetX) >= SMALL_SWIPE_THRESHOLD_PX) {
-            msg = `${msg} Small `;
-        } else {
-            msg = `${msg} None `;
+    //handle the end of the drag
+    const handleDragEnd = () => {
+        
+        const offset = x.get(); // visual X offset and not info.offset.x which is highly inflated
+ 
+        if (Math.abs(offset) >= SMALL_SWIPE_THRESHOLD_PX) {
+            triggerAction(actionKey);
         }
-
-        if (offsetX > 0) {
-            msg = `${msg} Right`;
-        } else {
-            msg = `${msg} Left`;
-        }
-        console.log(msg)
 
         //reset the dragging flag after one frame to prevent taps from triggering
         requestAnimationFrame(() => setIsDragging(false));
     };
+ 
 
-    //cancel taps on drags
-    const handleTap = () => {
-        if (isDragging) return;
+	/* TAP ACTION HANDLING */
+    const handleTap = async () => {
+        if (isDragging) return; //cancel taps on drags
 
         onSelect(playlist);
     };
-
+    
     return (
         <>
-        {/* className="flex items-center gap-4 p-2 rounded-xl bg-zinc-900/50 active:bg-zinc-800 transition-colors cursor-pointer group" */}
         <div className="relative group overflow-hidden rounded-lg">
 
             {/* BACKGROUND ACTIONS LAYER */}
@@ -124,7 +131,8 @@ export const PlaylistItem = ({
             >
                 <div 
                     className="w-12 h-12 rounded flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: playlist.color }}
+                    style={{ backgroundColor: "color-mix(in srgb, var(--color-brand), transparent 70%)" }}
+                    //style={{ backgroundColor: playlist.color }}
                 >
                     <MusicNoteIcon size={ICON_SIZE_PX} />
                 </div>

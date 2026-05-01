@@ -58,7 +58,7 @@ export const TrackItem = ({
         setIsDragging(true);
     }
 
-	//actual action execution via model.utils action handler
+	//actual action execution via /track.utils action handler
 	const executeAction = useTrackActionHandler();
 	const triggerAction = (action: TrackAction) => {
 		switch (action) {
@@ -83,7 +83,7 @@ export const TrackItem = ({
 		}
 	};
 
-	//handle the end of the drag. for now just console logs
+	//handle the end of the drag
 	const handleDragEnd = () => {
 
 		const offset = x.get(); // visual X offset and not info.offset.x which is highly inflated

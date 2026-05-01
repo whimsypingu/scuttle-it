@@ -1,4 +1,4 @@
-// src/model/model.utils.ts
+// src/track/track.utils.ts
 import { useQueue } from '@/store/hooks/useQueue';
 import { useEditTarget } from '@/features/edit/EditProvider';
 import { useLikesMutations } from '@/store/hooks/useLikes';
