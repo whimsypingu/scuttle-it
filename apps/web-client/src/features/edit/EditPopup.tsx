@@ -54,7 +54,9 @@ export const EditPopup = () => {
                     </DialogDescription>
                 </DialogHeader>
 
-                {activeEditForm()}
+                <div className="max-h-[70dvh] overflow-hidden">
+                    {activeEditForm()}
+                </div>
 
             </DialogContent>
         </Dialog>

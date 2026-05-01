@@ -8,6 +8,7 @@ import { getTrackDisplayMetadata } from "@/track/track.utils";
 
 import type { TrackBase } from "@/track/track.types";
 import type { EditArtistPayload, EditTrackMutationProps, EditTrackPayload } from "@/store/hooks/hooks.types";
+import { usePlaylists } from "@/store/hooks/usePlaylists";
 
 
 interface EditTrackFormProps {
@@ -24,6 +25,9 @@ export const EditTrackForm = ({
     const [artistInput, setArtistInput] = useState("");
 
     const { titleDisplay, artistDisplay } = getTrackDisplayMetadata(track); //placeholders
+
+    //playlists to add to
+    const { playlists } = usePlaylists();
 
     //edit hook
     const { editTrack } = useEdit();
@@ -45,31 +49,33 @@ export const EditTrackForm = ({
     }
 
     return (
-        <div className="flex flex-col gap-2">
-            {/* Title Section */}
-            <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-muted-foreground">
-                    Title
-                </label>
-                <Textarea
-                    value={titleInput}
-                    onChange={(e) => setTitleInput(e.target.value)}
-                    placeholder={titleDisplay}
-                    className="text-md focus-visible:ring-1"
-                />
-            </div>
+        <div className="flex flex-col h-full">
+            <div className="h-full custom-scrollbar overflow-y-auto flex flex-col gap-2">
+                {/* Title Section */}
+                <div className="flex flex-col gap-1">
+                    <label className="text-sm font-medium text-muted-foreground">
+                        Title
+                    </label>
+                    <Textarea
+                        value={titleInput}
+                        onChange={(e) => setTitleInput(e.target.value)}
+                        placeholder={titleDisplay}
+                        className="text-md focus-visible:ring-1"
+                    />
+                </div>
 
-            {/* Artists Section */}
-            <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-muted-foreground">
-                    Artist
-                </label>
-                <Textarea
-                    value={artistInput}
-                    onChange={(e) => setArtistInput(e.target.value)}
-                    placeholder={artistDisplay}
-                    className="text-md focus-visible:ring-1"
-                />
+                {/* Artists Section */}
+                <div className="flex flex-col gap-1">
+                    <label className="text-sm font-medium text-muted-foreground">
+                        Artist
+                    </label>
+                    <Textarea
+                        value={artistInput}
+                        onChange={(e) => setArtistInput(e.target.value)}
+                        placeholder={artistDisplay}
+                        className="text-md focus-visible:ring-1"
+                    />
+                </div>
             </div>
 
             {/* Save */}
