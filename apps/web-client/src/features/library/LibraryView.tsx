@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { XIcon } from "@phosphor-icons/react";
+import { PlusIcon, XIcon } from "@phosphor-icons/react";
 
 import { useDownloads } from "@/store/hooks/useDownloads";
 
 import { PlaylistItem } from "@/playlist/PlaylistItem";
 import { PlaylistList } from "@/playlist/PlaylistList";
 
-import { NAV_CONFIG, BOTTOM_SHELF } from "@/features/player/player.constants";
+import { NAV_CONFIG, BOTTOM_SHELF, PLAYER_CONFIG } from "@/features/player/player.constants";
 
 import type { PlaylistBase } from "@/playlist/playlist.types";
 import type { LibraryViewProps } from "@/features/library/library.types";
 import { usePlaylists } from "@/store/hooks/usePlaylists";
+import { formatReadableTime } from "../audio/audio.utils";
 
 
 export const MockLibrary = ({
@@ -51,7 +52,31 @@ export const MockLibrary = ({
                     >
                         {/* HEADER */}
                         <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4 flex flex-col">
-                            <h1 className="tab-heading">Library</h1>
+                            <div className="flex items-center justify-between mb-2">
+                                <h1 className="tab-heading truncate pr-4">
+                                    Library
+                                </h1>
+                            </div>
+                
+                            {/* ABOUT / METADATA SECTION */}
+                            <div className="mx-1">
+                                <div className="flex gap-4">
+                                    <div className="flex flex-col gap-0.5">
+                                        <span className="text-[10px] text-zinc-600 uppercase font-medium">Playlists</span>
+                                        <span className="text-xs text-white/70">
+                                            {playlists.length}
+                                        </span>
+                                    </div>
+
+                                    {/* RIGHT ACTION GROUP */}
+                                    <div className="ml-auto flex items-end gap-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
+                                        {/* CREATE */}
+                                        <button className="p-1">
+                                            <PlusIcon size={PLAYER_CONFIG.iconSize} weight="bold" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         {/* CONTENT AREA */}
