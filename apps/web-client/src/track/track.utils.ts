@@ -21,26 +21,26 @@ export const useTrackActionHandler = () => {
         
         switch (props.action) {
             case "setFirst": //set first in queue
-                const setFirstTrackPayload: SetFirstMutationProps = {
+                const setFirstTrackVars: SetFirstMutationProps = {
                     track: props.track,
                 };
-                setFirst(setFirstTrackPayload);
+                setFirst(setFirstTrackVars);
                 break;
 
             case "queueLast": //add to queue
                 makeToast(props.action);
-                const pushTrackPayload: PushMutationProps = {
+                const pushTrackVars: PushMutationProps = {
                     track: props.track,
                 };
-                push(pushTrackPayload);
+                push(pushTrackVars);
                 break;
 
             case "queueNext": //push next
                 makeToast(props.action);
-                const pushNextTrackPayload: PushNextMutationProps = {
+                const pushNextTrackVars: PushNextMutationProps = {
                     track: props.track,
                 };
-                pushNext(pushNextTrackPayload);
+                pushNext(pushNextTrackVars);
                 break;
 
             case "delete":
@@ -49,10 +49,10 @@ export const useTrackActionHandler = () => {
 
             case "deleteQueue": //delete from queue
                 makeToast(props.action);
-                const popTrackPayload: PopMutationProps = {
+                const popTrackVars: PopMutationProps = {
                     queueTrack: props.queueTrack,
                 };
-                pop(popTrackPayload);
+                pop(popTrackVars);
                 break;
 
             case "edit": //open a track editing popup
@@ -64,19 +64,19 @@ export const useTrackActionHandler = () => {
                 break;
 
             case "like": //like a track
-                const setLikePayload: SetLikeMutationProps = {
+                const setLikeVars: SetLikeMutationProps = {
                     track: props.track,
                     liked: true,
                 };
-                setLike(setLikePayload);
+                setLike(setLikeVars);
                 break;
 
             case "unlike": //unlike a track
-                const setUnlikePayload: SetLikeMutationProps = {
+                const setUnlikeVars: SetLikeMutationProps = {
                     track: props.track,
                     liked: false,
                 };
-                setLike(setUnlikePayload);
+                setLike(setUnlikeVars);
                 break; 
         }
     };

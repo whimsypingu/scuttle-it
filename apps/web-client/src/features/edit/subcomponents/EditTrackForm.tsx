@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { getTrackDisplayMetadata } from "@/track/track.utils";
 
 import type { TrackBase } from "@/track/track.types";
-import type { EditArtistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
+import type { EditArtistPayload, EditTrackMutationProps, EditTrackPayload } from "@/store/hooks/hooks.types";
 
 
 interface EditTrackFormProps {
@@ -32,13 +32,15 @@ export const EditTrackForm = ({
         const artistPayload: EditArtistPayload = {
             nameDisplay: artistInput || undefined,
         };
-        const payload: EditTrackPayload = {
+        const trackPayload: EditTrackPayload = {
             id: track.id, 
             titleDisplay: titleInput || undefined,
             artists: artistInput ? [artistPayload] : undefined,
         };
-
-        editTrack({ payload });
+        const editTrackVars: EditTrackMutationProps = {
+            payload: trackPayload,
+        };
+        editTrack(editTrackVars);
         onSave();
     }
 

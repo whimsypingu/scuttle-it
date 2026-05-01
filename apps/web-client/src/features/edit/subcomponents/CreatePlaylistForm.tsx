@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { getTrackDisplayMetadata } from "@/track/track.utils";
 
 import type { TrackBase } from "@/track/track.types";
-import type { EditArtistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
+import type { CreatePlaylistMutationProps, EditArtistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
+import { usePlaylistsMutations } from "@/store/hooks/usePlaylists";
 
 
 interface CreatePlaylistFormProps {
@@ -20,19 +21,14 @@ export const CreatePlaylistForm = ({
     const [nameInput, setNameInput] = useState("");
 
     //edit hook
-    const { editTrack } = useEdit();
+    const { createPlaylist } = usePlaylistsMutations();
 
-    const handleSave = () => { //use temp edit payload strategy -- migrate to artist selection in the future
-        // const artistPayload: EditArtistPayload = {
-        //     nameDisplay: artistInput || undefined,
-        // };
-        // const payload: EditTrackPayload = {
-        //     id: track.id, 
-        //     titleDisplay: titleInput || undefined,
-        //     artists: artistInput ? [artistPayload] : undefined,
-        // };
-
-        // editTrack({ payload });
+    const handleSave = () => {
+        const createPlaylistVars: CreatePlaylistMutationProps = {
+            playlistId: "hello",
+            name: nameInput,
+        }
+        createPlaylist(createPlaylistVars);
         onSave();
     }
 

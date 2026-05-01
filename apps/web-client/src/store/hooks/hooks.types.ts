@@ -84,3 +84,12 @@ export interface SetLikeMutationProps {
     track: TrackBase;
     liked: boolean;
 }
+
+
+/**
+ * usePlaylists
+ */
+export interface CreatePlaylistMutationProps {
+    playlistId: string;
+    name: string;
+}

@@ -16,7 +16,7 @@ DefaultCrashException = HTTPException(
 @PlaylistRouter.post("/create")
 async def create_playlist_endpoint(
     playlist_id: str = Query(..., min_length=1, description="Playlist ID for new playlist"),
-    name: bool = Query(...),
+    name: str = Query(..., min_length=1),
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
