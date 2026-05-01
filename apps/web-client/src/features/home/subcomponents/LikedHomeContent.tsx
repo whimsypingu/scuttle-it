@@ -1,33 +1,30 @@
 import { motion } from 'framer-motion';
+
 import { XIcon } from '@phosphor-icons/react';
-
-import { useDownloads } from '@/store/hooks/useDownloads';
-
-import { PlaylistList } from '@/features/playlist/PlaylistList';
-
-import { formatReadableTime } from '@/features/audio/audio.utils';
+import type { HomeContent } from '../home.types';
 import { BOTTOM_SHELF } from '@/features/player/player.constants';
+import { PlaylistList } from '@/features/playlist/PlaylistList';
+import { useLikes } from '@/store/hooks/useLikes';
+import { PlaylistInfo } from '@/features/playlist/PlaylistInfo';
 
-import type { HomeContent } from '@/features/home/home.types';
 
-
-interface DownloadedHomeContentViewProps {
+interface LikedHomeContentViewProps {
     contentData: HomeContent;
     onClose: () => void;
 }
 
-export const DownloadedHomeContentView = ({
+export const LikedHomeContentView = ({
     contentData,
     onClose
-}: DownloadedHomeContentViewProps) => {
+}: LikedHomeContentViewProps) => {
 
-    const scrollContext = useDownloads();
+    const likesScrollContext = useLikes();
 
     return (
         <>
-        {/* DOWNLOADED TRACKS VIEW */}
+        {/* LIKED TRACKS VIEW */}
         <motion.div
-            key="downloaded-home-content-view"
+            key="liked-home-content-view"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -43,7 +40,7 @@ export const DownloadedHomeContentView = ({
                     }}
                 >
                     <h1 className="tab-heading truncate pr-4">
-                        Tracks
+                        Likes
                     </h1>
                     <button className="text-sm font-medium text-white/40 active:text-white shrink-0">
                         <XIcon size={20} weight="bold" />
@@ -65,31 +62,17 @@ export const DownloadedHomeContentView = ({
                     <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
                         {contentData.description}
                     </p>
-
-                    <div className="flex gap-4">
-                        <div className="flex flex-col gap-0.5">
-                            <span className="text-[10px] text-zinc-600 uppercase font-medium">Tracks</span>
-                            <span className="text-xs text-white/70">
-                                {scrollContext.totalCount}
-                            </span>
-                        </div>
-
-                        <div className="flex flex-col gap-0.5">
-                            <span className="text-[10px] text-zinc-600 uppercase font-medium">Duration</span>
-                            <span className="text-xs text-white/70">
-                                {formatReadableTime(scrollContext.totalDuration)}
-                            </span>
-                        </div>
-                    </div>
+                    
+                    <PlaylistInfo scrollContext={likesScrollContext}/>
                 </div>
             </div>
 
             {/* CONTENT AREA */}
             <div className="flex-1 no-scrollbar">
                 <PlaylistList
-                    scrollContext={scrollContext}
+                    scrollContext={likesScrollContext}
                     bottomSpacing={BOTTOM_SHELF.totalHeight}
-                    actions={["queueNext", "queueLast", "like", "edit"]}
+                    actions={["queueNext", "queueLast", "unlike", "edit"]}
                 />
             </div>
         </motion.div>

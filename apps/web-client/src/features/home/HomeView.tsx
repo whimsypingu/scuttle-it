@@ -112,9 +112,9 @@ export const MOCK_HOME_CONTENTS: HomeContent[] = [
     },
     {
         id: "hc4",
-        type: HOME_CONTENT_TYPES.OTHER,
-        name: "Deep Focus",
-        description: "Ambient and lo-fi beats to keep your head in the zone.",
+        type: HOME_CONTENT_TYPES.LIKES,
+        name: "Likes",
+        description: "All your liked tracks.",
         color: "#a855f7", // Purple
     },
     {

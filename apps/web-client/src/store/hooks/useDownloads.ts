@@ -19,7 +19,7 @@ export const useDownloads = (limit = 30) => {
         },
         getNextPageParam: (lastPage) => {
             const nextOffset = lastPage.offset + lastPage.limit;
-            return nextOffset < lastPage.total ? nextOffset : undefined;
+            return nextOffset < lastPage.totalCount ? nextOffset : undefined;
         },
         staleTime: 1000 * 60 * 5,
     });
@@ -30,7 +30,8 @@ export const useDownloads = (limit = 30) => {
     
     return {
         tracks,
-        totalCount: getDownloads.data?.pages[0]?.total ?? 0,
+        totalCount: getDownloads.data?.pages[0]?.totalCount ?? 0,
+        totalDuration: getDownloads.data?.pages[0]?.totalDuration ?? 0,
         fetchNextPage: getDownloads.fetchNextPage,
         hasNextPage: getDownloads.hasNextPage,
         isLoading: getDownloads.isLoading,

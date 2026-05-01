@@ -82,7 +82,7 @@ function App() {
 					<Toast isExpanded={isPlayerExpanded} />
 					
 					<EditPopup />
-				</div>				
+				</div>
 			</EditProvider>
 		</QueryClientProvider>
 	);

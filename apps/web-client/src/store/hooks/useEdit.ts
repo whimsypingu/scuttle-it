@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query"
 import { queryClient } from "@/store/queryClient"
 
 import type { EditTrackPayload } from "@/store/hooks/hooks.types";
+import { makeToast } from "@/features/toast/Toast";
 
 
 export const useEdit = () => {
@@ -25,6 +26,10 @@ export const useEdit = () => {
         onSuccess: (data) => {
             //refetch all data that could possibly have the edited track. consider a better bounded approach to this
             queryClient.invalidateQueries({ queryKey: ["tracks"] }); 
+
+            if (data.success) {
+                makeToast("Saved");
+            }
         },
         onError: (err) => {
             console.error("Edit track failed.");

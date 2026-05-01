@@ -1,4 +1,4 @@
-import { HeartIcon, PenIcon, PlusCircleIcon, RowsPlusTopIcon, TrashIcon } from '@phosphor-icons/react';
+import { HeartBreakIcon, HeartIcon, PenIcon, PlusCircleIcon, RowsPlusTopIcon, TrashIcon } from '@phosphor-icons/react';
 import type { TrackAction, TrackActionConfig } from "@/model/model.types";
 
 export const ICON_SIZE_PX = 20;
@@ -31,6 +31,10 @@ export const TRACK_ACTION_CONFIG: Record<TrackAction, TrackActionConfig> = {
 	like: { 
         icon: HeartIcon, 
         color: "var(--color-brand)" 
+    },
+    unlike: {
+        icon: HeartBreakIcon,
+        color: "var(--color-brand)"
     },
 	edit: { 
         icon: PenIcon, 

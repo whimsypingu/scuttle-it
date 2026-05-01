@@ -15,3 +15,9 @@ export const PLAYLIST_ACTION_CONFIG: Record<PlaylistActionType, PlaylistActionCo
         color: "var(--color-brand)" 
     }
 };
+
+//playlist element sizing
+export const PLAYLIST_CONFIG = {
+    iconSize: 20,
+    dropdownIconSize: 16,
+};

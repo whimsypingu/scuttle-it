@@ -18,6 +18,10 @@ export interface TrackBase {
     artists: ArtistBase[];
     duration: number;
 }
+export interface PlaylistTrack extends TrackBase {
+    addedAt: number;
+    position: number;
+}
 export interface QueueTrack extends TrackBase {
     queueId: QueueId;
     position: number;
@@ -29,6 +33,7 @@ export type TrackActionProps =
     | { action: "queueLast"; track: TrackBase }
     | { action: "queueNext"; track: TrackBase }
     | { action: "like"; track: TrackBase }
+    | { action: "unlike"; track: TrackBase }
     | { action: "delete"; track: TrackBase }
     | { action: "deleteQueue"; queueTrack: QueueTrack }
     | { action: "edit"; track: TrackBase };

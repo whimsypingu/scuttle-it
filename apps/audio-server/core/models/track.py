@@ -16,6 +16,11 @@ class TrackBase(ScuttleBase):
         return self.title_display or self.title
 
 
+class PlaylistTrack(TrackBase):
+    added_at: int
+    position: float
+
+
 class QueueTrack(TrackBase):
     queue_id: int
     position: float

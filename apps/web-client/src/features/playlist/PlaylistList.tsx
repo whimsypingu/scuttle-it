@@ -19,6 +19,24 @@ export const PlaylistList = ({
         isFetchingNextPage
     } = scrollContext;
 
+    //nothing to show
+    if (tracks.length === 0) {
+        return (
+            <div className="min-h-0 w-full h-full">                
+                <div className="flex flex-col gap-1 items-center justify-center px-4 py-16 text-center">
+                    <p className="text-sm font-medium text-muted-foreground">
+                        No Tracks
+                    </p>
+                    
+                    <p className="text-xs text-muted-foreground/60">
+                        Add some tracks!
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    //temp debugging logic
     const handleTrackSelect = (track: TrackBase) => {
         console.log("Selected track:", track.title);
     }
@@ -44,18 +62,19 @@ export const PlaylistList = ({
                         </div>
                     )
                 }}
+                computeItemKey={(index, track) => track.id} //https://virtuoso.dev/message-list/item-keys/ this helped
                 itemContent={(index, track) => (
                     <motion.div
                         key={track.id}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
                         transition={{
                             duration: 0.3,
                             delay: Math.min(index * 0.1, 0.1) //not perfect but it has a nice effect initially
                         }}
                     >
                         <TrackItem
-                            key={track.id}
                             track={track}
                             onSelect={handleTrackSelect}
                             index={index}

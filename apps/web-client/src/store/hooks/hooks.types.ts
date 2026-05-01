@@ -1,4 +1,5 @@
 import type { QueueTrack, TrackBase } from "@/model/model.types";
+import type { IconProps } from "@phosphor-icons/react";
 
 
 /**
@@ -59,4 +60,27 @@ export interface PopMutationProps {
 export interface YTSearchMutationProps {
     q: string;
     limit?: number;
+}
+
+
+/**
+ * Sorting Playlists
+ */
+export type SortmodeProps = 
+    | { sortmode: 0; desc: "Position descending" }
+    | { sortmode: 1; desc: "Date added descending" };
+export type Sortmode = SortmodeProps["sortmode"];
+
+export interface SortmodeConfig { //corresponding phosphor icon for each Sortmode
+    icon: React.ComponentType<IconProps>;
+    detail: string;
+}
+
+
+/**
+ * useLikes
+ */
+export interface SetLikeMutationProps {
+    track: TrackBase;
+    liked: boolean;
 }
