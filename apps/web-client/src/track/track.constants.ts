@@ -1,5 +1,5 @@
 import { HeartBreakIcon, HeartIcon, PenIcon, PlusCircleIcon, RowsPlusTopIcon, TrashIcon } from '@phosphor-icons/react';
-import type { TrackAction, TrackActionConfig } from "@/model/model.types";
+import type { TrackAction, TrackActionConfig } from "@/track/track.types";
 
 export const ICON_SIZE_PX = 20;
 

@@ -10,7 +10,7 @@ import { QueueList } from '@/features/queue/QueueList';
 import { PLAYER_CONFIG } from '@/features/player/player.constants';
 
 import type { ExpandedViewProps } from '@/features/player/player.types';
-import { getTrackDisplayMetadata } from '@/model/model.utils';
+import { getTrackDisplayMetadata } from '@/track/track.utils';
 
 
 

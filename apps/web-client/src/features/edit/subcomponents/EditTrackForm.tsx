@@ -4,9 +4,9 @@ import { useEdit } from "@/store/hooks/useEdit";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
-import { getTrackDisplayMetadata } from "@/model/model.utils";
+import { getTrackDisplayMetadata } from "@/track/track.utils";
 
-import type { TrackBase } from "@/model/model.types";
+import type { TrackBase } from "@/track/track.types";
 import type { EditArtistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
 
 

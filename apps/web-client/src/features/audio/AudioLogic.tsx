@@ -3,7 +3,7 @@ import { useSettings } from "@/store/hooks/useSettings";
 import { useEffect, useRef } from "react";
 
 import { audioEngine } from "./audioEngine";
-import { getTrackDisplayMetadata } from "@/model/model.utils";
+import { getTrackDisplayMetadata } from "@/track/track.utils";
 import { useAudioPlayback, useBackupSync, usePrefetchSync } from "./useAudioEngine";
 
 export const AudioLogic = () => {

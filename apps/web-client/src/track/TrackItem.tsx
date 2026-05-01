@@ -3,12 +3,12 @@ import { motion, useMotionValue, useMotionValueEvent, useTransform } from 'frame
 
 import { MusicNoteIcon } from '@phosphor-icons/react';
 
-import { getTrackDisplayMetadata, useTrackActionHandler } from '@/model/model.utils';
+import { getTrackDisplayMetadata, useTrackActionHandler } from '@/track/track.utils';
 import { useQueue } from '@/store/hooks/useQueue';
 
-import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/model/model.constants';
+import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/track/track.constants';
 
-import type { QueueTrack, TrackAction, TrackItemProps } from '@/model/model.types';
+import type { QueueTrack, TrackAction, TrackItemProps } from '@/track/track.types';
 import { audioEngine } from '@/features/audio/audioEngine';
 
 

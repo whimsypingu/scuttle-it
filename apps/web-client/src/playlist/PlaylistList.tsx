@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
 
-import { TrackItem } from '@/model/TrackItem';
+import { TrackItem } from '@/track/TrackItem';
 
 import type { PlaylistListProps } from '@/playlist/playlist.types';
-import type { TrackBase } from '@/model/model.types';
+import type { TrackBase } from '@/track/track.types';
 import { Virtuoso } from 'react-virtuoso';
 
 

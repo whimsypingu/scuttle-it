@@ -1,6 +1,6 @@
 import type { IconProps } from "@phosphor-icons/react";
 
-import type { TrackAction, TrackBase } from "@/model/model.types";
+import type { TrackAction, TrackBase } from "@/track/track.types";
 import type { Sortmode } from "@/store/hooks/hooks.types";
 
 

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useQueue } from '@/store/hooks/useQueue';
 
 import { MiniViewPlayPauseButton, MiniViewSlider } from '@/features/player/subcomponents/MiniViewControls';
-import { getTrackDisplayMetadata } from '@/model/model.utils';
+import { getTrackDisplayMetadata } from '@/track/track.utils';
 
 import type { MiniViewProps } from '@/features/player/player.types';
 

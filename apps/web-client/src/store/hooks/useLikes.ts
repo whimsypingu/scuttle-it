@@ -2,10 +2,10 @@ import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-q
 import { useMemo, useState } from 'react';
 
 import { makeToast } from '@/features/toast/Toast';
-import { getTrackDisplayMetadata, trackBaseToPlaylistTrack } from '@/model/model.utils';
+import { getTrackDisplayMetadata, trackBaseToPlaylistTrack } from '@/track/track.utils';
 
 import type { InfiniteData } from '@tanstack/react-query';
-import type { PlaylistTrack } from '@/model/model.types';
+import type { PlaylistTrack } from '@/track/track.types';
 import type { SetLikeMutationProps, Sortmode } from '@/store/hooks/hooks.types';
 
 

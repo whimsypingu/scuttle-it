@@ -1,4 +1,4 @@
-import type { TrackBase } from "@/model/model.types";
+import type { TrackBase } from "@/track/track.types";
 
 
 //flexible typing for what can be edited in a popup

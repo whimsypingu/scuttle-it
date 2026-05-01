@@ -1,4 +1,4 @@
-import type { QueueTrack, TrackBase } from "@/model/model.types";
+import type { QueueTrack, TrackBase } from "@/track/track.types";
 import type { IconProps } from "@phosphor-icons/react";
 
 

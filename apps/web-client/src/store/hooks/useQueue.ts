@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
-import { trackBaseToQueueTrack } from "@/model/model.utils";
+import { trackBaseToQueueTrack } from "@/track/track.utils";
 
-import type { QueueTrack } from "@/model/model.types";
+import type { QueueTrack } from "@/track/track.types";
 import type { PopMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
 
 

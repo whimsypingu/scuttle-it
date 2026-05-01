@@ -5,7 +5,7 @@ import { useLikesMutations } from '@/store/hooks/useLikes';
 
 import { makeToast } from '@/features/toast/Toast';
 
-import type { PlaylistTrack, QueueId, QueueTrack, TrackActionProps, TrackBase } from '@/model/model.types';
+import type { PlaylistTrack, QueueId, QueueTrack, TrackActionProps, TrackBase } from '@/track/track.types';
 
 
 export const useTrackActionHandler = () => {
