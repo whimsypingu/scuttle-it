@@ -3,9 +3,9 @@ import { motion, useMotionValue, useMotionValueEvent, useTransform } from 'frame
 
 import { MusicNoteIcon } from '@phosphor-icons/react';
 
-import { PLAYLIST_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/features/playlist/playlist.constants';
+import { PLAYLIST_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/playlist/playlist.constants';
 
-import type { PlaylistItemProps } from '@/features/playlist/playlist.types';
+import type { PlaylistItemProps } from '@/playlist/playlist.types';
 
 
 export const PlaylistItem = ({ 

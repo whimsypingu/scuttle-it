@@ -3,8 +3,8 @@ import { XIcon } from '@phosphor-icons/react';
 
 import { useLikes } from '@/store/hooks/useLikes';
 
-import { PlaylistList } from '@/features/playlist/PlaylistList';
-import { PlaylistInfo } from '@/features/playlist/PlaylistInfo';
+import { PlaylistList } from '@/playlist/PlaylistList';
+import { PlaylistInfo } from '@/playlist/PlaylistInfo';
 
 import { BOTTOM_SHELF } from '@/features/player/player.constants';
 

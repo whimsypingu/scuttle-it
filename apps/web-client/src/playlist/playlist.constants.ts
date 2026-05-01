@@ -1,5 +1,5 @@
 import { PushPinIcon, TrashIcon } from '@phosphor-icons/react';
-import type { PlaylistActionType, PlaylistActionConfig } from "@/features/playlist/playlist.types";
+import type { PlaylistActionType, PlaylistActionConfig } from "@/playlist/playlist.types";
 
 export const ICON_SIZE_PX = 20;
 

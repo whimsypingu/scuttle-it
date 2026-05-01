@@ -4,9 +4,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenu
 import { formatReadableTime } from '@/features/audio/audio.utils';
 
 import { SORTMODE_CONFIG } from '@/store/hooks/hooks.constants';
-import { PLAYLIST_CONFIG } from '@/features/playlist/playlist.constants';
+import { PLAYLIST_CONFIG } from '@/playlist/playlist.constants';
 
-import type { PlaylistInfoProps } from '@/features/playlist/playlist.types';
+import type { PlaylistInfoProps } from '@/playlist/playlist.types';
 import type { Sortmode } from '@/store/hooks/hooks.types';
 
 

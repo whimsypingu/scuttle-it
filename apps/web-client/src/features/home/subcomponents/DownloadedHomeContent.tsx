@@ -3,7 +3,7 @@ import { XIcon } from '@phosphor-icons/react';
 
 import { useDownloads } from '@/store/hooks/useDownloads';
 
-import { PlaylistList } from '@/features/playlist/PlaylistList';
+import { PlaylistList } from '@/playlist/PlaylistList';
 
 import { formatReadableTime } from '@/features/audio/audio.utils';
 import { BOTTOM_SHELF } from '@/features/player/player.constants';

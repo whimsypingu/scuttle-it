@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { XIcon } from '@phosphor-icons/react';
 import type { HomeContent } from '../home.types';
 import { BOTTOM_SHELF } from '@/features/player/player.constants';
-import { PlaylistList } from '@/features/playlist/PlaylistList';
+import { PlaylistList } from '@/playlist/PlaylistList';
 
 
 interface OtherHomeContentViewProps {
