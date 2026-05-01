@@ -53,25 +53,26 @@ ON likes(position);
 
 -- playlists table
 CREATE TABLE IF NOT EXISTS playlists (
-    id INTEGER PRIMARY KEY,
+    internal_id INTEGER PRIMARY KEY,
+    id TEXT UNIQUE,
     name TEXT NOT NULL,
     created_at INTEGER DEFAULT (unixepoch())
 );
 
 -- playlist and titles junction table
 CREATE TABLE IF NOT EXISTS playlist_tracks (
-    playlist_id INTEGER NOT NULL,
+    playlist_internal_id INTEGER NOT NULL,
     track_internal_id TEXT NOT NULL,
-    position REAL NOT NULL UNIQUE,
+    position REAL NOT NULL,
     added_at INTEGER DEFAULT (unixepoch()),
-    FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE,
+    FOREIGN KEY (playlist_internal_id) REFERENCES playlists(internal_id) ON DELETE CASCADE,
     FOREIGN KEY (track_internal_id) REFERENCES tracks(internal_id) ON DELETE CASCADE,
-    PRIMARY KEY (playlist_id, track_internal_id)
+    PRIMARY KEY (playlist_internal_id, track_internal_id)
 );
 
 -- playlist titles covering index
 CREATE INDEX IF NOT EXISTS idx_playlist_tracks_position
-ON playlist_tracks (playlist_id, position, track_internal_id);
+ON playlist_tracks (playlist_internal_id, position, track_internal_id);
 
 
 -- play queue
