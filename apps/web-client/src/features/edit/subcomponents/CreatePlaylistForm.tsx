@@ -17,6 +17,7 @@ export const CreatePlaylistForm = ({
     onSave 
 }: CreatePlaylistFormProps) => {
     const [nameInput, setNameInput] = useState("");
+    const [descriptionInput, setDescriptionInput] = useState("");
 
     //edit hook
     const { createPlaylist } = usePlaylistsMutations();
@@ -25,6 +26,7 @@ export const CreatePlaylistForm = ({
         const createPlaylistVars: CreatePlaylistMutationProps = {
             playlistId: generateUUID(), //generates a standard v4 UUID for the playlist ID if in a secure context, otherwise a custom `insecure-xxxx...` id
             name: nameInput,
+            //put description in here later
         }
         createPlaylist(createPlaylistVars);
         onSave();
@@ -32,17 +34,33 @@ export const CreatePlaylistForm = ({
 
     return (
         <div className="flex flex-col gap-2">
-            {/* Title Section */}
+            {/* Name Section */}
             <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-muted-foreground">Name</label>
+                <label className="text-sm font-medium text-muted-foreground">
+                    Name
+                </label>
                 <Textarea
                     value={nameInput}
                     onChange={(e) => setNameInput(e.target.value)}
-                    placeholder={"placeholder"}
+                    placeholder={"Give this playlist a name..."}
                     className="text-md focus-visible:ring-1"
                 />
             </div>
 
+            {/* Description Section */}
+            <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-muted-foreground">
+                    Description
+                </label>
+                <Textarea
+                    value={descriptionInput}
+                    onChange={(e) => setDescriptionInput(e.target.value)}
+                    placeholder={"Write a little about this playlist..."}
+                    className="text-md focus-visible:ring-1"
+                />
+            </div>
+
+            {/* Save */}
             <div className="flex justify-end pt-4">
                 <Button
                     className="min-w-[80px]"

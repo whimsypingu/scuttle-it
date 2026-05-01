@@ -48,7 +48,9 @@ export const EditTrackForm = ({
         <div className="flex flex-col gap-2">
             {/* Title Section */}
             <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-muted-foreground">Title</label>
+                <label className="text-sm font-medium text-muted-foreground">
+                    Title
+                </label>
                 <Textarea
                     value={titleInput}
                     onChange={(e) => setTitleInput(e.target.value)}
@@ -59,7 +61,9 @@ export const EditTrackForm = ({
 
             {/* Artists Section */}
             <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-muted-foreground">Artist</label>
+                <label className="text-sm font-medium text-muted-foreground">
+                    Artist
+                </label>
                 <Textarea
                     value={artistInput}
                     onChange={(e) => setArtistInput(e.target.value)}
@@ -68,6 +72,7 @@ export const EditTrackForm = ({
                 />
             </div>
 
+            {/* Save */}
             <div className="flex justify-end pt-4">
                 <Button
                     className="min-w-[80px]"
