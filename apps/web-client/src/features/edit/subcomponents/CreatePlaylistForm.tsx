@@ -25,7 +25,7 @@ export const CreatePlaylistForm = ({
 
     const handleSave = () => {
         const createPlaylistVars: CreatePlaylistMutationProps = {
-            playlistId: "hello",
+            playlistId: crypto.randomUUID(), //generates a standard v4 UUID for the playlist ID
             name: nameInput,
         }
         createPlaylist(createPlaylistVars);
