@@ -10,7 +10,7 @@ RetrievalRouter = APIRouter(prefix="/retrieve", tags=["Retrieval"])
 
 
 @RetrievalRouter.get("/downloads", response_model=RetrievalResponse)
-async def retrieve_downloads(
+async def retrieve_downloads_endpoint(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=10, ge=1, le=30),
     db_manager: DatabaseManager = Depends(get_db_manager)
@@ -36,7 +36,7 @@ async def retrieve_downloads(
 
 
 @RetrievalRouter.get("/likes", response_model=RetrievalResponse)
-async def retrieve_likes(
+async def retrieve_likes_endpoint(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=10, ge=1, le=30), 
     sortmode: int = Query(default=0, ge=0, le=1, description="0=position, 1=added_at"),
@@ -53,6 +53,23 @@ async def retrieve_likes(
             "limit": limit,
             "results": results
         }
+    
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail="Crashed"
+        )
+
+
+@RetrievalRouter.get("/track/{track_id}")
+async def retrieve_track_details_endpoint(
+    track_id: str,
+    db_manager: DatabaseManager = Depends(get_db_manager)
+):
+    try:
+        details = await db_manager.retrieve_track_details(track_id)
+        return details
     
     except Exception as e:
         traceback.print_exc()

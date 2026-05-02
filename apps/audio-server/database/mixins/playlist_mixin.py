@@ -1,8 +1,8 @@
 import logging
 
-from database.mixins.mixin_utils import row_to_playlistbase
+from database.mixins.mixin_utils import row_to_playlist_summary
 
-from core.models.playlist import PlaylistBase
+from core.models.playlist import PlaylistSummary
 
 logger = logging.getLogger(__name__)
 
@@ -49,8 +49,8 @@ class PlaylistMixin:
 
 
 
-    async def get_playlists(self) -> list[PlaylistBase]:
-        """Retrieve the playlists"""
+    async def get_playlists(self) -> list[PlaylistSummary]:
+        """Retrieve the playlists, with some extra metadata"""
 
         query = f'''
             SELECT
@@ -75,8 +75,8 @@ class PlaylistMixin:
                     rows = await cursor.fetchall()
 
                     return [
-                        PlaylistBase(
-                            **row_to_playlistbase(row).model_dump(),
+                        PlaylistSummary(
+                            **row_to_playlist_summary(row).model_dump(),
                         ) for row in rows
                     ]
         except Exception:

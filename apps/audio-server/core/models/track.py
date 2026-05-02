@@ -1,6 +1,7 @@
 from pydantic import Field
 from core.models.base import ScuttleBase
 from core.models.artist import ArtistBase, EditArtist
+from core.models.playlist import PlaylistBase
 
 class TrackBase(ScuttleBase):
     internal_id: int | None = None
@@ -26,6 +27,14 @@ class QueueTrack(TrackBase):
     position: float
 
 
+class TrackDetails(TrackBase):
+    playlists: list[PlaylistBase] = Field(default_factory=list)
+    #include fields like last_played_at, or downloaded_at, etc.
+
+
+
+
+#incoming pydantic object
 #see: apps/web-client/src/store/hooks/hooks.types.ts
 class EditTrack(ScuttleBase):
     id: str | None = None #optional external source ID to identify which track to edit

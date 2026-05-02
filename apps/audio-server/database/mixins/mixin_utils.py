@@ -1,8 +1,8 @@
 import sqlite3
 
 from core.models.artist import ArtistBase
-from core.models.playlist import PlaylistBase
-from core.models.track import PlaylistTrack, TrackBase
+from core.models.playlist import PlaylistBase, PlaylistSummary
+from core.models.track import PlaylistTrack, TrackBase, TrackDetails
 
 
 #validators for sql to custom types
@@ -51,13 +51,54 @@ def row_to_playlist_track(
         position=row["position"]
     )
 
+def row_to_track_details(
+    row: sqlite3.Row
+) -> TrackDetails:
+    trackbase = row_to_trackbase(row)
+
+    UNIT_SEP = "\x1f"
+    RECORD_SEP = "\x1e"
+
+    #parse the playlist blob back into PlaylistBase objects
+    playlists = []
+    if row["playlist_blob"]: #only if this track is in any playlists
+        for packet in row["playlist_blob"].split(RECORD_SEP):
+            parts = packet.split(UNIT_SEP)
+
+            #explicit part handling
+            p_internal_id = int(parts[0])
+            p_id = parts[1] or None
+            p_name = parts[2]
+            
+            playlists.append(PlaylistBase(
+                internal_id=p_internal_id,
+                id=p_id,
+                name=p_name
+            ))
+
+    return TrackDetails(
+        **trackbase.__dict__,
+        playlists=playlists
+    )
+
+
+#playlists
 def row_to_playlistbase(
     row: sqlite3.Row
 ) -> PlaylistBase:
     return PlaylistBase(
         internal_id=row["internal_id"],
         id=row["id"],
-        name=row["name"],
+        name=row["name"]
+    )
+
+def row_to_playlist_summary(
+    row: sqlite3.Row
+) -> PlaylistSummary:
+    playlistbase = row_to_playlistbase(row)
+
+    return PlaylistSummary(
+        **playlistbase.__dict__,
         total_count=row["total_count"],
         total_duration=row["total_duration"]
     )

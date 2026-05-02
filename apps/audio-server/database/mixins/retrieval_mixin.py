@@ -1,9 +1,9 @@
 import logging
 
-from database.mixins.mixin_utils import row_to_playlist_track, row_to_trackbase
+from database.mixins.mixin_utils import row_to_playlist_track, row_to_track_details, row_to_trackbase
 
 from core.models.artist import ArtistBase
-from core.models.track import PlaylistTrack, TrackBase
+from core.models.track import PlaylistTrack, TrackBase, TrackDetails
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +116,7 @@ class RetrievalMixin:
 
 
     async def retrieve_likes(self, offset: int, limit: int, sortmode: int) -> list[PlaylistTrack]:
-        """Retrieve a sublist of tracks from the Likes table""" #change sort_by field to enum
+        """Retrieve a sublist of tracks from the Likes table"""
         logger.info(f"Retrieving Liked tracks with offset {offset} and limit {limit} with sortmode {sortmode}")
 
         #see: apps/audio-server/api/routers/retrieval_router.py for mapping
@@ -171,8 +171,70 @@ class RetrievalMixin:
                     return [
                         row_to_playlist_track(row) for row in rows
                     ]
-
         except Exception:
             logger.exception("Failed to retrieve Liked contents")
             raise
         
+
+    async def retrieve_track_details(self, track_id: str) -> TrackDetails:
+        """Retrieve details about a track"""
+        logger.info(f"Retrieving details about track_id: {track_id}")
+
+        UNIT_SEP = "\x1f"
+        RECORD_SEP = "\x1e"
+
+        query = f'''
+            SELECT
+                -- TrackBase fields
+                t.internal_id,
+                t.id,
+                t.title,
+                t.title_display,
+                t.duration,
+
+                -- ArtistBase fields
+                GROUP_CONCAT(
+                    a.internal_id || '{UNIT_SEP}' ||
+                    COALESCE(a.id, '') || '{UNIT_SEP}' ||
+                    a.name || '{UNIT_SEP}' ||
+                    COALESCE(a.name_display, ''), 
+                    '{RECORD_SEP}'
+                ) AS artist_blob,
+
+                -- PlaylistBase fields
+                GROUP_CONCAT(
+                    p.internal_id || '{UNIT_SEP}' ||
+                    COALESCE(p.id, '') || '{UNIT_SEP}' ||
+                    p.name,
+                    '{RECORD_SEP}'
+                ) AS playlist_blob
+
+            FROM tracks t
+
+            -- Join artists
+            JOIN track_artists ta ON ta.track_internal_id = t.internal_id
+            JOIN artists a ON ta.artist_internal_id = a.internal_id
+
+            -- Join playlists
+            LEFT JOIN playlist_tracks pt ON pt.track_internal_id = t.internal_id
+            LEFT JOIN playlists p ON pt.playlist_internal_id = p.internal_id
+
+            WHERE t.id = ?
+
+            GROUP BY t.internal_id
+
+            LIMIT 1;
+        '''
+
+        try: 
+            async with self.session() as db:
+                async with db.execute(query, (track_id,)) as cursor:
+                    row = await cursor.fetchone()
+                    return row_to_track_details(row)
+        except Exception:
+            logger.exception("Failed to retrieve track details")
+            raise
+        
+
+
+
