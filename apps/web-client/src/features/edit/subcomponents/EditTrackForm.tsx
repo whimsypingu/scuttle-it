@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useEdit } from "@/store/hooks/useEdit";
+import { useEditTrack } from "@/store/hooks/useEdit";
 
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -26,11 +26,12 @@ export const EditTrackForm = ({
 
     const { titleDisplay, artistDisplay } = getTrackDisplayMetadata(track); //placeholders
 
-    //playlists to add to
+    //all possible playlists
     const { playlists } = usePlaylists();
 
-    //edit hook
-    const { editTrack } = useEdit();
+    //edit hook with extra track details
+    const { trackDetails, editTrack } = useEditTrack(track);
+    console.log(trackDetails);
 
     const handleSave = () => { //use temp edit payload strategy -- migrate to artist selection in the future
         const artistPayload: EditArtistPayload = {
@@ -75,6 +76,13 @@ export const EditTrackForm = ({
                         placeholder={artistDisplay}
                         className="text-md focus-visible:ring-1"
                     />
+                </div>
+
+                {/* PLAYLIST MEMBERSHIP */}
+                <div className="flex flex-col">
+                    {playlists.map((p) => (
+                        <p>{p.name}</p>
+                    ))}
                 </div>
             </div>
 

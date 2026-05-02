@@ -7,8 +7,10 @@ import type { Sortmode } from "@/store/hooks/hooks.types";
 export interface PlaylistBase {
     id: string;
     name: string;
+}
+export interface PlaylistSummary extends PlaylistBase {
     totalCount: number;
-    totalDuration: number;
+    totalDuration: number;    
     color?: string;
 }
 
@@ -28,8 +30,8 @@ export interface PlaylistActionConfig { //corresponding phosphor icon and color 
 
 //fields for a PlaylistItem
 export interface PlaylistItemProps {
-    playlist: PlaylistBase; //covers all kinds of PlaylistBase derived playlists
-    onSelect: (playlist: PlaylistBase) => void;
+    playlist: PlaylistSummary; //requires that a PlaylistItem must have some metadata fields to display
+    onSelect: (playlist: PlaylistSummary) => void;
     actions?: [PlaylistAction, PlaylistAction, PlaylistAction, PlaylistAction]; //leftmost action to rightmost action
 }
 

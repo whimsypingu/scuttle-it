@@ -9,7 +9,7 @@ import { PlaylistList } from "@/playlist/PlaylistList";
 
 import { NAV_CONFIG, BOTTOM_SHELF, PLAYER_CONFIG } from "@/features/player/player.constants";
 
-import type { PlaylistBase } from "@/playlist/playlist.types";
+import type { PlaylistSummary } from "@/playlist/playlist.types";
 import type { LibraryViewProps } from "@/features/library/library.types";
 import { usePlaylists } from "@/store/hooks/usePlaylists";
 import { formatReadableTime } from "../audio/audio.utils";
@@ -24,7 +24,7 @@ export const MockLibrary = ({
     const scrollContext = useDownloads(); //EMERGENCY: replace this with playlist specific infinite scroll data
     const { playlists } = usePlaylists();
     
-    const [selectedPlaylist, setSelectedPlaylist] = useState<PlaylistBase | null>(null);
+    const [selectedPlaylist, setSelectedPlaylist] = useState<PlaylistSummary | null>(null);
 
     // prep the 'create playlist' form popup function
     const { setEditTarget } = useEditTarget();
