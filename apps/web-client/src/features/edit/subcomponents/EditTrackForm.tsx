@@ -32,6 +32,21 @@ export const EditTrackForm = ({
 
     //edit hook with extra track details
     const { trackDetails, isLoading, editTrack } = useEditTrack(track);
+    const [selectedPlaylistIds, setSelectedPlaylistIds] = useState<Set<string>>(new Set(trackDetails?.playlists.map(p => p.id)));
+
+    const handlePlaylistToggle = (playlistId: string) => { //useState holds immutable objects so we replace with changes, consider useStating each line
+        setSelectedPlaylistIds(prev => {
+            const next = new Set(prev);
+            if (next.has(playlistId)) {
+                next.delete(playlistId);
+            } else {
+                next.add(playlistId);
+            }
+            return next;
+        });
+    };
+
+    //draw the ui subcomponent for the playlist checkboxes
     const renderEditContent = () => {
         if (isLoading) {
             return (<div className="p-4 animate-pulse">Loading details...</div>);
@@ -42,16 +57,18 @@ export const EditTrackForm = ({
         }
 
         return (
-            <div className="flex flex-col gap-1">
-                {playlists.map((p) => (
-                    <div>
+            <div className="flex flex-col px-1">
+                {playlists.map((p, index) => (
+                    <div 
+                        className={`flex flex-row items-center gap-2 px-1 py-2 cursor-pointer transition-colors ${index !== 0 ? "border-t" : ""}`}
+                        onClick={() => handlePlaylistToggle(p.id)}
+                    >
                         <Checkbox 
                             id={p.id}
-                            checked={trackDetails.playlists.some(playlist => playlist.id === p.id)}
-                            onCheckedChange={() => {}}
+                            checked={selectedPlaylistIds.has(p.id)}
                         />
 
-                        <label className="text-sm font-medium text-foreground">
+                        <label className="text-sm font-medium text-muted-foreground">
                             {p.name}
                         </label>
                     </div>
@@ -59,8 +76,6 @@ export const EditTrackForm = ({
             </div>
         )
     }
-    let playlistIds = trackDetails?.playlists
-    console.log(trackDetails);
 
     const handleSave = () => { //use temp edit payload strategy -- migrate to artist selection in the future
         const artistPayload: EditArtistPayload = {
