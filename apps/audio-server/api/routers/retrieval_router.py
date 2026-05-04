@@ -1,6 +1,6 @@
 import traceback
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Path, Query, HTTPException
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
 
@@ -45,6 +45,34 @@ async def retrieve_likes_endpoint(
     try:
         results = await db_manager.retrieve_likes(offset, limit, sortmode) #consider using asyncio.gather() for these read ops?
         stats = await db_manager.retrieve_likes_stats()
+        return {
+            "count": len(results),
+            "total_count": stats["total_count"],
+            "total_duration": stats["total_duration"],
+            "offset": offset,
+            "limit": limit,
+            "results": results
+        }
+    
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail="Crashed"
+        )
+
+
+@RetrievalRouter.get("/playlist/{playlist_id}", response_model=RetrievalResponse)
+async def retrieve_playlist_endpoint(
+    playlist_id: str = Path(..., min_length=1, description="Playlist ID"),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=30), 
+    sortmode: int = Query(default=0, ge=0, le=1, description="0=position, 1=added_at"),
+    db_manager: DatabaseManager = Depends(get_db_manager)
+):
+    try:
+        results = await db_manager.retrieve_playlist(playlist_id, offset, limit, sortmode) #consider using asyncio.gather() for these read ops?
+        stats = await db_manager.retrieve_playlist_stats(playlist_id)
         return {
             "count": len(results),
             "total_count": stats["total_count"],

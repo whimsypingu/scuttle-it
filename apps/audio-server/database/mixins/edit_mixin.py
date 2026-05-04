@@ -48,6 +48,42 @@ class EditMixin:
                             VALUES (?, ?);
                         ''', (track_internal_id, artist_internal_id))
 
+                #playlist junctions table
+                if edit.playlist_ids:
+                    cursor = await db.execute("SELECT internal_id, id FROM playlists;")
+                    rows = await cursor.fetchall()
+
+                    playlist_id_map = {row["id"]: row["internal_id"] for row in rows}
+
+                    cursor = await db.execute('''
+                        SELECT p.id
+                        FROM playlists p
+                        JOIN playlist_tracks pt ON pt.playlist_internal_id = p.internal_id
+                        JOIN tracks t ON t.internal_id = pt.track_internal_id
+                        WHERE t.internal_id = ?;
+                    ''', (track_internal_id,))
+                    rows = await cursor.fetchall()
+
+                    existing_set = {row["id"] for row in rows}
+                    incoming_set = set(edit.playlist_ids)
+
+                    to_add = incoming_set - existing_set
+                    to_remove = existing_set - incoming_set
+
+                    for playlist_id in to_add:
+                        playlist_internal_id = playlist_id_map[playlist_id]
+                        await db.execute('''
+                            INSERT INTO playlist_tracks (track_internal_id, playlist_internal_id)
+                            VALUES (?, ?);
+                        ''', (track_internal_id, playlist_internal_id))
+
+                    for playlist_id in to_remove:
+                        playlist_internal_id = playlist_id_map[playlist_id]
+                        await db.execute('''
+                            DELETE FROM playlist_tracks
+                            WHERE track_internal_id = ? AND playlist_internal_id = ?;
+                        ''', (track_internal_id, playlist_internal_id))
+
                 logger.info(f"Successfully edited track with original track_id: {edit.id} | {edit.title_display}")
                 return True
         

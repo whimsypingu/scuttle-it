@@ -42,3 +42,5 @@ class EditTrack(ScuttleBase):
     title_display: str | None = None
 
     artists: list[EditArtist] | None = None
+
+    playlist_ids: list[str] | None = None #list of playlist IDs, if changed
