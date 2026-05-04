@@ -10,6 +10,7 @@ import type { TrackBase } from "@/track/track.types";
 import type { EditArtistPayload, EditTrackMutationProps, EditTrackPayload } from "@/store/hooks/hooks.types";
 import { usePlaylists } from "@/store/hooks/usePlaylists";
 import { Checkbox } from "@/components/ui/checkbox";
+import type { PlaylistId } from "@/playlist/playlist.types";
 
 
 interface EditTrackFormProps {
@@ -32,9 +33,9 @@ export const EditTrackForm = ({
 
     //edit hook with extra track details
     const { trackDetails, isLoading, editTrack } = useEditTrack(track);
-    const [selectedPlaylistIds, setSelectedPlaylistIds] = useState<Set<string>>(new Set(trackDetails?.playlists.map(p => p.id)));
+    const [selectedPlaylistIds, setSelectedPlaylistIds] = useState<Set<PlaylistId>>(new Set(trackDetails?.playlists.map(p => p.id))); //displayed set of selected playlist IDs
 
-    const handlePlaylistToggle = (playlistId: string) => { //useState holds immutable objects so we replace with changes, consider useStating each line
+    const handlePlaylistToggle = (playlistId: PlaylistId) => { //useState holds immutable objects so we replace with changes, consider useStating each line
         setSelectedPlaylistIds(prev => {
             const next = new Set(prev);
             if (next.has(playlistId)) {
@@ -85,6 +86,7 @@ export const EditTrackForm = ({
             id: track.id, 
             titleDisplay: titleInput || undefined,
             artists: artistInput ? [artistPayload] : undefined,
+            playlistIds: selectedPlaylistIds ? [...selectedPlaylistIds] : undefined,
         };
         const editTrackVars: EditTrackMutationProps = {
             payload: trackPayload,

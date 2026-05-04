@@ -4,8 +4,10 @@ import type { TrackAction, TrackBase } from "@/track/track.types";
 import type { Sortmode } from "@/store/hooks/hooks.types";
 
 
+export type PlaylistId = string;
+
 export interface PlaylistBase {
-    id: string;
+    id: PlaylistId;
     name: string;
 }
 export interface PlaylistSummary extends PlaylistBase {

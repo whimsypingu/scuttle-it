@@ -1,4 +1,5 @@
-import type { QueueTrack, TrackBase } from "@/track/track.types";
+import type { PlaylistId } from "@/playlist/playlist.types";
+import type { QueueTrack, TrackBase, TrackId } from "@/track/track.types";
 import type { IconProps } from "@phosphor-icons/react";
 
 
@@ -16,10 +17,11 @@ export interface EditArtistPayload {
 
 //see: audio-server/core/models/track.py
 export interface EditTrackPayload {
-    id?: string;
-    newId?: string;
+    id?: TrackId;
+    newId?: TrackId;
     titleDisplay?: string;
     artists?: EditArtistPayload[];
+    playlistIds?: PlaylistId[];
 }
 
 export interface EditTrackMutationProps {
@@ -90,6 +92,6 @@ export interface SetLikeMutationProps {
  * usePlaylists
  */
 export interface CreatePlaylistMutationProps {
-    playlistId: string;
+    playlistId: PlaylistId;
     name: string;
 }
