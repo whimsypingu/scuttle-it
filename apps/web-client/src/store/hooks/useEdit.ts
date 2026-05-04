@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import type { EditTrackPayload } from "@/store/hooks/hooks.types";
 import { makeToast } from "@/features/toast/Toast";
-import type { TrackBase } from "@/track/track.types";
+import type { TrackBase, TrackDetails } from "@/track/track.types";
 
 
 export const useEditTrack = (track: TrackBase) => {
@@ -17,8 +17,7 @@ export const useEditTrack = (track: TrackBase) => {
             if (!response.ok) throw new Error("Failed to fetch track details");
             
             const data = await response.json();
-            console.log(data);
-            return data;
+            return data as TrackDetails;
         },
         staleTime: 1000 * 60 * 5, //five minute cd for refetch if necessary
     });
@@ -55,7 +54,7 @@ export const useEditTrack = (track: TrackBase) => {
 
     
     return {
-        trackDetails: getTrackDetails.data,
+        trackDetails: getTrackDetails?.data,
         isLoading: getTrackDetails.isLoading,
         error: getTrackDetails.error,
 

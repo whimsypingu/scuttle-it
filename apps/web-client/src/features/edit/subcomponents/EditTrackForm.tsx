@@ -9,6 +9,7 @@ import { getTrackDisplayMetadata } from "@/track/track.utils";
 import type { TrackBase } from "@/track/track.types";
 import type { EditArtistPayload, EditTrackMutationProps, EditTrackPayload } from "@/store/hooks/hooks.types";
 import { usePlaylists } from "@/store/hooks/usePlaylists";
+import { Checkbox } from "@/components/ui/checkbox";
 
 
 interface EditTrackFormProps {
@@ -30,7 +31,35 @@ export const EditTrackForm = ({
     const { playlists } = usePlaylists();
 
     //edit hook with extra track details
-    const { trackDetails, editTrack } = useEditTrack(track);
+    const { trackDetails, isLoading, editTrack } = useEditTrack(track);
+    const renderEditContent = () => {
+        if (isLoading) {
+            return (<div className="p-4 animate-pulse">Loading details...</div>);
+        }
+
+        if (!trackDetails) {
+            return (<div>Error loading track.</div>);
+        }
+
+        return (
+            <div className="flex flex-col gap-1">
+                {playlists.map((p) => (
+                    <div>
+                        <Checkbox 
+                            id={p.id}
+                            checked={trackDetails.playlists.some(playlist => playlist.id === p.id)}
+                            onCheckedChange={() => {}}
+                        />
+
+                        <label className="text-sm font-medium text-foreground">
+                            {p.name}
+                        </label>
+                    </div>
+                ))}
+            </div>
+        )
+    }
+    let playlistIds = trackDetails?.playlists
     console.log(trackDetails);
 
     const handleSave = () => { //use temp edit payload strategy -- migrate to artist selection in the future
@@ -79,10 +108,11 @@ export const EditTrackForm = ({
                 </div>
 
                 {/* PLAYLIST MEMBERSHIP */}
-                <div className="flex flex-col">
-                    {playlists.map((p) => (
-                        <p>{p.name}</p>
-                    ))}
+                <div className="flex flex-col gap-1">
+                    <label className="text-sm font-medium text-muted-foreground">
+                        Playlists
+                    </label>
+                    {renderEditContent()}
                 </div>
             </div>
 

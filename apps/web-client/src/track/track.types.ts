@@ -1,3 +1,4 @@
+import type { PlaylistBase } from "@/playlist/playlist.types";
 import type { IconProps } from "@phosphor-icons/react";
 
 export type ArtistId = string;
@@ -25,6 +26,9 @@ export interface PlaylistTrack extends TrackBase {
 export interface QueueTrack extends TrackBase {
     queueId: QueueId;
     position: number;
+}
+export interface TrackDetails extends TrackBase {
+    playlists: PlaylistBase[];
 }
 
 //all available track actions with their required properties to execute the functions
