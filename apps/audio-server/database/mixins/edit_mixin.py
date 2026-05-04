@@ -50,11 +50,27 @@ class EditMixin:
 
                 #playlist junctions table
                 if edit.playlist_ids:
-                    cursor = await db.execute("SELECT internal_id, id FROM playlists;")
+                    cursor = await db.execute('''
+                        SELECT
+                            p.internal_id,
+                            p.id,
+                            COALESCE(MAX(pt.position), 0.0) AS last_position
+                        FROM playlists p
+                        LEFT JOIN playlist_tracks pt ON pt.playlist_internal_id = p.internal_id
+                        GROUP BY p.internal_id;
+                    ''')
                     rows = await cursor.fetchall()
 
-                    playlist_id_map = {row["id"]: row["internal_id"] for row in rows}
+                    #map of playlist information for later queries
+                    playlist_info = {
+                        row["id"]: {
+                            "internal_id": row["internal_id"],
+                            "position": row["last_position"] + 100.0
+                        }
+                        for row in rows
+                    }
 
+                    #collect existing memberships in db
                     cursor = await db.execute('''
                         SELECT p.id
                         FROM playlists p
@@ -64,6 +80,7 @@ class EditMixin:
                     ''', (track_internal_id,))
                     rows = await cursor.fetchall()
 
+                    #set comparisons to find which playlists to add or remove memberships from
                     existing_set = {row["id"] for row in rows}
                     incoming_set = set(edit.playlist_ids)
 
@@ -71,18 +88,18 @@ class EditMixin:
                     to_remove = existing_set - incoming_set
 
                     for playlist_id in to_add:
-                        playlist_internal_id = playlist_id_map[playlist_id]
+                        info = playlist_info[playlist_id]
                         await db.execute('''
-                            INSERT INTO playlist_tracks (track_internal_id, playlist_internal_id)
-                            VALUES (?, ?);
-                        ''', (track_internal_id, playlist_internal_id))
+                            INSERT INTO playlist_tracks (track_internal_id, playlist_internal_id, position)
+                            VALUES (?, ?, ?);
+                        ''', (track_internal_id, info["internal_id"], info["position"]))
 
                     for playlist_id in to_remove:
-                        playlist_internal_id = playlist_id_map[playlist_id]
+                        info = playlist_info[playlist_id]
                         await db.execute('''
                             DELETE FROM playlist_tracks
                             WHERE track_internal_id = ? AND playlist_internal_id = ?;
-                        ''', (track_internal_id, playlist_internal_id))
+                        ''', (track_internal_id, info["internal_id"]))
 
                 logger.info(f"Successfully edited track with original track_id: {edit.id} | {edit.title_display}")
                 return True
