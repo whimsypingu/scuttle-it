@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import type { PlaylistSummary } from "@/playlist/playlist.types";
-import type { CreatePlaylistMutationProps } from "./hooks.types";
+import type { CreatePlaylistMutationProps, Sortmode } from "./hooks.types";
 import { makeToast } from "@/features/toast/Toast";
+import { useMemo, useState } from "react";
 
 
 
@@ -37,6 +38,57 @@ export const usePlaylists = () => {
         error: getPlaylists.error,
     };
 };
+
+
+
+/**
+ * usePlaylistContent
+ * 
+ * Paginated retrieval of playlist content
+ */
+export const usePlaylistContent = (playlistId: string, limit: number = 30) => {
+    const [sortmode, setSortmode] = useState<Sortmode>(0);
+
+    const queryKey = ["tracks", "playlist", playlistId, sortmode];
+
+    //fetch playlist
+    const getPlaylistContent = useInfiniteQuery({
+        queryKey,
+        initialPageParam: 0,
+        queryFn: async ({ pageParam }) => {
+            console.log("usePlaylistContent triggered");
+
+            const response = await fetch(`/retrieve/playlist/${playlistId}?offset=${pageParam}&limit=${limit}&sortmode=${sortmode}`, { method: "GET" });
+            if (!response.ok) throw new Error("Failed to fetch playlist content");
+
+            const data = await response.json();
+            return data;
+        },
+        getNextPageParam: (lastPage) => {
+            const nextOffset = lastPage.offset + lastPage.limit;
+            return nextOffset < lastPage.totalCount ? nextOffset : undefined;
+        },
+        staleTime: 1000 * 60 * 5,
+    });
+
+    const tracks = useMemo(() =>
+        getPlaylistContent.data?.pages.flatMap(page => page.results) ?? [],
+    [getPlaylistContent.data]);
+
+
+    return {
+        tracks,
+        sortmode,
+        setSortmode,
+        totalCount: getPlaylistContent.data?.pages[0]?.totalCount ?? 0,
+        totalDuration: getPlaylistContent.data?.pages[0]?.totalDuration ?? 0,
+        fetchNextPage: getPlaylistContent.fetchNextPage,
+        hasNextPage: getPlaylistContent.hasNextPage,
+        isLoading: getPlaylistContent.isLoading,
+        isFetchingNextPage: getPlaylistContent.isFetchingNextPage,
+    };
+};
+
 
 
 /**

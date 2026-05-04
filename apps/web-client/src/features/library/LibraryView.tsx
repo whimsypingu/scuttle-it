@@ -15,6 +15,7 @@ import { usePlaylists } from "@/store/hooks/usePlaylists";
 import { formatReadableTime } from "../audio/audio.utils";
 import { useEditTarget } from "../edit/EditProvider";
 import type { ActiveEditTarget } from "../edit/edit.types";
+import { PlaylistContentView } from "./subcomponents/PlaylistContent";
 
 
 export const MockLibrary = ({
@@ -44,6 +45,7 @@ export const MockLibrary = ({
             // scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
         }
     }, [tabResetSignal]);
+
 
     return (
         <>
@@ -114,71 +116,10 @@ export const MockLibrary = ({
                     </>
                 ) : (
                     <>
-                    {/* PLAYLIST DETAILS */}
-                    <motion.div
-                        key="playlist-detail-view"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="w-full h-full flex flex-col"
-                    >
-                        {/* HEADER */}
-                        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4 flex flex-col">
-                            <div 
-                                className="flex items-center justify-between mb-2"
-                                onPointerDown={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedPlaylist(null);
-                                }}
-                            >
-                                <h1 className="tab-heading truncate pr-4">
-                                    {selectedPlaylist.name}
-                                </h1>
-                                <button className="text-sm font-medium text-white/40 active:text-white shrink-0">
-                                    <XIcon size={20} weight="bold" />
-                                </button>
-                            </div>
-    
-                            {/* ABOUT / METADATA SECTION */}
-                            <div className="flex flex-col gap-2 mx-1">
-                                {/* <div className="flex items-center gap-2">
-                                    <div 
-                                        className="w-3 h-3 rounded-full" 
-                                        style={{ backgroundColor: selectedPlaylist.color }} 
-                                    />
-                                    <span className="text-[10px] uppercase tracking-widest font-bold text-white/90">
-                                        Archived Collection
-                                    </span>
-                                </div>
-                                
-                                <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2">
-                                    Created on March 2026. This archive contains high-fidelity 
-                                    renders and curated selections from the {selectedPlaylist.name} sessions.
-                                </p>
-                                 */}
-                                <div className="flex gap-4">
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] text-zinc-600 uppercase font-medium">Tracks</span>
-                                        <span className="text-xs text-white/70">{selectedPlaylist.totalCount}</span>
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] text-zinc-600 uppercase font-medium">Duration</span>
-                                        <span className="text-xs text-white/70">2h 45m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* CONTENT AREA */}
-                        <div className="flex-1 no-scrollbar">
-                            <PlaylistList
-                                scrollContext={scrollContext}
-                                bottomSpacing={BOTTOM_SHELF.totalHeight}
-                                actions={["queueNext", "queueLast", "like", "edit"]}
-                            />
-                        </div>
-
-                    </motion.div>
+                    <PlaylistContentView
+                        summaryData={selectedPlaylist}
+                        onClose={() => setSelectedPlaylist(null)}
+                    />
                     </>
                 )}
             </AnimatePresence>
