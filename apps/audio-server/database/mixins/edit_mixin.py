@@ -27,11 +27,11 @@ class EditMixin:
                 track_internal_id = row[0]
 
                 #track field edits
-                if edit.title_display:
+                if edit.title_display is not None:
                     await db.execute("UPDATE tracks SET title_display = ? WHERE id = ?;", (edit.title_display, edit.id))
 
                 #flush and fill artists -- temp strategy, will require further logic in the future
-                if edit.artists:
+                if edit.artists is not None:
                     await db.execute("DELETE FROM track_artists WHERE track_internal_id = ?;", (track_internal_id,))
 
                     for artist in edit.artists:
@@ -49,7 +49,7 @@ class EditMixin:
                         ''', (track_internal_id, artist_internal_id))
 
                 #playlist junctions table
-                if edit.playlist_ids:
+                if edit.playlist_ids is not None:
                     cursor = await db.execute('''
                         SELECT
                             p.internal_id,
@@ -83,6 +83,9 @@ class EditMixin:
                     #set comparisons to find which playlists to add or remove memberships from
                     existing_set = {row["id"] for row in rows}
                     incoming_set = set(edit.playlist_ids)
+
+                    logger.info(f"EXISTING SET: {existing_set}")
+                    logger.info(f"INCOMING_SET: {incoming_set}")
 
                     to_add = incoming_set - existing_set
                     to_remove = existing_set - incoming_set

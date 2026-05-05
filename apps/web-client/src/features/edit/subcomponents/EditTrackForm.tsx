@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useEditTrack } from "@/store/hooks/useEdit";
 
 import { Textarea } from "@/components/ui/textarea";
@@ -33,7 +33,13 @@ export const EditTrackForm = ({
 
     //edit hook with extra track details
     const { trackDetails, isLoading, editTrack } = useEditTrack(track);
-    const [selectedPlaylistIds, setSelectedPlaylistIds] = useState<Set<PlaylistId>>(new Set(trackDetails?.playlists.map(p => p.id))); //displayed set of selected playlist IDs
+    const [selectedPlaylistIds, setSelectedPlaylistIds] = useState<Set<PlaylistId>>(new Set()); //displayed set of selected playlist IDs
+
+    useEffect(() => { //load when the data arrives to prevent possibly displaying stale values
+        if (trackDetails?.playlists) {
+            setSelectedPlaylistIds(new Set(trackDetails.playlists.map(p => p.id)));
+        }
+    }, [trackDetails]);
 
     const handlePlaylistToggle = (playlistId: PlaylistId) => { //useState holds immutable objects so we replace with changes, consider useStating each line
         setSelectedPlaylistIds(prev => {
@@ -82,12 +88,17 @@ export const EditTrackForm = ({
         const artistPayload: EditArtistPayload = {
             nameDisplay: artistInput || undefined,
         };
+
+        const originalIds = trackDetails?.playlists.map(p => p.id) ?? [];
+        const hasPlaylistChanges = selectedPlaylistIds.size !== originalIds.length || originalIds.some(id => !selectedPlaylistIds.has(id));
+
         const trackPayload: EditTrackPayload = {
             id: track.id, 
             titleDisplay: titleInput || undefined,
             artists: artistInput ? [artistPayload] : undefined,
-            playlistIds: selectedPlaylistIds ? [...selectedPlaylistIds] : undefined,
+            playlistIds: hasPlaylistChanges ? [...selectedPlaylistIds] : undefined,
         };
+        console.log(trackPayload); //debugging
         const editTrackVars: EditTrackMutationProps = {
             payload: trackPayload,
         };

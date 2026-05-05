@@ -42,6 +42,7 @@ export const useEditTrack = (track: TrackBase) => {
             //refetch all data that could possibly have the edited track. consider a better bounded approach to this
             queryClient.invalidateQueries({ queryKey: ["tracks"] }); 
             queryClient.invalidateQueries({ queryKey: ["details", "tracks", track.id] }); //invalidate the edit-showable track data 
+            queryClient.invalidateQueries({ queryKey: ["playlists"] }); //invalidate the counts of playlists 
 
             if (data.success) {
                 makeToast("Saved");
