@@ -1,8 +1,6 @@
 import logging
 
-from database.mixins.mixin_utils import row_to_trackbase
-
-from core.models.track import EditTrackPayload, QueueTrack
+from core.models.track import EditTrackPayload
 
 logger = logging.getLogger(__name__)
 
@@ -10,25 +8,22 @@ logger = logging.getLogger(__name__)
 class EditMixin:
     """Handles editing database records"""
 
-    async def edit_track(self, payload: EditTrackPayload) -> bool:
+    async def edit_track(self, track_id: str, payload: EditTrackPayload) -> bool:
         """Edit track data"""
-        if not payload.id:
-            return False #EMERGENCY: throw an informative error
-        
-        logger.info(f"Editing track_id {payload.id}")
+        logger.info(f"Editing track_id {track_id}")
 
         try:
             async with self.session() as db:
-                cursor = await db.execute("SELECT internal_id FROM tracks WHERE id = ?;", (payload.id,))
+                cursor = await db.execute("SELECT internal_id FROM tracks WHERE id = ?;", (track_id,))
                 row = await cursor.fetchone()
                 if not row:
-                    logger.error(f"Failed to get internal_id for track_id: {payload.id}")
+                    logger.error(f"Failed to get internal_id for track_id: {track_id}")
                     raise ValueError("Failed to retrieve internal_id for edit_track")
                 track_internal_id = row[0]
 
                 #track field edits
                 if payload.title_display is not None:
-                    await db.execute("UPDATE tracks SET title_display = ? WHERE id = ?;", (payload.title_display, payload.id))
+                    await db.execute("UPDATE tracks SET title_display = ? WHERE id = ?;", (payload.title_display, track_id))
 
                 #flush and fill artists -- temp strategy, will require further logic in the future
                 if payload.artists is not None:
@@ -104,9 +99,9 @@ class EditMixin:
                             WHERE track_internal_id = ? AND playlist_internal_id = ?;
                         ''', (track_internal_id, info["internal_id"]))
 
-                logger.info(f"Successfully edited track with original track_id: {payload.id} | {payload.title_display}")
+                logger.info(f"Successfully edited track with original track_id: {track_id} | {payload.title_display}")
                 return True
         
         except Exception:
-            logger.exception(f"Critical failure during track edit for original track_id: {payload.id}")
+            logger.exception(f"Critical failure during track edit for original track_id: {track_id}")
             raise

@@ -37,7 +37,7 @@ class TrackDetails(TrackBase):
 #incoming pydantic object
 #see: apps/web-client/src/store/hooks/hooks.types.ts
 class EditTrackPayload(ScuttleBase):
-    id: str | None = None #optional external source ID to identify which track to edit
+    #id: str | None = None #optional external source ID to identify which track to edit
     new_id: str | None = None
     title_display: str | None = None
 

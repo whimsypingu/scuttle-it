@@ -17,7 +17,6 @@ export interface EditArtistPayload {
 
 //see: audio-server/core/models/track.py
 export interface EditTrackPayload {
-    id?: TrackId;
     newId?: TrackId;
     titleDisplay?: string;
     artists?: EditArtistPayload[];
@@ -25,6 +24,7 @@ export interface EditTrackPayload {
 }
 
 export interface EditTrackMutationProps {
+    trackId: TrackId;
     payload: EditTrackPayload; 
 }
 

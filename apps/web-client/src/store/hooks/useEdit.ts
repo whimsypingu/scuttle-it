@@ -23,10 +23,10 @@ export const useEditTrack = (track: TrackBase) => {
     });
 
     const editTrackMutation = useMutation({
-        mutationFn: async ({ payload }: EditTrackMutationProps) => {
+        mutationFn: async ({ trackId, payload }: EditTrackMutationProps) => {
             //see: apps/audio-server/api/routers/edit_router.py
-            const response = await fetch(`/edit/track`, {
-                method: "POST",
+            const response = await fetch(`/edit/track/${trackId}`, {
+                method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
                 },
