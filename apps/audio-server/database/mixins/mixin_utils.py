@@ -46,7 +46,7 @@ def row_to_playlist_track(
     trackbase = row_to_trackbase(row)
 
     return PlaylistTrack(
-        **trackbase.__dict__,
+        **trackbase.model_dump(),
         added_at=row["added_at"],
         position=row["position"]
     )
@@ -77,7 +77,7 @@ def row_to_track_details(
             ))
 
     return TrackDetails(
-        **trackbase.__dict__,
+        **trackbase.model_dump(),
         playlists=playlists
     )
 
@@ -98,7 +98,8 @@ def row_to_playlist_summary(
     playlistbase = row_to_playlistbase(row)
 
     return PlaylistSummary(
-        **playlistbase.__dict__,
+        **playlistbase.model_dump(),
         total_count=row["total_count"],
-        total_duration=row["total_duration"]
+        total_duration=row["total_duration"],
+        description=row["description"]
     )
