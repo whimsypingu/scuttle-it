@@ -2,10 +2,16 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 
-export const useDownloads = (limit = 30) => {
+export const useDownloadsContent = (limit: number = 30) => {
     const queryKey = ["tracks", "downloads"];
 
-    const getDownloads = useInfiniteQuery({
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isLoading,
+        isFetchingNextPage,
+    } = useInfiniteQuery({
         queryKey,
         initialPageParam: 0,
         queryFn: async ({ pageParam }) => {
@@ -25,16 +31,16 @@ export const useDownloads = (limit = 30) => {
     });
 
     const tracks = useMemo(() =>
-        getDownloads.data?.pages.flatMap(page => page.results) ?? [],
-    [getDownloads.data]);
+        data?.pages.flatMap(page => page.results) ?? [],
+    [data]);
     
     return {
         tracks,
-        totalCount: getDownloads.data?.pages[0]?.totalCount ?? 0,
-        totalDuration: getDownloads.data?.pages[0]?.totalDuration ?? 0,
-        fetchNextPage: getDownloads.fetchNextPage,
-        hasNextPage: getDownloads.hasNextPage,
-        isLoading: getDownloads.isLoading,
-        isFetchingNextPage: getDownloads.isFetchingNextPage
+        totalCount: data?.pages[0]?.totalCount ?? 0,
+        totalDuration: data?.pages[0]?.totalDuration ?? 0,
+        fetchNextPage,
+        hasNextPage,
+        isLoading,
+        isFetchingNextPage,
     };
 };

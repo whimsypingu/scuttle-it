@@ -13,7 +13,6 @@ import { useMemo, useState } from "react";
  * Hook to get the contents of the playlists
  */
 export const usePlaylists = () => {
-    const queryClient = useQueryClient();
     const queryKey = ["playlists"];
     
     //fetch playlists
@@ -52,7 +51,13 @@ export const usePlaylistContent = (playlistId: string, limit: number = 30) => {
     const queryKey = ["tracks", "playlist", playlistId, sortmode];
 
     //fetch playlist
-    const getPlaylistContent = useInfiniteQuery({
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isLoading,
+        isFetchingNextPage,
+    } = useInfiniteQuery({
         queryKey,
         initialPageParam: 0,
         queryFn: async ({ pageParam }) => {
@@ -72,20 +77,20 @@ export const usePlaylistContent = (playlistId: string, limit: number = 30) => {
     });
 
     const tracks = useMemo(() =>
-        getPlaylistContent.data?.pages.flatMap(page => page.results) ?? [],
-    [getPlaylistContent.data]);
+        data?.pages.flatMap(page => page.results) ?? [],
+    [data]);
 
 
     return {
         tracks,
         sortmode,
         setSortmode,
-        totalCount: getPlaylistContent.data?.pages[0]?.totalCount ?? 0,
-        totalDuration: getPlaylistContent.data?.pages[0]?.totalDuration ?? 0,
-        fetchNextPage: getPlaylistContent.fetchNextPage,
-        hasNextPage: getPlaylistContent.hasNextPage,
-        isLoading: getPlaylistContent.isLoading,
-        isFetchingNextPage: getPlaylistContent.isFetchingNextPage,
+        totalCount: data?.pages[0]?.totalCount ?? 0,
+        totalDuration: data?.pages[0]?.totalDuration ?? 0,
+        fetchNextPage,
+        hasNextPage,
+        isLoading,
+        isFetchingNextPage,
     };
 };
 

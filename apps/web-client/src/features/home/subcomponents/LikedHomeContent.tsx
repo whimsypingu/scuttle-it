@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { XIcon } from '@phosphor-icons/react';
 
-import { useLikes } from '@/store/hooks/useLikes';
+import { useLikesContent } from '@/store/hooks/useLikes';
 
 import { PlaylistList } from '@/playlist/PlaylistList';
 import { PlaylistInfo } from '@/playlist/PlaylistInfo';
@@ -21,7 +21,7 @@ export const LikedHomeContentView = ({
     onClose
 }: LikedHomeContentViewProps) => {
 
-    const likesScrollContext = useLikes();
+    const likesScrollContext = useLikesContent();
 
     return (
         <>

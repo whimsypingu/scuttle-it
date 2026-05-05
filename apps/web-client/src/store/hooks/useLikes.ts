@@ -14,17 +14,23 @@ import type { SetLikeMutationProps, Sortmode } from '@/store/hooks/hooks.types';
  * 
  * Hook to get the contents of the liked tracks
  */
-export const useLikes = (limit = 30) => {
+export const useLikesContent = (limit: number = 30) => {
     const [sortmode, setSortmode] = useState<Sortmode>(0);
 
     const queryKey = ["tracks", "likes", sortmode];
 
     //fetch likes
-    const getLikes = useInfiniteQuery({
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isLoading,
+        isFetchingNextPage,
+    } = useInfiniteQuery({
         queryKey,
         initialPageParam: 0,
         queryFn: async ({ pageParam }) => {
-            console.log("useLikes triggered");
+            console.log("useLikesContent triggered");
 
             const response = await fetch(`/retrieve/likes?offset=${pageParam}&limit=${limit}&sortmode=${sortmode}`, { method: "GET" });
             if (!response.ok) throw new Error("Failed to fetch likes");
@@ -40,20 +46,20 @@ export const useLikes = (limit = 30) => {
     });
 
     const tracks = useMemo(() =>
-        getLikes.data?.pages.flatMap(page => page.results) ?? [],
-    [getLikes.data]);
+        data?.pages.flatMap(page => page.results) ?? [],
+    [data]);
 
 
     return {
         tracks,
         sortmode,
         setSortmode,
-        totalCount: getLikes.data?.pages[0]?.totalCount ?? 0,
-        totalDuration: getLikes.data?.pages[0]?.totalDuration ?? 0,
-        fetchNextPage: getLikes.fetchNextPage,
-        hasNextPage: getLikes.hasNextPage,
-        isLoading: getLikes.isLoading,
-        isFetchingNextPage: getLikes.isFetchingNextPage,
+        totalCount: data?.pages[0]?.totalCount ?? 0,
+        totalDuration: data?.pages[0]?.totalDuration ?? 0,
+        fetchNextPage,
+        hasNextPage,
+        isLoading,
+        isFetchingNextPage,
     };
 };
 

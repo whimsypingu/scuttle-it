@@ -1,14 +1,11 @@
 import { motion } from 'framer-motion';
 import { XIcon } from '@phosphor-icons/react';
 
-import { useLikes } from '@/store/hooks/useLikes';
-
 import { PlaylistList } from '@/playlist/PlaylistList';
 import { PlaylistInfo } from '@/playlist/PlaylistInfo';
 
 import { BOTTOM_SHELF } from '@/features/player/player.constants';
 
-import type { HomeContent } from '@/features/home/home.types';
 import type { PlaylistSummary } from '@/playlist/playlist.types';
 import { usePlaylistContent } from '@/store/hooks/usePlaylists';
 

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { XIcon } from '@phosphor-icons/react';
 
-import { useDownloads } from '@/store/hooks/useDownloads';
+import { useDownloadsContent } from '@/store/hooks/useDownloads';
 
 import { PlaylistList } from '@/playlist/PlaylistList';
 
@@ -21,7 +21,7 @@ export const DownloadedHomeContentView = ({
     onClose
 }: DownloadedHomeContentViewProps) => {
 
-    const scrollContext = useDownloads();
+    const scrollContext = useDownloadsContent();
 
     return (
         <>

@@ -1,28 +1,24 @@
-import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PlusIcon, XIcon } from "@phosphor-icons/react";
+import { PlusIcon } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
 
-import { useDownloads } from "@/store/hooks/useDownloads";
+import { usePlaylists } from "@/store/hooks/usePlaylists";
+import { useEditTarget } from "@/features/edit/EditProvider";
 
 import { PlaylistItem } from "@/playlist/PlaylistItem";
-import { PlaylistList } from "@/playlist/PlaylistList";
+import { PlaylistContentView } from "@/features/library/subcomponents/PlaylistContent";
 
 import { NAV_CONFIG, BOTTOM_SHELF, PLAYER_CONFIG } from "@/features/player/player.constants";
 
 import type { PlaylistSummary } from "@/playlist/playlist.types";
 import type { LibraryViewProps } from "@/features/library/library.types";
-import { usePlaylists } from "@/store/hooks/usePlaylists";
-import { formatReadableTime } from "../audio/audio.utils";
-import { useEditTarget } from "../edit/EditProvider";
-import type { ActiveEditTarget } from "../edit/edit.types";
-import { PlaylistContentView } from "./subcomponents/PlaylistContent";
+import type { ActiveEditTarget } from "@/features/edit/edit.types";
 
 
 export const MockLibrary = ({
     tabResetSignal
 }: LibraryViewProps) => {
 
-    const scrollContext = useDownloads(); //EMERGENCY: replace this with playlist specific infinite scroll data
     const { playlists } = usePlaylists();
     
     const [selectedPlaylist, setSelectedPlaylist] = useState<PlaylistSummary | null>(null);
