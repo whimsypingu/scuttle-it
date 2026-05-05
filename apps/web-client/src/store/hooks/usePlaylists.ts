@@ -107,21 +107,27 @@ export const usePlaylistsMutations = () => {
 
     //create a playlist
     const createPlaylistMutation = useMutation({
-        mutationFn: async({ playlistId, name }: CreatePlaylistMutationProps) => {
-            const response = await fetch(`/playlists/create?playlist_id=${playlistId}&name=${name}`, { method: "POST" });
+        mutationFn: async({ payload }: CreatePlaylistMutationProps) => {
+            const response = await fetch(`/playlists/create`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
 
             if (!response.ok) throw new Error("Failed to create new playlist");
 
             const data = await response.json();
             return data;
         },
-        onMutate: async({ playlistId, name }) => {
+        onMutate: async({ payload }) => {
             await queryClient.cancelQueries({ queryKey });
             const rollbackPlaylists = queryClient.getQueryData<PlaylistSummary[]>(queryKey);
 
             const tempNewPlaylistSummary: PlaylistSummary = {
-                id: playlistId,
-                name: name,
+                id: payload.playlistId,
+                name: payload.name,
                 totalCount: 0,
                 totalDuration: 0,
             };
@@ -142,7 +148,7 @@ export const usePlaylistsMutations = () => {
             console.log("Optimistic setting like/unlike failed, rolling back.");
         },
         onSuccess: (data, variables) => {
-            const msg = `Created ${variables.name}`;
+            const msg = `Created ${variables.payload.name}`;
             makeToast(msg);
 
             queryClient.invalidateQueries({ queryKey });

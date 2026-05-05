@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
-import type { EditTrackPayload } from "@/store/hooks/hooks.types";
+import type { EditTrackMutationProps } from "@/store/hooks/hooks.types";
 import { makeToast } from "@/features/toast/Toast";
 import type { TrackBase, TrackDetails } from "@/track/track.types";
 
@@ -23,7 +23,7 @@ export const useEditTrack = (track: TrackBase) => {
     });
 
     const editTrackMutation = useMutation({
-        mutationFn: async ({ payload }: { payload: EditTrackPayload }) => {
+        mutationFn: async ({ payload }: EditTrackMutationProps) => {
             //see: apps/audio-server/api/routers/edit_router.py
             const response = await fetch(`/edit/track`, {
                 method: "POST",
