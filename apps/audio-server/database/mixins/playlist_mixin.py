@@ -2,7 +2,7 @@ import logging
 
 from database.mixins.mixin_utils import row_to_playlist_summary
 
-from core.models.playlist import PlaylistSummary
+from core.models.playlist import PlaylistSummary, CreatePlaylistPayload
 
 logger = logging.getLogger(__name__)
 
@@ -10,22 +10,22 @@ logger = logging.getLogger(__name__)
 class PlaylistMixin:
     """Handles custom user playlists"""
 
-    async def create_playlist(self, playlist_id: str, name: str) -> bool:
+    async def create_playlist(self, payload: CreatePlaylistPayload) -> bool:
         """Creating a playlist"""
-        logger.info(f"Creating playlist {name} with playlist_id: {playlist_id}...")
+        logger.info(f"Creating playlist {payload.name} with playlist_id: {payload.playlist_id}...")
 
         try: 
             async with self.session() as db:
                 await db.execute('''
-                    INSERT INTO playlists (id, name)
-                    VALUES (?, ?);
-                ''', (playlist_id, name)) #raises exception if insertion fails due to colliding id
+                    INSERT INTO playlists (id, name, description)
+                    VALUES (?, ?, ?);
+                ''', (payload.playlist_id, payload.name, payload.description)) #raises exception if insertion fails due to colliding id
 
-                logger.info(f"Successfully created playlist {name} with playlist_id {playlist_id}")
+                logger.info(f"Successfully created playlist {payload.name} with playlist_id {payload.playlist_id}")
                 return True
 
         except Exception:
-            logger.exception(f"Failed to create playlist {name} with playlist_id {playlist_id}")
+            logger.exception(f"Failed to create playlist {payload.name} with playlist_id {payload.playlist_id}")
             raise
 
 
@@ -61,7 +61,8 @@ class PlaylistMixin:
 
                 -- Metadata
                 COUNT(pt.track_internal_id) AS total_count,
-                COALESCE(SUM(t.duration), 0) AS total_duration
+                COALESCE(SUM(t.duration), 0) AS total_duration,
+                p.description
             FROM playlists p
             LEFT JOIN playlist_tracks pt ON pt.playlist_internal_id = p.internal_id
             LEFT JOIN tracks t ON t.internal_id = pt.track_internal_id
@@ -75,9 +76,7 @@ class PlaylistMixin:
                     rows = await cursor.fetchall()
 
                     return [
-                        PlaylistSummary(
-                            **row_to_playlist_summary(row).model_dump(),
-                        ) for row in rows
+                        row_to_playlist_summary(row) for row in rows
                     ]
         except Exception:
             logger.exception("Failed to retrieve Playlists")

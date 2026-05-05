@@ -10,3 +10,15 @@ class PlaylistBase(ScuttleBase):
 class PlaylistSummary(PlaylistBase):
     total_count: int = Field(default=0, ge=0, description="Number of tracks")
     total_duration: float = Field(default=0.0, ge=0.0, description="Duration in seconds")
+
+    description: str | None = Field(None, description="Optional playlist description")
+
+
+
+#incoming pydantic object
+#see: apps/web-client/src/store/hooks/hooks.types.ts
+class CreatePlaylistPayload(ScuttleBase):
+    playlist_id: str = Field(..., min_length=1) #frontend generated ID (custom UUID)
+    name: str = Field(..., min_length=1, max_length=100)
+
+    description: str | None = None
