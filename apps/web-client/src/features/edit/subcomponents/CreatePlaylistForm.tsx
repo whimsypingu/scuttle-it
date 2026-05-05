@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 import { generateUUID } from "@/lib/generate";
 
-import type { CreatePlaylistMutationProps } from "@/store/hooks/hooks.types";
+import type { CreatePlaylistMutationProps, CreatePlaylistPayload } from "@/store/hooks/hooks.types";
 
 
 interface CreatePlaylistFormProps {
@@ -23,11 +23,14 @@ export const CreatePlaylistForm = ({
     const { createPlaylist } = usePlaylistsMutations();
 
     const handleSave = () => {
-        const createPlaylistVars: CreatePlaylistMutationProps = {
+        const playlistPayload: CreatePlaylistPayload = {
             playlistId: generateUUID(), //generates a standard v4 UUID for the playlist ID if in a secure context, otherwise a custom `insecure-xxxx...` id
             name: nameInput,
-            //put description in here later
-        }
+            description: descriptionInput || undefined,
+        };
+        const createPlaylistVars: CreatePlaylistMutationProps = {
+            payload: playlistPayload,
+        };
         createPlaylist(createPlaylistVars);
         onSave();
     }

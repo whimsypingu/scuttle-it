@@ -51,18 +51,8 @@ export const PlaylistContentView = ({
     
                 {/* ABOUT / METADATA SECTION */}
                 <div className="flex flex-col gap-2 mx-1">
-                    <div className="flex items-center gap-2">
-                        <div 
-                            className="w-2 h-2 rounded-full animate-pulse purple" 
-                            // style={{ backgroundColor: contentData.color }} 
-                        />
-                        <span className="text-[10px] uppercase tracking-[0.15em] font-black text-white/60">
-                            Everything
-                        </span>
-                    </div>
-
                     <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
-                        Blank summaryData description
+                        {summaryData.description || "No description"}
                     </p>
                     
                     <PlaylistInfo scrollContext={playlistScrollContext}/>
