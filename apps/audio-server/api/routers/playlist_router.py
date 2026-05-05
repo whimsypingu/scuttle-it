@@ -14,7 +14,7 @@ DefaultCrashException = HTTPException(
 )
 
 
-@PlaylistRouter.post("/create")
+@PlaylistRouter.post("")
 async def create_playlist_endpoint(
     payload: CreatePlaylistPayload = Body(...), #automatically parse JSON body into pydantic model
     db_manager: DatabaseManager = Depends(get_db_manager)
@@ -30,7 +30,7 @@ async def create_playlist_endpoint(
         raise DefaultCrashException
     
 
-@PlaylistRouter.post("/delete")
+@PlaylistRouter.delete("")
 async def delete_playlist_endpoint(
     playlist_id: str = Query(..., min_length=1, description="Playlist ID for new playlist"),
     db_manager: DatabaseManager = Depends(get_db_manager)
@@ -46,7 +46,7 @@ async def delete_playlist_endpoint(
         raise DefaultCrashException
         
 
-@PlaylistRouter.get("/get")
+@PlaylistRouter.get("")
 async def get_playlists_endpoint(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):

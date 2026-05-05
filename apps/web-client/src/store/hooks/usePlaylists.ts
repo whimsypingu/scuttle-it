@@ -21,7 +21,7 @@ export const usePlaylists = () => {
         queryFn: async () => {
             console.log("usePlaylists triggered");
 
-            const response = await fetch(`/playlists/get`, { method: "GET" });
+            const response = await fetch(`/playlists`, { method: "GET" });
             if (!response.ok) throw new Error("Failed to fetch playlists");
             
             const data = await response.json();
@@ -108,7 +108,7 @@ export const usePlaylistsMutations = () => {
     //create a playlist
     const createPlaylistMutation = useMutation({
         mutationFn: async({ payload }: CreatePlaylistMutationProps) => {
-            const response = await fetch(`/playlists/create`, {
+            const response = await fetch(`/playlists`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
