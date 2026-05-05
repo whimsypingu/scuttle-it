@@ -1,6 +1,7 @@
 import traceback
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from core.models.playlist import CreatePlaylistPayload
+from fastapi import APIRouter, Body, Depends, Query, HTTPException
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
 
@@ -15,12 +16,11 @@ DefaultCrashException = HTTPException(
 
 @PlaylistRouter.post("/create")
 async def create_playlist_endpoint(
-    playlist_id: str = Query(..., min_length=1, description="Playlist ID for new playlist"),
-    name: str = Query(..., min_length=1),
+    payload: CreatePlaylistPayload = Body(...), #automatically parse JSON body into pydantic model
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.create_playlist(playlist_id, name)
+        success = await db_manager.create_playlist(payload)
 
         return {
             "success": success,
