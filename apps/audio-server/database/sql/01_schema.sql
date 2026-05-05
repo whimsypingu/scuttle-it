@@ -51,12 +51,14 @@ CREATE TABLE IF NOT EXISTS likes (
 CREATE INDEX IF NOT EXISTS idx_likes_position
 ON likes(position);
 
+
 -- playlists table
 CREATE TABLE IF NOT EXISTS playlists (
     internal_id INTEGER PRIMARY KEY,
     id TEXT UNIQUE,
     name TEXT NOT NULL,
-    created_at INTEGER DEFAULT (unixepoch())
+    created_at INTEGER DEFAULT (unixepoch()),
+    description TEXT
 );
 
 -- playlist and titles junction table
