@@ -13,7 +13,7 @@ export interface PlaylistBase {
 export interface PlaylistSummary extends PlaylistBase {
     totalCount: number;
     totalDuration: number;    
-    color?: string;
+    description?: string;
 }
 
 //all available playlist actions with their required properties to execute the functions

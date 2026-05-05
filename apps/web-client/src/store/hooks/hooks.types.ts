@@ -91,7 +91,12 @@ export interface SetLikeMutationProps {
 /**
  * usePlaylists
  */
-export interface CreatePlaylistMutationProps {
+export interface CreatePlaylistPayload {
     playlistId: PlaylistId;
     name: string;
+    description?: string;
+}
+
+export interface CreatePlaylistMutationProps {
+    payload: CreatePlaylistPayload;
 }
