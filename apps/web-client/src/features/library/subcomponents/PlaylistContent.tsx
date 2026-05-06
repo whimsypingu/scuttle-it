@@ -6,12 +6,12 @@ import { PlaylistInfo } from '@/playlist/PlaylistInfo';
 
 import { BOTTOM_SHELF } from '@/features/player/player.constants';
 
-import type { PlaylistSummary } from '@/playlist/playlist.types';
+import type { SummaryPlaylist } from '@/playlist/playlist.types';
 import { usePlaylistContent } from '@/store/hooks/usePlaylists';
 
 
 interface PlaylistContentViewProps {
-    summaryData: PlaylistSummary;
+    summaryData: SummaryPlaylist;
     onClose: () => void;
 }
 

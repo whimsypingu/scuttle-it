@@ -1,8 +1,8 @@
 import logging
 
-from database.mixins.mixin_utils import row_to_playlist_summary
+from database.mixins.mixin_utils import row_to_summary_playlist
 
-from core.models.playlist import PlaylistSummary, CreatePlaylistPayload
+from core.models.playlist import SummaryPlaylist, CreatePlaylistPayload
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class PlaylistMixin:
 
 
 
-    async def get_playlists(self) -> list[PlaylistSummary]:
+    async def get_playlists(self) -> list[SummaryPlaylist]:
         """Retrieve the playlists, with some extra metadata"""
 
         query = f'''
@@ -76,7 +76,7 @@ class PlaylistMixin:
                     rows = await cursor.fetchall()
 
                     return [
-                        row_to_playlist_summary(row) for row in rows
+                        row_to_summary_playlist(row) for row in rows
                     ]
         except Exception:
             logger.exception("Failed to retrieve Playlists")

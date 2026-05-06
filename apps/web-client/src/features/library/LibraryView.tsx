@@ -10,7 +10,7 @@ import { PlaylistContentView } from "@/features/library/subcomponents/PlaylistCo
 
 import { NAV_CONFIG, BOTTOM_SHELF, PLAYER_CONFIG } from "@/features/player/player.constants";
 
-import type { PlaylistSummary } from "@/playlist/playlist.types";
+import type { SummaryPlaylist } from "@/playlist/playlist.types";
 import type { LibraryViewProps } from "@/features/library/library.types";
 import type { ActiveEditTarget } from "@/features/edit/edit.types";
 
@@ -21,7 +21,7 @@ export const MockLibrary = ({
 
     const { playlists } = usePlaylists();
     
-    const [selectedPlaylist, setSelectedPlaylist] = useState<PlaylistSummary | null>(null);
+    const [selectedPlaylist, setSelectedPlaylist] = useState<SummaryPlaylist | null>(null);
 
     // prep the 'create playlist' form popup function
     const { setEditTarget } = useEditTarget();

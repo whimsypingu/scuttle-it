@@ -4,12 +4,12 @@ import { useEditPlaylist, useEditTrack } from "@/store/hooks/useEdit";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
-import type { PlaylistSummary } from "@/playlist/playlist.types";
+import type { SummaryPlaylist } from "@/playlist/playlist.types";
 import type { EditPlaylistMutationProps, EditPlaylistPayload } from "@/store/hooks/hooks.types";
 
 
 interface EditPlaylistFormProps {
-    playlist: PlaylistSummary;
+    playlist: SummaryPlaylist;
     onSave: () => void;
 }
 

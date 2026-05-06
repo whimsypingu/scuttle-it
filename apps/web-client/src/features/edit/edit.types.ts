@@ -1,4 +1,4 @@
-import type { PlaylistSummary } from "@/playlist/playlist.types";
+import type { SummaryPlaylist } from "@/playlist/playlist.types";
 import type { TrackBase } from "@/track/track.types";
 
 
@@ -6,7 +6,7 @@ import type { TrackBase } from "@/track/track.types";
 export type ActiveEditTarget = 
     | { type: "editTrack"; data: TrackBase }
     | { type: "createPlaylist"; data: null }
-    | { type: "editPlaylist"; data: PlaylistSummary };
+    | { type: "editPlaylist"; data: SummaryPlaylist };
     //add more things to edit later, like playlists
 export type EditableType = ActiveEditTarget["type"];
 

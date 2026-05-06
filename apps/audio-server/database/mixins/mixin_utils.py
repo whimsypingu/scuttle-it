@@ -1,7 +1,7 @@
 import sqlite3
 
 from core.models.artist import ArtistBase
-from core.models.playlist import PlaylistBase, PlaylistDetails, PlaylistSummary
+from core.models.playlist import PlaylistBase, PlaylistDetails, SummaryPlaylist
 from core.models.track import PlaylistTrack, TrackBase, TrackDetails
 
 
@@ -92,12 +92,12 @@ def row_to_playlistbase(
         name=row["name"]
     )
 
-def row_to_playlist_summary(
+def row_to_summary_playlist(
     row: sqlite3.Row
-) -> PlaylistSummary:
+) -> SummaryPlaylist:
     playlistbase = row_to_playlistbase(row)
 
-    return PlaylistSummary(
+    return SummaryPlaylist(
         **playlistbase.model_dump(),
         total_count=row["total_count"],
         total_duration=row["total_duration"],
@@ -109,7 +109,7 @@ def row_to_playlist_details(
 ) -> PlaylistDetails:
     playlistbase = row_to_playlistbase(row)
 
-    return PlaylistSummary(
+    return SummaryPlaylist(
         **playlistbase.model_dump(),
         description=row["description"]
     )

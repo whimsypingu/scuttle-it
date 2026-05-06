@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import type { EditPlaylistMutationProps, EditTrackMutationProps } from "@/store/hooks/hooks.types";
 import { makeToast } from "@/features/toast/Toast";
 import type { TrackBase, TrackDetails } from "@/track/track.types";
-import type { PlaylistDetails, PlaylistSummary } from "@/playlist/playlist.types";
+import type { PlaylistDetails, SummaryPlaylist } from "@/playlist/playlist.types";
 
 
 export const useEditTrack = (track: TrackBase) => {
@@ -66,7 +66,7 @@ export const useEditTrack = (track: TrackBase) => {
 
 
 
-export const useEditPlaylist = (playlist: PlaylistSummary) => {
+export const useEditPlaylist = (playlist: SummaryPlaylist) => {
     const queryClient = useQueryClient();
 
     const getPlaylistDetails = useQuery({

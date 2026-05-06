@@ -10,7 +10,7 @@ export interface PlaylistBase {
     id: PlaylistId;
     name: string;
 }
-export interface PlaylistSummary extends PlaylistBase {
+export interface SummaryPlaylist extends PlaylistBase {
     totalCount: number;
     totalDuration: number;    
     description?: string;
@@ -21,11 +21,11 @@ export interface PlaylistDetails extends PlaylistBase {
 
 //all available playlist actions with their required properties to execute the functions
 export type PlaylistActionProps = 
-    | { action: "pin"; playlist: PlaylistBase }
-    | { action: "delete"; playlist: PlaylistBase }
-    | { action: "play"; playlist: PlaylistBase }
-    | { action: "shufflePlay"; playlist: PlaylistBase }
-    | { action: "edit"; playlist: PlaylistBase };
+    | { action: "pin"; playlist: SummaryPlaylist }
+    | { action: "delete"; playlist: SummaryPlaylist }
+    | { action: "play"; playlist: SummaryPlaylist }
+    | { action: "shufflePlay"; playlist: SummaryPlaylist }
+    | { action: "edit"; playlist: SummaryPlaylist };
 export type PlaylistAction = PlaylistActionProps["action"];
 
 export interface PlaylistActionConfig { //corresponding phosphor icon and color pairing to show on swipe for a TrackAction
@@ -35,8 +35,8 @@ export interface PlaylistActionConfig { //corresponding phosphor icon and color 
 
 //fields for a PlaylistItem
 export interface PlaylistItemProps {
-    playlist: PlaylistSummary; //requires that a PlaylistItem must have some metadata fields to display
-    onSelect: (playlist: PlaylistSummary) => void;
+    playlist: SummaryPlaylist; //requires that a PlaylistItem must have some metadata fields to display
+    onSelect: (playlist: SummaryPlaylist) => void;
     actions?: [PlaylistAction, PlaylistAction, PlaylistAction, PlaylistAction]; //leftmost action to rightmost action
 }
 

@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
-import type { PlaylistSummary } from "@/playlist/playlist.types";
+import type { SummaryPlaylist } from "@/playlist/playlist.types";
 import type { CreatePlaylistMutationProps, Sortmode } from "./hooks.types";
 import { makeToast } from "@/features/toast/Toast";
 import { useMemo, useState } from "react";
@@ -25,7 +25,7 @@ export const usePlaylists = () => {
             if (!response.ok) throw new Error("Failed to fetch playlists");
             
             const data = await response.json();
-            return data.playlists as PlaylistSummary[];
+            return data.playlists as SummaryPlaylist[];
         },
         staleTime: 1000 * 60 * 5, 
     });
@@ -123,17 +123,17 @@ export const usePlaylistsMutations = () => {
         },
         onMutate: async({ payload }) => {
             await queryClient.cancelQueries({ queryKey });
-            const rollbackPlaylists = queryClient.getQueryData<PlaylistSummary[]>(queryKey);
+            const rollbackPlaylists = queryClient.getQueryData<SummaryPlaylist[]>(queryKey);
 
-            const tempNewPlaylistSummary: PlaylistSummary = {
+            const tempNewSummaryPlaylist: SummaryPlaylist = {
                 id: payload.playlistId,
                 name: payload.name,
                 totalCount: 0,
                 totalDuration: 0,
             };
 
-            queryClient.setQueryData<PlaylistSummary[]>(queryKey, (old) => {
-                return [...(old || []), tempNewPlaylistSummary];
+            queryClient.setQueryData<SummaryPlaylist[]>(queryKey, (old) => {
+                return [...(old || []), tempNewSummaryPlaylist];
             });
 
             return { rollbackPlaylists };
