@@ -29,3 +29,8 @@ class CreatePlaylistPayload(ScuttleBase):
     name: str = Field(..., min_length=1, max_length=100)
 
     description: str | None = None
+
+
+class EditPlaylistPayload(ScuttleBase):
+    name: str | None = None
+    description: str | None = None

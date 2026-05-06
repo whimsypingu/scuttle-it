@@ -1,5 +1,6 @@
 import traceback
 
+from core.models.playlist import EditPlaylistPayload
 from fastapi import APIRouter, Body, Depends, HTTPException, Path
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
@@ -31,3 +32,19 @@ async def edit_track_endpoint(
         traceback.print_exc()
         raise DefaultCrashException
 
+
+@EditRouter.patch("/playlist/{playlist_id}")
+async def edit_playlist_endpoint(
+    playlist_id: str = Path(..., min_length=1, description="Playlist ID"),
+    payload: EditPlaylistPayload = Body(...), #automatically parse JSON body into pydantic model
+    db_manager: DatabaseManager = Depends(get_db_manager)
+):
+    try:
+        success = await db_manager.edit_playlist(playlist_id, payload) #status after attempting push
+
+        return {
+            "success": success,
+        }
+    except Exception as e:
+        traceback.print_exc()
+        raise DefaultCrashException

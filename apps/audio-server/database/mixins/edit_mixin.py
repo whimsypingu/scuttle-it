@@ -1,5 +1,6 @@
 import logging
 
+from core.models.playlist import EditPlaylistPayload
 from core.models.track import EditTrackPayload
 
 logger = logging.getLogger(__name__)
@@ -104,4 +105,39 @@ class EditMixin:
         
         except Exception:
             logger.exception(f"Critical failure during track edit for original track_id: {track_id}")
+            raise
+
+
+    async def edit_playlist(self, playlist_id: str, payload: EditPlaylistPayload) -> bool:
+        """Edit playlist data"""
+        logger.info(f"Editing playlist_id {playlist_id}")
+
+        try:
+            async with self.session() as db:
+                update_data = payload.model_dump(exclude_unset=True) #remembers missing fields from request body
+
+                set_clauses = []
+                values = []
+                
+                #hard code this to prevent any accidental sql injections and field name abnormalities in the future for non-text fields
+                if "name" in update_data:
+                    set_clauses.append("name = ?")
+                    values.append(update_data["name"])
+
+                if "description" in update_data:
+                    set_clauses.append("description = ?")
+                    values.append(update_data["description"])
+
+                if not set_clauses:
+                    return False #temp early exit
+                
+                #join the set clauses and add the id for the query
+                params = values + [playlist_id]
+                await db.execute(f"UPDATE playlists SET {', '.join(set_clauses)} WHERE id = ?;", params)
+
+                logger.info(f"Successfully edited track with original playlist_id: {playlist_id} | {payload.name}")
+                return True
+        
+        except Exception:
+            logger.exception(f"Critical failure during playlist edit for original playlist_id: {playlist_id}")
             raise
