@@ -14,6 +14,14 @@ class PlaylistSummary(PlaylistBase):
     description: str | None = Field(None, description="Optional playlist description")
 
 
+class PlaylistDetails(PlaylistBase):
+    description: str | None = Field(None, description="")
+    playlists: list[PlaylistBase] = Field(default_factory=list)
+    #include fields like created_at, etc.
+
+
+
+
 
 #incoming pydantic object
 #see: apps/web-client/src/store/hooks/hooks.types.ts

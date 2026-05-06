@@ -1,6 +1,7 @@
 import logging
 
-from database.mixins.mixin_utils import row_to_playlist_track, row_to_track_details, row_to_trackbase
+from core.models.playlist import PlaylistDetails
+from database.mixins.mixin_utils import row_to_playlist_details, row_to_playlist_track, row_to_track_details, row_to_trackbase
 
 from core.models.artist import ArtistBase
 from core.models.track import PlaylistTrack, TrackBase, TrackDetails
@@ -329,6 +330,38 @@ class RetrievalMixin:
             logger.exception("Failed to retrieve track details")
             raise
         
+
+    async def retrieve_playlist_details(self, playlist_id: str) -> PlaylistDetails:
+        """Retrieve details about a playlist"""
+        logger.info(f"Retrieving details about playlist_id: {playlist_id}")
+
+        query = f'''
+            SELECT
+                -- PlaylistBase fields
+                p.internal_id,
+                p.id,
+                p.name,
+
+                -- Metadata
+                p.description
+            FROM playlists p
+
+            WHERE p.id = ?
+            
+            LIMIT 1;
+        '''
+
+        try: 
+            async with self.session() as db:
+                async with db.execute(query, (playlist_id,)) as cursor:
+                    row = await cursor.fetchone()
+                    return row_to_playlist_details(row)
+        except Exception:
+            logger.exception("Failed to retrieve playlist details")
+            raise
+        
+
+
 
 
 

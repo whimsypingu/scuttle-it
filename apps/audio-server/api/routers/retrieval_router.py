@@ -105,3 +105,20 @@ async def retrieve_track_details_endpoint(
             status_code=500,
             detail="Crashed"
         )
+
+
+@RetrievalRouter.get("/playlist/{playlist_id}")
+async def retrieve_playlist_details_endpoint(
+    playlist_id: str,
+    db_manager: DatabaseManager = Depends(get_db_manager)
+):
+    try:
+        details = await db_manager.retrieve_playlist_details(playlist_id)
+        return details
+    
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail="Crashed"
+        )
