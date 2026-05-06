@@ -36,12 +36,11 @@ export const usePlaylistActionHandler = () => {
                 break;
 
             case "edit": //open a playlist editing popup
-                makeToast(props.action);
-                // const editTrackTarget: ActiveEditTarget = {
-                //     type: "editTrack", 
-                //     data: props.track,
-                // };
-                // setEditTarget(editTrackTarget);
+                const editPlaylistTarget: ActiveEditTarget = {
+                    type: "editPlaylist",
+                    data: props.playlist,
+                };
+                setEditTarget(editPlaylistTarget);
                 break;
         }
     };

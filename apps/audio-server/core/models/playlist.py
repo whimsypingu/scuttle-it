@@ -16,7 +16,6 @@ class SummaryPlaylist(PlaylistBase):
 
 class PlaylistDetails(PlaylistBase):
     description: str | None = Field(None, description="")
-    playlists: list[PlaylistBase] = Field(default_factory=list)
     #include fields like created_at, etc.
 
 

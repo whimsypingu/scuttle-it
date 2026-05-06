@@ -5,6 +5,7 @@ import { EditTrackForm } from "@/features/edit/subcomponents/EditTrackForm";
 import { CreatePlaylistForm } from "@/features/edit/subcomponents/CreatePlaylistForm";
 
 import { EDIT_CONFIG } from "@/features/edit/edit.constants";
+import { EditPlaylistForm } from "./subcomponents/EditPlaylistForm";
 
 
 export const EditPopup = () => {
@@ -35,6 +36,13 @@ export const EditPopup = () => {
                 return (
                     <CreatePlaylistForm 
                         onSave={handleClose} 
+                    />
+                );
+            case "editPlaylist":
+                return (
+                    <EditPlaylistForm
+                        playlist={editTarget.data}
+                        onSave={handleClose}
                     />
                 );
             default:

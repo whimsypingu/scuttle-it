@@ -31,7 +31,7 @@ export interface EditTrackMutationProps {
 //see: audio-server/core/models/playlist.py
 export interface EditPlaylistPayload {
     name?: string;
-    description?: string;
+    description?: string | null;
 }
 
 export interface EditPlaylistMutationProps {
@@ -106,7 +106,7 @@ export interface SetLikeMutationProps {
 export interface CreatePlaylistPayload {
     playlistId: PlaylistId;
     name: string;
-    description?: string;
+    description: string | null;
 }
 
 export interface CreatePlaylistMutationProps {

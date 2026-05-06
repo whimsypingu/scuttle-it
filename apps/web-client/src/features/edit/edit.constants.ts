@@ -10,4 +10,8 @@ export const EDIT_CONFIG: Record<EditableType, EditPopupMetadata> = {
         title: "Create Playlist",
         description: "Make a new playlist.",
     },
+    editPlaylist: {
+        title: "Edit Playlist",
+        description: "Update the metadata for this playlist.",
+    },
 };

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useEditPlaylist, useEditTrack } from "@/store/hooks/useEdit";
+import { useEditPlaylist } from "@/store/hooks/useEdit";
 
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -20,13 +20,13 @@ export const EditPlaylistForm = ({
     const [nameInput, setNameInput] = useState<string>(playlist.name);
     const [descriptionInput, setDescriptionInput] = useState<string>(playlist.description ?? "");
 
-    //edit hook with extra track details
+    //edit hook with extra playlist details
     const { playlistDetails, isLoading, editPlaylist } = useEditPlaylist(playlist);
 
-    const handleSave = () => { //use temp edit payload strategy -- migrate to artist selection in the future
+    const handleSave = () => {
         const playlistPayload: EditPlaylistPayload = {
             name: nameInput || undefined,
-            description: descriptionInput || undefined,
+            description: descriptionInput || null, //change this to be undefined for no change
         };
         const editPlaylistVars: EditPlaylistMutationProps = {
             playlistId: playlist.id,
@@ -47,7 +47,7 @@ export const EditPlaylistForm = ({
                     <Textarea
                         value={nameInput}
                         onChange={(e) => setNameInput(e.target.value)}
-                        placeholder={playlist.name}
+                        placeholder={"Give this playlist a new name..."}
                         className="text-md focus-visible:ring-1"
                     />
                 </div>
@@ -60,7 +60,7 @@ export const EditPlaylistForm = ({
                     <Textarea
                         value={descriptionInput}
                         onChange={(e) => setDescriptionInput(e.target.value)}
-                        placeholder={playlist.description ?? "Playlist description (Optional)"}
+                        placeholder={"Write a little about this playlist..."}
                         className="text-md focus-visible:ring-1"
                     />
                 </div>

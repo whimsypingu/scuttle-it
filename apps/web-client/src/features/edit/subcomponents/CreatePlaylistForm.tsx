@@ -26,7 +26,7 @@ export const CreatePlaylistForm = ({
         const playlistPayload: CreatePlaylistPayload = {
             playlistId: generateUUID(), //generates a standard v4 UUID for the playlist ID if in a secure context, otherwise a custom `insecure-xxxx...` id
             name: nameInput,
-            description: descriptionInput || undefined,
+            description: descriptionInput || null,
         };
         const createPlaylistVars: CreatePlaylistMutationProps = {
             payload: playlistPayload,
