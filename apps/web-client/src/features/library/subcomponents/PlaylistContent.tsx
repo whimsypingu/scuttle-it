@@ -51,9 +51,11 @@ export const PlaylistContentView = ({
     
                 {/* ABOUT / METADATA SECTION */}
                 <div className="flex flex-col gap-2 mx-1">
-                    <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
-                        {summaryData.description || "No description"}
-                    </p>
+                    {summaryData.description && (
+                        <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
+                            {summaryData.description}
+                        </p>
+                    )}
                     
                     <PlaylistInfo scrollContext={playlistScrollContext}/>
                 </div>

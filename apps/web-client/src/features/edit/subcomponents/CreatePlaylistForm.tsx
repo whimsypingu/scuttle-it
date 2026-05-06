@@ -23,13 +23,14 @@ export const CreatePlaylistForm = ({
     const { createPlaylist } = usePlaylistsMutations();
 
     const handleSave = () => {
-        const playlistPayload: CreatePlaylistPayload = {
+        //finalized payload
+        const payload: CreatePlaylistPayload = {
             playlistId: generateUUID(), //generates a standard v4 UUID for the playlist ID if in a secure context, otherwise a custom `insecure-xxxx...` id
             name: nameInput,
             description: descriptionInput || null,
         };
         const createPlaylistVars: CreatePlaylistMutationProps = {
-            payload: playlistPayload,
+            payload,
         };
         createPlaylist(createPlaylistVars);
         onSave();

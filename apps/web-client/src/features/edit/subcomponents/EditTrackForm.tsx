@@ -92,15 +92,15 @@ export const EditTrackForm = ({
         const originalIds = trackDetails?.playlists.map(p => p.id) ?? [];
         const hasPlaylistChanges = selectedPlaylistIds.size !== originalIds.length || originalIds.some(id => !selectedPlaylistIds.has(id));
 
-        const trackPayload: EditTrackPayload = {
+        //finalized payload
+        const payload: EditTrackPayload = {
             titleDisplay: titleInput || undefined,
             artists: artistInput ? [artistPayload] : undefined,
             playlistIds: hasPlaylistChanges ? [...selectedPlaylistIds] : undefined,
         };
-        console.log(trackPayload); //debugging
         const editTrackVars: EditTrackMutationProps = {
             trackId: track.id,
-            payload: trackPayload,
+            payload,
         };
         editTrack(editTrackVars);
         onSave();

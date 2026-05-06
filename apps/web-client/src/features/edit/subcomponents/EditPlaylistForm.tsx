@@ -24,13 +24,14 @@ export const EditPlaylistForm = ({
     const { playlistDetails, isLoading, editPlaylist } = useEditPlaylist(playlist);
 
     const handleSave = () => {
-        const playlistPayload: EditPlaylistPayload = {
+        //finalized payload
+        const payload: EditPlaylistPayload = {
             name: nameInput || undefined,
             description: descriptionInput || null, //change this to be undefined for no change
         };
         const editPlaylistVars: EditPlaylistMutationProps = {
             playlistId: playlist.id,
-            payload: playlistPayload,
+            payload,
         };
         editPlaylist(editPlaylistVars);
         onSave();
