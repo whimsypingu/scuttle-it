@@ -28,6 +28,18 @@ export interface EditTrackMutationProps {
     payload: EditTrackPayload; 
 }
 
+//see: audio-server/core/models/playlist.py
+export interface EditPlaylistPayload {
+    name?: string;
+    description?: string;
+}
+
+export interface EditPlaylistMutationProps {
+    playlistId: PlaylistId;
+    payload: EditPlaylistPayload;
+}
+
+
 
 /**
  * useQueue
