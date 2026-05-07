@@ -28,7 +28,6 @@ export const useTrackActionHandler = () => {
                 break;
 
             case "queueLast": //add to queue
-                makeToast(props.action);
                 const pushTrackVars: PushMutationProps = {
                     track: props.track,
                 };
@@ -36,7 +35,6 @@ export const useTrackActionHandler = () => {
                 break;
 
             case "queueNext": //push next
-                makeToast(props.action);
                 const pushNextTrackVars: PushNextMutationProps = {
                     track: props.track,
                 };
@@ -48,7 +46,6 @@ export const useTrackActionHandler = () => {
                 break;
 
             case "deleteQueue": //delete from queue
-                makeToast(props.action);
                 const popTrackVars: PopMutationProps = {
                     queueTrack: props.queueTrack,
                 };

@@ -46,9 +46,7 @@ export const useEditTrack = (track: TrackBase) => {
             queryClient.invalidateQueries({ queryKey: ["details", "tracks", track.id] }); //invalidate the edit-showable track data 
             queryClient.invalidateQueries({ queryKey: ["playlists"] }); //invalidate the counts of playlists 
 
-            if (data.success) {
-                makeToast("Saved");
-            }
+            makeToast("Saved");
         },
         onError: (err) => {
             console.error("Edit track failed.");
@@ -105,9 +103,7 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
             queryClient.invalidateQueries({ queryKey: ["details", "playlists", playlist.id] }); //invalidate the edit-showable playlist data 
             queryClient.invalidateQueries({ queryKey: ["playlists"] }); //invalidate the counts of playlists 
 
-            if (data.success) {
-                makeToast("Saved");
-            }
+            makeToast("Saved");
         },
         onError: (err) => {
             console.error("Edit playlist failed.");
