@@ -181,6 +181,40 @@ class PlayQueueMixin:
             raise
 
 
+    async def set_all_play_queue(self, playlist_id, sortmode) -> bool:
+        """Setting a playlist with a sort order as the Play Queue"""
+        logger.info(f"Setting playlist with playlist_id {playlist_id} as the Play Queue...")
+
+        #see: apps/audio-server/api/routers/retrieval_router.py for mapping
+        SORT_MAP = {
+            0: "position ASC",
+            1: "added_at DESC",
+        }
+
+        query = f'''
+            INSERT INTO play_queue (track_internal_id, position)
+            SELECT
+                pt.track_internal_id,
+                (ROW_NUMBER() OVER (ORDER BY pt.{SORT_MAP[sortmode]})) * 100
+            FROM playlist_tracks pt
+            JOIN playlists p ON p.internal_id = pt.playlist_internal_id
+            WHERE p.id = ?;
+        '''
+
+        try:
+            async with self.session() as db:
+                await db.execute("DELETE FROM play_queue;")
+
+                await db.execute(query, (playlist_id,))
+                    
+                logger.info(f"Successfully set playlist {playlist_id} as the Play Queue")
+                return True
+
+        except Exception:
+            logger.exception(f"Failed to set playlist {playlist_id} as the Play Queue")
+            raise
+
+
     async def get_play_queue(self) -> list[QueueTrack]:
         """Retrieve the full play queue with all metadata"""
 
