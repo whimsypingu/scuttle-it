@@ -112,7 +112,6 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
             console.error("Edit playlist failed.");
         }
     });
-
     
     return {
         playlistDetails: getPlaylistDetails?.data,

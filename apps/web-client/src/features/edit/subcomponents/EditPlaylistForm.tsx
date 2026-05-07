@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
 
 import type { SummaryPlaylist } from "@/playlist/playlist.types";
-import type { EditPlaylistMutationProps, EditPlaylistPayload } from "@/store/hooks/hooks.types";
+import type { DeletePlaylistMutationProps, EditPlaylistMutationProps, EditPlaylistPayload } from "@/store/hooks/hooks.types";
 import { HoldToDeleteButton } from "@/components/ui/hold-delete";
+import { usePlaylistsMutations } from "@/store/hooks/usePlaylists";
 
 
 interface EditPlaylistFormProps {
@@ -25,6 +26,7 @@ export const EditPlaylistForm = ({
 
     //edit hook with extra playlist details
     const { playlistDetails, isLoading, editPlaylist } = useEditPlaylist(playlist); //provides support for future details like created timestamp etc
+    const { deletePlaylist } = usePlaylistsMutations();
 
     const handleSave = () => {
         //finalized payload
@@ -41,6 +43,10 @@ export const EditPlaylistForm = ({
     }
 
     const handleDelete = () => {
+        const deletePlaylistVars: DeletePlaylistMutationProps = {
+            playlist,
+        };
+        deletePlaylist(deletePlaylistVars);
         onSave();
     }
 

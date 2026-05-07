@@ -1,7 +1,7 @@
 import traceback
 
 from core.models.playlist import CreatePlaylistPayload
-from fastapi import APIRouter, Body, Depends, Query, HTTPException
+from fastapi import APIRouter, Body, Depends, Path, Query, HTTPException
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
 
@@ -30,9 +30,9 @@ async def create_playlist_endpoint(
         raise DefaultCrashException
     
 
-@PlaylistRouter.delete("")
+@PlaylistRouter.delete("/{playlist_id}")
 async def delete_playlist_endpoint(
-    playlist_id: str = Query(..., min_length=1, description="Playlist ID for new playlist"),
+    playlist_id: str = Path(..., min_length=1, description="Playlist ID"),
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
