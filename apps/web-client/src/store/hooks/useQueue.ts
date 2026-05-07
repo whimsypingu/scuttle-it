@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
+import { audioEngine } from "@/features/audio/audioEngine";
+
 import { trackBaseToQueueTrack } from "@/track/track.utils";
 
 import type { QueueTrack } from "@/track/track.types";
@@ -211,6 +213,7 @@ export const useQueue = () => {
 
 export const useSetQueue = () => {
     const queryClient = useQueryClient();
+    const queryKey = ["tracks", "play_queue"];
 
     // set a playlist as the queue. does not optimistically update the queue
     const setAllPlaylistMutation = useMutation({
@@ -224,7 +227,12 @@ export const useSetQueue = () => {
             return data;
         },
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: ["queue"] }); //invalidate the queue state forcing a refetch
+            queryClient.setQueryData(queryKey, data.queue);
+
+            if (data.queue && data.queue.length > 0) {
+                const firstTrack = data.queue[0];
+                audioEngine.playTrack({ trackId: firstTrack.id, forceRestart: true }); //immediately start playing on success
+            }
         },
         onError: (err) => {
             console.log("Set queue failed.");

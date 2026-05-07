@@ -111,10 +111,12 @@ async def set_all_play_queue(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.set_all_play_queue(playlist_id, sortmode) #status after attempting set -- don't bother sending back the full queue for optimistic update
+        success = await db_manager.set_all_play_queue(playlist_id, sortmode) #status after attempting set
+        updated_queue = await db_manager.get_play_queue() #get the updated queue -- EMERGENCY: make this stuff not like this bruh
 
         return {
             "success": success,
+            "queue": updated_queue
         }
     except Exception as e:
         traceback.print_exc()
