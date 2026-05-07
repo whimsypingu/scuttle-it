@@ -47,8 +47,6 @@ export const EditPlaylistForm = ({
     return (
         <div className="flex flex-col h-full">
             <div className="flex-1 custom-scrollbar overflow-y-auto flex flex-col gap-2">
-
-                <div className="flex flex-col min-h-[calc(100%+1px)] gap-2">
                 {/* Name Section */}
                 <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-muted-foreground">
@@ -76,18 +74,15 @@ export const EditPlaylistForm = ({
                 </div>
 
                 {/* Delete Button */}
-                <div className="mt-auto" />
-                <div className="flex justify-end pb-1">
+                <div className="flex justify-end pt-2 pb-1">
                     <HoldToDeleteButton onDelete={handleDelete} />
-                </div>
-
                 </div>
             </div>
 
             {/* Save */}
             <div className="flex justify-end pt-4">
                 <Button
-                    className="min-w-[80px]"
+                    className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
                     variant="secondary"
                     onClick={handleSave}
                 >
