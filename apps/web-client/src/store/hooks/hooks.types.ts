@@ -23,9 +23,6 @@ export interface EditTrackPayload {
     playlistIds?: PlaylistId[];
 }
 
-export interface EditTrackMutationProps {
-    payload: EditTrackPayload; 
-}
 
 //see: audio-server/core/models/playlist.py
 export interface EditPlaylistPayload {
@@ -33,9 +30,6 @@ export interface EditPlaylistPayload {
     description?: string | null;
 }
 
-export interface EditPlaylistMutationProps {
-    payload: EditPlaylistPayload;
-}
 
 
 
@@ -105,10 +99,6 @@ export interface CreatePlaylistPayload {
     playlistId: PlaylistId;
     name: string;
     description: string | null;
-}
-
-export interface CreatePlaylistMutationProps {
-    payload: CreatePlaylistPayload;
 }
 
 export interface DeletePlaylistMutationProps {

@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { makeToast } from "@/features/toast/Toast";
 
-import type { EditPlaylistMutationProps, EditTrackMutationProps } from "@/store/hooks/hooks.types";
+import type { EditPlaylistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
 import type { TrackBase, TrackDetails } from "@/track/track.types";
 import type { PlaylistDetails, SummaryPlaylist } from "@/playlist/playlist.types";
 
@@ -25,7 +25,7 @@ export const useEditTrack = (track: TrackBase) => {
     });
 
     const editTrackMutation = useMutation({
-        mutationFn: async ({ payload }: EditTrackMutationProps) => {
+        mutationFn: async (payload: EditTrackPayload) => {
             //see: apps/audio-server/api/routers/edit_router.py
             const response = await fetch(`/edit/track/${track.id}`, {
                 method: "PATCH",
@@ -85,7 +85,7 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
     });
 
     const editPlaylistMutation = useMutation({
-        mutationFn: async ({ payload }: EditPlaylistMutationProps) => {
+        mutationFn: async (payload: EditPlaylistPayload) => {
             //see: apps/audio-server/api/routers/edit_router.py
             const response = await fetch(`/edit/playlist/${playlist.id}`, {
                 method: "PATCH",
@@ -113,12 +113,54 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
             console.error("Edit playlist failed.");
         }
     });
-    
+
+
+    //delete a playlist
+    const queryKey = ["playlists"];
+    const deletePlaylistMutation = useMutation({
+        mutationFn: async() => {
+            const response = await fetch(`/playlists/${playlist.id}`, {
+                method: "DELETE",
+            });
+
+            if (!response.ok) throw new Error("Failed to delete playlist");
+
+            const data = await response.json();
+            return data;
+        },
+        onMutate: async() => {
+            await queryClient.cancelQueries({ queryKey });
+            const rollbackPlaylists = queryClient.getQueryData<SummaryPlaylist[]>(queryKey);
+
+            queryClient.setQueryData<SummaryPlaylist[]>(queryKey, (old: SummaryPlaylist[] | undefined) => {
+                return old?.filter(p => p.id !== playlist.id); //filter out the playlistId
+            });
+
+            return { rollbackPlaylists };
+        },
+        onError: (err, data, context) => {
+            const msg = `Error`;
+            makeToast(msg);
+
+            if (context?.rollbackPlaylists) {
+                queryClient.setQueryData(queryKey, context.rollbackPlaylists);
+            }
+            console.log("Optimistic playlist deletion failed, rolling back.");
+        },
+        onSuccess: (data) => {
+            const msg = `Deleted ${playlist.name}`;
+            makeToast(msg);
+
+            queryClient.invalidateQueries({ queryKey });
+        },
+    });
+
     return {
         playlistDetails: getPlaylistDetails?.data,
         isLoading: getPlaylistDetails.isLoading,
         error: getPlaylistDetails.error,
 
         editPlaylist: editPlaylistMutation.mutate,
+        deletePlaylist: deletePlaylistMutation.mutate,
    };
 }

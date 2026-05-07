@@ -11,8 +11,8 @@ import { getTrackDisplayMetadata } from "@/track/track.utils";
 import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
 
 import type { TrackBase } from "@/track/track.types";
-import type { EditArtistPayload, EditTrackMutationProps, EditTrackPayload } from "@/store/hooks/hooks.types";
 import type { PlaylistId } from "@/playlist/playlist.types";
+import type { EditArtistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
 
 
 interface EditTrackFormProps {
@@ -100,10 +100,7 @@ export const EditTrackForm = ({
             artists: artistInput ? [artistPayload] : undefined,
             playlistIds: hasPlaylistChanges ? [...selectedPlaylistIds] : undefined,
         };
-        const editTrackVars: EditTrackMutationProps = {
-            payload,
-        };
-        editTrack(editTrackVars);
+        editTrack(payload);
         onSave();
     }
 

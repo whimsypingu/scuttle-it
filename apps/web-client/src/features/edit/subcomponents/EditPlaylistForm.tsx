@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/button";
 import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
 
 import type { SummaryPlaylist } from "@/playlist/playlist.types";
-import type { DeletePlaylistMutationProps, EditPlaylistMutationProps, EditPlaylistPayload } from "@/store/hooks/hooks.types";
+import type { EditPlaylistPayload } from "@/store/hooks/hooks.types";
 import { HoldToDeleteButton } from "@/components/ui/hold-delete";
-import { usePlaylistsMutations } from "@/store/hooks/usePlaylists";
 
 
 interface EditPlaylistFormProps {
@@ -25,8 +24,7 @@ export const EditPlaylistForm = ({
     const [descriptionInput, setDescriptionInput] = useState<string>(playlist.description ?? "");
 
     //edit hook with extra playlist details
-    const { playlistDetails, isLoading, editPlaylist } = useEditPlaylist(playlist); //provides support for future details like created timestamp etc
-    const { deletePlaylist } = usePlaylistsMutations();
+    const { playlistDetails, isLoading, editPlaylist, deletePlaylist } = useEditPlaylist(playlist); //provides support for future details like created timestamp etc
 
     const handleSave = () => {
         //finalized payload
@@ -34,18 +32,12 @@ export const EditPlaylistForm = ({
             name: nameInput || undefined,
             description: descriptionInput || null, //change this to be undefined for no change
         };
-        const editPlaylistVars: EditPlaylistMutationProps = {
-            payload,
-        };
-        editPlaylist(editPlaylistVars);
+        editPlaylist(payload);
         onSave();
     }
 
     const handleDelete = () => {
-        const deletePlaylistVars: DeletePlaylistMutationProps = {
-            playlist,
-        };
-        deletePlaylist(deletePlaylistVars);
+        deletePlaylist();
         onSave();
     }
 

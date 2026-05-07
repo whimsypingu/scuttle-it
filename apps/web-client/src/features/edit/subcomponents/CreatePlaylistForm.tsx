@@ -8,7 +8,7 @@ import { generateUUID } from "@/lib/generate";
 
 import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
 
-import type { CreatePlaylistMutationProps, CreatePlaylistPayload } from "@/store/hooks/hooks.types";
+import type { CreatePlaylistPayload } from "@/store/hooks/hooks.types";
 
 
 interface CreatePlaylistFormProps {
@@ -31,10 +31,7 @@ export const CreatePlaylistForm = ({
             name: nameInput,
             description: descriptionInput || null,
         };
-        const createPlaylistVars: CreatePlaylistMutationProps = {
-            payload,
-        };
-        createPlaylist(createPlaylistVars);
+        createPlaylist(payload);
         onSave();
     }
 

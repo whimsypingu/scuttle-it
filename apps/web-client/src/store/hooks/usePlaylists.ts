@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { makeToast } from "@/features/toast/Toast";
 
 import type { SummaryPlaylist } from "@/playlist/playlist.types";
-import type { CreatePlaylistMutationProps, DeletePlaylistMutationProps, Sortmode } from "@/store/hooks/hooks.types";
+import type { CreatePlaylistPayload, DeletePlaylistMutationProps, Sortmode } from "@/store/hooks/hooks.types";
 
 
 
@@ -108,7 +108,7 @@ export const usePlaylistsMutations = () => {
 
     //create a playlist
     const createPlaylistMutation = useMutation({
-        mutationFn: async({ payload }: CreatePlaylistMutationProps) => {
+        mutationFn: async(payload: CreatePlaylistPayload) => {
             const response = await fetch(`/playlists`, {
                 method: "POST",
                 headers: {
@@ -122,7 +122,7 @@ export const usePlaylistsMutations = () => {
             const data = await response.json();
             return data;
         },
-        onMutate: async({ payload }) => {
+        onMutate: async(payload) => {
             await queryClient.cancelQueries({ queryKey });
             const rollbackPlaylists = queryClient.getQueryData<SummaryPlaylist[]>(queryKey);
 
@@ -139,7 +139,7 @@ export const usePlaylistsMutations = () => {
 
             return { rollbackPlaylists };
         },
-        onError: (err, variables, context) => {
+        onError: (err, payload, context) => {
             const msg = `Error`;
             makeToast(msg);
 
@@ -148,57 +148,15 @@ export const usePlaylistsMutations = () => {
             }
             console.log("Optimistic playlist creation, rolling back.");
         },
-        onSuccess: (data, variables) => {
-            const msg = `Created ${variables.payload.name}`;
+        onSuccess: (data, payload) => {
+            const msg = `Created ${payload.name}`;
             makeToast(msg);
 
             queryClient.invalidateQueries({ queryKey });
         },
     });
-
-
-    //delete a playlist
-    const deletePlaylistMutation = useMutation({
-        mutationFn: async({ playlist }: DeletePlaylistMutationProps) => {
-            const response = await fetch(`/playlists/${playlist.id}`, {
-                method: "DELETE",
-            });
-
-            if (!response.ok) throw new Error("Failed to delete playlist");
-
-            const data = await response.json();
-            return data;
-        },
-        onMutate: async({ playlist }) => {
-            await queryClient.cancelQueries({ queryKey });
-            const rollbackPlaylists = queryClient.getQueryData<SummaryPlaylist[]>(queryKey);
-
-            queryClient.setQueryData<SummaryPlaylist[]>(queryKey, (old: SummaryPlaylist[] | undefined) => {
-                return old?.filter(p => p.id !== playlist.id); //filter out the playlistId
-            });
-
-            return { rollbackPlaylists };
-        },
-        onError: (err, variables, context) => {
-            const msg = `Error`;
-            makeToast(msg);
-
-            if (context?.rollbackPlaylists) {
-                queryClient.setQueryData(queryKey, context.rollbackPlaylists);
-            }
-            console.log("Optimistic playlist deletion failed, rolling back.");
-        },
-        onSuccess: (data, variables) => {
-            const msg = `Deleted ${variables.playlist.name}`;
-            makeToast(msg);
-
-            queryClient.invalidateQueries({ queryKey });
-        },
-    });
-
 
     return {
         createPlaylist: createPlaylistMutation.mutate,
-        deletePlaylist: deletePlaylistMutation.mutate,
     };
 };
