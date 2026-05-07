@@ -59,6 +59,12 @@ export interface PopMutationProps {
     queueTrack: QueueTrack;
 }
 
+export interface SetAllPlaylistMutationProps {
+    playlist: SummaryPlaylist;
+    sortmode?: Sortmode;
+}
+
+
 
 /**
  * useSearch

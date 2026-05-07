@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { trackBaseToQueueTrack } from "@/track/track.utils";
 
 import type { QueueTrack } from "@/track/track.types";
-import type { PopMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
+import type { PopMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetAllPlaylistMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
 
 
 export const useQueue = () => {
@@ -205,5 +205,33 @@ export const useQueue = () => {
         pop: popMutation.mutate,
         isPushing: pushMutation.isPending,
         isPopping: popMutation.isPending,
+    };
+};
+
+
+export const useSetQueue = () => {
+    const queryClient = useQueryClient();
+
+    // set a playlist as the queue. does not optimistically update the queue
+    const setAllPlaylistMutation = useMutation({
+        mutationFn: async ({ playlist, sortmode }: SetAllPlaylistMutationProps) => {
+            const query = sortmode !== undefined ? `?sortmode=${sortmode}` : "";
+            const response = await fetch(`/queue/set-all/playlist/${playlist.id}${query}`, { method: "POST" });
+
+            if (!response.ok) throw new Error("Failed to set queue");
+
+            const data = await response.json();
+            return data;
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["queue"] }); //invalidate the queue state forcing a refetch
+        },
+        onError: (err) => {
+            console.log("Set queue failed.");
+        },
+    });
+
+    return {
+        setPlaylist: setAllPlaylistMutation.mutate,
     };
 };
