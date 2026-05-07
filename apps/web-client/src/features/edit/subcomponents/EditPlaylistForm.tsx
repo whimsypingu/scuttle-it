@@ -8,6 +8,7 @@ import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
 
 import type { SummaryPlaylist } from "@/playlist/playlist.types";
 import type { EditPlaylistMutationProps, EditPlaylistPayload } from "@/store/hooks/hooks.types";
+import { HoldToDeleteButton } from "@/components/ui/hold-delete";
 
 
 interface EditPlaylistFormProps {
@@ -45,7 +46,9 @@ export const EditPlaylistForm = ({
 
     return (
         <div className="flex flex-col h-full">
-            <div className="h-full custom-scrollbar overflow-y-auto flex flex-col gap-2">
+            <div className="flex-1 custom-scrollbar overflow-y-auto flex flex-col gap-2">
+
+                <div className="flex flex-col min-h-[calc(100%+1px)] gap-2">
                 {/* Name Section */}
                 <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-muted-foreground">
@@ -73,15 +76,11 @@ export const EditPlaylistForm = ({
                 </div>
 
                 {/* Delete Button */}
+                <div className="mt-auto" />
                 <div className="flex justify-end pb-1">
-                    <div className="h-0 px-1 py-2 transition-colors border-t" />
-                    <Button
-                        className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
-                        variant="destructive"
-                        onClick={handleDelete}
-                    >
-                        Delete
-                    </Button>
+                    <HoldToDeleteButton onDelete={handleDelete} />
+                </div>
+
                 </div>
             </div>
 
