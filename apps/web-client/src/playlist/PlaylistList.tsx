@@ -25,8 +25,8 @@ export const PlaylistList = ({
     //loading state
     if (isLoading) {
         return (
-            <div className="min-h-0 w-full h-full">                
-                <div className="flex flex-col gap-1 items-center justify-center px-4 py-16 text-center">
+            <div className="min-h-0 w-full h-full">
+                <div className="items-center justify-center px-4 py-16 text-center">
                     <div className="flex gap-1.5 items-center justify-center h-6">
                         {[0, 1, 2].map((index) => ( //3 bouncing dots, to test this f12 and networks tab and throttle the network to 3g
                             <motion.div

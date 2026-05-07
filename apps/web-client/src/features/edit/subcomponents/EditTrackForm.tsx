@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { useEditTrack } from "@/store/hooks/useEdit";
+import { usePlaylists } from "@/store/hooks/usePlaylists";
 
+import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
 import { getTrackDisplayMetadata } from "@/track/track.utils";
 
+import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
+
 import type { TrackBase } from "@/track/track.types";
 import type { EditArtistPayload, EditTrackMutationProps, EditTrackPayload } from "@/store/hooks/hooks.types";
-import { usePlaylists } from "@/store/hooks/usePlaylists";
-import { Checkbox } from "@/components/ui/checkbox";
 import type { PlaylistId } from "@/playlist/playlist.types";
 
 
@@ -147,7 +149,7 @@ export const EditTrackForm = ({
             {/* Save */}
             <div className="flex justify-end pt-4">
                 <Button
-                    className="min-w-[80px]"
+                    className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
                     variant="secondary"
                     onClick={handleSave}
                 >

@@ -4,6 +4,8 @@ import { useEditPlaylist } from "@/store/hooks/useEdit";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
+import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
+
 import type { SummaryPlaylist } from "@/playlist/playlist.types";
 import type { EditPlaylistMutationProps, EditPlaylistPayload } from "@/store/hooks/hooks.types";
 
@@ -37,6 +39,10 @@ export const EditPlaylistForm = ({
         onSave();
     }
 
+    const handleDelete = () => {
+        onSave();
+    }
+
     return (
         <div className="flex flex-col h-full">
             <div className="h-full custom-scrollbar overflow-y-auto flex flex-col gap-2">
@@ -67,8 +73,15 @@ export const EditPlaylistForm = ({
                 </div>
 
                 {/* Delete Button */}
-                <div className="flex flex-col gap-1">
-                    
+                <div className="flex justify-end pb-1">
+                    <div className="h-0 px-1 py-2 transition-colors border-t" />
+                    <Button
+                        className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
+                        variant="destructive"
+                        onClick={handleDelete}
+                    >
+                        Delete
+                    </Button>
                 </div>
             </div>
 

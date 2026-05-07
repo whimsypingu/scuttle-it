@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 
 import { generateUUID } from "@/lib/generate";
 
+import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
+
 import type { CreatePlaylistMutationProps, CreatePlaylistPayload } from "@/store/hooks/hooks.types";
 
 
@@ -69,7 +71,7 @@ export const CreatePlaylistForm = ({
             {/* Save */}
             <div className="flex justify-end pt-4">
                 <Button
-                    className="min-w-[80px]"
+                    className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
                     variant="secondary"
                     onClick={handleSave}
                 >
