@@ -114,7 +114,7 @@ class EditMixin:
 
         try:
             async with self.session() as db:
-                update_data = payload.model_dump(exclude_unset=True) #remembers missing fields from request body
+                update_data = payload.model_dump(exclude_unset=True) #remembers missing fields from request body, required to handle null vs non-existent description field
 
                 set_clauses = []
                 values = []

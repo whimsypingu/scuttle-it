@@ -21,7 +21,7 @@ export const EditPlaylistForm = ({
     const [descriptionInput, setDescriptionInput] = useState<string>(playlist.description ?? "");
 
     //edit hook with extra playlist details
-    const { playlistDetails, isLoading, editPlaylist } = useEditPlaylist(playlist);
+    const { playlistDetails, isLoading, editPlaylist } = useEditPlaylist(playlist); //provides support for future details like created timestamp etc
 
     const handleSave = () => {
         //finalized payload
@@ -48,7 +48,7 @@ export const EditPlaylistForm = ({
                     <Textarea
                         value={nameInput}
                         onChange={(e) => setNameInput(e.target.value)}
-                        placeholder={"Give this playlist a new name..."}
+                        placeholder={playlist.name}
                         className="text-md focus-visible:ring-1"
                     />
                 </div>
