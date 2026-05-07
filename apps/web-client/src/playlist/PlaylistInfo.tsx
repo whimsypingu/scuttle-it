@@ -7,11 +7,13 @@ import { SORTMODE_CONFIG } from '@/store/hooks/hooks.constants';
 import { PLAYLIST_CONFIG } from '@/playlist/playlist.constants';
 
 import type { PlaylistInfoProps } from '@/playlist/playlist.types';
-import type { Sortmode } from '@/store/hooks/hooks.types';
+import type { SetAllPlaylistMutationProps, Sortmode } from '@/store/hooks/hooks.types';
+import { useSetQueue } from '@/store/hooks/useQueue';
 
 
 export const PlaylistInfo = ({
-    scrollContext
+    playlist,
+    scrollContext,
 }: PlaylistInfoProps) => {
     const { 
         totalCount,
@@ -20,8 +22,21 @@ export const PlaylistInfo = ({
         setSortmode 
     } = scrollContext;
 
+    const { setPlaylist } = useSetQueue();
+
     const isSortable = (typeof sortmode === "number") && !!setSortmode; //check specifically for existence, not truthiness for sortmode because 0 is falsy
     const CurrentIcon = isSortable ? SORTMODE_CONFIG[sortmode].icon : QuestionIcon; //precompute current Icon if available, otherwise see a QuestionIcon which should never happen
+
+    //play the entire playlist with the given sorted order
+    const handlePlay = () => {
+        if (!!playlist) { //temporary, until we build the system playlist logic
+            const setAllPlaylistVars: SetAllPlaylistMutationProps = {
+                playlist,
+                sortmode,
+            };
+            setPlaylist(setAllPlaylistVars);
+        }
+    }
 
     return (
         <div className="flex gap-4">
@@ -42,7 +57,10 @@ export const PlaylistInfo = ({
             {/* RIGHT ACTION GROUP */}
             <div className="ml-auto flex items-end gap-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
                 {/* PLAY ALL */}
-                <button className="p-1">
+                <button 
+                    className="p-1"
+                    onClick={handlePlay}
+                >
                     <PlayIcon size={PLAYLIST_CONFIG.iconSize} weight="fill" />
                 </button>
                 

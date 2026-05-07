@@ -58,6 +58,7 @@ export interface InfiniteScrollContext {
 
 //playlist subcomponent properties
 export interface PlaylistInfoProps {
+    playlist?: SummaryPlaylist;
     scrollContext: InfiniteScrollContext;
 }
 

@@ -57,7 +57,10 @@ export const PlaylistContentView = ({
                         </p>
                     )}
                     
-                    <PlaylistInfo scrollContext={playlistScrollContext}/>
+                    <PlaylistInfo 
+                        playlist={summaryData} 
+                        scrollContext={playlistScrollContext}
+                    />
                 </div>
             </div>
 
