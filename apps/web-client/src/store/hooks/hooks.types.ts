@@ -24,7 +24,6 @@ export interface EditTrackPayload {
 }
 
 export interface EditTrackMutationProps {
-    trackId: TrackId;
     payload: EditTrackPayload; 
 }
 
@@ -35,7 +34,6 @@ export interface EditPlaylistPayload {
 }
 
 export interface EditPlaylistMutationProps {
-    playlistId: PlaylistId;
     payload: EditPlaylistPayload;
 }
 

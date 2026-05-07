@@ -35,7 +35,6 @@ export const EditPlaylistForm = ({
             description: descriptionInput || null, //change this to be undefined for no change
         };
         const editPlaylistVars: EditPlaylistMutationProps = {
-            playlistId: playlist.id,
             payload,
         };
         editPlaylist(editPlaylistVars);

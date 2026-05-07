@@ -101,7 +101,6 @@ export const EditTrackForm = ({
             playlistIds: hasPlaylistChanges ? [...selectedPlaylistIds] : undefined,
         };
         const editTrackVars: EditTrackMutationProps = {
-            trackId: track.id,
             payload,
         };
         editTrack(editTrackVars);

@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
-import type { EditPlaylistMutationProps, EditTrackMutationProps } from "@/store/hooks/hooks.types";
 import { makeToast } from "@/features/toast/Toast";
+
+import type { EditPlaylistMutationProps, EditTrackMutationProps } from "@/store/hooks/hooks.types";
 import type { TrackBase, TrackDetails } from "@/track/track.types";
 import type { PlaylistDetails, SummaryPlaylist } from "@/playlist/playlist.types";
 
@@ -24,9 +25,9 @@ export const useEditTrack = (track: TrackBase) => {
     });
 
     const editTrackMutation = useMutation({
-        mutationFn: async ({ trackId, payload }: EditTrackMutationProps) => {
+        mutationFn: async ({ payload }: EditTrackMutationProps) => {
             //see: apps/audio-server/api/routers/edit_router.py
-            const response = await fetch(`/edit/track/${trackId}`, {
+            const response = await fetch(`/edit/track/${track.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -84,9 +85,9 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
     });
 
     const editPlaylistMutation = useMutation({
-        mutationFn: async ({ playlistId, payload }: EditPlaylistMutationProps) => {
+        mutationFn: async ({ payload }: EditPlaylistMutationProps) => {
             //see: apps/audio-server/api/routers/edit_router.py
-            const response = await fetch(`/edit/playlist/${playlistId}`, {
+            const response = await fetch(`/edit/playlist/${playlist.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
