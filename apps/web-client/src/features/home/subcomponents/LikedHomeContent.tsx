@@ -67,6 +67,7 @@ export const LikedHomeContentView = ({
                     </p>
                     
                     <PlaylistInfo 
+                        playlist={contentData}
                         scrollContext={likesScrollContext}
                     />
                 </div>

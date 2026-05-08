@@ -5,9 +5,10 @@ import type { Sortmode } from "@/store/hooks/hooks.types";
 
 
 export type PlaylistId = string;
+export type SystemPlaylistId = string;
 
 export interface PlaylistBase {
-    id: PlaylistId;
+    id: PlaylistId | SystemPlaylistId;
     name: string;
 }
 export interface SummaryPlaylist extends PlaylistBase {
@@ -58,7 +59,7 @@ export interface InfiniteScrollContext {
 
 //playlist subcomponent properties
 export interface PlaylistInfoProps {
-    playlist?: SummaryPlaylist;
+    playlist: PlaylistBase;
     scrollContext: InfiniteScrollContext;
 }
 

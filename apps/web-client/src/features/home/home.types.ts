@@ -1,3 +1,4 @@
+import type { PlaylistBase } from "@/playlist/playlist.types";
 import type { HOME_CONTENT_TYPES } from "./home.constants";
 
 
@@ -7,10 +8,8 @@ export interface HomeViewProps {
 
 export type HomeContentType = typeof HOME_CONTENT_TYPES[keyof typeof HOME_CONTENT_TYPES];
 
-export interface HomeContent {
-    id: string;
+export interface HomeContent extends PlaylistBase {
     type: HomeContentType; 
-    name: string;
     description?: string;
     color?: string;
 }

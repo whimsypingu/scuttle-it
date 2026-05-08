@@ -29,13 +29,11 @@ export const PlaylistInfo = ({
 
     //play the entire playlist with the given sorted order
     const handlePlay = () => {
-        if (!!playlist) { //temporary, until we build the system playlist logic
-            const setAllPlaylistVars: SetAllPlaylistMutationProps = {
-                playlist,
-                sortmode,
-            };
-            setPlaylist(setAllPlaylistVars);
-        }
+        const setAllPlaylistVars: SetAllPlaylistMutationProps = {
+            playlist,
+            sortmode,
+        };
+        setPlaylist(setAllPlaylistVars);
     }
 
     return (
