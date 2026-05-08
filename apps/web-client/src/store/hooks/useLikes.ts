@@ -71,7 +71,7 @@ export const useLikesContent = (limit: number = 30) => {
  */
 export const useLikesMutations = () => {
     const queryClient = useQueryClient();
-    const queryKey = ["tracks", "likes"];
+    const rootKey = ["tracks", "likes"]; //does not include sortmode as the last part of the queryKey
 
     //set a track to liked or unliked state
     const setLikeMutation = useMutation({
@@ -84,12 +84,12 @@ export const useLikesMutations = () => {
             return data;
         },
         onMutate: async (variables) => {
-            await queryClient.cancelQueries({ queryKey });
-            const rollbackLikes = queryClient.getQueryData<InfiniteData<any>>(queryKey);
+            await queryClient.cancelQueries({ queryKey: rootKey });
+            const rollbackLikes = queryClient.getQueriesData<InfiniteData<any>>({ queryKey: rootKey });
 
             const tempLikedTrack = trackBaseToPlaylistTrack(variables.track); //typecast to a PlaylistTrack with -1 default position field -- could cause problems
 
-            queryClient.setQueryData<InfiniteData<any>>(queryKey, (old) => {
+            queryClient.setQueriesData<InfiniteData<any>>({ queryKey: rootKey }, (old) => {
                 if (!old) return old; //not opened yet, no need to even bother with an optimistic update
 
                 //check if the track already exists anywhere in the infinite cache
@@ -110,7 +110,7 @@ export const useLikesMutations = () => {
                         }
 
                         // UNLIKING: remove it from every page it might be on
-                        if (!variables.liked) {
+                        if (!variables.liked && isAlreadyInCache) {
                             return {
                                 ...page,
                                 results: page.results.filter((t: PlaylistTrack) => t.id !== variables.track.id),
@@ -129,8 +129,11 @@ export const useLikesMutations = () => {
             const msg = `Error`;
             makeToast(msg);
 
+            //rollback all versions of the likes list
             if (context?.rollbackLikes) {
-                queryClient.setQueryData(queryKey, context.rollbackLikes);
+                context.rollbackLikes.forEach(([key, old]) => {
+                    queryClient.setQueryData(key, old);
+                })
             }
             console.log("Optimistic setting like/unlike failed, rolling back.");
         },
@@ -138,6 +141,8 @@ export const useLikesMutations = () => {
             const { titleDisplay } = getTrackDisplayMetadata(variables.track);
             const msg = `${variables.liked ? "Liked" : "Removed"} ${titleDisplay}`;
             makeToast(msg);
+
+            // queryClient.invalidateQueries({ queryKey });
         },
     });
 
