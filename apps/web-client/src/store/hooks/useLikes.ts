@@ -138,9 +138,10 @@ export const useLikesMutations = () => {
             console.log("Optimistic setting like/unlike failed, rolling back.");
         },
         onSuccess: (data, variables) => {
-            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
-            const msg = `${variables.liked ? "Liked" : "Removed"} ${titleDisplay}`;
-            makeToast(msg);
+            if (variables.successMsg) {
+                const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+                makeToast(`${variables.successMsg}: `, titleDisplay);
+            }
 
             // queryClient.invalidateQueries({ queryKey });
         },

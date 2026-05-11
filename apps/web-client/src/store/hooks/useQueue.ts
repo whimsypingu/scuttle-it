@@ -60,9 +60,10 @@ export const useQueue = () => {
         onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue); //immediately swap the optimistic -1 queueId for DB-assigned queueId
 
-            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
-            const msg = `Playing: ${titleDisplay}`;
-            makeToast(msg);
+            if (variables.successMsg) {
+                const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+                makeToast(`${variables.successMsg}: `, titleDisplay);
+            }
         },
     });
 
@@ -130,9 +131,10 @@ export const useQueue = () => {
         onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue);
 
-            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
-            const msg = `Queued: ${titleDisplay}`;
-            makeToast(msg);
+            if (variables.successMsg) {
+                const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+                makeToast(`${variables.successMsg}: `, titleDisplay);
+            }
         },
     });
 
@@ -171,9 +173,10 @@ export const useQueue = () => {
         onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue);
 
-            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
-            const msg = `Next: ${titleDisplay}`;
-            makeToast(msg);
+            if (variables.successMsg) {
+                const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+                makeToast(`${variables.successMsg}: `, titleDisplay);
+            }
         },
     });
 
@@ -206,9 +209,10 @@ export const useQueue = () => {
         onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue);
 
-            const { titleDisplay } = getTrackDisplayMetadata(variables.queueTrack);
-            const msg = `Removed: ${titleDisplay}`;
-            makeToast(msg);
+            if (variables.successMsg) {
+                const { titleDisplay } = getTrackDisplayMetadata(variables.queueTrack);
+                makeToast(`${variables.successMsg}: `, titleDisplay);
+            }
         },
     });
 

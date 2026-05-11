@@ -23,6 +23,7 @@ export const useTrackActionHandler = () => {
             case "setFirst": //set first in queue
                 const setFirstTrackVars: SetFirstMutationProps = {
                     track: props.track,
+                    successMsg: "Playing",
                 };
                 setFirst(setFirstTrackVars);
                 break;
@@ -30,6 +31,7 @@ export const useTrackActionHandler = () => {
             case "queueLast": //add to queue
                 const pushTrackVars: PushMutationProps = {
                     track: props.track,
+                    successMsg: "Queued",
                 };
                 push(pushTrackVars);
                 break;
@@ -37,17 +39,19 @@ export const useTrackActionHandler = () => {
             case "queueNext": //push next
                 const pushNextTrackVars: PushNextMutationProps = {
                     track: props.track,
+                    successMsg: "Next",
                 };
                 pushNext(pushNextTrackVars);
                 break;
 
-            case "delete":
+            case "delete": //NOT USED
                 makeToast(props.action);
                 break;
 
             case "deleteQueue": //delete from queue
                 const popTrackVars: PopMutationProps = {
                     queueTrack: props.queueTrack,
+                    successMsg: "Removed",
                 };
                 pop(popTrackVars);
                 break;
@@ -64,6 +68,7 @@ export const useTrackActionHandler = () => {
                 const setLikeVars: SetLikeMutationProps = {
                     track: props.track,
                     liked: true,
+                    successMsg: "Liked",
                 };
                 setLike(setLikeVars);
                 break;
@@ -72,6 +77,7 @@ export const useTrackActionHandler = () => {
                 const setUnlikeVars: SetLikeMutationProps = {
                     track: props.track,
                     liked: false,
+                    successMsg: "Removed",
                 };
                 setLike(setUnlikeVars);
                 break; 
