@@ -32,6 +32,7 @@ export const PlaylistInfo = ({
         const setAllPlaylistVars: SetAllPlaylistMutationProps = {
             playlist,
             sortmode,
+            successMsg: "Playing",
         };
         setPlaylist(setAllPlaylistVars);
     }

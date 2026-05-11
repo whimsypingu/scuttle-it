@@ -255,8 +255,9 @@ export const useSetQueue = () => {
                 audioEngine.playTrack({ trackId: firstTrack.id, forceRestart: true }); //immediately start playing on success
             }
 
-            const msg = `Playing: ${variables.playlist.name}`;
-            makeToast(msg);
+            if (variables.successMsg) {
+                makeToast(`${variables.successMsg}: `, variables.playlist.name);
+            }
         },
         onError: (err) => {
             console.log("Set queue failed.");

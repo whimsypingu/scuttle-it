@@ -29,6 +29,7 @@ export const usePlaylistActionHandler = () => {
             case "play":
                 const setAllPlaylistVars: SetAllPlaylistMutationProps = {
                     playlist: props.playlist,
+                    successMsg: "Playing",
                 };
                 setPlaylist(setAllPlaylistVars);
                 break;
