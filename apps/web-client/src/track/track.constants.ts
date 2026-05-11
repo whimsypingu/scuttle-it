@@ -1,4 +1,4 @@
-import { HeartBreakIcon, HeartIcon, PenIcon, PlusCircleIcon, RowsPlusTopIcon, TrashIcon } from '@phosphor-icons/react';
+import { HeartBreakIcon, HeartIcon, PenIcon, RowsPlusBottomIcon, RowsPlusTopIcon, TrashIcon } from '@phosphor-icons/react';
 import type { TrackAction, TrackActionConfig } from "@/track/track.types";
 
 
@@ -15,7 +15,7 @@ export const TRACK_ACTION_CONFIG: Record<TrackAction, TrackActionConfig> = {
         color: "var(--color-brand)" 
     },
 	queueLast: { 
-        icon: PlusCircleIcon, 
+        icon: RowsPlusBottomIcon, 
         color: "var(--color-brand)"
     },
     queueNext: {
