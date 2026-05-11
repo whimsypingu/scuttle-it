@@ -152,7 +152,7 @@ export const usePlaylistsMutations = () => {
             const msg = `Created ${payload.name}`;
             makeToast(msg);
 
-            queryClient.invalidateQueries({ queryKey });
+            queryClient.invalidateQueries({ queryKey }); //make optimistic later
         },
     });
 

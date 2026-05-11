@@ -106,6 +106,7 @@ export const useLikesMutations = () => {
                                 ...page,
                                 results: [tempLikedTrack, ...page.results],
                                 totalCount: page.totalCount + 1,
+                                totalDuration: page.totalDuration + variables.track.duration,
                             };
                         }
 
@@ -115,6 +116,7 @@ export const useLikesMutations = () => {
                                 ...page,
                                 results: page.results.filter((t: PlaylistTrack) => t.id !== variables.track.id),
                                 totalCount: Math.max(0, page.totalCount - 1),
+                                totalDuration: Math.max(0, page.totalDuration - variables.track.duration),
                             };
                         }
 
