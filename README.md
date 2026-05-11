@@ -17,7 +17,7 @@ Scuttle is an audio archival tool for managing and playing your personal audio c
         </td>
         <td align="center" width="40%">
             <p><b>Web Client</b> <em>(5/11/26)</em></p>
-            <video src="./docs/assets/web_client_demo_TEMP.mp4" controls muted loop style="max-width: 100%;"></video>
+            <video src="https://github.com/user-attachments/assets/c76482a3-96f5-4ffb-94b7-9fa0437f97e1" controls muted loop style="max-width: 100%;"></video>
         </td>
     </tr>
 </table>
