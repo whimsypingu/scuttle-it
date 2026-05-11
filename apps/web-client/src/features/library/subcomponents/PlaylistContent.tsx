@@ -1,33 +1,32 @@
 import { motion } from 'framer-motion';
 import { XIcon } from '@phosphor-icons/react';
 
-import { useLikesContent } from '@/store/hooks/useLikes';
-
 import { PlaylistList } from '@/playlist/PlaylistList';
 import { PlaylistInfo } from '@/playlist/PlaylistInfo';
 
 import { BOTTOM_SHELF } from '@/features/player/player.constants';
 
-import type { HomeContent, SystemPlaylist } from '@/features/home/home.types';
+import type { SummaryPlaylist } from '@/playlist/playlist.types';
+import { usePlaylistContent } from '@/store/hooks/usePlaylists';
 
 
-interface LikedHomeContentViewProps {
-    data: SystemPlaylist;
+interface PlaylistContentViewProps {
+    summaryData: SummaryPlaylist;
     onClose: () => void;
 }
 
-export const LikedHomeContentView = ({
-    data,
+export const PlaylistContentView = ({
+    summaryData,
     onClose
-}: LikedHomeContentViewProps) => {
+}: PlaylistContentViewProps) => {
 
-    const likesScrollContext = useLikesContent();
+    const playlistScrollContext = usePlaylistContent(summaryData.id);
 
     return (
         <>
-        {/* LIKED TRACKS VIEW */}
+        {/* PLAYLIST TRACKS VIEW */}
         <motion.div
-            key="liked-home-content-view"
+            key="playlist-content-view"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -43,7 +42,7 @@ export const LikedHomeContentView = ({
                     }}
                 >
                     <h1 className="tab-heading truncate pr-4">
-                        Likes
+                        {summaryData.name}
                     </h1>
                     <button className="text-sm font-medium text-white/40 active:text-white shrink-0">
                         <XIcon size={20} weight="bold" />
@@ -52,23 +51,15 @@ export const LikedHomeContentView = ({
     
                 {/* ABOUT / METADATA SECTION */}
                 <div className="flex flex-col gap-2 mx-1">
-                    <div className="flex items-center gap-2">
-                        <div 
-                            className="w-2 h-2 rounded-full animate-pulse" 
-                            style={{ backgroundColor: "var(--color-brand)" }} //update this later
-                        />
-                        <span className="text-[10px] uppercase tracking-[0.15em] font-black text-white/60">
-                            {data.tagline}
-                        </span>
-                    </div>
-
-                    <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
-                        {data.description}
-                    </p>
+                    {summaryData.description && (
+                        <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
+                            {summaryData.description}
+                        </p>
+                    )}
                     
                     <PlaylistInfo 
-                        playlist={data}
-                        scrollContext={likesScrollContext}
+                        playlist={summaryData} 
+                        scrollContext={playlistScrollContext}
                     />
                 </div>
             </div>
@@ -76,10 +67,10 @@ export const LikedHomeContentView = ({
             {/* CONTENT AREA */}
             <div className="flex-1 no-scrollbar">
                 <PlaylistList
-                    scrollContext={likesScrollContext}
+                    scrollContext={playlistScrollContext}
                     bottomSpacing={BOTTOM_SHELF.totalHeight}
-                    actions={["queueNext", "queueLast", "unlike", "edit"]}
-                    emptySubtext="Swipe left to like a track"
+                    actions={["queueNext", "queueLast", "like", "edit"]}
+                    emptySubtext="Swipe left and edit to add a track"
                 />
             </div>
         </motion.div>

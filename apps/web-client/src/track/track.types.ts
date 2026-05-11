@@ -1,3 +1,4 @@
+import type { PlaylistBase } from "@/playlist/playlist.types";
 import type { IconProps } from "@phosphor-icons/react";
 
 export type ArtistId = string;
@@ -26,6 +27,9 @@ export interface QueueTrack extends TrackBase {
     queueId: QueueId;
     position: number;
 }
+export interface TrackDetails extends TrackBase {
+    playlists: PlaylistBase[];
+}
 
 //all available track actions with their required properties to execute the functions
 export type TrackActionProps = 
@@ -46,8 +50,8 @@ export interface TrackActionConfig { //corresponding phosphor icon and color pai
 
 //fields for a TrackItem
 export interface TrackItemProps {
-    track: TrackBase | QueueTrack; //technically just TrackBase works fine but for clarity it could be version of one
-    onSelect: (track: TrackBase | QueueTrack) => void;
+    track: TrackBase; //covers all kinds of TrackBase derived tracks
+    onSelect: (track: TrackBase) => void;
     index: number;
 	actions?: [TrackAction, TrackAction, TrackAction, TrackAction]; //leftmost action to rightmost action
 }

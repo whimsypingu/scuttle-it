@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 
-import type { TrackBase } from "@/model/model.types";
+import type { TrackBase } from "@/track/track.types";
 import type { YTSearchMutationProps } from "@/store/hooks/hooks.types";
 
 

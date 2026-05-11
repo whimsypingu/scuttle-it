@@ -1,11 +1,13 @@
-// src/model/model.utils.ts
+// src/track/track.utils.ts
 import { useQueue } from '@/store/hooks/useQueue';
 import { useEditTarget } from '@/features/edit/EditProvider';
 import { useLikesMutations } from '@/store/hooks/useLikes';
 
 import { makeToast } from '@/features/toast/Toast';
 
-import type { PlaylistTrack, QueueId, QueueTrack, TrackActionProps, TrackBase } from '@/model/model.types';
+import type { PlaylistTrack, QueueId, QueueTrack, TrackActionProps, TrackBase } from '@/track/track.types';
+import type { ActiveEditTarget } from '@/features/edit/edit.types';
+import type { PopMutationProps, PushMutationProps, PushNextMutationProps, SetFirstMutationProps, SetLikeMutationProps } from '@/store/hooks/hooks.types';
 
 
 export const useTrackActionHandler = () => {
@@ -19,17 +21,24 @@ export const useTrackActionHandler = () => {
         
         switch (props.action) {
             case "setFirst": //set first in queue
-                setFirst({ track: props.track });
+                const setFirstTrackVars: SetFirstMutationProps = {
+                    track: props.track,
+                };
+                setFirst(setFirstTrackVars);
                 break;
 
             case "queueLast": //add to queue
-                makeToast(props.action);
-                push({ track: props.track });
+                const pushTrackVars: PushMutationProps = {
+                    track: props.track,
+                };
+                push(pushTrackVars);
                 break;
 
             case "queueNext": //push next
-                makeToast(props.action);
-                pushNext({ track: props.track });
+                const pushNextTrackVars: PushNextMutationProps = {
+                    track: props.track,
+                };
+                pushNext(pushNextTrackVars);
                 break;
 
             case "delete":
@@ -37,30 +46,35 @@ export const useTrackActionHandler = () => {
                 break;
 
             case "deleteQueue": //delete from queue
-                makeToast(props.action);
-                pop({ queueTrack: props.queueTrack });
+                const popTrackVars: PopMutationProps = {
+                    queueTrack: props.queueTrack,
+                };
+                pop(popTrackVars);
                 break;
 
             case "edit": //open a track editing popup
-                setEditTarget({ 
-                    type: "track", 
-                    data: props.track 
-                });
+                const editTrackTarget: ActiveEditTarget = {
+                    type: "editTrack", 
+                    data: props.track,
+                };
+                setEditTarget(editTrackTarget);
                 break;
 
             case "like": //like a track
-                setLike({
+                const setLikeVars: SetLikeMutationProps = {
                     track: props.track,
                     liked: true,
-                });
+                };
+                setLike(setLikeVars);
                 break;
 
             case "unlike": //unlike a track
-                setLike({
+                const setUnlikeVars: SetLikeMutationProps = {
                     track: props.track,
                     liked: false,
-                });
-                break;
+                };
+                setLike(setUnlikeVars);
+                break; 
         }
     };
 

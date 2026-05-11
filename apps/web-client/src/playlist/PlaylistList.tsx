@@ -1,23 +1,56 @@
 import { motion } from 'framer-motion';
 
-import { TrackItem } from '@/model/TrackItem';
+import { TrackItem } from '@/track/TrackItem';
 
-import type { PlaylistListProps } from '@/features/playlist/playlist.types';
-import type { TrackBase } from '@/model/model.types';
+import type { PlaylistListProps } from '@/playlist/playlist.types';
+import type { TrackBase } from '@/track/track.types';
 import { Virtuoso } from 'react-virtuoso';
 
 
 export const PlaylistList = ({
     scrollContext,
     bottomSpacing = 0,
-    actions = ["queueNext", "queueLast", "like", "edit"]
+    actions = ["queueNext", "queueLast", "like", "edit"],
+    emptyText = "No Tracks",
+    emptySubtext = "Add some tracks!"
 }: PlaylistListProps) => {
     const {
         tracks,
         fetchNextPage,
         hasNextPage,
-        isFetchingNextPage
+        isFetchingNextPage,
+        isLoading,
     } = scrollContext;
+
+    //loading state
+    if (isLoading) {
+        return (
+            <div className="min-h-0 w-full h-full">
+                <div className="items-center justify-center px-4 py-16 text-center">
+                    <div className="flex gap-1.5 items-center justify-center h-6">
+                        {[0, 1, 2].map((index) => ( //3 bouncing dots, to test this f12 and networks tab and throttle the network to 3g
+                            <motion.div
+                                key={index}
+                                className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60"
+                                initial={{ opacity: 0 }}
+                                animate={{ 
+                                    y: [0, -6, 0],
+                                    opacity: [0.4, 1, 0.4] 
+                                }}
+                                transition={{
+                                    duration: 0.8,
+                                    repeat: Infinity,
+                                    repeatDelay: 0.5,
+                                    delay: index * 0.15,
+                                    ease: "easeInOut",
+                                }}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     //nothing to show
     if (tracks.length === 0) {
@@ -25,11 +58,11 @@ export const PlaylistList = ({
             <div className="min-h-0 w-full h-full">                
                 <div className="flex flex-col gap-1 items-center justify-center px-4 py-16 text-center">
                     <p className="text-sm font-medium text-muted-foreground">
-                        No Tracks
+                        {emptyText}
                     </p>
                     
                     <p className="text-xs text-muted-foreground/60">
-                        Add some tracks!
+                        {emptySubtext}
                     </p>
                 </div>
             </div>

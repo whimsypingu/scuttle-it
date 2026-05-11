@@ -2,10 +2,10 @@ import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-q
 import { useMemo, useState } from 'react';
 
 import { makeToast } from '@/features/toast/Toast';
-import { getTrackDisplayMetadata, trackBaseToPlaylistTrack } from '@/model/model.utils';
+import { getTrackDisplayMetadata, trackBaseToPlaylistTrack } from '@/track/track.utils';
 
 import type { InfiniteData } from '@tanstack/react-query';
-import type { PlaylistTrack } from '@/model/model.types';
+import type { PlaylistTrack } from '@/track/track.types';
 import type { SetLikeMutationProps, Sortmode } from '@/store/hooks/hooks.types';
 
 
@@ -14,17 +14,23 @@ import type { SetLikeMutationProps, Sortmode } from '@/store/hooks/hooks.types';
  * 
  * Hook to get the contents of the liked tracks
  */
-export const useLikes = (limit = 30) => {
+export const useLikesContent = (limit: number = 30) => {
     const [sortmode, setSortmode] = useState<Sortmode>(0);
 
     const queryKey = ["tracks", "likes", sortmode];
 
     //fetch likes
-    const getLikes = useInfiniteQuery({
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isLoading,
+        isFetchingNextPage,
+    } = useInfiniteQuery({
         queryKey,
         initialPageParam: 0,
         queryFn: async ({ pageParam }) => {
-            console.log("useLikes triggered");
+            console.log("useLikesContent triggered");
 
             const response = await fetch(`/retrieve/likes?offset=${pageParam}&limit=${limit}&sortmode=${sortmode}`, { method: "GET" });
             if (!response.ok) throw new Error("Failed to fetch likes");
@@ -40,20 +46,20 @@ export const useLikes = (limit = 30) => {
     });
 
     const tracks = useMemo(() =>
-        getLikes.data?.pages.flatMap(page => page.results) ?? [],
-    [getLikes.data]);
+        data?.pages.flatMap(page => page.results) ?? [],
+    [data]);
 
 
     return {
         tracks,
         sortmode,
         setSortmode,
-        totalCount: getLikes.data?.pages[0]?.totalCount ?? 0,
-        totalDuration: getLikes.data?.pages[0]?.totalDuration ?? 0,
-        fetchNextPage: getLikes.fetchNextPage,
-        hasNextPage: getLikes.hasNextPage,
-        isLoading: getLikes.isLoading,
-        isFetchingNextPage: getLikes.isFetchingNextPage,
+        totalCount: data?.pages[0]?.totalCount ?? 0,
+        totalDuration: data?.pages[0]?.totalDuration ?? 0,
+        fetchNextPage,
+        hasNextPage,
+        isLoading,
+        isFetchingNextPage,
     };
 };
 
@@ -65,7 +71,7 @@ export const useLikes = (limit = 30) => {
  */
 export const useLikesMutations = () => {
     const queryClient = useQueryClient();
-    const queryKey = ["tracks", "likes"];
+    const rootKey = ["tracks", "likes"]; //does not include sortmode as the last part of the queryKey
 
     //set a track to liked or unliked state
     const setLikeMutation = useMutation({
@@ -77,25 +83,25 @@ export const useLikesMutations = () => {
             const data = await response.json();
             return data;
         },
-        onMutate: async ({ track, liked }) => {
-            await queryClient.cancelQueries({ queryKey });
-            const rollbackLikes = queryClient.getQueryData<InfiniteData<any>>(queryKey);
+        onMutate: async (variables) => {
+            await queryClient.cancelQueries({ queryKey: rootKey });
+            const rollbackLikes = queryClient.getQueriesData<InfiniteData<any>>({ queryKey: rootKey });
 
-            const tempLikedTrack = trackBaseToPlaylistTrack(track); //typecast to a PlaylistTrack with -1 default position field -- could cause problems
+            const tempLikedTrack = trackBaseToPlaylistTrack(variables.track); //typecast to a PlaylistTrack with -1 default position field -- could cause problems
 
-            queryClient.setQueryData<InfiniteData<any>>(queryKey, (old) => {
+            queryClient.setQueriesData<InfiniteData<any>>({ queryKey: rootKey }, (old) => {
                 if (!old) return old; //not opened yet, no need to even bother with an optimistic update
 
                 //check if the track already exists anywhere in the infinite cache
                 const isAlreadyInCache = old.pages.some(page => 
-                    page.results.some((t: PlaylistTrack) => t.id === track.id)
+                    page.results.some((t: PlaylistTrack) => t.id === variables.track.id)
                 );
 
                 return {
                     ...old,
                     pages: old.pages.map((page, index) => {
                         // LIKING: add it to the top of the first page
-                        if (liked && !isAlreadyInCache && index === 0) {
+                        if (variables.liked && !isAlreadyInCache && index === 0) {
                             return {
                                 ...page,
                                 results: [tempLikedTrack, ...page.results],
@@ -104,10 +110,10 @@ export const useLikesMutations = () => {
                         }
 
                         // UNLIKING: remove it from every page it might be on
-                        if (!liked) {
+                        if (!variables.liked && isAlreadyInCache) {
                             return {
                                 ...page,
-                                results: page.results.filter((t: PlaylistTrack) => t.id !== track.id),
+                                results: page.results.filter((t: PlaylistTrack) => t.id !== variables.track.id),
                                 totalCount: Math.max(0, page.totalCount - 1),
                             };
                         }
@@ -123,16 +129,20 @@ export const useLikesMutations = () => {
             const msg = `Error`;
             makeToast(msg);
 
+            //rollback all versions of the likes list
             if (context?.rollbackLikes) {
-                queryClient.setQueryData(queryKey, context.rollbackLikes);
+                context.rollbackLikes.forEach(([key, old]) => {
+                    queryClient.setQueryData(key, old);
+                })
             }
             console.log("Optimistic setting like/unlike failed, rolling back.");
         },
         onSuccess: (data, variables) => {
-            const msg = `${variables.liked ? "Liked" : "Removed"} ${getTrackDisplayMetadata(variables.track).titleDisplay}`;
+            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+            const msg = `${variables.liked ? "Liked" : "Removed"} ${titleDisplay}`;
             makeToast(msg);
 
-            queryClient.invalidateQueries({ queryKey });
+            // queryClient.invalidateQueries({ queryKey });
         },
     });
 

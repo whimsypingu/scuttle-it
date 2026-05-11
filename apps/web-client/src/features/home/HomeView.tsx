@@ -4,7 +4,8 @@ import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
 import type { HomeContent, HomeViewProps } from "@/features/home/home.types";
 import { AnimatePresence, motion } from "framer-motion";
-import { HOME_CONTENT_COMPONENTS, HOME_CONTENT_TYPES } from "./home.constants";
+import { MOCK_HOME_CONTENTS } from "./home.constants";
+import { OtherHomeContentView } from "./subcomponents/OtherHomeContent";
 
 
 export const MockHome = ({
@@ -21,9 +22,32 @@ export const MockHome = ({
         }
     }, [tabResetSignal]);
 
-    const ActiveHomeContentView = selectedHomeContent 
-        ? (HOME_CONTENT_COMPONENTS[selectedHomeContent.type] || HOME_CONTENT_COMPONENTS[HOME_CONTENT_TYPES.OTHER])
-        : (HOME_CONTENT_COMPONENTS[HOME_CONTENT_TYPES.OTHER]);
+
+    const renderActiveContent = () => {
+        if (!selectedHomeContent) return null;
+
+        const { type, data } = selectedHomeContent;
+
+        let ActiveHomeContentView = null;
+        switch (type) {
+            case ("systemPlaylist"):
+                ActiveHomeContentView = data.component;
+                break;
+            default:
+                console.error("Unimplemented ActiveHomeContentView");
+                return null;
+        }
+
+        return (
+            <ActiveHomeContentView
+                data={data}
+                onClose={() => setSelectedHomeContent(null)}
+            />
+        );
+    }
+    // const ActiveHomeContentView = selectedHomeContent 
+    //     ? (HOME_CONTENT_COMPONENTS[selectedHomeContent.type] || HOME_CONTENT_COMPONENTS[HOME_CONTENT_TYPES.OTHER])
+    //     : (HOME_CONTENT_COMPONENTS[HOME_CONTENT_TYPES.OTHER]);
 
     return (
         <>
@@ -53,9 +77,9 @@ export const MockHome = ({
                                 className="grid grid-cols-2 gap-4"
                                 style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
                             >
-                                {MOCK_HOME_CONTENTS.map(item => (
+                                {MOCK_HOME_CONTENTS.map((item, index) => (
                                     <div 
-                                        key={item.id} 
+                                        key={index} 
                                         className="bg-card aspect-square rounded-md shadow-lg p-4 flex flex-col"
                                         onClick={() => setSelectedHomeContent(item)}
                                     >
@@ -76,10 +100,7 @@ export const MockHome = ({
                     </>
                 ) : (
                     <>
-                    <ActiveHomeContentView
-                        contentData={selectedHomeContent}
-                        onClose={() => setSelectedHomeContent(null)}
-                    />
+                    {renderActiveContent()}
                     </>
                 )}
             </AnimatePresence>
@@ -87,90 +108,3 @@ export const MockHome = ({
         </>
     );
 };
-
-export const MOCK_HOME_CONTENTS: HomeContent[] = [
-    {
-        id: "hc1",
-        type: HOME_CONTENT_TYPES.DOWNLOADS,
-        name: "All Tracks",
-        description: "Your core library. Every single track in one playlist.",
-        color: "#22c55e", // Green
-    },
-    {
-        id: "hc2",
-        type: HOME_CONTENT_TYPES.RECENTLY_PLAYED,
-        name: "Recently Played",
-        description: "Jump back into the tracks and albums you've been spinning lately.",
-        color: "#3b82f6", // Blue
-    },
-    {
-        id: "hc3",
-        type: HOME_CONTENT_TYPES.POPULAR,
-        name: "Popular Now",
-        description: "The hottest tracks trending across the community this week.",
-        color: "#ef4444", // Red
-    },
-    {
-        id: "hc4",
-        type: HOME_CONTENT_TYPES.LIKES,
-        name: "Likes",
-        description: "All your liked tracks.",
-        color: "#a855f7", // Purple
-    },
-    {
-        id: "hc5",
-        type: HOME_CONTENT_TYPES.OTHER,
-        name: "Morning Energy",
-        description: "Uptempo tracks to kickstart your daily routine.",
-        color: "#eab308", // Yellow
-    },
-    {
-        id: "hc6",
-        type: HOME_CONTENT_TYPES.OTHER,
-        name: "Heavy Rotation",
-        description: "Your most-played tracks from the last 30 days.",
-        color: "#ec4899", // Pink
-    },
-    {
-        id: "hc7",
-        type: HOME_CONTENT_TYPES.OTHER,
-        name: "New Discoveries",
-        description: "Fresh releases tailored to your specific taste profile.",
-        color: "#14b8a6", // Teal
-    },
-    {
-        id: "hc8",
-        type: HOME_CONTENT_TYPES.OTHER,
-        name: "Chill Classics",
-        description: "Timeless records that set a relaxed mood.",
-        color: "#f97316", // Orange
-    },
-    {
-        id: "hc9",
-        type: HOME_CONTENT_TYPES.OTHER,
-        name: "Late Night Melodies",
-        description: "Soft acoustics and midnight jazz for the wind-down.",
-        color: "#6366f1", // Indigo
-    },
-    {
-        id: "hc10",
-        type: HOME_CONTENT_TYPES.OTHER,
-        name: "Gym Motivation",
-        description: "High-BPM anthems to push your limits.",
-        color: "#475569", // Slate
-    },
-    {
-        id: "hc11",
-        type: HOME_CONTENT_TYPES.OTHER,
-        name: "On The Road",
-        description: "The perfect companion for long drives and open highways.",
-        color: "#84cc16", // Lime
-    },
-    {
-        id: "hc12",
-        type: HOME_CONTENT_TYPES.OTHER,
-        name: "Hidden Gems",
-        description: "Under-the-radar tracks you might have missed.",
-        color: "#06b6d4", // Cyan
-    },
-];

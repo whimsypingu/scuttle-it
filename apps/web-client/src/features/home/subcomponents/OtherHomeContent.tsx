@@ -1,18 +1,18 @@
 import { motion } from 'framer-motion';
 
 import { XIcon } from '@phosphor-icons/react';
-import type { HomeContent } from '../home.types';
+import type { HomeContent, SystemPlaylist } from '../home.types';
 import { BOTTOM_SHELF } from '@/features/player/player.constants';
-import { PlaylistList } from '@/features/playlist/PlaylistList';
+import { PlaylistList } from '@/playlist/PlaylistList';
 
 
 interface OtherHomeContentViewProps {
-    contentData: HomeContent;
+    data: SystemPlaylist;
     onClose: () => void;
 }
 
 export const OtherHomeContentView = ({
-    contentData,
+    data,
     onClose
 }: OtherHomeContentViewProps) => {
 
@@ -47,7 +47,7 @@ export const OtherHomeContentView = ({
                     <div className="flex items-center gap-2">
                         <div 
                             className="w-2 h-2 rounded-full animate-pulse" 
-                            style={{ backgroundColor: contentData.color }} 
+                            style={{ backgroundColor: "var(--brand-color)" }} //update this later
                         />
                         <span className="text-[10px] uppercase tracking-[0.15em] font-black text-white/60">
                             N/A
@@ -55,7 +55,7 @@ export const OtherHomeContentView = ({
                     </div>
                     
                     <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
-                        {contentData.description || "Your collection of tracks saved for offline playback."}
+                        {data.description || "Your collection of tracks saved for offline playback."}
                     </p>
                        
                     <div className="flex gap-6 mt-1">

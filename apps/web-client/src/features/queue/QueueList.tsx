@@ -5,9 +5,9 @@ import { useMemo } from 'react';
 import { useQueue } from '@/store/hooks/useQueue';
 import { useSettings } from '@/store/hooks/useSettings';
 
-import { TrackItem } from '@/model/TrackItem';
+import { TrackItem } from '@/track/TrackItem';
 
-import type { TrackBase } from '@/model/model.types';
+import type { TrackBase } from '@/track/track.types';
 
 
 export const QueueList = () => {

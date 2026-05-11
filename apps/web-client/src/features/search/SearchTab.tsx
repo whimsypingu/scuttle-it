@@ -6,12 +6,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
 
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { PlaylistList } from "@/features/playlist/PlaylistList";
+import { PlaylistList } from "@/playlist/PlaylistList";
 
 import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
 import type { SearchTabProps } from "@/features/search/search.types";
-import type { InfiniteScrollContext } from "../playlist/playlist.types";
+import type { InfiniteScrollContext } from "../../playlist/playlist.types";
 
 
 export const SearchTab = ({
@@ -169,6 +169,8 @@ export const SearchTab = ({
                                     scrollContext={dummySearchScrollContext}
                                     bottomSpacing={BOTTOM_SHELF.totalHeight}
                                     actions={["queueNext", "queueLast", "delete", "delete"]}
+                                    emptyText="No Results"
+                                    emptySubtext=""
                                 />
                             </div>
                         </motion.div>

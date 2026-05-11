@@ -1,9 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
-import { trackBaseToQueueTrack } from "@/model/model.utils";
+import { audioEngine } from "@/features/audio/audioEngine";
 
-import type { QueueTrack } from "@/model/model.types";
-import type { PopMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
+import { getTrackDisplayMetadata, trackBaseToQueueTrack } from "@/track/track.utils";
+
+import type { QueueTrack } from "@/track/track.types";
+import type { PopMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetAllPlaylistMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
+import { makeToast } from "@/features/toast/Toast";
 
 
 export const useQueue = () => {
@@ -35,12 +38,12 @@ export const useQueue = () => {
             const data = await response.json();
             return data;
         },
-        onMutate: async ({ track }) => {
+        onMutate: async (variables) => {
             await queryClient.cancelQueries({ queryKey }); // cancel outgoing refetches so they dont rewrite optimistic changes
 
             const rollbackQueue = queryClient.getQueryData(queryKey); //get the rollback state
 
-            const tempQueueTrack = trackBaseToQueueTrack(track, -1); //typecast to a QueueTrack with -1 default queueId field
+            const tempQueueTrack = trackBaseToQueueTrack(variables.track, -1); //typecast to a QueueTrack with -1 default queueId field
 
             queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
                 return [tempQueueTrack, ...(old?.slice(1) || [])];
@@ -48,15 +51,19 @@ export const useQueue = () => {
 
             return { rollbackQueue }; //return context for rollback
         },
-        onError: (err, track, context) => {
+        onError: (err, variables, context) => {
             if (context?.rollbackQueue) {
                 queryClient.setQueryData(queryKey, context.rollbackQueue);
             }
             console.log("Optimistic setFirst queue failed, rolling back.");
         },
-        onSuccess: (data) => {
+        onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue); //immediately swap the optimistic -1 queueId for DB-assigned queueId
-        }
+
+            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+            const msg = `Playing: ${titleDisplay}`;
+            makeToast(msg);
+        },
     });
 
     const reorderMutation = useMutation({
@@ -102,11 +109,11 @@ export const useQueue = () => {
             const data = await response.json();
             return data;
         },
-        onMutate: async ({ track }) => {
+        onMutate: async (variables) => {
             await queryClient.cancelQueries({ queryKey });
             const rollbackQueue = queryClient.getQueryData(queryKey);
 
-            const tempQueueTrack = trackBaseToQueueTrack(track, -1); //typecast to a QueueTrack with -1 default queueId field
+            const tempQueueTrack = trackBaseToQueueTrack(variables.track, -1); //typecast to a QueueTrack with -1 default queueId field
 
             queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
                 return [...(old || []), tempQueueTrack];
@@ -114,14 +121,18 @@ export const useQueue = () => {
 
             return { rollbackQueue };
         },
-        onError: (err, track, context) => {
+        onError: (err, variables, context) => {
             if (context?.rollbackQueue) {
                 queryClient.setQueryData(queryKey, context.rollbackQueue);
             }
             console.log("Optimistic push queue failed, rolling back.");
         },
-        onSuccess: (data) => {
+        onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue);
+
+            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+            const msg = `Queued: ${titleDisplay}`;
+            makeToast(msg);
         },
     });
 
@@ -135,11 +146,11 @@ export const useQueue = () => {
             const data = await response.json();
             return data;
         },
-        onMutate: async ({ track }) => {
+        onMutate: async (variables) => {
             await queryClient.cancelQueries({ queryKey });
             const rollbackQueue = queryClient.getQueryData(queryKey);
 
-            const tempQueueTrack = trackBaseToQueueTrack(track, -1); //typecast to a QueueTrack with -1 default queueId field -- could cause problems
+            const tempQueueTrack = trackBaseToQueueTrack(variables.track, -1); //typecast to a QueueTrack with -1 default queueId field -- could cause problems
 
             queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
                 if (!old || old.length === 0) {
@@ -151,14 +162,18 @@ export const useQueue = () => {
 
             return { rollbackQueue };
         },
-        onError: (err, track, context) => {
+        onError: (err, variables, context) => {
             if (context?.rollbackQueue) {
                 queryClient.setQueryData(queryKey, context.rollbackQueue);
             }
             console.log("Optimistic push to next position in queue failed, rolling back.");
         },
-        onSuccess: (data) => {
+        onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue);
+
+            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+            const msg = `Next: ${titleDisplay}`;
+            makeToast(msg);
         },
     });
 
@@ -172,24 +187,28 @@ export const useQueue = () => {
             const data = await response.json();
             return data;
         },
-        onMutate: async ({ queueTrack }) => {
+        onMutate: async (variables) => {
             await queryClient.cancelQueries({ queryKey });
             const rollbackQueue = queryClient.getQueryData(queryKey);
 
             queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
-                return old?.filter(t => t.queueId !== queueTrack.queueId); //filter out by the unique queueId
+                return old?.filter(t => t.queueId !== variables.queueTrack.queueId); //filter out by the unique queueId
             });
 
             return { rollbackQueue };
         },
-        onError: (err, queueTrack, context) => {
+        onError: (err, variables, context) => {
             if (context?.rollbackQueue) {
                 queryClient.setQueryData(queryKey, context.rollbackQueue);
             }
             console.log("Optimistic pop queue failed, rolling back.");
         },
-        onSuccess: (data) => {
+        onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue);
+
+            const { titleDisplay } = getTrackDisplayMetadata(variables.queueTrack);
+            const msg = `Removed: ${titleDisplay}`;
+            makeToast(msg);
         },
     });
 
@@ -205,5 +224,42 @@ export const useQueue = () => {
         pop: popMutation.mutate,
         isPushing: pushMutation.isPending,
         isPopping: popMutation.isPending,
+    };
+};
+
+
+export const useSetQueue = () => {
+    const queryClient = useQueryClient();
+    const queryKey = ["tracks", "play_queue"];
+
+    // set a playlist as the queue, and start playing when loaded. does not optimistically update the queue
+    const setAllPlaylistMutation = useMutation({
+        mutationFn: async ({ playlist, sortmode }: SetAllPlaylistMutationProps) => {
+            const query = sortmode !== undefined ? `?sortmode=${sortmode}` : "";
+            const response = await fetch(`/queue/set-all/playlist/${playlist.id}${query}`, { method: "POST" });
+
+            if (!response.ok) throw new Error("Failed to set queue");
+
+            const data = await response.json();
+            return data;
+        },
+        onSuccess: (data, variables) => {
+            queryClient.setQueryData(queryKey, data.queue);
+
+            if (data.queue && data.queue.length > 0) {
+                const firstTrack = data.queue[0];
+                audioEngine.playTrack({ trackId: firstTrack.id, forceRestart: true }); //immediately start playing on success
+            }
+
+            const msg = `Playing: ${variables.playlist.name}`;
+            makeToast(msg);
+        },
+        onError: (err) => {
+            console.log("Set queue failed.");
+        },
+    });
+
+    return {
+        setPlaylist: setAllPlaylistMutation.mutate,
     };
 };

@@ -3,12 +3,12 @@ import { motion, useMotionValue, useMotionValueEvent, useTransform } from 'frame
 
 import { MusicNoteIcon } from '@phosphor-icons/react';
 
-import { getTrackDisplayMetadata, useTrackActionHandler } from '@/model/model.utils';
+import { getTrackDisplayMetadata, useTrackActionHandler } from '@/track/track.utils';
 import { useQueue } from '@/store/hooks/useQueue';
 
-import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/model/model.constants';
+import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/track/track.constants';
 
-import type { QueueTrack, TrackAction, TrackItemProps } from '@/model/model.types';
+import type { QueueTrack, TrackAction, TrackItemProps } from '@/track/track.types';
 import { audioEngine } from '@/features/audio/audioEngine';
 
 
@@ -58,7 +58,7 @@ export const TrackItem = ({
         setIsDragging(true);
     }
 
-	//actual action execution via model.utils action handler
+	//actual action execution via /track.utils action handler
 	const executeAction = useTrackActionHandler();
 	const triggerAction = (action: TrackAction) => {
 		switch (action) {
@@ -83,7 +83,7 @@ export const TrackItem = ({
 		}
 	};
 
-	//handle the end of the drag. for now just console logs
+	//handle the end of the drag
 	const handleDragEnd = () => {
 
 		const offset = x.get(); // visual X offset and not info.offset.x which is highly inflated

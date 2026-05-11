@@ -2,8 +2,10 @@ import { useEditTarget } from "@/features/edit/EditProvider";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EditTrackForm } from "@/features/edit/subcomponents/EditTrackForm";
+import { CreatePlaylistForm } from "@/features/edit/subcomponents/CreatePlaylistForm";
 
 import { EDIT_CONFIG } from "@/features/edit/edit.constants";
+import { EditPlaylistForm } from "./subcomponents/EditPlaylistForm";
 
 
 export const EditPopup = () => {
@@ -23,10 +25,23 @@ export const EditPopup = () => {
         if (!editTarget) return null;
 
         switch (editTarget.type) {
-            case "track":
+            case "editTrack":
                 return (
                     <EditTrackForm
                         track={editTarget.data}
+                        onSave={handleClose}
+                    />
+                );
+            case "createPlaylist":
+                return (
+                    <CreatePlaylistForm 
+                        onSave={handleClose} 
+                    />
+                );
+            case "editPlaylist":
+                return (
+                    <EditPlaylistForm
+                        playlist={editTarget.data}
                         onSave={handleClose}
                     />
                 );
@@ -37,7 +52,7 @@ export const EditPopup = () => {
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-            <DialogContent>
+            <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
                 <DialogHeader>
                     <DialogTitle>
                         {config?.title ?? "Edit"}
@@ -47,7 +62,9 @@ export const EditPopup = () => {
                     </DialogDescription>
                 </DialogHeader>
 
-                {activeEditForm()}
+                <div className="max-h-[70dvh] overflow-hidden">
+                    {activeEditForm()}
+                </div>
 
             </DialogContent>
         </Dialog>

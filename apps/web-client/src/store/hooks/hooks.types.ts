@@ -1,4 +1,5 @@
-import type { QueueTrack, TrackBase } from "@/model/model.types";
+import type { PlaylistBase, PlaylistId, SummaryPlaylist } from "@/playlist/playlist.types";
+import type { QueueTrack, TrackBase, TrackId } from "@/track/track.types";
 import type { IconProps } from "@phosphor-icons/react";
 
 
@@ -16,15 +17,20 @@ export interface EditArtistPayload {
 
 //see: audio-server/core/models/track.py
 export interface EditTrackPayload {
-    id?: string;
-    newId?: string;
+    newId?: TrackId;
     titleDisplay?: string;
     artists?: EditArtistPayload[];
+    playlistIds?: PlaylistId[];
 }
 
-export interface EditTrackMutationProps {
-    payload: EditTrackPayload; 
+
+//see: audio-server/core/models/playlist.py
+export interface EditPlaylistPayload {
+    name?: string;
+    description?: string | null;
 }
+
+
 
 
 /**
@@ -52,6 +58,12 @@ export interface PushNextMutationProps {
 export interface PopMutationProps {
     queueTrack: QueueTrack;
 }
+
+export interface SetAllPlaylistMutationProps {
+    playlist: PlaylistBase;
+    sortmode?: Sortmode;
+}
+
 
 
 /**
@@ -83,4 +95,18 @@ export interface SortmodeConfig { //corresponding phosphor icon for each Sortmod
 export interface SetLikeMutationProps {
     track: TrackBase;
     liked: boolean;
+}
+
+
+/**
+ * usePlaylists
+ */
+export interface CreatePlaylistPayload {
+    playlistId: PlaylistId;
+    name: string;
+    description: string | null;
+}
+
+export interface DeletePlaylistMutationProps {
+    playlist: PlaylistBase;
 }
