@@ -18,6 +18,7 @@ export const MOCK_HOME_CONTENTS: HomeContent[] = [
         data: {
             id: "downloads",
             name: "All Tracks",
+            tagline: "Everything",
             description: "Your core library. Every single track in one playlist.",
             component: DownloadedHomeContentView,
         }
@@ -30,6 +31,7 @@ export const MOCK_HOME_CONTENTS: HomeContent[] = [
         data: {
             id: "likes",
             name: "Likes",
+            tagline: "Favorites",
             description: "All your liked tracks.",
             component: LikedHomeContentView,
         }

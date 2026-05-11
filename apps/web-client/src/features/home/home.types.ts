@@ -13,6 +13,7 @@ export type SystemPlaylistId = "downloads" | "likes";
 
 export interface SystemPlaylist extends PlaylistBase {
     id: SystemPlaylistId;
+    tagline: string; //metadata label beneath name
     description: string;
     component: React.FC<any>;
 }

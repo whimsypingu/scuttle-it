@@ -14,9 +14,6 @@ export interface SummaryPlaylist extends PlaylistBase {
     totalCount: number;
     totalDuration: number;
     description?: string;
-
-    playable?: boolean;
-    sortable?: boolean;
 }
 export interface PlaylistDetails extends PlaylistBase {
     description?: string;

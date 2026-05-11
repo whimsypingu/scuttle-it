@@ -55,10 +55,10 @@ export const LikedHomeContentView = ({
                     <div className="flex items-center gap-2">
                         <div 
                             className="w-2 h-2 rounded-full animate-pulse" 
-                            style={{ backgroundColor: "var(--brand-color)" }} //update this later
+                            style={{ backgroundColor: "var(--color-brand)" }} //update this later
                         />
                         <span className="text-[10px] uppercase tracking-[0.15em] font-black text-white/60">
-                            Everything
+                            {data.tagline}
                         </span>
                     </div>
 
