@@ -44,7 +44,7 @@ export const Toast = ({ isExpanded }: ToastProps) => {
 }
 
 // makeToast wrapper
-const makeToastCustom = (msg: string) => {
+const makeToastCustom = (msg: string, boldedMsg: string = "") => {
     toast(
         <div style={toastCustomStyle}>
             <span style={{
@@ -53,7 +53,7 @@ const makeToastCustom = (msg: string) => {
                 whiteSpace: 'nowrap',
                 display: 'block', //required for ellipsis to work on a span, and appy styling again to inner jsx content
             }}>
-                {msg}
+                <span style={{ fontWeight: 300 }}>{msg}</span><b style={{ fontWeight: 600 }}>{boldedMsg}</b>
             </span>
         </div>,
         {

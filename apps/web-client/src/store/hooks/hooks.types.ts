@@ -40,28 +40,34 @@ export interface EditPlaylistPayload {
  */
 export interface SetFirstMutationProps {
     track: TrackBase;
+    successMsg?: string;
 }
 
 export interface ReorderMutationProps {
     queueTrack: QueueTrack;
     targetPosition: number;
+    successMsg?: string;
 }
 
 export interface PushMutationProps {
     track: TrackBase;
+    successMsg?: string;
 }
 
 export interface PushNextMutationProps {
     track: TrackBase;
+    successMsg?: string;
 }
 
 export interface PopMutationProps {
     queueTrack: QueueTrack;
+    successMsg?: string;
 }
 
 export interface SetAllPlaylistMutationProps {
     playlist: PlaylistBase;
     sortmode?: Sortmode;
+    successMsg?: string;
 }
 
 
@@ -95,6 +101,7 @@ export interface SortmodeConfig { //corresponding phosphor icon for each Sortmod
 export interface SetLikeMutationProps {
     track: TrackBase;
     liked: boolean;
+    successMsg?: string;
 }
 
 
