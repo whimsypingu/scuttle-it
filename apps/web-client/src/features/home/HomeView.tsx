@@ -4,7 +4,8 @@ import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
 import type { HomeContent, HomeViewProps } from "@/features/home/home.types";
 import { AnimatePresence, motion } from "framer-motion";
-import { HOME_CONTENT_COMPONENTS, HOME_CONTENT_TYPES, MOCK_HOME_CONTENTS } from "./home.constants";
+import { MOCK_HOME_CONTENTS } from "./home.constants";
+import { OtherHomeContentView } from "./subcomponents/OtherHomeContent";
 
 
 export const MockHome = ({
@@ -21,9 +22,32 @@ export const MockHome = ({
         }
     }, [tabResetSignal]);
 
-    const ActiveHomeContentView = selectedHomeContent 
-        ? (HOME_CONTENT_COMPONENTS[selectedHomeContent.type] || HOME_CONTENT_COMPONENTS[HOME_CONTENT_TYPES.OTHER])
-        : (HOME_CONTENT_COMPONENTS[HOME_CONTENT_TYPES.OTHER]);
+
+    const renderActiveContent = () => {
+        if (!selectedHomeContent) return null;
+
+        const { type, data } = selectedHomeContent;
+
+        let ActiveHomeContentView = null;
+        switch (type) {
+            case ("systemPlaylist"):
+                ActiveHomeContentView = data.component;
+                break;
+            default:
+                console.error("Unimplemented ActiveHomeContentView");
+                return null;
+        }
+
+        return (
+            <ActiveHomeContentView
+                data={data}
+                onClose={() => setSelectedHomeContent(null)}
+            />
+        );
+    }
+    // const ActiveHomeContentView = selectedHomeContent 
+    //     ? (HOME_CONTENT_COMPONENTS[selectedHomeContent.type] || HOME_CONTENT_COMPONENTS[HOME_CONTENT_TYPES.OTHER])
+    //     : (HOME_CONTENT_COMPONENTS[HOME_CONTENT_TYPES.OTHER]);
 
     return (
         <>
@@ -53,9 +77,9 @@ export const MockHome = ({
                                 className="grid grid-cols-2 gap-4"
                                 style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
                             >
-                                {MOCK_HOME_CONTENTS.map(item => (
+                                {MOCK_HOME_CONTENTS.map((item, index) => (
                                     <div 
-                                        key={item.id} 
+                                        key={index} 
                                         className="bg-card aspect-square rounded-md shadow-lg p-4 flex flex-col"
                                         onClick={() => setSelectedHomeContent(item)}
                                     >
@@ -76,10 +100,7 @@ export const MockHome = ({
                     </>
                 ) : (
                     <>
-                    <ActiveHomeContentView
-                        contentData={selectedHomeContent}
-                        onClose={() => setSelectedHomeContent(null)}
-                    />
+                    {renderActiveContent()}
                     </>
                 )}
             </AnimatePresence>

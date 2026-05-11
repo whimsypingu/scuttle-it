@@ -8,16 +8,16 @@ import { PlaylistList } from '@/playlist/PlaylistList';
 import { formatReadableTime } from '@/features/audio/audio.utils';
 import { BOTTOM_SHELF } from '@/features/player/player.constants';
 
-import type { HomeContent } from '@/features/home/home.types';
+import type { HomeContent, SystemPlaylist } from '@/features/home/home.types';
 
 
 interface DownloadedHomeContentViewProps {
-    contentData: HomeContent;
+    data: SystemPlaylist;
     onClose: () => void;
 }
 
 export const DownloadedHomeContentView = ({
-    contentData,
+    data,
     onClose
 }: DownloadedHomeContentViewProps) => {
 
@@ -55,7 +55,7 @@ export const DownloadedHomeContentView = ({
                     <div className="flex items-center gap-2">
                         <div 
                             className="w-2 h-2 rounded-full animate-pulse" 
-                            style={{ backgroundColor: contentData.color }} 
+                            style={{ backgroundColor: "var(--brand-color)" }} //update this later
                         />
                         <span className="text-[10px] uppercase tracking-[0.15em] font-black text-white/60">
                             Everything
@@ -63,7 +63,7 @@ export const DownloadedHomeContentView = ({
                     </div>
 
                     <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
-                        {contentData.description}
+                        {data.description}
                     </p>
 
                     <div className="flex gap-4">

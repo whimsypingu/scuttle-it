@@ -5,20 +5,23 @@ import type { Sortmode } from "@/store/hooks/hooks.types";
 
 
 export type PlaylistId = string;
-export type SystemPlaylistId = string;
 
 export interface PlaylistBase {
-    id: PlaylistId | SystemPlaylistId;
+    id: PlaylistId;
     name: string;
 }
 export interface SummaryPlaylist extends PlaylistBase {
     totalCount: number;
-    totalDuration: number;    
+    totalDuration: number;
     description?: string;
+
+    playable?: boolean;
+    sortable?: boolean;
 }
 export interface PlaylistDetails extends PlaylistBase {
     description?: string;
 }
+
 
 //all available playlist actions with their required properties to execute the functions
 export type PlaylistActionProps = 
