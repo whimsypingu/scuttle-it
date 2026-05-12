@@ -15,6 +15,7 @@ import type { InfiniteScrollContext } from "../../playlist/playlist.types";
 import { Spinner } from "@/components/ui/spinner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useDownloadJobs } from "@/store/hooks/useJobs";
+import { SearchStatusIndicator } from "./subcomponents/SearchStatusIndicator";
 
 
 export const SearchTab = ({
@@ -72,9 +73,6 @@ export const SearchTab = ({
         triggerYoutubeSearch({ q: query, limit: 1 });
     }
 
-    // status of search and download jobs
-    const { jobs, isPending, isProcessing } = useDownloadJobs();
-
     return (
         <>
         <motion.div 
@@ -97,19 +95,7 @@ export const SearchTab = ({
                         <h1 className="tab-heading truncate">Search</h1>
 
                         {/* DOWNLOAD INDICATOR */}
-                        {(isPending || isProcessing) && (
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <button className="p-2">
-                                        <Spinner className="size-4" />
-                                    </button>
-                                </PopoverTrigger>
-
-                                <PopoverContent align="start">
-                                    hello world
-                                </PopoverContent>
-                            </Popover>
-                        )}
+                        <SearchStatusIndicator />
                     </div>
 
                     {isSearching && (
