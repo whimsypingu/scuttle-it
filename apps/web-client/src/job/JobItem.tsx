@@ -17,8 +17,8 @@ export const JobItem = ({
         displayText = job.query || job.trackId || job.id;
     }
 
-    const getTimeAgo = (timestamp: number) => {
-        const seconds = Math.floor((Date.now() - timestamp) / 1000);
+    const getTimeAgo = (secs: number) => {
+        const seconds = Math.floor(((Date.now() / 1000) - secs) / 1000);
         if (seconds < 60) return 'Just now';
         const minutes = Math.floor(seconds / 60);
         if (minutes < 60) return `${minutes}m ago`;

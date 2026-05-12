@@ -3,7 +3,6 @@ import { Spinner } from "@/components/ui/spinner";
 import type { DownloadJob } from "@/job/job.types";
 import { useDownloadJobs } from "@/store/hooks/useJobs";
 import { CheckCircleIcon, ChecksIcon } from "@phosphor-icons/react";
-import { POPOVER_CONTENT_PADDING } from "../search.constants";
 import { useEffect, useRef } from "react";
 import { JobItem } from "@/job/JobItem";
 
@@ -12,7 +11,7 @@ export const SearchStatusIndicator = () => {
     // status of search and download jobs
     const { jobs, isPending, isProcessing } = useDownloadJobs();
 
-    const firstActiveIndex = mockJobs.findIndex(job => job.status !== "completed");
+    const firstActiveIndex = jobs.findIndex(job => job.status !== "completed");
     console.log(firstActiveIndex);
 
     const activeItemRef = (node: HTMLDivElement | null) => {
@@ -29,7 +28,7 @@ export const SearchStatusIndicator = () => {
     return (
         <>
         {/* DOWNLOAD INDICATOR */}
-        {(mockJobs.length > 0) && (
+        {(jobs.length > 0) && (
             <Popover>
                 <PopoverTrigger asChild>
                     <button className="p-2">
@@ -41,10 +40,10 @@ export const SearchStatusIndicator = () => {
                     </button>
                 </PopoverTrigger>
 
-                <PopoverContent align="start" collisionPadding={POPOVER_CONTENT_PADDING}>
-                    <div className="max-h-[30dvh] overflow-y-auto custom-scrollbar">
+                <PopoverContent align="start" className="max-h-[30dvh] max-w-[60dvw] p-0">
+                    <div className="overflow-y-auto custom-scrollbar">
                         <div className="flex flex-col gap-1">
-                            {mockJobs.map((job, index) => (
+                            {jobs.map((job, index) => (
                                 <div ref={index === firstActiveIndex ? activeItemRef : null}>
                                     <JobItem job={job} />
                                 </div>
