@@ -62,11 +62,17 @@ class DownloadWorker:
                 )
                 logger.info(f"[{self.worker_id}] Successfully finished {job.identifier}")
 
+                #status
+                await self.dl_queue.complete_job(job.id, success=True)
+
             except Exception as e:
                 await self.ws_manager.broadcast(
                     WSPokeFactory.download_job_error()
                 )
                 logger.error(f"[{self.worker_id}] Error: {str(e)}")
+
+                #status
+                await self.dl_queue.complete_job(job.id, success=False)
             
             finally:
                 self.current_job = None
