@@ -1,13 +1,14 @@
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query"
 
-import type { JobBase } from "@/job/job.types";
+import type { DownloadJob } from "@/job/job.types";
 
 
-export const useJobs = () => {
+export const useDownloadJobs = () => {
     const queryKey = ["jobs"];
     
     //fetch jobs
-    const getJobs = useQuery({
+    const { data, refetch, isLoading, error } = useQuery({
         queryKey,
         queryFn: async () => {
             console.log("useJobs triggered");
@@ -16,17 +17,26 @@ export const useJobs = () => {
             if (!response.ok) throw new Error("Failed to fetch jobs");
             
             const data = await response.json();
-            return data.jobs as JobBase[];
+            return data.jobs as DownloadJob[];
         },
         staleTime: 1000 * 60 * 5, 
     });
 
+    //prevent re-calculations for these bools
+    const { isPending, isProcessing } = useMemo(() => {
+        return {
+            isPending: data?.some(j => j.status === "pending") ?? false,
+            isProcessing: data?.some(j => j.status === "processing") ?? false,
+        };
+    }, [data]);
+
     return {
-        jobs: getJobs.data ?? [],
-        isProcessing: getJobs.data?.some(j => j.status === "Processing"),
-        refetch: getJobs.refetch,
-        isLoading: getJobs.isLoading,
-        error: getJobs.error,
+        jobs: data ?? [],
+        isPending,
+        isProcessing,
+        refetch,
+        isLoading,
+        error,
     };
 };
 

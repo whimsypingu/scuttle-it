@@ -66,7 +66,13 @@ class DownloadQueue:
 
         return completed_jobs + processing_jobs + pending_jobs
     
+
+    #deprecated? NOT USED
     @property
     def pending_count(self) -> int:
         return len(self._queue)
+    
+    @property
+    def processing_count(self) -> int:
+        return len(self._processing)
     
