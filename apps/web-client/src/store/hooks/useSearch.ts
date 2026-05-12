@@ -10,7 +10,9 @@ export const useSearch = (query: string) => {
     const dbSearch = useQuery({
         queryKey: ["search", "database", query],
         queryFn: async () => {
-            const response = await fetch(`/search/db-search?q=${encodeURIComponent(query)}`, { method: "GET" });
+            const response = await fetch(`/search/db-search?q=${encodeURIComponent(query)}`, { 
+                method: "GET" 
+            });
             if (!response.ok) throw new Error("Search failed");
             
             const data = await response.json();
@@ -21,7 +23,9 @@ export const useSearch = (query: string) => {
 
     const ytSearch = useMutation({
         mutationFn: async ({ q, limit = 1 }: YTSearchMutationProps) => {
-            const response = await fetch(`/search/yt-search?q=${encodeURIComponent(q)}&query_limit=${limit}`, { method: "POST" });
+            const response = await fetch(`/search/yt-search?q=${encodeURIComponent(q)}&query_limit=${limit}`, { 
+                method: "POST" 
+            });
             if (!response.ok) throw new Error("YouTube request failed");
 
             const data = await response.json();

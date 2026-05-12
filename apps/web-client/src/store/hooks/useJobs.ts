@@ -13,7 +13,9 @@ export const useDownloadJobs = () => {
         queryFn: async () => {
             console.log("useJobs triggered");
 
-            const response = await fetch(`/jobs/downloads`, { method: "GET" });
+            const response = await fetch(`/jobs/downloads`, { 
+                method: "GET" 
+            });
             if (!response.ok) throw new Error("Failed to fetch jobs");
             
             const data = await response.json();

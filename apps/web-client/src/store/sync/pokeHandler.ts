@@ -1,8 +1,8 @@
-import type { DownloadJob } from "@/job/job.types";
 import { queryClient } from "@/store/queryClient";
 import { WS_POKE_TYPES } from "@/store/sync/sync.constants";
 
 import type { WSPoke } from "@/store/sync/sync.types";
+import type { DownloadJob } from "@/job/job.types";
 
 
 export function handleWSPoke(poke: WSPoke): void {
@@ -14,6 +14,7 @@ export function handleWSPoke(poke: WSPoke): void {
         case WS_POKE_TYPES.DOWNLOAD_JOB_SUCCESS:
             queryClient.invalidateQueries({ queryKey: ["tracks"] });
 
+            //implement slight optimistic updates by replacing job states within cache
             const updatedJob = payload as DownloadJob;
             queryClient.setQueryData<DownloadJob[]>(["jobs", "downloads"], (old = []) => {
                 const exists = old.find(j => j.id === updatedJob.id);
