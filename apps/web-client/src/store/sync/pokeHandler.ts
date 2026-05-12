@@ -12,6 +12,7 @@ export function handleWSPoke(poke: WSPoke): void {
     switch (type) {
         case WS_POKE_TYPES.DOWNLOAD_JOB_SUCCESS:
             queryClient.invalidateQueries({ queryKey: ["tracks"] });
+            queryClient.invalidateQueries({ queryKey: ["jobs"] });
             break;
 
         default:
