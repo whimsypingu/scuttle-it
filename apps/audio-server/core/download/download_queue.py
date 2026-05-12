@@ -51,20 +51,23 @@ class DownloadQueue:
     async def complete_job(self, id: str, success: bool = True):
         """Worker calls this when done."""
         async with self._lock:
-            if id in self._processing:
-                job = self._processing.pop(id)
-                job.status = JobStatus.COMPLETED if success else JobStatus.FAILED
+            job = self._processing.pop(id)
 
+            if job:
+                job.status = JobStatus.COMPLETED if success else JobStatus.FAILED
                 self._completed.append(job)
                 logger.info(f"[DL-Queue] Job moved to history. Status: {job.status} ({job.id})")
+            else:
+                logger.warning(f"[DL-Queue] Attempted to complete job for id {id} but it wasn't in _processing.")
 
-    def get_all_jobs(self) -> list[DownloadJob]:
+    async def get_all_jobs(self) -> list[DownloadJob]:
         """Combine for the API endpoint"""
-        completed_jobs = list(self._completed) #completed deque, ordered from oldest first to newest last
-        processing_jobs = list(self._processing.values()) #no particular order among currently processing jobs
-        pending_jobs = list(self._queue)
+        async with self._lock:
+            completed_jobs = list(self._completed) #completed deque, ordered from oldest first to newest last
+            processing_jobs = list(self._processing.values()) #no particular order among currently processing jobs
+            pending_jobs = list(self._queue)
 
-        return completed_jobs + processing_jobs + pending_jobs
+            return completed_jobs + processing_jobs + pending_jobs
     
 
     #deprecated? NOT USED

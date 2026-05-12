@@ -16,7 +16,7 @@ class WebsocketManager:
         self.active_connections.discard(websocket)
 
     async def broadcast(self, message: dict):
-        for connection in self.active_connections:
+        for connection in list(self.active_connections): #iterate on a copy to prevent Set changed size bugs, just in case
             try:
                 await connection.send_json(message)
             except Exception:

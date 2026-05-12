@@ -1,3 +1,4 @@
+import type { DownloadJob } from "@/job/job.types";
 import { queryClient } from "@/store/queryClient";
 import { WS_POKE_TYPES } from "@/store/sync/sync.constants";
 
@@ -12,7 +13,15 @@ export function handleWSPoke(poke: WSPoke): void {
     switch (type) {
         case WS_POKE_TYPES.DOWNLOAD_JOB_SUCCESS:
             queryClient.invalidateQueries({ queryKey: ["tracks"] });
-            queryClient.invalidateQueries({ queryKey: ["jobs"] });
+
+            const updatedJob = payload as DownloadJob;
+            queryClient.setQueryData<DownloadJob[]>(["jobs", "downloads"], (old = []) => {
+                const exists = old.find(j => j.id === updatedJob.id);
+                if (exists) {
+                    return old.map(j => j.id === updatedJob.id ? updatedJob : j);
+                }
+                return old;
+            });
             break;
 
         default:

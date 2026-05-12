@@ -30,7 +30,7 @@ export const useSearch = (query: string) => {
         onSuccess: (jobs) => {
             console.log(`Started YouTube download job.`);
 
-            queryClient.setQueryData(["jobs"], jobs);
+            queryClient.setQueryData(["jobs", "downloads"], jobs);
         },
     });
 

@@ -56,24 +56,24 @@ class DownloadWorker:
                 else:
                     await self.yt_client.download_by_youtube_id(job.track_id)
 
-                #poke the frontend with update status
-                await self.ws_manager.broadcast(
-                    WSPokeFactory.download_job_success()
-                )
-                logger.info(f"[{self.worker_id}] Successfully finished {job.identifier}")
-
                 #status
                 await self.dl_queue.complete_job(job.id, success=True)
 
-            except Exception as e:
+                #poke the frontend with update status
                 await self.ws_manager.broadcast(
-                    WSPokeFactory.download_job_error()
+                    WSPokeFactory.download_job_success(job)
                 )
-                logger.error(f"[{self.worker_id}] Error: {str(e)}")
+                logger.info(f"[{self.worker_id}] Successfully finished {job.identifier}")
 
+            except Exception as e:
                 #status
                 await self.dl_queue.complete_job(job.id, success=False)
             
+                await self.ws_manager.broadcast(
+                    WSPokeFactory.download_job_error(job)
+                )
+                logger.error(f"[{self.worker_id}] Error: {str(e)}")
+
             finally:
                 self.current_job = None
 

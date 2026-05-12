@@ -7,12 +7,12 @@ from core.download.download_queue import DownloadQueue
 JobRouter = APIRouter(prefix="/jobs", tags=["Jobs"])
 
 
-@JobRouter.get("/search-and-download")
+@JobRouter.get("/downloads")
 async def search_and_download_jobs_endpoint(
     dl_queue: DownloadQueue = Depends(get_dl_queue)
 ):
     try:
-        jobs = dl_queue.get_all_jobs()
+        jobs = await dl_queue.get_all_jobs()
         return {
             "success": True,
             "jobs": jobs
