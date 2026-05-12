@@ -1,0 +1,1 @@
+export const POPOVER_CONTENT_PADDING = 60;

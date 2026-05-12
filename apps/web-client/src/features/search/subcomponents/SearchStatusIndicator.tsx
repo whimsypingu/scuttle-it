@@ -2,12 +2,29 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Spinner } from "@/components/ui/spinner";
 import type { DownloadJob } from "@/job/job.types";
 import { useDownloadJobs } from "@/store/hooks/useJobs";
-import { CheckCircleIcon } from "@phosphor-icons/react";
+import { CheckCircleIcon, ChecksIcon } from "@phosphor-icons/react";
+import { POPOVER_CONTENT_PADDING } from "../search.constants";
+import { useEffect, useRef } from "react";
+import { JobItem } from "@/job/JobItem";
 
 
 export const SearchStatusIndicator = () => {
     // status of search and download jobs
     const { jobs, isPending, isProcessing } = useDownloadJobs();
+
+    const firstActiveIndex = mockJobs.findIndex(job => job.status !== "completed");
+    console.log(firstActiveIndex);
+
+    const activeItemRef = (node: HTMLDivElement | null) => {
+        if (node) {
+            requestAnimationFrame(() => {
+                node.scrollIntoView({
+                    block: "start",
+                    behavior: "auto",
+                });
+            });
+        }
+    };
 
     return (
         <>
@@ -19,19 +36,20 @@ export const SearchStatusIndicator = () => {
                         {(isPending || isProcessing) ? (
                             <Spinner className="size-4" />
                         ) : (
-                            <CheckCircleIcon />
+                            <ChecksIcon />
                         )}
                     </button>
                 </PopoverTrigger>
 
-                <PopoverContent align="start">
-                    <div className="max-h-[40dvh] overflow-y-auto custom-scrollbar">
-                        <div className="flex flex-col">
-                            {mockJobs.map((job) => (
-                                <div>{job.query}, {job.status}</div>
+                <PopoverContent align="start" collisionPadding={POPOVER_CONTENT_PADDING}>
+                    <div className="max-h-[30dvh] overflow-y-auto custom-scrollbar">
+                        <div className="flex flex-col gap-1">
+                            {mockJobs.map((job, index) => (
+                                <div ref={index === firstActiveIndex ? activeItemRef : null}>
+                                    <JobItem job={job} />
+                                </div>
                             ))}
                         </div>
-
                     </div>
                 </PopoverContent>
             </Popover>
