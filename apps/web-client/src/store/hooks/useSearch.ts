@@ -2,6 +2,8 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 
 import type { TrackBase } from "@/track/track.types";
 import type { YTSearchMutationProps } from "@/store/hooks/hooks.types";
+import type { DownloadJob } from "@/job/job.types";
+import { queryClient } from "../queryClient";
 
 
 export const useSearch = (query: string) => {
@@ -11,8 +13,8 @@ export const useSearch = (query: string) => {
             const response = await fetch(`/search/db-search?q=${encodeURIComponent(query)}`, { method: "GET" });
             if (!response.ok) throw new Error("Search failed");
             
-            const rawData = await response.json();
-            return rawData.results as TrackBase[];
+            const data = await response.json();
+            return data.results as TrackBase[];
         },
         staleTime: 1000 * 30,
     });
@@ -22,11 +24,13 @@ export const useSearch = (query: string) => {
             const response = await fetch(`/search/yt-search?q=${encodeURIComponent(q)}&query_limit=${limit}`, { method: "POST" });
             if (!response.ok) throw new Error("YouTube request failed");
 
-            const rawData = await response.json();
-            return rawData.jobId as string;
+            const data = await response.json();
+            return data.jobs as DownloadJob[];
         },
-        onSuccess: (jobId) => {
-            console.log(`Started YouTube job: ${jobId}`);
+        onSuccess: (jobs) => {
+            console.log(`Started YouTube download job.`);
+
+            queryClient.setQueryData(["jobs"], jobs);
         },
     });
 

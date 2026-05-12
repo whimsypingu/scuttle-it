@@ -3,7 +3,7 @@ import { useSearch } from "@/store/hooks/useSearch";
 
 import { motion, AnimatePresence } from "framer-motion";
 
-import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
+import { MagnifyingGlassIcon, SpinnerIcon, XIcon } from "@phosphor-icons/react";
 
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { PlaylistList } from "@/playlist/PlaylistList";
@@ -12,6 +12,9 @@ import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
 import type { SearchTabProps } from "@/features/search/search.types";
 import type { InfiniteScrollContext } from "../../playlist/playlist.types";
+import { Spinner } from "@/components/ui/spinner";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useDownloadJobs } from "@/store/hooks/useJobs";
 
 
 export const SearchTab = ({
@@ -70,8 +73,7 @@ export const SearchTab = ({
     }
 
     // status of search and download jobs
-    const isPending = true;
-    const isProcessing = true;
+    const { jobs, isPending, isProcessing } = useDownloadJobs();
 
     return (
         <>
@@ -91,14 +93,22 @@ export const SearchTab = ({
                         }
                     }}
                 >
-                    <div className="flex">
-                        <h1 className="tab-heading truncate pr-4">Search</h1>
+                    <div className="flex gap-2 pr-4">
+                        <h1 className="tab-heading truncate">Search</h1>
 
                         {/* DOWNLOAD INDICATOR */}
                         {(isPending || isProcessing) && (
-                            <motion.button>
-                                hello world
-                            </motion.button>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <button className="p-2">
+                                        <Spinner className="size-4" />
+                                    </button>
+                                </PopoverTrigger>
+
+                                <PopoverContent align="start">
+                                    hello world
+                                </PopoverContent>
+                            </Popover>
                         )}
                     </div>
 
