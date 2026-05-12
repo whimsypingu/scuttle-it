@@ -36,7 +36,6 @@ export const useSearch = (query: string) => {
         isError: dbSearch.isError,
 
         triggerYoutubeSearch: ytSearch.mutate,
-        isYoutubeProcessing: ytSearch.isPending,
         youtubeJobId: ytSearch.data,
     };
 };

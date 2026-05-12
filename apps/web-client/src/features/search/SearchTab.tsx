@@ -69,6 +69,10 @@ export const SearchTab = ({
         triggerYoutubeSearch({ q: query, limit: 1 });
     }
 
+    // status of search and download jobs
+    const isPending = true;
+    const isProcessing = true;
+
     return (
         <>
         <motion.div 
@@ -87,7 +91,16 @@ export const SearchTab = ({
                         }
                     }}
                 >
-                    <h1 className="tab-heading truncate pr-4">Search</h1>
+                    <div className="flex">
+                        <h1 className="tab-heading truncate pr-4">Search</h1>
+
+                        {/* DOWNLOAD INDICATOR */}
+                        {(isPending || isProcessing) && (
+                            <motion.button>
+                                hello world
+                            </motion.button>
+                        )}
+                    </div>
 
                     {isSearching && (
                         <>
