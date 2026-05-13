@@ -39,7 +39,6 @@ class DownloadWorker:
                 self.current_job = job
                 
                 #poke the frontend with update status
-                job.status = JobStatus.PROCESSING
                 await self.ws_manager.broadcast(
                     WSPokeFactory.download_job_status_update(job)
                 )
@@ -66,7 +65,6 @@ class DownloadWorker:
                 await self.dl_queue.complete_job(job.id, success=True)
 
                 #poke the frontend with update status
-                job.status = JobStatus.COMPLETED
                 await self.ws_manager.broadcast(
                     WSPokeFactory.download_job_status_update(job)
                 )
@@ -76,7 +74,6 @@ class DownloadWorker:
                 #status
                 await self.dl_queue.complete_job(job.id, success=False)
             
-                job.status = JobStatus.FAILED
                 await self.ws_manager.broadcast(
                     WSPokeFactory.download_job_status_update(job)
                 )
