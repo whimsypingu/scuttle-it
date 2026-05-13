@@ -1,18 +1,16 @@
+import { useDownloadJobs } from "@/store/hooks/useJobs";
+import { ChecksIcon } from "@phosphor-icons/react";
+
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Spinner } from "@/components/ui/spinner";
-import type { DownloadJob } from "@/job/job.types";
-import { useDownloadJobs } from "@/store/hooks/useJobs";
-import { CheckCircleIcon, ChecksIcon } from "@phosphor-icons/react";
-import { useEffect, useRef } from "react";
 import { JobItem } from "@/job/JobItem";
+
+import type { DownloadJob } from "@/job/job.types";
 
 
 export const SearchStatusIndicator = () => {
     // status of search and download jobs
     const { jobs, isPending, isProcessing } = useDownloadJobs();
-
-    console.log("INDICATOR");
-    console.log(jobs);
 
     const firstActiveIndex = jobs.findIndex(job => job.status !== "completed");
     console.log(firstActiveIndex);

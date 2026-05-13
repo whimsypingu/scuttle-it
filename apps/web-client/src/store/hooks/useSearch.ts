@@ -1,9 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 
+import { queryClient } from "@/store/queryClient";
+
 import type { TrackBase } from "@/track/track.types";
 import type { YTSearchMutationProps } from "@/store/hooks/hooks.types";
 import type { DownloadJob } from "@/job/job.types";
-import { queryClient } from "../queryClient";
 
 
 export const useSearch = (query: string) => {

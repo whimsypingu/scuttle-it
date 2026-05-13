@@ -1,6 +1,8 @@
-import { JOB_STATUS_CONFIG } from './job.constants';
-import type { JobItemProps } from './job.types';
-import { isDownloadJob } from './job.utils';
+import { isDownloadJob } from '@/job/job.utils';
+
+import { JOB_STATUS_CONFIG } from '@/job/job.constants';
+
+import type { JobItemProps } from '@/job/job.types';
 
 
 export const JobItem = ({ 

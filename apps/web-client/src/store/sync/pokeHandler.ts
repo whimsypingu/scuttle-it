@@ -19,18 +19,16 @@ export function handleWSPoke(poke: WSPoke): void {
                 queryClient.invalidateQueries({ queryKey: ["tracks"] });
             }
             
+            //update the cache to reflect the processing status of the job
             queryClient.setQueryData<DownloadJob[]>(["jobs", "downloads"], (old = []) => {
                 const currentJobs = old ? [...old] : [];
 
-                const index = old.findIndex(j => j.id === updatedJob.id);
+                const index = old.findIndex(j => j.id === updatedJob.id); //find an existing entry, otherwise make a new one
                 if (index !== -1) {
                     currentJobs[index] = { ...updatedJob };
                 } else {
                     currentJobs.push({ ...updatedJob });
                 }
-
-                console.log("CACHE");
-                console.log(currentJobs);
                 return currentJobs;
             });
             break;

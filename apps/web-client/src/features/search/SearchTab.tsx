@@ -3,19 +3,16 @@ import { useSearch } from "@/store/hooks/useSearch";
 
 import { motion, AnimatePresence } from "framer-motion";
 
-import { MagnifyingGlassIcon, SpinnerIcon, XIcon } from "@phosphor-icons/react";
+import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
 
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { SearchStatusIndicator } from "@/features/search/subcomponents/SearchStatusIndicator";
 import { PlaylistList } from "@/playlist/PlaylistList";
 
 import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
 import type { SearchTabProps } from "@/features/search/search.types";
-import type { InfiniteScrollContext } from "../../playlist/playlist.types";
-import { Spinner } from "@/components/ui/spinner";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useDownloadJobs } from "@/store/hooks/useJobs";
-import { SearchStatusIndicator } from "./subcomponents/SearchStatusIndicator";
+import type { InfiniteScrollContext } from "@/playlist/playlist.types";
 
 
 export const SearchTab = ({

@@ -1,5 +1,6 @@
 import { CaretCircleRightIcon, CheckCircleIcon, DotsThreeCircleIcon, XCircleIcon } from '@phosphor-icons/react';
-import type { JobStatus, JobStatusConfig } from './job.types';
+
+import type { JobStatus, JobStatusConfig } from '@/job/job.types';
 
 
 //all available job statuses with their corresponding icons and colors
