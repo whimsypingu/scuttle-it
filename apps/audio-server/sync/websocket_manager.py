@@ -16,10 +16,14 @@ class WebsocketManager:
         self.active_connections.discard(websocket)
 
     async def broadcast(self, message: dict):
-        for connection in self.active_connections:
+        failed_connections = []
+        for conn in self.active_connections:
             try:
-                await connection.send_json(message)
+                await conn.send_json(message)
             except Exception:
-                self.disconnect(connection)
+                failed_connections.append(conn) #append and delete elsewhere to prevent Set changed size bugs witout running on a copy of the set
+        
+        for failed_conn in failed_connections:
+                self.disconnect(failed_conn)
 
         logger.info(f"WebsocketManager broadcasting to {len(self.active_connections)} clients: {message}")

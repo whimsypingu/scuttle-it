@@ -42,7 +42,8 @@ async def search_youtube(
         )
         await dl_queue.add(job)
         return {
-            "job_id": job.id
+            "success": True,
+            "job": job,
         }
     
     except Exception as e:

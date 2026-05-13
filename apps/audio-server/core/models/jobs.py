@@ -1,10 +1,27 @@
+import time
 import uuid
+from enum import Enum
 from core.models.base import ScuttleBase
 from pydantic import Field, model_validator
 
-class DownloadJob(ScuttleBase):
+
+class JobStatus(str, Enum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
+class JobBase(ScuttleBase):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    
+
+    #cast to int to drop fp microseconds and have simple int based field for date
+    created_at: int = Field(default_factory=lambda: int(time.time()))
+
+    status: JobStatus = JobStatus.PENDING
+
+
+class DownloadJob(JobBase):
     track_id: str | None = None
     query: str | None = None
     priority: bool = False #is it important or not

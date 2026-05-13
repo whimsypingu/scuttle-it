@@ -1,6 +1,7 @@
 import logging
 
 from core.download.download_queue import DownloadQueue
+from core.models.jobs import JobStatus
 from core.youtube.youtube_client import YouTubeClient
 from database.database_manager import DatabaseManager
 from sync.pokes import WSPokeFactory
@@ -37,6 +38,10 @@ class DownloadWorker:
                 job = await self.dl_queue.get_next()
                 self.current_job = job
                 
+                #poke the frontend with update status
+                await self.ws_manager.broadcast(
+                    WSPokeFactory.download_job_status_update(job)
+                )
                 logger.info(f"[{self.worker_id}] Processing: {job.identifier}")
 
                 if job.query:
@@ -56,18 +61,24 @@ class DownloadWorker:
                 else:
                     await self.yt_client.download_by_youtube_id(job.track_id)
 
+                #status
+                await self.dl_queue.complete_job(job.id, success=True)
+
                 #poke the frontend with update status
                 await self.ws_manager.broadcast(
-                    WSPokeFactory.download_job_success()
+                    WSPokeFactory.download_job_status_update(job)
                 )
                 logger.info(f"[{self.worker_id}] Successfully finished {job.identifier}")
 
             except Exception as e:
+                #status
+                await self.dl_queue.complete_job(job.id, success=False)
+            
                 await self.ws_manager.broadcast(
-                    WSPokeFactory.download_job_error()
+                    WSPokeFactory.download_job_status_update(job)
                 )
                 logger.error(f"[{self.worker_id}] Error: {str(e)}")
-            
+
             finally:
                 self.current_job = None
 

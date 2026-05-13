@@ -6,12 +6,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
 
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { SearchStatusIndicator } from "@/features/search/subcomponents/SearchStatusIndicator";
 import { PlaylistList } from "@/playlist/PlaylistList";
 
 import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
 import type { SearchTabProps } from "@/features/search/search.types";
-import type { InfiniteScrollContext } from "../../playlist/playlist.types";
+import type { InfiniteScrollContext } from "@/playlist/playlist.types";
 
 
 export const SearchTab = ({
@@ -87,7 +88,12 @@ export const SearchTab = ({
                         }
                     }}
                 >
-                    <h1 className="tab-heading truncate pr-4">Search</h1>
+                    <div className="flex gap-2 pr-4">
+                        <h1 className="tab-heading truncate">Search</h1>
+
+                        {/* DOWNLOAD INDICATOR */}
+                        <SearchStatusIndicator />
+                    </div>
 
                     {isSearching && (
                         <>
