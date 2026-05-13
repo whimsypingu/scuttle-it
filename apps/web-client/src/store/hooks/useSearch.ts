@@ -29,12 +29,21 @@ export const useSearch = (query: string) => {
             if (!response.ok) throw new Error("YouTube request failed");
 
             const data = await response.json();
-            return data.jobs as DownloadJob[];
+            return data.job as DownloadJob;
         },
-        onSuccess: (jobs) => {
+        onSuccess: (job) => {
             console.log(`Started YouTube download job.`);
 
-            queryClient.setQueryData(["jobs", "downloads"], jobs);
+            //optimistic update, but don't be too aggressive in case we lose a race condition with a websocket status update that de-syncs the ui
+            queryClient.setQueryData<DownloadJob[]>(["jobs", "downloads"], (old = []) => {
+                const currentJobs = old ? [...old] : [];
+
+                const index = old.findIndex(j => j.id === job.id);
+                if (index === -1) {
+                    currentJobs.push({ ...job });
+                }
+                return currentJobs;
+            });
         },
     });
 

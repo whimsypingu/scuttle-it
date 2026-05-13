@@ -11,17 +11,27 @@ export function handleWSPoke(poke: WSPoke): void {
     console.log(`WebSocket sync handling ${type}`, payload || "");
 
     switch (type) {
-        case WS_POKE_TYPES.DOWNLOAD_JOB_SUCCESS:
-            queryClient.invalidateQueries({ queryKey: ["tracks"] });
-
+        case WS_POKE_TYPES.DOWNLOAD_JOB_STATUS_UPDATE:
             //implement slight optimistic updates by replacing job states within cache
             const updatedJob = payload as DownloadJob;
+
+            if (updatedJob.status === "completed") {
+                queryClient.invalidateQueries({ queryKey: ["tracks"] });
+            }
+            
             queryClient.setQueryData<DownloadJob[]>(["jobs", "downloads"], (old = []) => {
-                const exists = old.find(j => j.id === updatedJob.id);
-                if (exists) {
-                    return old.map(j => j.id === updatedJob.id ? updatedJob : j);
+                const currentJobs = old ? [...old] : [];
+
+                const index = old.findIndex(j => j.id === updatedJob.id);
+                if (index !== -1) {
+                    currentJobs[index] = { ...updatedJob };
+                } else {
+                    currentJobs.push({ ...updatedJob });
                 }
-                return old;
+
+                console.log("CACHE");
+                console.log(currentJobs);
+                return currentJobs;
             });
             break;
 

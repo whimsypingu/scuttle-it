@@ -18,7 +18,7 @@ export const JobItem = ({
     }
 
     const getTimeAgo = (secs: number) => {
-        const seconds = Math.floor(((Date.now() / 1000) - secs) / 1000);
+        const seconds = Math.floor(((Date.now() / 1000) - secs));
         if (seconds < 60) return 'Just now';
         const minutes = Math.floor(seconds / 60);
         if (minutes < 60) return `${minutes}m ago`;
@@ -28,7 +28,10 @@ export const JobItem = ({
 
     return (
         <>
-        <div className="w-full flex items-center gap-2 p-2">
+        <div 
+            key={job.id}
+            className="w-full flex items-center gap-2 p-2"
+        >
             <div 
                 className="flex-shrink-0 p-2"
                 style={{ color }}

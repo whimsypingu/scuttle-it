@@ -11,6 +11,9 @@ export const SearchStatusIndicator = () => {
     // status of search and download jobs
     const { jobs, isPending, isProcessing } = useDownloadJobs();
 
+    console.log("INDICATOR");
+    console.log(jobs);
+
     const firstActiveIndex = jobs.findIndex(job => job.status !== "completed");
     console.log(firstActiveIndex);
 
@@ -44,7 +47,10 @@ export const SearchStatusIndicator = () => {
                     <div className="overflow-y-auto custom-scrollbar">
                         <div className="flex flex-col gap-1">
                             {jobs.map((job, index) => (
-                                <div ref={index === firstActiveIndex ? activeItemRef : null}>
+                                <div
+                                    key={job.id} 
+                                    ref={index === firstActiveIndex ? activeItemRef : null}
+                                >
                                     <JobItem job={job} />
                                 </div>
                             ))}
