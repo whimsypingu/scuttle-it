@@ -9,6 +9,7 @@ import type { DownloadJob } from "@/job/job.types";
 
 
 export const SearchStatusIndicator = () => {
+
     // status of search and download jobs
     const { jobs, isPending, isProcessing } = useDownloadJobs();
 
@@ -32,7 +33,15 @@ export const SearchStatusIndicator = () => {
         {(jobs.length > 0) && (
             <Popover>
                 <PopoverTrigger asChild>
-                    <button className="p-2">
+                    <button 
+                        className="p-2"
+                        onClick={(e) => {
+                            e.stopPropagation(); //prevent closing the search results
+                        }}
+                        onPointerDown={(e) => {
+                            e.stopPropagation();
+                        }}
+                    >
                         {(isPending || isProcessing) ? (
                             <Spinner className="size-4" />
                         ) : (
