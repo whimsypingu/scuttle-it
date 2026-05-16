@@ -5,6 +5,7 @@ import { usePlaylists } from "@/store/hooks/usePlaylists";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { HoldToDeleteButton } from "@/components/ui/hold-delete";
 
 import { getTrackDisplayMetadata } from "@/track/track.utils";
 
@@ -34,7 +35,7 @@ export const EditTrackForm = ({
     const { playlists } = usePlaylists();
 
     //edit hook with extra track details
-    const { trackDetails, isLoading, editTrack } = useEditTrack(track);
+    const { trackDetails, isLoading, editTrack, deleteTrack } = useEditTrack(track);
     const [selectedPlaylistIds, setSelectedPlaylistIds] = useState<Set<PlaylistId>>(new Set()); //displayed set of selected playlist IDs
 
     useEffect(() => { //load when the data arrives to prevent possibly displaying stale values
@@ -104,6 +105,11 @@ export const EditTrackForm = ({
         onSave();
     }
 
+    const handleDelete = () => {
+        deleteTrack();
+        onSave();
+    }
+
     return (
         <div className="flex flex-col h-full">
             <div className="h-full custom-scrollbar overflow-y-auto flex flex-col gap-2">
@@ -139,6 +145,11 @@ export const EditTrackForm = ({
                         Playlists
                     </label>
                     {renderEditContent()}
+                </div>
+
+                {/* Delete Button */}
+                <div className="flex justify-end pt-2 pb-1">
+                    <HoldToDeleteButton onDelete={handleDelete} />
                 </div>
             </div>
 
