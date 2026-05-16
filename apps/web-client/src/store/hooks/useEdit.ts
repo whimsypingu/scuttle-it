@@ -53,13 +53,40 @@ export const useEditTrack = (track: TrackBase) => {
         }
     });
 
-    
+    //delete a track
+    const deleteQueryKey = ["tracks"];
+    const deleteTrackMutation = useMutation({
+        mutationFn: async () => {
+            const response = await fetch(`/tracks/${track.id}`, {
+                method: "DELETE",
+            });
+
+            if (!response.ok) throw new Error("Failed to delete playlist");
+
+            const data = await response.json();
+            return data;
+        },
+        onError: (err, data, context) => {
+            const msg = `Error`;
+            makeToast(msg);
+
+            console.log("Track deletion failed.");
+        },
+        onSuccess: (data) => {
+            const msg = `Deleted ${track.titleDisplay ?? track.title}`;
+            makeToast(msg);
+
+            queryClient.invalidateQueries({ queryKey: deleteQueryKey });
+        }
+    });
+
     return {
         trackDetails: getTrackDetails?.data,
         isLoading: getTrackDetails.isLoading,
         error: getTrackDetails.error,
 
         editTrack: editTrackMutation.mutate,
+        deleteTrack: deleteTrackMutation.mutate,
    };
 }
 
