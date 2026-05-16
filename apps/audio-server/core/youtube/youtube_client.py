@@ -126,7 +126,7 @@ class YouTubeClient():
         self,
         youtube_id: str,
         parse: bool = True
-    ) -> TrackBase:
+    ) -> tuple[TrackBase, Path]:
         """
         Downloads a specific YouTube video as an audio file and returns a TrackBase object.
 
@@ -139,6 +139,7 @@ class YouTubeClient():
 
         Returns:
             TrackBase: An instance of a TrackBase
+            Path: File path of the downloaded track
 
         Raises:
             YtdlpTimeoutError: If yt-dlp times out.
@@ -146,8 +147,8 @@ class YouTubeClient():
             YtdlpDownloadError: If yt-dlp exits with a non-zero code, or any other error.
         """
 
-        output_path = self.data_dir / f"{youtube_id}.{self.dl_format}"
-        temp_path = self.data_dir / f"{youtube_id}.{self.dl_temp_format}"
+        output_path = self.data_dir / f"{self.yt_prefix}{youtube_id}.{self.dl_format}"
+        temp_path = self.data_dir / f"{self.yt_prefix}{youtube_id}.{self.dl_temp_format}"
 
         url = f"https://www.youtube.com/watch?v={youtube_id}"
 
@@ -222,7 +223,7 @@ class YouTubeClient():
                     name_display=parsed_artist
                 ) for parsed_artist in parsed_artists]
             
-            return download_result
+            return download_result, output_path
 
         except asyncio.TimeoutError as e:
             raise YtdlpTimeoutError() from e
