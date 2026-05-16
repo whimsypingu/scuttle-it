@@ -202,8 +202,8 @@ class YouTubeClient():
             if raw_id != youtube_id:
                 raise YtdlpMetadataError(f"Mismatched yt-dlp id: extracted id {raw_id} != provided YouTube id {youtube_id}")
             
-            #prepare return value
-            result = TrackBase(
+            #prepare return values
+            download_result = TrackBase(
                 id=f"{self.yt_prefix}{raw_id}",
                 title=raw_title,
                 duration=int(raw_duration),
@@ -216,13 +216,13 @@ class YouTubeClient():
             if parse:
                 parsed_title, parsed_artists, _ = self.parser.predict(raw_title, raw_uploader)
 
-                result.title_display = parsed_title
-                result.artists=[ArtistBase(
+                download_result.title_display = parsed_title
+                download_result.artists=[ArtistBase(
                     name=parsed_artist,
                     name_display=parsed_artist
                 ) for parsed_artist in parsed_artists]
             
-            return result
+            return download_result
 
         except asyncio.TimeoutError as e:
             raise YtdlpTimeoutError() from e

@@ -1,6 +1,7 @@
 import logging
 
 from core.download.download_queue import DownloadQueue
+from core.models.artist import EditArtist
 from core.models.jobs import JobStatus
 from core.models.track import EditTrackPayload
 from core.youtube.youtube_client import YouTubeClient
@@ -54,13 +55,22 @@ class DownloadWorker:
 
                     #register download
                     top_search_result = search_results[0]
-                    new_search_result = await self.yt_client.download_by_youtube_id(top_search_result.id, parse=True)
+                    download_result = await self.yt_client.download_by_youtube_id(top_search_result.id, parse=True)
                     
-                    await self.db_manager.unregister_track(top_search_result.id) #replace entirely
-                    await self.db_manager.register_track(new_search_result)
+                    #should only run if the download is parsed
+                    assert top_search_result.id == download_result.id
+                    await self.db_manager.edit_track(
+                        download_result.id, 
+                        EditTrackPayload(
+                            title_display=download_result.display,
+                            artists=[EditArtist(
+                                name_display=artist.display
+                            ) for artist in download_result.artists]
+                        )
+                    )
 
-                    await self.db_manager.register_download(top_search_result.id)
-                    await self.db_manager.push_next_play_queue(top_search_result.id) #push to play queue immediately for now
+                    await self.db_manager.register_download(download_result.id)
+                    await self.db_manager.push_next_play_queue(download_result.id) #push to play queue immediately for now
 
                 #EMERGENCY: not yet implemented for non-search-queries
                 else:
