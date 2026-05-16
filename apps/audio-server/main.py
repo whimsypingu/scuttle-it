@@ -25,6 +25,7 @@ from api.routers.like_router import LikeRouter
 from api.routers.job_router import JobRouter
 
 from core.youtube.youtube_client import YouTubeClient
+from core.audio.processor import AudioProcessor
 from database.database_manager import DatabaseManager
 from sync.websocket_manager import WebsocketManager
 from core.download.download_queue import DownloadQueue
@@ -51,11 +52,15 @@ async def lifespan(app: FastAPI):
     dl_queue = DownloadQueue()
     app.state.dl_queue = dl_queue
 
+    audio_processor = AudioProcessor()
+    app.state.audio_processor = audio_processor
+
     workers = []
     for i in range(2):
         dl_worker = DownloadWorker(
             worker_id=f"Worker-{i+1}",
             dl_queue=dl_queue,
+            audio_processor=audio_processor,
             yt_client=YouTubeClient(),
             db_manager=db_manager,
             ws_manager=ws_manager

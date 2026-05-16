@@ -1,5 +1,6 @@
 import logging
 
+from core.audio.processor import AudioProcessor
 from core.download.download_queue import DownloadQueue
 from core.models.artist import EditArtistPayload
 from core.models.track import EditTrackPayload
@@ -16,6 +17,7 @@ class DownloadWorker:
         self,
         worker_id: str,
         dl_queue: DownloadQueue,
+        audio_processor: AudioProcessor,
         yt_client: YouTubeClient,
         db_manager: DatabaseManager,
         ws_manager: WebsocketManager
@@ -23,6 +25,7 @@ class DownloadWorker:
         self.worker_id = worker_id
 
         self.dl_queue = dl_queue
+        self.audio_processor = audio_processor
         self.yt_client = yt_client
         self.db_manager = db_manager
         self.ws_manager = ws_manager
@@ -54,7 +57,10 @@ class DownloadWorker:
 
                     #register download
                     top_search_result = search_results[0]
-                    download_result = await self.yt_client.download_by_youtube_id(top_search_result.id, parse=True)
+                    download_result, file_path = await self.yt_client.download_by_youtube_id(top_search_result.id, parse=True)
+
+                    #clean audio file
+                    await self.audio_processor.clean(file_path)
                     
                     #should only run if the download is parsed for now
                     assert top_search_result.id == download_result.id
