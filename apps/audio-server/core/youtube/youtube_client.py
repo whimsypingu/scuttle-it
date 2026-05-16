@@ -204,7 +204,7 @@ class YouTubeClient():
             
             #prepare return value
             result = TrackBase(
-                id=raw_id,
+                id=f"{self.yt_prefix}{raw_id}",
                 title=raw_title,
                 duration=int(raw_duration),
                 artists=[ArtistBase(
@@ -218,8 +218,9 @@ class YouTubeClient():
 
                 result.title_display = parsed_title
                 result.artists=[ArtistBase(
-                    name=a
-                ) for a in parsed_artists]
+                    name=parsed_artist,
+                    name_display=parsed_artist
+                ) for parsed_artist in parsed_artists]
             
             return result
 
@@ -237,8 +238,7 @@ class YouTubeClient():
     async def search_by_query(
         self,
         q: str,
-        limit: int = 5,
-        parse: bool = True
+        limit: int = 5
     ) -> list[TrackBase]:
         """
         Search YouTube using yt-dlp for the query, and return limit number of TrackBase objects
@@ -282,25 +282,16 @@ class YouTubeClient():
                 logger.info(f"{raw_id} | {raw_title} | {raw_uploader} | {raw_duration}")
 
                 #prepare return value
-                result = TrackBase(
-                    id=f"{self.yt_prefix}{raw_id}",
-                    title=raw_title,
-                    duration=int(raw_duration),
-                    artists=[ArtistBase(
-                        name=raw_uploader
-                    )]
+                results.append(
+                    TrackBase(
+                        id=f"{self.yt_prefix}{raw_id}",
+                        title=raw_title,
+                        duration=int(raw_duration),
+                        artists=[ArtistBase(
+                            name=raw_uploader
+                        )]
+                    )
                 )
-
-                #attempt metadata parse
-                if parse:
-                    parsed_title, parsed_artists, _ = self.parser.predict(raw_title, raw_uploader)
-
-                    result.title_display = parsed_title
-                    result.artists=[ArtistBase(
-                        name=a
-                    ) for a in parsed_artists]
-                
-                results.append(result)
 
             return results
 
