@@ -15,6 +15,7 @@ from api.routers.test_router import TestRouter
 
 from api.routers.audio_router import AudioRouter
 from api.routers.queue_router import QueueRouter
+from api.routers.track_router import TrackRouter
 from api.routers.playlist_router import PlaylistRouter
 from api.routers.retrieval_router import RetrievalRouter
 from api.routers.search_router import SearchRouter
@@ -92,6 +93,7 @@ app.include_router(TestRouter)
 
 app.include_router(AudioRouter)
 app.include_router(QueueRouter)
+app.include_router(TrackRouter)
 app.include_router(PlaylistRouter)
 app.include_router(RetrievalRouter)
 app.include_router(SearchRouter)
