@@ -27,7 +27,7 @@ export const useEditTrack = (track: TrackBase) => {
     const editTrackMutation = useMutation({
         mutationFn: async (payload: EditTrackPayload) => {
             //see: apps/audio-server/api/routers/edit_router.py
-            const response = await fetch(`/edit/track/${track.id}`, {
+            const response = await fetch(`/tracks/edit/${track.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -112,7 +112,7 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
     const editPlaylistMutation = useMutation({
         mutationFn: async (payload: EditPlaylistPayload) => {
             //see: apps/audio-server/api/routers/edit_router.py
-            const response = await fetch(`/edit/playlist/${playlist.id}`, {
+            const response = await fetch(`/playlists/edit/${playlist.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",

@@ -21,7 +21,6 @@ from api.routers.retrieval_router import RetrievalRouter
 from api.routers.search_router import SearchRouter
 from api.routers.settings_router import SettingsRouter
 from api.routers.websocket_router import WebsocketRouter
-from api.routers.edit_router import EditRouter
 from api.routers.like_router import LikeRouter
 from api.routers.job_router import JobRouter
 
@@ -99,7 +98,6 @@ app.include_router(RetrievalRouter)
 app.include_router(SearchRouter)
 app.include_router(SettingsRouter)
 app.include_router(WebsocketRouter)
-app.include_router(EditRouter)
 app.include_router(LikeRouter)
 app.include_router(JobRouter)
 
