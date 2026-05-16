@@ -1,8 +1,7 @@
 import logging
 
 from core.download.download_queue import DownloadQueue
-from core.models.artist import EditArtist
-from core.models.jobs import JobStatus
+from core.models.artist import EditArtistPayload
 from core.models.track import EditTrackPayload
 from core.youtube.youtube_client import YouTubeClient
 from database.database_manager import DatabaseManager
@@ -57,13 +56,13 @@ class DownloadWorker:
                     top_search_result = search_results[0]
                     download_result = await self.yt_client.download_by_youtube_id(top_search_result.id, parse=True)
                     
-                    #should only run if the download is parsed
+                    #should only run if the download is parsed for now
                     assert top_search_result.id == download_result.id
                     await self.db_manager.edit_track(
                         download_result.id, 
                         EditTrackPayload(
                             title_display=download_result.display,
-                            artists=[EditArtist(
+                            artists=[EditArtistPayload(
                                 name_display=artist.display
                             ) for artist in download_result.artists]
                         )
