@@ -46,7 +46,7 @@ export const useEditTrack = (track: TrackBase) => {
             queryClient.invalidateQueries({ queryKey: ["details", "tracks", track.id] }); //invalidate the edit-showable track data 
             queryClient.invalidateQueries({ queryKey: ["playlists"] }); //invalidate the counts of playlists 
 
-            makeToast("Saved");
+            makeToast("", "Saved");
         },
         onError: (err) => {
             console.error("Edit track failed.");
@@ -67,14 +67,12 @@ export const useEditTrack = (track: TrackBase) => {
             return data;
         },
         onError: (err, data, context) => {
-            const msg = `Error`;
-            makeToast(msg);
+            makeToast("", "Error");
 
             console.log("Track deletion failed.");
         },
         onSuccess: (data) => {
-            const msg = `Deleted ${track.titleDisplay ?? track.title}`;
-            makeToast(msg);
+            makeToast("Deleted: ", `${track.titleDisplay ?? track.title}`);
 
             queryClient.invalidateQueries({ queryKey: deleteQueryKey });
         }
@@ -130,7 +128,7 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
             queryClient.invalidateQueries({ queryKey: ["details", "playlists", playlist.id] }); //invalidate the edit-showable playlist data 
             queryClient.invalidateQueries({ queryKey: ["playlists"] }); //invalidate the counts of playlists 
 
-            makeToast("Saved");
+            makeToast("", "Saved");
         },
         onError: (err) => {
             console.error("Edit playlist failed.");
@@ -162,8 +160,7 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
             return { rollbackPlaylists };
         },
         onError: (err, data, context) => {
-            const msg = `Error`;
-            makeToast(msg);
+            makeToast("", "Error");
 
             if (context?.rollbackPlaylists) {
                 queryClient.setQueryData(queryKey, context.rollbackPlaylists);
@@ -171,8 +168,7 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
             console.log("Optimistic playlist deletion failed, rolling back.");
         },
         onSuccess: (data) => {
-            const msg = `Deleted ${playlist.name}`;
-            makeToast(msg);
+            makeToast("Deleted: ", playlist.name);
 
             queryClient.invalidateQueries({ queryKey });
         },
