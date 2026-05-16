@@ -5,6 +5,7 @@ from pathlib import Path
 from config import settings
 from core.models.track import TrackBase
 from core.models.artist import ArtistBase
+from core.youtube.metadata_parser.parser import YouTubeParser
 from core.youtube.youtube_exceptions import YtdlpDownloadError, YtdlpMetadataError, YtdlpSearchError, YtdlpTimeoutError, YtdlpUpdateError
 
 logger = logging.getLogger(__name__)
@@ -38,6 +39,8 @@ class YouTubeClient():
                 setattr(self, key, value)
             else:
                 logger.warning(f"YouTubeClient ignored unknown override: {key}")
+
+        self.parser: YouTubeParser = YouTubeParser()
 
         logger.info(f"YouTubeClient ready.")
 
@@ -121,7 +124,8 @@ class YouTubeClient():
 
     async def download_by_youtube_id(
         self,
-        youtube_id: str
+        youtube_id: str,
+        parse: bool = True
     ) -> TrackBase:
         """
         Downloads a specific YouTube video as an audio file and returns a TrackBase object.
@@ -197,16 +201,27 @@ class YouTubeClient():
             #id check
             if raw_id != youtube_id:
                 raise YtdlpMetadataError(f"Mismatched yt-dlp id: extracted id {raw_id} != provided YouTube id {youtube_id}")
-
-            #return value
-            return TrackBase(
+            
+            #prepare return value
+            result = TrackBase(
                 id=raw_id,
                 title=raw_title,
-                duration=raw_duration,
+                duration=int(raw_duration),
                 artists=[ArtistBase(
                     name=raw_uploader
                 )]
             )
+
+            #attempt metadata parse
+            if parse:
+                parsed_title, parsed_artists, _ = self.parser.predict(raw_title, raw_uploader)
+
+                result.title_display = parsed_title
+                result.artists=[ArtistBase(
+                    name=a
+                ) for a in parsed_artists]
+            
+            return result
 
         except asyncio.TimeoutError as e:
             raise YtdlpTimeoutError() from e
@@ -222,7 +237,8 @@ class YouTubeClient():
     async def search_by_query(
         self,
         q: str,
-        limit: int = 5
+        limit: int = 5,
+        parse: bool = True
     ) -> list[TrackBase]:
         """
         Search YouTube using yt-dlp for the query, and return limit number of TrackBase objects
@@ -264,15 +280,27 @@ class YouTubeClient():
                 raw_id, raw_title, raw_uploader, raw_duration = parts
     
                 logger.info(f"{raw_id} | {raw_title} | {raw_uploader} | {raw_duration}")
-                
-                results.append(TrackBase(
+
+                #prepare return value
+                result = TrackBase(
                     id=f"{self.yt_prefix}{raw_id}",
                     title=raw_title,
                     duration=int(raw_duration),
                     artists=[ArtistBase(
                         name=raw_uploader
                     )]
-                ))
+                )
+
+                #attempt metadata parse
+                if parse:
+                    parsed_title, parsed_artists, _ = self.parser.predict(raw_title, raw_uploader)
+
+                    result.title_display = parsed_title
+                    result.artists=[ArtistBase(
+                        name=a
+                    ) for a in parsed_artists]
+                
+                results.append(result)
 
             return results
 
