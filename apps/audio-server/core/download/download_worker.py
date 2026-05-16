@@ -1,7 +1,8 @@
 import logging
 
 from core.download.download_queue import DownloadQueue
-from core.models.jobs import JobStatus
+from core.models.artist import EditArtistPayload
+from core.models.track import EditTrackPayload
 from core.youtube.youtube_client import YouTubeClient
 from database.database_manager import DatabaseManager
 from sync.pokes import WSPokeFactory
@@ -53,9 +54,23 @@ class DownloadWorker:
 
                     #register download
                     top_search_result = search_results[0]
-                    await self.yt_client.download_by_youtube_id(top_search_result.id)
-                    await self.db_manager.register_download(top_search_result.id)
-                    await self.db_manager.push_next_play_queue(top_search_result.id) #push to play queue immediately for now
+                    download_result = await self.yt_client.download_by_youtube_id(top_search_result.id, parse=True)
+                    
+                    #should only run if the download is parsed for now
+                    assert top_search_result.id == download_result.id
+                    await self.db_manager.edit_track(
+                        download_result.id, 
+                        EditTrackPayload(
+                            title_display=download_result.display,
+                            duration=download_result.duration,
+                            artists=[EditArtistPayload(
+                                name_display=artist.display
+                            ) for artist in download_result.artists]
+                        )
+                    )
+
+                    await self.db_manager.register_download(download_result.id)
+                    await self.db_manager.push_next_play_queue(download_result.id) #push to play queue immediately for now
 
                 #EMERGENCY: not yet implemented for non-search-queries
                 else:

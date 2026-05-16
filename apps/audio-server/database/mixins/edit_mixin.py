@@ -23,8 +23,18 @@ class EditMixin:
                 track_internal_id = row[0]
 
                 #track field edits
+                fields = []
+                params = []
+                
                 if payload.title_display is not None:
-                    await db.execute("UPDATE tracks SET title_display = ? WHERE id = ?;", (payload.title_display, track_id))
+                    fields.append("title_display = ?")
+                    params.append(payload.title_display)
+                if payload.duration is not None:
+                    fields.append("duration = ?")
+                    params.append(payload.duration)
+                
+                if fields:
+                    await db.execute(f"UPDATE tracks SET {", ".join(fields)} WHERE id = ?;", (*params, track_id))
 
                 #flush and fill artists -- temp strategy, will require further logic in the future
                 if payload.artists is not None:

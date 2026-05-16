@@ -6,3 +6,5 @@ pydantic
 pydantic-settings
 python-dotenv
 httpx
+sklearn-crfsuite
+joblib
