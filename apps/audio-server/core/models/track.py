@@ -40,6 +40,7 @@ class EditTrackPayload(ScuttleBase):
     id: str | None = None #optional external source ID to identify which artist to edit
     new_id: str | None = None
     title_display: str | None = None
+    duration: float | None = None
 
     artists: list[EditArtistPayload] | None = None
 

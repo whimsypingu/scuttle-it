@@ -62,6 +62,7 @@ class DownloadWorker:
                         download_result.id, 
                         EditTrackPayload(
                             title_display=download_result.display,
+                            duration=download_result.duration,
                             artists=[EditArtistPayload(
                                 name_display=artist.display
                             ) for artist in download_result.artists]
