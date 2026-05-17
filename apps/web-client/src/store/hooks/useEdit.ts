@@ -27,7 +27,7 @@ export const useEditTrack = (track: TrackBase) => {
     const editTrackMutation = useMutation({
         mutationFn: async (payload: EditTrackPayload) => {
             //see: apps/audio-server/api/routers/edit_router.py
-            const response = await fetch(`/edit/track/${track.id}`, {
+            const response = await fetch(`/tracks/edit/${track.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -46,20 +46,45 @@ export const useEditTrack = (track: TrackBase) => {
             queryClient.invalidateQueries({ queryKey: ["details", "tracks", track.id] }); //invalidate the edit-showable track data 
             queryClient.invalidateQueries({ queryKey: ["playlists"] }); //invalidate the counts of playlists 
 
-            makeToast("Saved");
+            makeToast("", "Saved");
         },
         onError: (err) => {
             console.error("Edit track failed.");
         }
     });
 
-    
+    //delete a track
+    const deleteQueryKey = ["tracks"];
+    const deleteTrackMutation = useMutation({
+        mutationFn: async () => {
+            const response = await fetch(`/tracks/${track.id}`, {
+                method: "DELETE",
+            });
+
+            if (!response.ok) throw new Error("Failed to delete playlist");
+
+            const data = await response.json();
+            return data;
+        },
+        onError: (err, data, context) => {
+            makeToast("", "Error");
+
+            console.log("Track deletion failed.");
+        },
+        onSuccess: (data) => {
+            makeToast("Deleted: ", `${track.titleDisplay ?? track.title}`);
+
+            queryClient.invalidateQueries({ queryKey: deleteQueryKey });
+        }
+    });
+
     return {
         trackDetails: getTrackDetails?.data,
         isLoading: getTrackDetails.isLoading,
         error: getTrackDetails.error,
 
         editTrack: editTrackMutation.mutate,
+        deleteTrack: deleteTrackMutation.mutate,
    };
 }
 
@@ -85,7 +110,7 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
     const editPlaylistMutation = useMutation({
         mutationFn: async (payload: EditPlaylistPayload) => {
             //see: apps/audio-server/api/routers/edit_router.py
-            const response = await fetch(`/edit/playlist/${playlist.id}`, {
+            const response = await fetch(`/playlists/edit/${playlist.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -103,7 +128,7 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
             queryClient.invalidateQueries({ queryKey: ["details", "playlists", playlist.id] }); //invalidate the edit-showable playlist data 
             queryClient.invalidateQueries({ queryKey: ["playlists"] }); //invalidate the counts of playlists 
 
-            makeToast("Saved");
+            makeToast("", "Saved");
         },
         onError: (err) => {
             console.error("Edit playlist failed.");
@@ -135,8 +160,7 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
             return { rollbackPlaylists };
         },
         onError: (err, data, context) => {
-            const msg = `Error`;
-            makeToast(msg);
+            makeToast("", "Error");
 
             if (context?.rollbackPlaylists) {
                 queryClient.setQueryData(queryKey, context.rollbackPlaylists);
@@ -144,8 +168,7 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
             console.log("Optimistic playlist deletion failed, rolling back.");
         },
         onSuccess: (data) => {
-            const msg = `Deleted ${playlist.name}`;
-            makeToast(msg);
+            makeToast("Deleted: ", playlist.name);
 
             queryClient.invalidateQueries({ queryKey });
         },
