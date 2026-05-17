@@ -14,6 +14,7 @@ import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
 import type { TrackBase } from "@/track/track.types";
 import type { PlaylistId } from "@/playlist/playlist.types";
 import type { EditArtistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
+import { ArticleIcon, IdentificationCardIcon, LinkIcon, NotchesIcon } from "@phosphor-icons/react";
 
 
 interface EditTrackFormProps {
@@ -60,9 +61,9 @@ export const EditTrackForm = ({
     };
 
     //draw the ui subcomponent for the playlist checkboxes
-    const renderEditContent = () => {
+    const renderPlaylistContent = () => {
         if (isLoading) {
-            return (<div className="p-4 animate-pulse">Loading details...</div>);
+            return (<div className="p-4 animate-pulse">Loading playlists...</div>);
         }
 
         if (!trackDetails) {
@@ -73,7 +74,7 @@ export const EditTrackForm = ({
             <div className="flex flex-col px-1">
                 {playlists.map((p, index) => (
                     <div 
-                        className={`flex flex-row items-center gap-2 px-1 py-2 cursor-pointer transition-colors ${index !== 0 ? "border-t" : ""}`}
+                        className={`flex flex-row items-center gap-2 px-1 py-2 cursor-pointer transition-colors ${index == 0 ? "border-t" : ""} border-b`}
                         onClick={() => handlePlaylistToggle(p.id)}
                     >
                         <Checkbox 
@@ -94,20 +95,30 @@ export const EditTrackForm = ({
         return (
             <div className="flex flex-col px-1">
                 <div className="flex flex-row items-center gap-2 px-1 py-1">
+                    <NotchesIcon size={16} />
                     <label className="text-xs font-medium text-muted-foreground">
                         {title}
                     </label>
                 </div>
 
                 <div className="flex flex-row items-center gap-2 px-1 py-1">
+                    <NotchesIcon size={16} />
                     <label className="text-xs font-medium text-muted-foreground">
                         {artists}
                     </label>
                 </div>
 
-                <a href={link}>
-                    <div className="flex flex-row items-center gap-2 px-1 py-1">
-                        <label className="text-xs font-medium text-muted-foreground">
+                <a 
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                >
+                    <div className="
+                        flex flex-row items-center gap-2 px-1 py-1
+                        active:scale-[0.98]
+                    ">
+                        <LinkIcon size={16} />
+                        <label className="text-xs font-medium underline underline-offset-4 text-muted-foreground">
                             {link}
                         </label>
                     </div>
@@ -141,7 +152,7 @@ export const EditTrackForm = ({
 
     return (
         <div className="flex flex-col h-full">
-            <div className="h-full custom-scrollbar overflow-y-auto flex flex-col gap-2">
+            <div className="h-full custom-scrollbar overflow-y-auto flex flex-col gap-4">
                 {/* Title Section */}
                 <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-muted-foreground">
@@ -173,7 +184,7 @@ export const EditTrackForm = ({
                     <label className="text-sm font-medium text-muted-foreground">
                         Playlists
                     </label>
-                    {renderEditContent()}
+                    {renderPlaylistContent()}
                 </div>
 
                 {/* Source Section */}
