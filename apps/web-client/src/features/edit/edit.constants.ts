@@ -2,6 +2,7 @@ import type { EditableType, EditPopupMetadata } from "@/features/edit/edit.types
 
 
 export const MIN_BUTTON_WIDTH = 80;
+export const SOURCE_ICON_SIZE = 16;
 
 export const EDIT_CONFIG: Record<EditableType, EditPopupMetadata> = {
     editTrack: {

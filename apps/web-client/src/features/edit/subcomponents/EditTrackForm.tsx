@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useEditTrack } from "@/store/hooks/useEdit";
 import { usePlaylists } from "@/store/hooks/usePlaylists";
 
+import { LinkIcon, NotchesIcon } from "@phosphor-icons/react";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -9,12 +11,11 @@ import { HoldToDeleteButton } from "@/components/ui/hold-delete";
 
 import { getTrackDisplayMetadata, getTrackSourceMetadata, getTrackSourceLink } from "@/track/track.utils";
 
-import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
+import { MIN_BUTTON_WIDTH, SOURCE_ICON_SIZE } from "@/features/edit/edit.constants";
 
 import type { TrackBase } from "@/track/track.types";
 import type { PlaylistId } from "@/playlist/playlist.types";
 import type { EditArtistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
-import { ArticleIcon, IdentificationCardIcon, LinkIcon, NotchesIcon } from "@phosphor-icons/react";
 
 
 interface EditTrackFormProps {
@@ -91,18 +92,19 @@ export const EditTrackForm = ({
         );
     };
 
+    //draw the ui subcomponent for the source data
     const renderSourceContent = () => {
         return (
             <div className="flex flex-col px-1">
                 <div className="flex flex-row items-center gap-2 px-1 py-1">
-                    <NotchesIcon size={16} />
+                    <NotchesIcon size={SOURCE_ICON_SIZE} />
                     <label className="text-xs font-medium text-muted-foreground">
                         {title}
                     </label>
                 </div>
 
                 <div className="flex flex-row items-center gap-2 px-1 py-1">
-                    <NotchesIcon size={16} />
+                    <NotchesIcon size={SOURCE_ICON_SIZE} />
                     <label className="text-xs font-medium text-muted-foreground">
                         {artists}
                     </label>
@@ -110,14 +112,11 @@ export const EditTrackForm = ({
 
                 <a 
                     href={link}
-                    target="_blank"
-                    rel="noopener noreferrer nofollow"
+                    target="_blank" //open in new tab
+                    rel="noopener noreferrer nofollow" //security, privacy, and seo
                 >
-                    <div className="
-                        flex flex-row items-center gap-2 px-1 py-1
-                        active:scale-[0.98]
-                    ">
-                        <LinkIcon size={16} />
+                    <div className="flex flex-row items-center gap-2 px-1 py-1 active:scale-[0.98]">
+                        <LinkIcon size={SOURCE_ICON_SIZE} />
                         <label className="text-xs font-medium underline underline-offset-4 text-muted-foreground">
                             {link}
                         </label>
