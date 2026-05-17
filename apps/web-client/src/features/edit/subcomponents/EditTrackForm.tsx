@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { HoldToDeleteButton } from "@/components/ui/hold-delete";
 
-import { getTrackDisplayMetadata } from "@/track/track.utils";
+import { getTrackDisplayMetadata, getTrackSourceMetadata, getTrackSourceLink } from "@/track/track.utils";
 
 import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
 
@@ -28,6 +28,9 @@ export const EditTrackForm = ({
     const [titleInput, setTitleInput] = useState("");
     //const [artists, setArtists] = useState<string[]>(track.artists.map(a => a.nameDisplay ?? a.name)); //EMERGENCY: use this with shadcn badges? to make artists selectable in the future
     const [artistInput, setArtistInput] = useState("");
+
+    const { title, artists } = getTrackSourceMetadata(track); //source data
+    const { link } = getTrackSourceLink(track);
 
     const { titleDisplay, artistDisplay } = getTrackDisplayMetadata(track); //placeholders
 
@@ -84,8 +87,34 @@ export const EditTrackForm = ({
                     </div>
                 ))}
             </div>
-        )
-    }
+        );
+    };
+
+    const renderSourceContent = () => {
+        return (
+            <div className="flex flex-col px-1">
+                <div className="flex flex-row items-center gap-2 px-1 py-1">
+                    <label className="text-xs font-medium text-muted-foreground">
+                        {title}
+                    </label>
+                </div>
+
+                <div className="flex flex-row items-center gap-2 px-1 py-1">
+                    <label className="text-xs font-medium text-muted-foreground">
+                        {artists}
+                    </label>
+                </div>
+
+                <a href={link}>
+                    <div className="flex flex-row items-center gap-2 px-1 py-1">
+                        <label className="text-xs font-medium text-muted-foreground">
+                            {link}
+                        </label>
+                    </div>
+                </a>
+            </div>
+        );
+    };
 
     const handleSave = () => { //use temp edit payload strategy -- migrate to artist selection in the future
         const artistPayload: EditArtistPayload = {
@@ -145,6 +174,14 @@ export const EditTrackForm = ({
                         Playlists
                     </label>
                     {renderEditContent()}
+                </div>
+
+                {/* Source Section */}
+                <div className="flex flex-col gap-1">
+                    <label className="text-sm font-medium text-muted-foreground">
+                        Source
+                    </label>
+                    {renderSourceContent()}
                 </div>
 
                 {/* Delete Button */}
