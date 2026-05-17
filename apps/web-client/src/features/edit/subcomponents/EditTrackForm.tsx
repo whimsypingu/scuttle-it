@@ -2,14 +2,16 @@ import { useEffect, useState } from "react";
 import { useEditTrack } from "@/store/hooks/useEdit";
 import { usePlaylists } from "@/store/hooks/usePlaylists";
 
+import { LinkIcon, NotchesIcon } from "@phosphor-icons/react";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { HoldToDeleteButton } from "@/components/ui/hold-delete";
 
-import { getTrackDisplayMetadata } from "@/track/track.utils";
+import { getTrackDisplayMetadata, getTrackSourceMetadata, getTrackSourceLink } from "@/track/track.utils";
 
-import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
+import { MIN_BUTTON_WIDTH, SOURCE_ICON_SIZE } from "@/features/edit/edit.constants";
 
 import type { TrackBase } from "@/track/track.types";
 import type { PlaylistId } from "@/playlist/playlist.types";
@@ -28,6 +30,9 @@ export const EditTrackForm = ({
     const [titleInput, setTitleInput] = useState("");
     //const [artists, setArtists] = useState<string[]>(track.artists.map(a => a.nameDisplay ?? a.name)); //EMERGENCY: use this with shadcn badges? to make artists selectable in the future
     const [artistInput, setArtistInput] = useState("");
+
+    const { title, artists } = getTrackSourceMetadata(track); //source data
+    const { link } = getTrackSourceLink(track);
 
     const { titleDisplay, artistDisplay } = getTrackDisplayMetadata(track); //placeholders
 
@@ -57,9 +62,9 @@ export const EditTrackForm = ({
     };
 
     //draw the ui subcomponent for the playlist checkboxes
-    const renderEditContent = () => {
+    const renderPlaylistContent = () => {
         if (isLoading) {
-            return (<div className="p-4 animate-pulse">Loading details...</div>);
+            return (<div className="p-4 animate-pulse">Loading playlists...</div>);
         }
 
         if (!trackDetails) {
@@ -70,7 +75,7 @@ export const EditTrackForm = ({
             <div className="flex flex-col px-1">
                 {playlists.map((p, index) => (
                     <div 
-                        className={`flex flex-row items-center gap-2 px-1 py-2 cursor-pointer transition-colors ${index !== 0 ? "border-t" : ""}`}
+                        className={`flex flex-row items-center gap-2 px-1 py-2 cursor-pointer transition-colors ${index == 0 ? "border-t" : ""} border-b`}
                         onClick={() => handlePlaylistToggle(p.id)}
                     >
                         <Checkbox 
@@ -84,8 +89,42 @@ export const EditTrackForm = ({
                     </div>
                 ))}
             </div>
-        )
-    }
+        );
+    };
+
+    //draw the ui subcomponent for the source data
+    const renderSourceContent = () => {
+        return (
+            <div className="flex flex-col px-1">
+                <div className="flex flex-row items-center gap-2 px-1 py-1">
+                    <NotchesIcon size={SOURCE_ICON_SIZE} />
+                    <label className="text-xs font-medium text-muted-foreground">
+                        {title}
+                    </label>
+                </div>
+
+                <div className="flex flex-row items-center gap-2 px-1 py-1">
+                    <NotchesIcon size={SOURCE_ICON_SIZE} />
+                    <label className="text-xs font-medium text-muted-foreground">
+                        {artists}
+                    </label>
+                </div>
+
+                <a 
+                    href={link}
+                    target="_blank" //open in new tab
+                    rel="noopener noreferrer nofollow" //security, privacy, and seo
+                >
+                    <div className="flex flex-row items-center gap-2 px-1 py-1 active:scale-[0.98]">
+                        <LinkIcon size={SOURCE_ICON_SIZE} />
+                        <label className="text-xs font-medium underline underline-offset-4 text-muted-foreground">
+                            {link}
+                        </label>
+                    </div>
+                </a>
+            </div>
+        );
+    };
 
     const handleSave = () => { //use temp edit payload strategy -- migrate to artist selection in the future
         const artistPayload: EditArtistPayload = {
@@ -112,7 +151,7 @@ export const EditTrackForm = ({
 
     return (
         <div className="flex flex-col h-full">
-            <div className="h-full custom-scrollbar overflow-y-auto flex flex-col gap-2">
+            <div className="h-full custom-scrollbar overflow-y-auto flex flex-col gap-4">
                 {/* Title Section */}
                 <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-muted-foreground">
@@ -144,7 +183,15 @@ export const EditTrackForm = ({
                     <label className="text-sm font-medium text-muted-foreground">
                         Playlists
                     </label>
-                    {renderEditContent()}
+                    {renderPlaylistContent()}
+                </div>
+
+                {/* Source Section */}
+                <div className="flex flex-col gap-1">
+                    <label className="text-sm font-medium text-muted-foreground">
+                        Source
+                    </label>
+                    {renderSourceContent()}
                 </div>
 
                 {/* Delete Button */}

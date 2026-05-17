@@ -112,10 +112,35 @@ export const trackBaseToQueueTrack = (
 });
 
 
+// extract the original title and artists
+export const getTrackSourceMetadata = (track?: TrackBase): { title: string, artists: string } => {
+    if (!track) { //handle null tracks
+        return { title: "---", artists: "---" };
+    }
+
+    const title = track.title ?? "---";
+    const artists = track.artists?.map(a => a.name).join(", ") ?? "---";
+
+    return { title, artists };
+}
+
+
+export const getTrackSourceLink = (track?: TrackBase): { link: string } => {
+    if (!track) {
+        return { link: "---" };
+    }
+    
+    //currently default to youtube link
+    const link = `https://youtube.com/watch?v=${track.id}`;
+
+    return { link };
+}
+
+
 // extract the best display title and artist string
 export const getTrackDisplayMetadata = (track?: TrackBase): { titleDisplay: string, artistDisplay: string } => {
     if (!track) { //handle null tracks
-        return { titleDisplay: "---", artistDisplay: "---" }
+        return { titleDisplay: "---", artistDisplay: "---" };
     }
 
     const titleDisplay = track.titleDisplay ?? track.title ?? "---";
