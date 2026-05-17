@@ -5,6 +5,7 @@ from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
 
 from core.models.track import EditTrackPayload
+from core.audio.utils import delete_track_file
 
 TrackRouter = APIRouter(prefix="/tracks", tags=["Tracks"])
 
@@ -39,6 +40,13 @@ async def delete_track_endpoint(
 ):
     try:
         success = await db_manager.unregister_track(track_id)
+
+        #attempt deleting file, if it can't find the file or deleting the file fails for whatever reason
+        #this whole operation is not necessarily a failure
+        try:
+            delete_track_file(track_id)
+        except Exception as e:
+            pass
 
         return {
             "success": success,

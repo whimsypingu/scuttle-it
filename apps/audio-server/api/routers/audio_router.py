@@ -1,25 +1,17 @@
 import traceback
-from pathlib import Path
+
 from fastapi import APIRouter, Depends, Path, HTTPException
 from fastapi.responses import FileResponse
 
-from config import settings
 from api.dependencies import get_db_manager, get_dl_queue
 from database.database_manager import DatabaseManager
 from core.download.download_queue import DownloadQueue
 from core.models.jobs import DownloadJob
 
+from core.audio.utils import resolve_track_path
+
 AudioRouter = APIRouter(prefix="/audio", tags=["Audio"])
 
-
-def resolve_track_path(track_id: str) -> Path:
-    """Finds the first file matching track_id.* in the data directory."""
-    for ext in [".flac", ".m4a", ".mp3"]: #EMERGENCY: remove this hardcoded value
-        file_path = settings.DATA_DIR / f"{track_id}{ext}"
-        if file_path.exists():
-            return file_path
-    raise HTTPException(status_code=404, detail=f"Track {track_id} not found")
-    
 
 @AudioRouter.get("/stream/{track_id}")
 async def get_audio_stream(
@@ -38,11 +30,17 @@ async def get_audio_stream(
                 "job_id": job.id
             }
         
-        file_path = resolve_track_path(track_id)
+        file_path = resolve_track_path(track_id) #raises FileNotFoundError on failure
 
         return FileResponse(
             path=file_path,
             content_disposition_type="inline"
+        )
+    
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=404, 
+            detail=f"Track {track_id} not found"
         )
     
     except Exception as e:
