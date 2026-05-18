@@ -1,4 +1,4 @@
-import type { AudioCallback, AudioEvent, AudioStrategy, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions } from "@/features/audio/audio.types";
+import type { AudioCallback, AudioEvent, AudioStrategy, FlushListenDurationPayload, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions } from "@/features/audio/audio.types";
 
 
 class AudioEngine implements IAudioEngine  {
@@ -42,7 +42,8 @@ class AudioEngine implements IAudioEngine  {
     //track listening stats
     private setupListenStats() {
         this.strategy.on("timeupdate" as AudioEvent, (callback: any) => {
-            if (!this.strategy.getCurrentTrackId()) return;
+            const currentTrackId = this.strategy.getCurrentTrackId();
+            if (!currentTrackId) return;
 
             const currentTime = this.strategy.getCurrentTime();
             const delta = currentTime - this.previousTime;
@@ -52,16 +53,41 @@ class AudioEngine implements IAudioEngine  {
             }
             this.previousTime = currentTime;
 
+            //automatic heartbeat duration flush
             if (this.listenDuration >= this.LISTEN_HEARTBEAT_INTERVAL) {
+                const flushDuration = this.listenDuration; //snapshot duration to flush
+
+                this.listenDuration = 0; //reset buffer
                 console.log(
-                    `%c[Tracker Success] Accumulated ${this.listenDuration}s of listening! ` +
-                    `Track ID: ${this.strategy.getCurrentTrackId()} | Current Playback Time: ${Math.round(currentTime)}s`, 
+                    `%c[Tracker Success] Accumulated ${flushDuration}s of listening! ` +
+                    `Track ID: ${currentTrackId} | Current Playback Time: ${Math.round(currentTime)}s`, 
                     'color: #10b981; font-weight: bold;'
                 );
-                this.listenDuration = 0; //reset
+
+                this.flushListenDuration(currentTrackId, flushDuration); //fire and forget
             }
-        })
+        });
+
     } 
+
+    private async flushListenDuration(trackId: string, listenDuration: number) {
+        if (!trackId || listenDuration <= 0) return; 
+
+        const payload: FlushListenDurationPayload = {
+            trackId,
+            listenDuration,
+        };
+
+        try {
+            await fetch(`/stats/increment/listen-duration`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+        } catch (err) {
+            console.error("Background stat flush failed:", err);
+        }
+    }
 
     public on<K extends AudioEvent>(event: K, callback: AudioCallback<K>) {
         return this.strategy.on(event, callback);
