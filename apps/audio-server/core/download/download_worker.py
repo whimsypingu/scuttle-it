@@ -53,7 +53,6 @@ class DownloadWorker:
                     search_results = await self.yt_client.search_by_query(q=job.query, limit=job.query_limit)
                     for search_result in search_results:
                         await self.db_manager.register_track(search_result)
-                    await self.db_manager.build_search_index()
 
                     #register download
                     top_search_result = search_results[0]
@@ -79,9 +78,16 @@ class DownloadWorker:
                     await self.db_manager.register_download(download_result.id)
                     await self.db_manager.push_next_play_queue(download_result.id) #push to play queue immediately for now
 
+                    await self.db_manager.build_search_index()
+
                 #EMERGENCY: not yet implemented for non-search-queries
                 else:
-                    await self.yt_client.download_by_youtube_id(job.track_id)
+                    download_result, file_path = await self.yt_client.download_by_youtube_id(job.track_id, parse=True)
+
+                    await self.db_manager.register_track(download_result)
+                    await self.db_manager.register_download(download_result.id)
+
+                    await self.db_manager.build_search_index()
 
                 #status
                 await self.dl_queue.complete_job(job.id, success=True)
