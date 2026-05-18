@@ -39,7 +39,7 @@ async def delete_track_endpoint(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.unregister_track(track_id)
+        success = await db_manager.unregister_download(track_id)
 
         #attempt deleting file, if it can't find the file or deleting the file fails for whatever reason
         #this whole operation is not necessarily a failure
