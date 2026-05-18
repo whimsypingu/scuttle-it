@@ -86,6 +86,7 @@ class DownloadWorker:
 
                     await self.db_manager.register_track(download_result)
                     await self.db_manager.register_download(download_result.id)
+                    await self.db_manager.push_next_play_queue(download_result.id) #push to play queue immediately for now
 
                     await self.db_manager.build_search_index()
 
