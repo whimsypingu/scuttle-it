@@ -61,6 +61,7 @@ class DownloadWorker:
 
                     #clean audio file
                     await self.audio_processor.clean(file_path)
+                    clean_duration = await self.audio_processor.get_duration(file_path)
                     
                     #should only run if the download is parsed for now
                     assert top_search_result.id == download_result.id
@@ -68,7 +69,7 @@ class DownloadWorker:
                         download_result.id, 
                         EditTrackPayload(
                             title_display=download_result.display,
-                            duration=download_result.duration,
+                            duration=clean_duration,
                             artists=[EditArtistPayload(
                                 name_display=artist.display
                             ) for artist in download_result.artists]
