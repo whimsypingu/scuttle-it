@@ -59,20 +59,18 @@ function App() {
 			<EditProvider>
 				<div className="relative h-dvh w-full overflow-hidden bg-surface">
 
-					{!isPlayerExpanded && (
-						<>
-						<MainLayout
-							activeTab={activeTab}
-							onTabChange={handleTabChange}
-						>
-							{renderContent()}
-						</MainLayout>
+					<MainLayout
+						activeTab={activeTab}
+						onTabChange={handleTabChange}
+					>
+						{renderContent()}
+					</MainLayout>
 
+					{!isPlayerExpanded && (
 						<NavBar
 							activeTab={activeTab}
 							onTabChange={handleTabChange}
 						/>
-						</>
 					)}
 
 					<Suspense fallback={null}>
