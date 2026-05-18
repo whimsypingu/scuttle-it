@@ -24,7 +24,10 @@ const ProfileTab = lazy(() => import('@/features/profile/ProfileTab').then(m => 
 
 function App() {
 	const [isPlayerExpanded, setIsPlayerExpanded] = useState(false);
-	const [activeTab, setActiveTab] = useState<Tab>("home");
+	const [activeTab, setActiveTab] = useState<Tab>(() => {
+		const params = new URLSearchParams(window.location.search);
+		return params.get("tab") as Tab || "home";
+	});
 	const [tabResetSignal, setTabResetSignal] = useState(0); //reset tab signal
 
 	const handleTabChange = (newTab: Tab) => {
@@ -32,6 +35,9 @@ function App() {
 			setTabResetSignal(prev => prev + 1);
 		} else {
 			setActiveTab(newTab);
+
+			const newUrl = `${window.location.pathname}?tab=${newTab}`;
+			window.history.pushState({ tab: newTab }, '', newUrl);
 		}
 	}
 
