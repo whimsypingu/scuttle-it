@@ -14,6 +14,8 @@ import { SyncLogic } from '@/store/sync/SyncLogic';
 import { EditPopup } from '@/features/edit/EditPopup';
 import { EditProvider } from '@/features/edit/EditProvider';
 
+import { NAV_ITEMS } from '@/features/player/player.constants';
+
 const GlobalPlayer = lazy(() => import('@/features/player/GlobalPlayer').then(m => ({ default: m.GlobalPlayer })));
 
 const MockHome = lazy(() => import('@/features/home/HomeView').then(m => ({ default: m.MockHome })));
@@ -26,7 +28,8 @@ function App() {
 	const [isPlayerExpanded, setIsPlayerExpanded] = useState(false);
 	const [activeTab, setActiveTab] = useState<Tab>(() => {
 		const params = new URLSearchParams(window.location.search);
-		return params.get("tab") as Tab || "home";
+		const openTab = params.get("tab");
+		return NAV_ITEMS.some(item => item.tab === openTab) ? openTab as Tab : "home";
 	});
 	const [tabResetSignal, setTabResetSignal] = useState(0); //reset tab signal
 
