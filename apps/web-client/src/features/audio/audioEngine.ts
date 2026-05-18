@@ -4,6 +4,10 @@ import type { AudioCallback, AudioEvent, AudioStrategy, IAudioEngine, PlayPauseT
 class AudioEngine implements IAudioEngine  {
     private static instance: AudioEngine;
     private strategy!: AudioStrategy; //! set in initialization
+
+    private LISTEN_HEARTBEAT_INTERVAL = 30; //seconds between a heartbeat ping
+    private listenDuration = 0; //seconds, floating point value
+    private previousTime = 0; //delta tracking helper variable
     
     private constructor() { null }
 
@@ -20,6 +24,9 @@ class AudioEngine implements IAudioEngine  {
         }
 
         console.log(`[AudioEngine] Strategy loaded: ${this.strategy.strategy}`);
+
+        this.setupListenStats();
+        console.log(`[AudioEngine] Listening stats setup: ${this.strategy.strategy}`);
     }
 
     //ensure only one AudioEngine exists, singleton creation must be awaited now due to dynamic imports
@@ -31,6 +38,30 @@ class AudioEngine implements IAudioEngine  {
         }
         return AudioEngine.instance;
     }
+
+    //track listening stats
+    private setupListenStats() {
+        this.strategy.on("timeupdate" as AudioEvent, (callback: any) => {
+            if (!this.strategy.getCurrentTrackId()) return;
+
+            const currentTime = this.strategy.getCurrentTime();
+            const delta = currentTime - this.previousTime;
+
+            if (delta > 0 && delta < 2) { //prevent tracking large changes like scrubbing and skips
+                this.listenDuration += delta;
+            }
+            this.previousTime = currentTime;
+
+            if (this.listenDuration >= this.LISTEN_HEARTBEAT_INTERVAL) {
+                console.log(
+                    `%c[Tracker Success] Accumulated ${this.listenDuration}s of listening! ` +
+                    `Track ID: ${this.strategy.getCurrentTrackId()} | Current Playback Time: ${Math.round(currentTime)}s`, 
+                    'color: #10b981; font-weight: bold;'
+                );
+                this.listenDuration = 0; //reset
+            }
+        })
+    } 
 
     public on<K extends AudioEvent>(event: K, callback: AudioCallback<K>) {
         return this.strategy.on(event, callback);
