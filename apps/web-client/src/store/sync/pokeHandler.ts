@@ -17,6 +17,7 @@ export function handleWSPoke(poke: WSPoke): void {
 
             if (updatedJob.status === "completed") {
                 queryClient.invalidateQueries({ queryKey: ["tracks"] });
+                queryClient.invalidateQueries({ queryKey: ["profile", "stats"]});
             }
             
             //update the cache to reflect the processing status of the job

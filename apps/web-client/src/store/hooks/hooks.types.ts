@@ -117,3 +117,12 @@ export interface CreatePlaylistPayload {
 export interface DeletePlaylistMutationProps {
     playlist: PlaylistBase;
 }
+
+
+/**
+ * useProfile
+ */
+export interface UserStats {
+    totalTrackCount: number;
+    totalListenedDuration: number;
+}
