@@ -140,8 +140,7 @@ export const usePlaylistsMutations = () => {
             return { rollbackPlaylists };
         },
         onError: (err, payload, context) => {
-            const msg = `Error`;
-            makeToast(msg);
+            makeToast("", "Error");
 
             if (context?.rollbackPlaylists) {
                 queryClient.setQueryData(queryKey, context.rollbackPlaylists);
@@ -149,8 +148,7 @@ export const usePlaylistsMutations = () => {
             console.log("Optimistic playlist creation, rolling back.");
         },
         onSuccess: (data, payload) => {
-            const msg = `Created ${payload.name}`;
-            makeToast(msg);
+            makeToast("Created: ", payload.name);
 
             queryClient.invalidateQueries({ queryKey }); //make optimistic later
         },
