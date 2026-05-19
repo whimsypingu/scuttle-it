@@ -30,6 +30,7 @@ from database.database_manager import DatabaseManager
 from sync.websocket_manager import WebsocketManager
 from core.download.download_queue import DownloadQueue
 from core.download.download_worker import DownloadWorker
+from core.stats.stats_manager import StatsManager
 
 logging.basicConfig(
     level=logging.INFO,
@@ -70,6 +71,12 @@ async def lifespan(app: FastAPI):
         #start working in the background
         asyncio.create_task(dl_worker.run())
 
+    stats_manager = StatsManager(
+        db_manager=db_manager,
+        ws_manager=ws_manager
+    )
+    asyncio.create_task(stats_manager.run(10))
+
     await db_manager.build_from_directory()
     await db_manager.build_search_index()
     await db_manager.normalize_play_queue_positions()
@@ -79,6 +86,7 @@ async def lifespan(app: FastAPI):
     #shutdown
     for w in workers:
         w.stop()
+    stats_manager.stop()
 
 
 app = FastAPI(
