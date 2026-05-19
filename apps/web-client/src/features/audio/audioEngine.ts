@@ -62,11 +62,11 @@ class AudioEngine implements IAudioEngine  {
             }
         });
 
-        this.strategy.on("pause" as AudioEvent, (callback: any) => {
+        this.strategy.on("pause" as AudioEvent, () => {
             this.flushListenDuration(this.currentTrackId, this.listenDuration);
         });
 
-        this.strategy.on("ended" as AudioEvent, (callback: any) => {
+        this.strategy.on("ended" as AudioEvent, () => {
             this.flushListenDuration(this.currentTrackId, this.listenDuration);
         });
     } 

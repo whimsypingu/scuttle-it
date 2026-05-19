@@ -10,7 +10,6 @@ export class StandardStrategy implements AudioStrategy {
         timeupdate: new Set(),
         durationchange: new Set(),
         ended: new Set(),
-        trackidchange: new Set(),
     };
 
     private currentTrackId: string | null = null;
@@ -66,11 +65,6 @@ export class StandardStrategy implements AudioStrategy {
         return this.currentTrackId;
     }
 
-    private setCurrentTrackId(trackId: string): void {
-        this.currentTrackId = trackId;
-        this.emit("trackidchange", trackId);
-    }
-
     async load(trackId: string): Promise<void> {
         const fullUrl = `/audio/stream/${trackId}?t=${Date.now()}`;
 
@@ -85,7 +79,7 @@ export class StandardStrategy implements AudioStrategy {
             return;
         }
 
-        this.setCurrentTrackId(trackId);
+        this.currentTrackId = trackId;
         this.audioEl.src = fullUrl;
 
         return new Promise((resolve, reject) => {

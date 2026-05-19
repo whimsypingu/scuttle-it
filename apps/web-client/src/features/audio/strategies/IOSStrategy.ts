@@ -21,7 +21,6 @@ export class IOSStrategy implements AudioStrategy {
         timeupdate: new Set(),
         durationchange: new Set(),
         ended: new Set(),
-        trackidchange: new Set(),
     };
 
     // --- state variables ---
@@ -189,11 +188,6 @@ export class IOSStrategy implements AudioStrategy {
         return this.currentTrackId;
     }
 
-    private setCurrentTrackId(trackId: string): void {
-        this.currentTrackId = trackId;
-        this.emit("trackidchange", trackId);
-    }
-
     /**
      * Loads a track into the iOS-specific pipeline.
      * 1) Checks if the AudioContext needs a self-healing rebuild step
@@ -234,7 +228,7 @@ export class IOSStrategy implements AudioStrategy {
         sourceNode.connect(this.dest);
         console.log("[IOSStrategy] Node connected");
 
-        this.setCurrentTrackId(trackId);
+        this.currentTrackId = trackId;
 
         return new Promise((resolve, reject) => {
             const cleanup = () => {
@@ -330,7 +324,7 @@ export class IOSStrategy implements AudioStrategy {
         this.audioEl.removeAttribute("src");
         this.audioEl.load(); //reset
 
-        this.currentTrackId = null; //migrate to this.setCurrentTrackId?
+        this.currentTrackId = null;
         console.debug("[IOSStrategy] Cleaned up.");
     }
 }
