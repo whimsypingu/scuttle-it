@@ -23,6 +23,7 @@ from api.routers.settings_router import SettingsRouter
 from api.routers.websocket_router import WebsocketRouter
 from api.routers.like_router import LikeRouter
 from api.routers.job_router import JobRouter
+from api.routers.stats_router import StatsRouter
 
 from core.youtube.youtube_client import YouTubeClient
 from core.audio.processor import AudioProcessor
@@ -37,6 +38,7 @@ logging.basicConfig(
     format="\033[32m%(asctime)s\033[0m %(levelname)-8s \033[34m%(name)s\033[0m - %(message)s",
     datefmt="%H:%M:%S"
 )
+logging.getLogger("asyncio").setLevel(logging.CRITICAL)
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +80,7 @@ async def lifespan(app: FastAPI):
         asyncio.create_task(dl_worker.run())
 
     #poll every interval seconds to flush stats into the database
-    asyncio.create_task(stats_manager.run(600))
+    asyncio.create_task(stats_manager.run(120))
 
     await db_manager.build_from_directory()
     await db_manager.build_search_index()
@@ -111,6 +113,7 @@ app.include_router(SettingsRouter)
 app.include_router(WebsocketRouter)
 app.include_router(LikeRouter)
 app.include_router(JobRouter)
+app.include_router(StatsRouter)
 
 @app.get("/status")
 async def get_status():

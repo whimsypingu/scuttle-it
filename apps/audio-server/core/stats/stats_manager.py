@@ -26,7 +26,7 @@ class StatsManager:
 
         self.is_running = True
 
-    async def add_listen_duration(self, track_id: str, listen_duration: float):
+    async def increment_listen_duration(self, track_id: str, listen_duration: float):
         if not track_id or listen_duration <= 0:
             return
         
@@ -53,7 +53,7 @@ class StatsManager:
             logger.error(f"Error: {str(e)}")
 
     async def run(self, flush_interval: int):
-        """Main loop for running the StatsManager instance and periodically handling flushes"""
+        """Main loop for running the StatsManager instance and periodically handling flush every flush_interval seconds"""
         logger.info(f"StatsManager started.")
 
         try:
@@ -63,5 +63,5 @@ class StatsManager:
         except asyncio.CancelledError:
             await self.flush_stats()
 
-    async def stop(self):
+    def stop(self):
         self.is_running = False

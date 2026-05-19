@@ -10,21 +10,32 @@ class StatsMixin:
         """Increment listen_duration fields for all track_id"""
         logger.info(f"Incrementing listen_duration statistics")
 
-        values = []
-        params = {}
+        cases = []          # "WHEN id = :id_0 THEN :dur_0"
+        params = {}         # id_X dur_X mapping
+        placeholders = []   # ":id_0", ":id_1", ":id_2", etc
+        track_ids = []      # "abc", "def", "ghi", etc
 
         for i, (track_id, listen_duration) in enumerate(buffer.items()):
-            values.append(f"(:id_{i}, :dur_{i})")
-            params[f"id_{i}"] = track_id
-            params[f"dur_{i}"] = round(listen_duration) #cast to int
+            rounded_duration = round(listen_duration)
+            if rounded_duration <= 0:
+                continue
 
-        values_clause = ", ".join(values)
+            cases.append(f"WHEN id = :id_{i} THEN :dur_{i}")
+            params[f"id_{i}"] = track_id
+            params[f"dur_{i}"] = rounded_duration
+            placeholders.append(f":id_{i}")
+            track_ids.append(track_id)
+        
+        if not track_ids:
+            return True
+
+        cases_clause = " ".join(cases)
+        placeholders_clause = ", ".join(placeholders) # ":id_0, :id_1, :id_2, ..."
 
         query = f"""
-            UPDATE tracks AS t
-            SET listen_duration = t.listen_duration + buffer.duration
-            FROM (VALUES {values_clause}) AS buffer(track_id, duration)
-            WHERE t.track_id = buffer.track_id;
+            UPDATE tracks
+            SET listened_duration = listened_duration + CASE {cases_clause} ELSE 0 END
+            WHERE id IN ({placeholders_clause});
         """
 
         try:
