@@ -9,3 +9,7 @@ class RetrievalResponse(ScuttleBase):
     offset: int
     limit: int
     results: list[TrackBase]
+
+class StatsResponse(ScuttleBase):
+    total_track_count: int
+    total_listened_duration: int

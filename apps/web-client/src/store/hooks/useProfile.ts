@@ -20,7 +20,7 @@ export const useStats = () => {
             if (!response.ok) throw new Error("Failed to fetch stats");
             
             const data = await response.json();
-            return data.stats as UserStats;
+            return data as UserStats;
         },
         staleTime: 1000 * 60 * 5, 
     });
