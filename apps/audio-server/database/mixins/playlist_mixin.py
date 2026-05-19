@@ -2,7 +2,8 @@ import logging
 
 from database.mixins.mixin_utils import row_to_summary_playlist
 
-from core.models.playlist import SummaryPlaylist, CreatePlaylistPayload
+from core.models.playlist import SummaryPlaylist
+from core.models.payloads import CreatePlaylistPayload
 
 logger = logging.getLogger(__name__)
 

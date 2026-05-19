@@ -1,10 +1,10 @@
 import traceback
 
-from fastapi import APIRouter, Body, Depends, Path, Query, HTTPException
+from fastapi import APIRouter, Body, Depends, Path, HTTPException
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
 
-from core.models.track import EditTrackPayload
+from core.models.payloads import EditTrackPayload
 from core.audio.utils import delete_track_file
 
 TrackRouter = APIRouter(prefix="/tracks", tags=["Tracks"])

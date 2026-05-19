@@ -17,21 +17,3 @@ class SummaryPlaylist(PlaylistBase):
 class PlaylistDetails(PlaylistBase):
     description: str | None = Field(None, description="")
     #include fields like created_at, etc.
-
-
-
-
-
-#incoming pydantic object
-#see: apps/web-client/src/store/hooks/hooks.types.ts
-class CreatePlaylistPayload(ScuttleBase):
-    playlist_id: str = Field(..., min_length=1) #frontend generated ID (custom UUID)
-    name: str = Field(..., min_length=1, max_length=100)
-
-    description: str | None = None
-
-
-class EditPlaylistPayload(ScuttleBase):
-    id: str | None = None #optional external source ID to identify which artist to edit
-    name: str | None = None
-    description: str | None = None

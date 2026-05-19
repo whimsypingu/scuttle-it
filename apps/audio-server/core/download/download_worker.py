@@ -2,8 +2,7 @@ import logging
 
 from core.audio.processor import AudioProcessor
 from core.download.download_queue import DownloadQueue
-from core.models.artist import EditArtistPayload
-from core.models.track import EditTrackPayload
+from core.models.payloads import EditArtistPayload, EditTrackPayload
 from core.youtube.youtube_client import YouTubeClient
 from database.database_manager import DatabaseManager
 from sync.pokes import WSPokeFactory

@@ -1,6 +1,6 @@
 import traceback
 
-from fastapi import APIRouter, Body, Depends, Query, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException
 from api.dependencies import get_stats_manager
 from core.stats.stats_manager import StatsManager
 
