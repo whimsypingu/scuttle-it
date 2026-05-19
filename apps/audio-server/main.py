@@ -52,6 +52,7 @@ async def lifespan(app: FastAPI):
     app.state.ws_manager = ws_manager
 
     stats_manager = StatsManager(
+        flush_interval=300, #how frequently to flush stats
         db_manager=db_manager,
         ws_manager=ws_manager
     )
@@ -80,7 +81,7 @@ async def lifespan(app: FastAPI):
         asyncio.create_task(dl_worker.run())
 
     #poll every interval seconds to flush stats into the database
-    asyncio.create_task(stats_manager.run(120))
+    asyncio.create_task(stats_manager.run())
 
     await db_manager.build_from_directory()
     await db_manager.build_search_index()

@@ -1,6 +1,5 @@
 import asyncio
 import logging
-from pathlib import Path
 
 from database.database_manager import DatabaseManager
 from sync.pokes import WSPokeFactory
@@ -12,11 +11,14 @@ logger = logging.getLogger(__name__)
 class StatsManager:
     def __init__(
         self,
+        flush_interval: int,
         db_manager: DatabaseManager,
         ws_manager: WebsocketManager
     ):
         self.db_manager = db_manager
         self.ws_manager = ws_manager
+
+        self.flush_interval = flush_interval
 
         #running buffer mapping track_id -> total floating point seconds accumulated listened -- db typecasts to int
         self.listen_duration_buffer: dict[str, float] = {}
@@ -52,13 +54,13 @@ class StatsManager:
         except Exception as e:
             logger.error(f"Error: {str(e)}")
 
-    async def run(self, flush_interval: int):
+    async def run(self):
         """Main loop for running the StatsManager instance and periodically handling flush every flush_interval seconds"""
         logger.info(f"StatsManager started.")
 
         try:
             while self.is_running:
-                await asyncio.sleep(flush_interval)
+                await asyncio.sleep(self.flush_interval)
                 await self.flush_stats()
         except asyncio.CancelledError:
             await self.flush_stats()
