@@ -60,7 +60,7 @@ class SearchMixin:
                 SELECT
                     t.internal_id,
                     t.id,
-                    t.listened_count,
+                    t.listened_duration,
                     sub.score,
                     CASE WHEN d.track_internal_id IS NOT NULL THEN 10.0 ELSE 1.0 END AS dl_boost
                 FROM (
@@ -78,7 +78,7 @@ class SearchMixin:
                 -- Finalize ranking
                 SELECT
                     c.internal_id,
-                    c.score * c.listened_count * c.dl_boost AS final_rank
+                    c.score * c.dl_boost AS final_rank --*c.listened_duration but change it to a real function
                 FROM candidates c
                 JOIN track_artists ta ON ta.track_internal_id = c.internal_id   --artist preference weighting
                 JOIN artists a ON a.internal_id = ta.artist_internal_id

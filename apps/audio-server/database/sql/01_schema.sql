@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS tracks (
     title_display TEXT,
     duration INTEGER DEFAULT 0, --seconds
     listened_duration INTEGER DEFAULT 0,
-    listened_count INTEGER DEFAULT 0,
     listened_at INTEGER DEFAULT 0 --see https://sqlite.org/lang_datefunc.html for (unixepoch())
 );
 
