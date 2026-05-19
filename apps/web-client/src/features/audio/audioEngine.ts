@@ -43,6 +43,9 @@ class AudioEngine implements IAudioEngine  {
     //track listening stats
     private setupListenStats() {
         this.strategy.on("play" as AudioEvent, (callback: any) => {
+            if (this.currentTrackId !== this.strategy.getCurrentTrackId()) {
+                this.flushListenDuration(this.currentTrackId, this.listenDuration); //fire and forget
+            }
             this.currentTrackId = this.strategy.getCurrentTrackId();
         });
 
@@ -56,9 +59,8 @@ class AudioEngine implements IAudioEngine  {
             this.previousTime = currentTime;
 
             //automatic heartbeat duration flush
-            if (this.listenDuration >= this.LISTEN_HEARTBEAT_INTERVAL || this.currentTrackId !== this.strategy.getCurrentTrackId()) {
+            if (this.listenDuration >= this.LISTEN_HEARTBEAT_INTERVAL) {
                 this.flushListenDuration(this.currentTrackId, this.listenDuration); //fire and forget
-                this.currentTrackId = this.strategy.getCurrentTrackId();
             }
         });
 
