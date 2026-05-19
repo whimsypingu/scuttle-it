@@ -14,7 +14,7 @@ export const SearchStatusIndicator = () => {
     const { jobs, isPending, isProcessing } = useDownloadJobs();
 
     const firstActiveIndex = jobs.findIndex(job => job.status !== "completed");
-    console.log(firstActiveIndex);
+    //console.log(firstActiveIndex); //DEBUG
 
     const activeItemRef = (node: HTMLDivElement | null) => {
         if (node) {

@@ -42,9 +42,6 @@ class AudioEngine implements IAudioEngine  {
     //track listening stats
     private setupListenStats() {
         this.strategy.on("timeupdate" as AudioEvent, (callback: any) => {
-            const currentTrackId = this.strategy.getCurrentTrackId();
-            if (!currentTrackId) return;
-
             const currentTime = this.strategy.getCurrentTime();
             const delta = currentTime - this.previousTime;
 
@@ -55,23 +52,28 @@ class AudioEngine implements IAudioEngine  {
 
             //automatic heartbeat duration flush
             if (this.listenDuration >= this.LISTEN_HEARTBEAT_INTERVAL) {
-                const flushDuration = this.listenDuration; //snapshot duration to flush
-
-                this.listenDuration = 0; //reset buffer
-                console.log(
-                    `%c[Tracker Success] Accumulated ${flushDuration}s of listening! ` +
-                    `Track ID: ${currentTrackId} | Current Playback Time: ${Math.round(currentTime)}s`, 
-                    'color: #10b981; font-weight: bold;'
-                );
-
-                this.flushListenDuration(currentTrackId, flushDuration); //fire and forget
+                this.flushListenDuration(this.strategy.getCurrentTrackId(), this.listenDuration); //fire and forget
             }
         });
 
+        this.strategy.on("pause" as AudioEvent, (callback: any) => {
+            this.flushListenDuration(this.strategy.getCurrentTrackId(), this.listenDuration);
+        });
+
+        this.strategy.on("ended" as AudioEvent, (callback: any) => {
+            this.flushListenDuration(this.strategy.getCurrentTrackId(), this.listenDuration);
+        });
     } 
 
-    private async flushListenDuration(trackId: string, listenDuration: number) {
+    private async flushListenDuration(trackId: string | null, listenDuration: number) {
         if (!trackId || listenDuration <= 0) return; 
+        
+        console.log(
+            `%c[Tracker Success] Accumulated ${listenDuration}s of listening! ` +
+            `Track ID: ${trackId} | Current Playback Time: ${Math.round(this.strategy.getCurrentTime())}s`, 
+            'color: #10b981; font-weight: bold;'
+        );
+        this.listenDuration = 0; //reset internal buffer, use the passed parameter as snapshot data
 
         const payload: FlushListenDurationPayload = {
             trackId,
