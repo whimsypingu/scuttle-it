@@ -1,8 +1,9 @@
 import traceback
 
 from fastapi import APIRouter, Body, Depends, HTTPException
-from api.dependencies import get_stats_manager
+from api.dependencies import get_db_manager, get_stats_manager
 from core.stats.stats_manager import StatsManager
+from database.database_manager import DatabaseManager
 
 from core.models.payloads import IncrementListenDurationPayload
 
@@ -21,7 +22,6 @@ async def increment_listen_duration(
     stats_manager: StatsManager = Depends(get_stats_manager)
 ):
     try:
-        print(payload)
         await stats_manager.increment_listen_duration(
             payload.track_id,
             payload.listen_duration
@@ -33,3 +33,19 @@ async def increment_listen_duration(
         traceback.print_exc()
         raise DefaultCrashException
 
+
+@StatsRouter.get("")
+async def get_stats_endpoint(
+    db_manager: DatabaseManager = Depends(get_db_manager),
+    stats_manager: StatsManager = Depends(get_stats_manager),
+):
+    try:
+        await stats_manager.flush()
+        stats = await db_manager.get_stats()
+        return {
+            "success": True,
+            "stats": stats,
+        }
+    except Exception as e:
+        traceback.print_exc()
+        raise DefaultCrashException

@@ -48,3 +48,24 @@ class StatsMixin:
         except Exception:
             logger.exception("Failed to increment listen_durations")
             raise
+
+
+    async def get_stats(self) -> dict:
+        """Get the stats"""
+
+        query = """
+            SELECT
+                (SELECT COUNT(*) FROM downloads) AS total_track_count,
+                (SELECT COALESCE(SUM(listened_duration), 0) FROM tracks) AS total_listened_duration;
+        """
+
+        try:
+            async with self.session() as db:
+                async with db.execute(query) as cursor:
+                    row = await cursor.fetchone()
+
+                    return dict(row)
+
+        except Exception:
+            logger.exception("Failed to retrieve stats")
+            raise

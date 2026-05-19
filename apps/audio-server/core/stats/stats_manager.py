@@ -38,7 +38,7 @@ class StatsManager:
             else:
                 self.listen_duration_buffer[track_id] = listen_duration
         
-    async def flush_stats(self):
+    async def flush(self):
         async with self.lock:
             if not self.listen_duration_buffer:
                 return
@@ -61,9 +61,9 @@ class StatsManager:
         try:
             while self.is_running:
                 await asyncio.sleep(self.flush_interval)
-                await self.flush_stats()
+                await self.flush()
         except asyncio.CancelledError:
-            await self.flush_stats()
+            await self.flush()
 
     def stop(self):
         self.is_running = False
