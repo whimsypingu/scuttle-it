@@ -18,7 +18,7 @@ class StatsManager:
         self.db_manager = db_manager
         self.ws_manager = ws_manager
 
-        #running buffer mapping track_id -> total floating point seconds accumulated listened
+        #running buffer mapping track_id -> total floating point seconds accumulated listened -- db typecasts to int
         self.listen_duration_buffer: dict[str, float] = {}
 
         #atomic data alterations
@@ -39,7 +39,6 @@ class StatsManager:
     async def flush_stats(self):
         async with self.lock:
             if not self.listen_duration_buffer:
-                logger.info("EMPTY")
                 return
             
             buffer_snapshot = self.listen_duration_buffer.copy() #shallow copy works because no mutable types inside
@@ -62,7 +61,6 @@ class StatsManager:
                 await asyncio.sleep(flush_interval)
                 await self.flush_stats()
         except asyncio.CancelledError:
-            logger.info("StatsManager loop cancelled via asyncio")
             await self.flush_stats()
 
     async def stop(self):

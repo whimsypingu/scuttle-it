@@ -49,6 +49,12 @@ async def lifespan(app: FastAPI):
     ws_manager = WebsocketManager()
     app.state.ws_manager = ws_manager
 
+    stats_manager = StatsManager(
+        db_manager=db_manager,
+        ws_manager=ws_manager
+    )
+    app.state.stats_manager = stats_manager
+
     #global
     dl_queue = DownloadQueue()
     app.state.dl_queue = dl_queue
@@ -71,11 +77,8 @@ async def lifespan(app: FastAPI):
         #start working in the background
         asyncio.create_task(dl_worker.run())
 
-    stats_manager = StatsManager(
-        db_manager=db_manager,
-        ws_manager=ws_manager
-    )
-    asyncio.create_task(stats_manager.run(10))
+    #poll every interval seconds to flush stats into the database
+    asyncio.create_task(stats_manager.run(600))
 
     await db_manager.build_from_directory()
     await db_manager.build_search_index()
