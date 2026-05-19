@@ -12,6 +12,7 @@ export type AudioEventMap = {
     timeupdate: number;
     durationchange: number;
     ended: void;
+    trackidchange: string | null;
 };
 export type AudioEvent = keyof AudioEventMap;
 

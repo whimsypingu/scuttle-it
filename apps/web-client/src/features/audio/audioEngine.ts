@@ -6,6 +6,7 @@ class AudioEngine implements IAudioEngine  {
     private strategy!: AudioStrategy; //! set in initialization
 
     private LISTEN_HEARTBEAT_INTERVAL = 30; //seconds between a heartbeat ping
+    private currentTrackId: string | null = null;
     private listenDuration = 0; //seconds, floating point value
     private previousTime = 0; //delta tracking helper variable
     
@@ -41,6 +42,10 @@ class AudioEngine implements IAudioEngine  {
 
     //track listening stats
     private setupListenStats() {
+        this.strategy.on("play" as AudioEvent, (callback: any) => {
+            this.currentTrackId = this.strategy.getCurrentTrackId();
+        });
+
         this.strategy.on("timeupdate" as AudioEvent, (callback: any) => {
             const currentTime = this.strategy.getCurrentTime();
             const delta = currentTime - this.previousTime;
@@ -51,17 +56,18 @@ class AudioEngine implements IAudioEngine  {
             this.previousTime = currentTime;
 
             //automatic heartbeat duration flush
-            if (this.listenDuration >= this.LISTEN_HEARTBEAT_INTERVAL) {
-                this.flushListenDuration(this.strategy.getCurrentTrackId(), this.listenDuration); //fire and forget
+            if (this.listenDuration >= this.LISTEN_HEARTBEAT_INTERVAL || this.currentTrackId !== this.strategy.getCurrentTrackId()) {
+                this.flushListenDuration(this.currentTrackId, this.listenDuration); //fire and forget
+                this.currentTrackId = this.strategy.getCurrentTrackId();
             }
         });
 
         this.strategy.on("pause" as AudioEvent, (callback: any) => {
-            this.flushListenDuration(this.strategy.getCurrentTrackId(), this.listenDuration);
+            this.flushListenDuration(this.currentTrackId, this.listenDuration);
         });
 
         this.strategy.on("ended" as AudioEvent, (callback: any) => {
-            this.flushListenDuration(this.strategy.getCurrentTrackId(), this.listenDuration);
+            this.flushListenDuration(this.currentTrackId, this.listenDuration);
         });
     } 
 
