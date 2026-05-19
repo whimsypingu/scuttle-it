@@ -7,17 +7,23 @@ import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
 import type { ProfileTabProps } from "@/features/profile/profile.types";
 import { CountUp } from "@/components/ui/countup";
+import { useStats } from "@/store/hooks/useProfile";
 
 
 export const ProfileTab = ({
     tabResetSignal
 }: ProfileTabProps) => {
 
-    //get these from tanstack probably
-    const stats = [
-        { label: "Total Tracks", value: "1248", suffix: "", Icon: MusicNotesIcon },
-        { label: "Minutes Listened", value: "4582.00", suffix: "", Icon: ClockIcon },
-        { label: "Audio Storage", value: "14.06", suffix: " GB", Icon: HardDrivesIcon },
+    const { stats } = useStats();
+
+    const totalTrackCountStr = stats.totalTrackCount.toString();
+    const minutesListenedStr = (stats.totalListenedDuration / 60).toFixed(2);
+
+        //get these from tanstack probably
+    const displayStats = [
+        { label: "Total Tracks", value: totalTrackCountStr, suffix: "", Icon: MusicNotesIcon },
+        { label: "Minutes Listened", value: minutesListenedStr, suffix: "", Icon: ClockIcon },
+        { label: "Audio Storage", value: "10.00", suffix: " GB", Icon: HardDrivesIcon },
     ];
 
     return (
@@ -47,7 +53,7 @@ export const ProfileTab = ({
                     {/* GENERAL STATS */}
                     <section>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {stats.map(({ label, value, suffix, Icon }) => (
+                            {displayStats.map(({ label, value, suffix, Icon }) => (
                                 <div 
                                     key={label}
                                     className="flex items-center p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/50 hover:border-primary/30 transition-colors"

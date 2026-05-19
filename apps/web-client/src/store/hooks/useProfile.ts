@@ -1,13 +1,15 @@
 import { useQuery } from "@tanstack/react-query"
 
-import type { UserStats } from "@/store/hooks/hooks.types";
+import { DEFAULT_STATS } from "@/features/profile/profile.constants";
+
+import type { UserStats } from "@/features/profile/profile.types";
 
 
 export const useStats = () => {
     const queryKey = ["profile", "stats"];
     
     //fetch settings
-    const { data: stats, isLoading, error } = useQuery<UserStats>({
+    const { data: stats = DEFAULT_STATS, isLoading, error } = useQuery<UserStats>({
         queryKey,
         queryFn: async () => {
             console.log("useStats triggered");
@@ -24,7 +26,7 @@ export const useStats = () => {
     });
 
     return {
-        stats,
+        stats: stats ?? DEFAULT_STATS,
         isLoading,
         error,
     };
