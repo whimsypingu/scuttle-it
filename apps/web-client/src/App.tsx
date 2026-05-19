@@ -40,7 +40,7 @@ function App() {
 			setActiveTab(newTab);
 
 			const newUrl = `${window.location.pathname}?tab=${newTab}`;
-			window.history.pushState({ tab: newTab }, '', newUrl);
+			window.history.replaceState({ tab: newTab }, '', newUrl);
 		}
 	}
 
