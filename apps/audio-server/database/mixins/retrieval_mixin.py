@@ -231,6 +231,7 @@ class RetrievalMixin:
                 -- Get track subset
                 SELECT * 
                 FROM tracks
+                WHERE listened_at > 0
                 ORDER BY listened_at DESC
                 LIMIT :limit OFFSET :offset
             )
