@@ -22,7 +22,8 @@ export const useStats = () => {
             const data = await response.json();
             return data as UserStats;
         },
-        staleTime: 1000 * 60 * 5, 
+        staleTime: 1000 * 60 * 5,
+        refetchOnMount: "always", //force refetch when this hook mounts to get the most up-to-date data
     });
 
     return {

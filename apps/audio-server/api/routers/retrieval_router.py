@@ -1,8 +1,9 @@
 import traceback
 
 from fastapi import APIRouter, Depends, Path, Query, HTTPException
-from api.dependencies import get_db_manager
+from api.dependencies import get_db_manager, get_stats_manager
 from database.database_manager import DatabaseManager
+from core.stats.stats_manager import StatsManager
 
 from core.models.responses import RetrievalResponse
 
@@ -67,9 +68,11 @@ async def retrieve_likes_endpoint(
 async def retrieve_recently_played_endpoint(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=10, ge=1, le=30), 
-    db_manager: DatabaseManager = Depends(get_db_manager)
+    db_manager: DatabaseManager = Depends(get_db_manager),
+    stats_manager: StatsManager = Depends(get_stats_manager)
 ):
     try:
+        await stats_manager.flush()
         results = await db_manager.retrieve_recents(offset, limit) #consider using asyncio.gather() for these read ops?
         stats = await db_manager.retrieve_recents_stats()
         return {
