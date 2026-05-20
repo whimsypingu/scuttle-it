@@ -6,6 +6,7 @@ import { LikedHomeContentView } from "./subcomponents/LikedHomeContent";
 import { OtherHomeContentView } from "./subcomponents/OtherHomeContent";
 
 import type { HomeContent } from "./home.types";
+import { RecentsHomeContentView } from "./subcomponents/RecentsHomeContent";
 
 
 
@@ -14,7 +15,7 @@ export const MOCK_HOME_CONTENTS: HomeContent[] = [
         type: "systemPlaylist",
         color: "#22c55e", // Green
         name: "All Tracks",
-        description: "All your tracks, in one place.",
+        description: "In one place.",
         data: {
             id: "downloads",
             name: "All Tracks",
@@ -32,10 +33,23 @@ export const MOCK_HOME_CONTENTS: HomeContent[] = [
             id: "likes",
             name: "Likes",
             tagline: "Favorites",
-            description: "All your liked tracks.",
+            description: "Stuff you liked.",
             component: LikedHomeContentView,
         }
     },
+    {
+        type: "systemPlaylist",
+        color: "#3b82f6", // Blue
+        name: "Recent",
+        description: "The stuff you just heard.",
+        data: {
+            id: "recents",
+            name: "Recently Played",
+            tagline: "History",
+            description: "Your 100 most recently listened tracks.",
+            component: RecentsHomeContentView,
+        }
+    }
 ]
 
 

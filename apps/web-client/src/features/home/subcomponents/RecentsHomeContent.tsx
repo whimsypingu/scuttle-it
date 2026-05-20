@@ -1,0 +1,100 @@
+import { motion } from 'framer-motion';
+import { XIcon } from '@phosphor-icons/react';
+
+import { useDownloadsContent } from '@/store/hooks/useDownloads';
+
+import { PlaylistList } from '@/playlist/PlaylistList';
+
+import { formatReadableTime } from '@/features/audio/audio.utils';
+import { BOTTOM_SHELF } from '@/features/player/player.constants';
+
+import type { HomeContent, SystemPlaylist } from '@/features/home/home.types';
+import { useRecentsContent } from '@/store/hooks/useRecents';
+
+
+interface RecentsHomeContentViewProps {
+    data: SystemPlaylist;
+    onClose: () => void;
+}
+
+export const RecentsHomeContentView = ({
+    data,
+    onClose
+}: RecentsHomeContentViewProps) => {
+
+    const scrollContext = useRecentsContent();
+
+    return (
+        <>
+        {/* RECENTLY PLAYED TRACKS VIEW */}
+        <motion.div
+            key="recents-home-content-view"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="w-full h-full flex flex-col"
+        >
+            {/* HEADER */}
+            <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4 flex flex-col">
+                <div 
+                    className="flex items-center justify-between mb-2"
+                    onPointerDown={(e) => {
+                        e.stopPropagation();
+                        onClose();
+                    }}
+                >
+                    <h1 className="tab-heading truncate pr-4">
+                        {data.name}
+                    </h1>
+                    <button className="text-sm font-medium text-white/40 active:text-white shrink-0">
+                        <XIcon size={20} weight="bold" />
+                    </button>
+                </div>
+    
+                {/* ABOUT / METADATA SECTION */}
+                <div className="flex flex-col gap-2 mx-1">
+                    <div className="flex items-center gap-2">
+                        <div 
+                            className="w-2 h-2 rounded-full animate-pulse" 
+                            style={{ backgroundColor: "var(--color-brand)" }} //update this later
+                        />
+                        <span className="text-[10px] uppercase tracking-[0.15em] font-black text-white/60">
+                            {data.tagline}
+                        </span>
+                    </div>
+
+                    <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
+                        {data.description}
+                    </p>
+
+                    <div className="flex gap-4">
+                        <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] text-zinc-600 uppercase font-medium">Tracks</span>
+                            <span className="text-xs text-white/70">
+                                {scrollContext.totalCount}
+                            </span>
+                        </div>
+
+                        <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] text-zinc-600 uppercase font-medium">Duration</span>
+                            <span className="text-xs text-white/70">
+                                {formatReadableTime(scrollContext.totalDuration)}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* CONTENT AREA */}
+            <div className="flex-1 no-scrollbar">
+                <PlaylistList
+                    scrollContext={scrollContext}
+                    bottomSpacing={BOTTOM_SHELF.totalHeight}
+                    actions={["queueNext", "queueLast", "like", "edit"]}
+                    emptySubtext="Listen to something to add here!"
+                />
+            </div>
+        </motion.div>
+        </>
+    );
+};

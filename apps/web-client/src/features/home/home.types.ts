@@ -9,7 +9,7 @@ export interface HomeViewProps {
 
 
 
-export type SystemPlaylistId = "downloads" | "likes";
+export type SystemPlaylistId = "downloads" | "likes" | "recents";
 
 export interface SystemPlaylist extends PlaylistBase {
     id: SystemPlaylistId;
@@ -33,7 +33,6 @@ export type HomeContent =
         description: string; 
         data: PlaylistBase;
     }
-
 
 // export type HomeContentType = typeof HOME_CONTENT_TYPES[keyof typeof HOME_CONTENT_TYPES];
 
