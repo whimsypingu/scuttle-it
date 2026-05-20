@@ -178,6 +178,99 @@ class RetrievalMixin:
         
 
 
+    #RECENTS
+    async def retrieve_recents_stats(self) -> dict:
+        """Total number and duration of recently played tracks"""
+        
+        MAX_TOTAL_RECORDS = 100
+
+        query = f'''
+            WITH recent_tracks AS (
+                SELECT duration
+                FROM tracks
+                WHERE listened_at > 0
+                ORDER BY listened_at DESC
+                LIMIT {MAX_TOTAL_RECORDS}
+            )
+            SELECT
+                COUNT(*) as total_count,
+                COALESCE(SUM(duration), 0) as total_duration
+            FROM recent_tracks;
+        '''
+
+        try:
+            async with self.session() as db:
+                async with db.execute(query) as cursor:
+                    row = await cursor.fetchone() #gets a row with (total_count, total_duration)
+                    return {
+                        "total_count": row["total_count"] if row else 0,
+                        "total_duration": row["total_duration"] if row else 0,
+                    }
+        except Exception:
+            logger.exception("Failed to retrieve recently played contents")
+            raise
+
+
+    async def retrieve_recents(self, offset: int, limit: int) -> list[TrackBase]:
+        """Retrieve a sublist of recently played tracks"""
+        logger.info(f"Retrieving recently played tracks with offset {offset} and limit {limit}")
+
+        #clamp paginated maximum retrieval amount
+        MAX_TOTAL_RECORDS = 100
+        if offset >= MAX_TOTAL_RECORDS:
+            return []
+        
+        if offset + limit > MAX_TOTAL_RECORDS:
+            limit = MAX_TOTAL_RECORDS - offset
+
+        UNIT_SEP = "\x1f"
+        RECORD_SEP = "\x1e"
+
+        query = f'''
+            WITH recently_played_subset_tracks AS (
+                -- Get track subset
+                SELECT * 
+                FROM tracks
+                ORDER BY listened_at DESC
+                LIMIT :limit OFFSET :offset
+            )
+            SELECT
+                -- TrackBase fields
+                t.internal_id,
+                t.id,
+                t.title,
+                t.title_display,
+                t.duration,
+
+                -- ArtistBase fields
+                GROUP_CONCAT(
+                    a.internal_id || '{UNIT_SEP}' ||
+                    COALESCE(a.id, '') || '{UNIT_SEP}' ||
+                    a.name || '{UNIT_SEP}' ||
+                    COALESCE(a.name_display, ''), 
+                    '{RECORD_SEP}'
+                ) AS artist_blob
+            FROM recently_played_subset_tracks t
+            JOIN track_artists ta ON ta.track_internal_id = t.internal_id
+            JOIN artists a ON ta.artist_internal_id = a.internal_id
+            GROUP BY t.internal_id
+            ORDER BY t.listened_at DESC;
+        '''
+
+        try: 
+            async with self.session() as db:
+                params = {"limit": limit, "offset": offset} #sql safety, clamped to maximum values
+                async with db.execute(query, params) as cursor:
+                    rows = await cursor.fetchall()
+                    return [
+                        row_to_trackbase(row) for row in rows
+                    ]
+        except Exception:
+            logger.exception("Failed to retrieve recently played contents")
+            raise
+
+
+
     #PLAYLISTS
     async def retrieve_playlist_stats(self, playlist_id) -> dict:
         """Total number and duration of playlist tracks""" #consider caching this kind of stuff as a view?

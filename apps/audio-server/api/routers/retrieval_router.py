@@ -62,6 +62,33 @@ async def retrieve_likes_endpoint(
         )
 
 
+
+@RetrievalRouter.get("/recently-played", response_model=RetrievalResponse)
+async def retrieve_recently_played_endpoint(
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=30), 
+    db_manager: DatabaseManager = Depends(get_db_manager)
+):
+    try:
+        results = await db_manager.retrieve_recents(offset, limit) #consider using asyncio.gather() for these read ops?
+        stats = await db_manager.retrieve_recents_stats()
+        return {
+            "count": len(results),
+            "total_count": stats["total_count"],
+            "total_duration": stats["total_duration"],
+            "offset": offset,
+            "limit": limit,
+            "results": results
+        }
+    
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail="Crashed"
+        )    
+
+
 @RetrievalRouter.get("/playlist/{playlist_id}", response_model=RetrievalResponse)
 async def retrieve_playlist_endpoint(
     playlist_id: str = Path(..., min_length=1, description="Playlist ID"),
