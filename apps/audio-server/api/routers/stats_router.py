@@ -23,7 +23,6 @@ async def increment_listen_duration(
     stats_manager: StatsManager = Depends(get_stats_manager)
 ):
     try:
-        print(payload)
         await stats_manager.increment_listened_duration(
             payload.track_id,
             payload.listen_duration,
