@@ -10,9 +10,3 @@ class ArtistBase(ScuttleBase):
     def display(self) -> str:
         return self.name_display or self.name
     
-
-#see: apps/web-client/src/store/hooks/hooks.types.ts
-class EditArtistPayload(ScuttleBase):
-    id: str | None = None #optional external source ID to identify which artist to edit
-    new_id: str | None = None
-    name_display: str | None = None

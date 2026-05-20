@@ -94,19 +94,36 @@ export const MockLibrary = ({
 
                         {/* CONTENT AREA */}
                         <div className="flex-1 overflow-y-auto no-scrollbar">
-                            <div 
-                                className="flex flex-col gap-1"
-                                style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
-                            >
-                                {/* PLAYLIST LIST */}
-                                {playlists.map((p) => (
-                                    <PlaylistItem
-                                        key={p.id}
-                                        playlist={p}
-                                        onSelect={(p) => setSelectedPlaylist(p)}
-                                    />
-                                ))}
-                            </div>
+                            {playlists.length >= 1 ? (
+                                <div 
+                                    className="flex flex-col gap-1"
+                                    style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
+                                >
+                                    {/* PLAYLIST LIST */}
+                                    {playlists.map((p) => (
+                                        <PlaylistItem
+                                            key={p.id}
+                                            playlist={p}
+                                            onSelect={(p) => setSelectedPlaylist(p)}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <>
+                                {/* No playlists to show */}
+                                <div className="min-h-0 w-full h-full">                
+                                    <div className="flex flex-col gap-1 items-center justify-center px-4 py-16 text-center">
+                                        <p className="text-sm font-medium text-muted-foreground">
+                                            No playlists
+                                        </p>
+                                        
+                                        <p className="text-xs text-muted-foreground/60">
+                                            Create a playlist to get started
+                                        </p>
+                                    </div>
+                                </div>
+                                </>
+                            )}
                         </div>
                     </motion.div>
                     </>

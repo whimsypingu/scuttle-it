@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { motion, useMotionValue, useMotionValueEvent, useTransform } from 'framer-motion';
+import { useQueue } from '@/store/hooks/useQueue';
 
 import { MusicNoteIcon } from '@phosphor-icons/react';
 
 import { getTrackDisplayMetadata, useTrackActionHandler } from '@/track/track.utils';
-import { useQueue } from '@/store/hooks/useQueue';
+import { formatTime } from '@/features/audio/audio.utils';
+import { audioEngine } from '@/features/audio/audioEngine';
 
 import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/track/track.constants';
 
 import type { QueueTrack, TrackAction, TrackItemProps } from '@/track/track.types';
-import { audioEngine } from '@/features/audio/audioEngine';
 
 
 export const TrackItem = ({ 
@@ -121,6 +122,8 @@ export const TrackItem = ({
 
 	const { titleDisplay, artistDisplay } = getTrackDisplayMetadata(track); //get metadata for display of this track
 
+	const duration = formatTime(track.duration);
+
 	return (
 		<>
 		<div className="relative group overflow-hidden rounded-lg">
@@ -158,7 +161,7 @@ export const TrackItem = ({
 				whileTap={!isDragging ? { scale: 0.98 } : {}}
 				transition={{ type: "spring", stiffness: 400, damping: 30 }}
 			
-				className="flex items-center gap-4 py-2 px-3 bg-background rounded-lg active:cursor-grabbing relative z-10 shadow-xl"
+				className="flex flex-row items-center gap-4 py-2 px-3 bg-background rounded-lg active:cursor-grabbing relative z-10 shadow-xl"
 			>
 				<div className={`
 					w-12 h-12 
@@ -174,6 +177,12 @@ export const TrackItem = ({
 					</span>
 					<span className="text-xs text-white/40 truncate">
 						{artistDisplay}
+					</span>
+				</div>
+
+				<div className="text-right flex flex-col">
+					<span className="text-xs text-white/40">
+						{duration}
 					</span>
 				</div>
 			</motion.div>

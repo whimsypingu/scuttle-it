@@ -1,9 +1,14 @@
-import type { AudioCallback, AudioEvent, AudioStrategy, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions } from "@/features/audio/audio.types";
+import type { AudioCallback, AudioEvent, AudioStrategy, FlushListenDurationPayload, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions } from "@/features/audio/audio.types";
 
 
 class AudioEngine implements IAudioEngine  {
     private static instance: AudioEngine;
     private strategy!: AudioStrategy; //! set in initialization
+
+    private LISTEN_HEARTBEAT_INTERVAL = 30; //seconds between a heartbeat ping
+    private currentTrackId: string | null = null;
+    private listenDuration = 0; //seconds, floating point value
+    private previousTime = 0; //delta tracking helper variable
     
     private constructor() { null }
 
@@ -20,6 +25,9 @@ class AudioEngine implements IAudioEngine  {
         }
 
         console.log(`[AudioEngine] Strategy loaded: ${this.strategy.strategy}`);
+
+        this.setupListenStats();
+        console.log(`[AudioEngine] Listening stats setup: ${this.strategy.strategy}`);
     }
 
     //ensure only one AudioEngine exists, singleton creation must be awaited now due to dynamic imports
@@ -30,6 +38,65 @@ class AudioEngine implements IAudioEngine  {
             AudioEngine.instance = engine;
         }
         return AudioEngine.instance;
+    }
+
+    //track listening stats
+    private setupListenStats() {
+        this.strategy.on("play" as AudioEvent, (callback: any) => {
+            if (this.currentTrackId !== this.strategy.getCurrentTrackId()) {
+                this.flushListenDuration(this.currentTrackId, this.listenDuration); //fire and forget
+            }
+            this.currentTrackId = this.strategy.getCurrentTrackId();
+        });
+
+        this.strategy.on("timeupdate" as AudioEvent, (callback: any) => {
+            const currentTime = this.strategy.getCurrentTime();
+            const delta = currentTime - this.previousTime;
+
+            if (delta > 0 && delta < 2) { //prevent tracking large changes like scrubbing and skips
+                this.listenDuration += delta;
+            }
+            this.previousTime = currentTime;
+
+            //automatic heartbeat duration flush
+            if (this.listenDuration >= this.LISTEN_HEARTBEAT_INTERVAL) {
+                this.flushListenDuration(this.currentTrackId, this.listenDuration); //fire and forget
+            }
+        });
+
+        this.strategy.on("pause" as AudioEvent, () => {
+            this.flushListenDuration(this.currentTrackId, this.listenDuration);
+        });
+
+        this.strategy.on("ended" as AudioEvent, () => {
+            this.flushListenDuration(this.currentTrackId, this.listenDuration);
+        });
+    } 
+
+    private async flushListenDuration(trackId: string | null, listenDuration: number) {
+        if (!trackId || listenDuration <= 0) return; 
+        
+        console.log(
+            `%c[Tracker Success] Accumulated ${listenDuration}s of listening! ` +
+            `Track ID: ${trackId} | Current Playback Time: ${Math.round(this.strategy.getCurrentTime())}s`, 
+            'color: #10b981; font-weight: bold;'
+        );
+        this.listenDuration = 0; //reset internal buffer, use the passed parameter as snapshot data
+
+        const payload: FlushListenDurationPayload = {
+            trackId,
+            listenDuration,
+        };
+
+        try {
+            await fetch(`/stats/increment/listen-duration`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+        } catch (err) {
+            console.error("Background stat flush failed:", err);
+        }
     }
 
     public on<K extends AudioEvent>(event: K, callback: AudioCallback<K>) {

@@ -151,10 +151,25 @@ class AudioProcessor:
             self._replace_file(file_path, temp_path)
         except Exception as e:
             self._remove_file(temp_path)
-            raise RuntimeError("Audio cleaning failed")
+            raise RuntimeError(f"Audio cleaning failed: {e}")
         
         elapsed_time = time.perf_counter() - start_time
         logger.info(f"Cleaned audio file in {elapsed_time:.2f}s: {file_path}")
+
+
+    async def get_duration(self, file_path):
+        cmd = [
+            self.ffprobe_bin,
+            "-v", "error",
+            "-show_entries", "format=duration",
+            "-of", "default=noprint_wrappers=1:nokey=1",
+            str(file_path)
+        ]
+        try:
+            stdout, _ = await self._run_command(cmd)
+            return round(float(stdout.strip()))
+        except Exception as e:
+            raise RuntimeError(f"Audio duration read failed: {e}")
 
 
 # if __name__ == "__main__":

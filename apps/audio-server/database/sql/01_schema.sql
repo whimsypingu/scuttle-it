@@ -4,9 +4,9 @@ CREATE TABLE IF NOT EXISTS tracks (
     id TEXT UNIQUE,
     title TEXT NOT NULL,
     title_display TEXT,
-    duration REAL DEFAULT 0.0,
-    pref REAL DEFAULT 0.0 CHECK (pref >= 0.0 AND pref <= 1.0),
-    pref_weight REAL DEFAULT 1.0
+    duration INTEGER DEFAULT 0, --seconds
+    listened_duration INTEGER DEFAULT 0,
+    listened_at INTEGER DEFAULT 0 --see https://sqlite.org/lang_datefunc.html for (unixepoch())
 );
 
 
@@ -16,8 +16,6 @@ CREATE TABLE IF NOT EXISTS artists (
     id TEXT UNIQUE,
     name TEXT NOT NULL, --name is highlighted as a keyword?
     name_display TEXT,
-    pref REAL DEFAULT 0.0 CHECK (pref >= 0.0 AND pref <= 1.0),
-    pref_weight REAL DEFAULT 1.0,
     enriched_at INTEGER DEFAULT 0 --see https://sqlite.org/lang_datefunc.html for (unixepoch())
 );
 

@@ -23,6 +23,7 @@ from api.routers.settings_router import SettingsRouter
 from api.routers.websocket_router import WebsocketRouter
 from api.routers.like_router import LikeRouter
 from api.routers.job_router import JobRouter
+from api.routers.stats_router import StatsRouter
 
 from core.youtube.youtube_client import YouTubeClient
 from core.audio.processor import AudioProcessor
@@ -30,12 +31,14 @@ from database.database_manager import DatabaseManager
 from sync.websocket_manager import WebsocketManager
 from core.download.download_queue import DownloadQueue
 from core.download.download_worker import DownloadWorker
+from core.stats.stats_manager import StatsManager
 
 logging.basicConfig(
     level=logging.INFO,
     format="\033[32m%(asctime)s\033[0m %(levelname)-8s \033[34m%(name)s\033[0m - %(message)s",
     datefmt="%H:%M:%S"
 )
+logging.getLogger("asyncio").setLevel(logging.CRITICAL)
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +50,13 @@ async def lifespan(app: FastAPI):
 
     ws_manager = WebsocketManager()
     app.state.ws_manager = ws_manager
+
+    stats_manager = StatsManager(
+        flush_interval=300, #how frequently to flush stats
+        db_manager=db_manager,
+        ws_manager=ws_manager
+    )
+    app.state.stats_manager = stats_manager
 
     #global
     dl_queue = DownloadQueue()
@@ -70,6 +80,9 @@ async def lifespan(app: FastAPI):
         #start working in the background
         asyncio.create_task(dl_worker.run())
 
+    #poll every interval seconds to flush stats into the database
+    asyncio.create_task(stats_manager.run())
+
     await db_manager.build_from_directory()
     await db_manager.build_search_index()
     await db_manager.normalize_play_queue_positions()
@@ -79,6 +92,7 @@ async def lifespan(app: FastAPI):
     #shutdown
     for w in workers:
         w.stop()
+    stats_manager.stop()
 
 
 app = FastAPI(
@@ -100,6 +114,7 @@ app.include_router(SettingsRouter)
 app.include_router(WebsocketRouter)
 app.include_router(LikeRouter)
 app.include_router(JobRouter)
+app.include_router(StatsRouter)
 
 @app.get("/status")
 async def get_status():

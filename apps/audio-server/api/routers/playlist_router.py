@@ -1,10 +1,10 @@
 import traceback
 
-from fastapi import APIRouter, Body, Depends, Path, Query, HTTPException
+from fastapi import APIRouter, Body, Depends, Path, HTTPException
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
 
-from core.models.playlist import CreatePlaylistPayload, EditPlaylistPayload
+from core.models.payloads import CreatePlaylistPayload, EditPlaylistPayload
 
 PlaylistRouter = APIRouter(prefix="/playlists", tags=["Playlists"])
 

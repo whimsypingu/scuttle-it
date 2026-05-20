@@ -1,10 +1,10 @@
 import traceback
 
-from fastapi import APIRouter, Body, Depends, Path, Query, HTTPException
+from fastapi import APIRouter, Body, Depends, Path, HTTPException
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
 
-from core.models.track import EditTrackPayload
+from core.models.payloads import EditTrackPayload
 from core.audio.utils import delete_track_file
 
 TrackRouter = APIRouter(prefix="/tracks", tags=["Tracks"])
@@ -39,7 +39,7 @@ async def delete_track_endpoint(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.unregister_track(track_id)
+        success = await db_manager.unregister_download(track_id)
 
         #attempt deleting file, if it can't find the file or deleting the file fails for whatever reason
         #this whole operation is not necessarily a failure

@@ -153,3 +153,10 @@ export interface PlayTrackOptions {
 export interface PlayPauseTrackOptions {
     trackId?: string;
 }
+
+
+//payloads to send
+export interface FlushListenDurationPayload {
+    trackId: string;
+    listenDuration: number;
+}

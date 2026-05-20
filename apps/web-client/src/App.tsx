@@ -14,6 +14,8 @@ import { SyncLogic } from '@/store/sync/SyncLogic';
 import { EditPopup } from '@/features/edit/EditPopup';
 import { EditProvider } from '@/features/edit/EditProvider';
 
+import { NAV_ITEMS } from '@/features/player/player.constants';
+
 const GlobalPlayer = lazy(() => import('@/features/player/GlobalPlayer').then(m => ({ default: m.GlobalPlayer })));
 
 const MockHome = lazy(() => import('@/features/home/HomeView').then(m => ({ default: m.MockHome })));
@@ -24,7 +26,11 @@ const ProfileTab = lazy(() => import('@/features/profile/ProfileTab').then(m => 
 
 function App() {
 	const [isPlayerExpanded, setIsPlayerExpanded] = useState(false);
-	const [activeTab, setActiveTab] = useState<Tab>("home");
+	const [activeTab, setActiveTab] = useState<Tab>(() => {
+		const params = new URLSearchParams(window.location.search);
+		const openTab = params.get("tab");
+		return NAV_ITEMS.some(item => item.tab === openTab) ? openTab as Tab : "home";
+	});
 	const [tabResetSignal, setTabResetSignal] = useState(0); //reset tab signal
 
 	const handleTabChange = (newTab: Tab) => {
@@ -32,6 +38,9 @@ function App() {
 			setTabResetSignal(prev => prev + 1);
 		} else {
 			setActiveTab(newTab);
+
+			const newUrl = `${window.location.pathname}?tab=${newTab}`;
+			window.history.replaceState({ tab: newTab }, '', newUrl);
 		}
 	}
 
@@ -59,20 +68,18 @@ function App() {
 			<EditProvider>
 				<div className="relative h-dvh w-full overflow-hidden bg-surface">
 
-					{!isPlayerExpanded && (
-						<>
-						<MainLayout
-							activeTab={activeTab}
-							onTabChange={handleTabChange}
-						>
-							{renderContent()}
-						</MainLayout>
+					<MainLayout
+						activeTab={activeTab}
+						onTabChange={handleTabChange}
+					>
+						{renderContent()}
+					</MainLayout>
 
+					{!isPlayerExpanded && (
 						<NavBar
 							activeTab={activeTab}
 							onTabChange={handleTabChange}
 						/>
-						</>
 					)}
 
 					<Suspense fallback={null}>

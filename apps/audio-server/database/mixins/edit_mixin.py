@@ -1,7 +1,6 @@
 import logging
 
-from core.models.playlist import EditPlaylistPayload
-from core.models.track import EditTrackPayload
+from core.models.payloads import EditTrackPayload, EditPlaylistPayload
 
 logger = logging.getLogger(__name__)
 
