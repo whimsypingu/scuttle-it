@@ -5,6 +5,7 @@ from core.models.base import ScuttleBase
 
 class IncrementListenDurationPayload(ScuttleBase):
     track_id: str
+    timestamp: int
     listen_duration: float
 
 

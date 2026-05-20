@@ -8,7 +8,7 @@ import { PlaylistInfo } from '@/playlist/PlaylistInfo';
 
 import { BOTTOM_SHELF } from '@/features/player/player.constants';
 
-import type { HomeContent, SystemPlaylist } from '@/features/home/home.types';
+import type { SystemPlaylist } from '@/features/home/home.types';
 
 
 interface LikedHomeContentViewProps {
@@ -43,7 +43,7 @@ export const LikedHomeContentView = ({
                     }}
                 >
                     <h1 className="tab-heading truncate pr-4">
-                        Likes
+                        {data.name}
                     </h1>
                     <button className="text-sm font-medium text-white/40 active:text-white shrink-0">
                         <XIcon size={20} weight="bold" />

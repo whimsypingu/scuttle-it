@@ -28,6 +28,8 @@ export interface QueueTrack extends TrackBase {
     position: number;
 }
 export interface TrackDetails extends TrackBase {
+    listenedDuration: number;
+    listenedAt: number;
     playlists: PlaylistBase[];
 }
 

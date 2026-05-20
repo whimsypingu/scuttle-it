@@ -1,25 +1,33 @@
 import { motion } from 'framer-motion';
-
 import { XIcon } from '@phosphor-icons/react';
-import type { HomeContent, SystemPlaylist } from '../home.types';
-import { BOTTOM_SHELF } from '@/features/player/player.constants';
+
+import { useRecentsContent } from '@/store/hooks/useRecents';
+
 import { PlaylistList } from '@/playlist/PlaylistList';
 
+import { formatReadableTime } from '@/features/audio/audio.utils';
+import { BOTTOM_SHELF } from '@/features/player/player.constants';
 
-interface OtherHomeContentViewProps {
+import type { SystemPlaylist } from '@/features/home/home.types';
+
+
+interface RecentsHomeContentViewProps {
     data: SystemPlaylist;
     onClose: () => void;
 }
 
-export const OtherHomeContentView = ({
+export const RecentsHomeContentView = ({
     data,
     onClose
-}: OtherHomeContentViewProps) => {
+}: RecentsHomeContentViewProps) => {
+
+    const scrollContext = useRecentsContent();
 
     return (
         <>
+        {/* RECENTLY PLAYED TRACKS VIEW */}
         <motion.div
-            key="other-home-content-view"
+            key="recents-home-content-view"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -35,7 +43,7 @@ export const OtherHomeContentView = ({
                     }}
                 >
                     <h1 className="tab-heading truncate pr-4">
-                        N/A
+                        {data.name}
                     </h1>
                     <button className="text-sm font-medium text-white/40 active:text-white shrink-0">
                         <XIcon size={20} weight="bold" />
@@ -43,47 +51,47 @@ export const OtherHomeContentView = ({
                 </div>
     
                 {/* ABOUT / METADATA SECTION */}
-                <div className="flex flex-col gap-1 pb-2">
+                <div className="flex flex-col gap-2 mx-1">
                     <div className="flex items-center gap-2">
                         <div 
                             className="w-2 h-2 rounded-full animate-pulse" 
-                            style={{ backgroundColor: "var(--brand-color)" }} //update this later
+                            style={{ backgroundColor: "var(--color-brand)" }} //update this later
                         />
                         <span className="text-[10px] uppercase tracking-[0.15em] font-black text-white/60">
-                            N/A
+                            {data.tagline}
                         </span>
                     </div>
-                    
+
                     <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
-                        {data.description || "Your collection of tracks saved for offline playback."}
+                        {data.description}
                     </p>
-                       
-                    <div className="flex gap-6 mt-1">
+
+                    <div className="flex gap-4">
                         <div className="flex flex-col gap-0.5">
-                            <span className="text-[9px] text-zinc-600 uppercase font-bold tracking-wider">Tracks</span>
-                            <span className="text-sm font-medium text-white/90">
-                                {/* Eventually replace with real length: tracks.length */}
-                                N/A
+                            <span className="text-[10px] text-zinc-600 uppercase font-medium">Tracks</span>
+                            <span className="text-xs text-white/70">
+                                {scrollContext.totalCount}
                             </span>
                         </div>
+
                         <div className="flex flex-col gap-0.5">
-                            <span className="text-[9px] text-zinc-600 uppercase font-bold tracking-wider">Storage</span>
-                            <span className="text-sm font-medium text-white/90">N/A</span>
+                            <span className="text-[10px] text-zinc-600 uppercase font-medium">Duration</span>
+                            <span className="text-xs text-white/70">
+                                {formatReadableTime(scrollContext.totalDuration)}
+                            </span>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* CONTENT AREA */}
-            <div className="flex-1 overflow-y-auto no-scrollbar">
-                <div 
-                    className="flex flex-col gap-0"
-                    style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
-                >
-                    {/* <PlaylistList
-                        tracks={[]}
-                    /> */}
-                </div>
+            <div className="flex-1 no-scrollbar">
+                <PlaylistList
+                    scrollContext={scrollContext}
+                    bottomSpacing={BOTTOM_SHELF.totalHeight}
+                    actions={["queueNext", "queueLast", "like", "edit"]}
+                    emptySubtext="Listen to something to add here!"
+                />
             </div>
         </motion.div>
         </>

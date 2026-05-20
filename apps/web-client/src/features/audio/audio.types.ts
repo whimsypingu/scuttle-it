@@ -158,5 +158,6 @@ export interface PlayPauseTrackOptions {
 //payloads to send
 export interface FlushListenDurationPayload {
     trackId: string;
+    timestamp: number;
     listenDuration: number;
 }

@@ -134,7 +134,7 @@ export const usePlaylistsMutations = () => {
             };
 
             queryClient.setQueryData<SummaryPlaylist[]>(queryKey, (old: SummaryPlaylist[] | undefined) => {
-                return [...(old || []), tempNewSummaryPlaylist];
+                return [tempNewSummaryPlaylist, ...(old || [])];
             });
 
             return { rollbackPlaylists };

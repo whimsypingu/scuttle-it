@@ -11,13 +11,13 @@ import { PlaylistContentView } from "@/features/library/subcomponents/PlaylistCo
 import { NAV_CONFIG, BOTTOM_SHELF, PLAYER_CONFIG } from "@/features/player/player.constants";
 
 import type { SummaryPlaylist } from "@/playlist/playlist.types";
-import type { LibraryViewProps } from "@/features/library/library.types";
+import type { LibraryTabProps } from "@/features/library/library.types";
 import type { ActiveEditTarget } from "@/features/edit/edit.types";
 
 
-export const MockLibrary = ({
+export const LibraryTab = ({
     tabResetSignal
-}: LibraryViewProps) => {
+}: LibraryTabProps) => {
 
     const { playlists } = usePlaylists();
     

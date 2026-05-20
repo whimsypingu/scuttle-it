@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
 import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
-import type { HomeContent, HomeViewProps } from "@/features/home/home.types";
-import { AnimatePresence, motion } from "framer-motion";
-import { MOCK_HOME_CONTENTS } from "./home.constants";
-import { OtherHomeContentView } from "./subcomponents/OtherHomeContent";
+import { HOME_CONTENTS } from "@/features/home/home.constants";
+
+import type { HomeContent, HomeTabProps } from "@/features/home/home.types";
 
 
-export const MockHome = ({
+export const HomeTab = ({
     tabResetSignal
-}: HomeViewProps) => {
+}: HomeTabProps) => {
     const [selectedHomeContent, setSelectedHomeContent] = useState<HomeContent | null>(null);
 
     // Reset when the signal changes
@@ -45,9 +45,6 @@ export const MockHome = ({
             />
         );
     }
-    // const ActiveHomeContentView = selectedHomeContent 
-    //     ? (HOME_CONTENT_COMPONENTS[selectedHomeContent.type] || HOME_CONTENT_COMPONENTS[HOME_CONTENT_TYPES.OTHER])
-    //     : (HOME_CONTENT_COMPONENTS[HOME_CONTENT_TYPES.OTHER]);
 
     return (
         <>
@@ -77,10 +74,10 @@ export const MockHome = ({
                                 className="grid grid-cols-2 gap-4"
                                 style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
                             >
-                                {MOCK_HOME_CONTENTS.map((item, index) => (
+                                {HOME_CONTENTS.map((item, index) => (
                                     <div 
                                         key={index} 
-                                        className="bg-card aspect-square rounded-md shadow-lg p-4 flex flex-col"
+                                        className="bg-card aspect-square rounded-md shadow-lg p-4 flex flex-col cursor-pointer active:scale-95 transition-transform"
                                         onClick={() => setSelectedHomeContent(item)}
                                     >
                                         {/* Use the mock color as a gradient or a solid block */}
