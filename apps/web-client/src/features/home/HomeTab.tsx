@@ -77,7 +77,7 @@ export const HomeTab = ({
                                 {HOME_CONTENTS.map((item, index) => (
                                     <div 
                                         key={index} 
-                                        className="bg-card aspect-square rounded-md shadow-lg p-4 flex flex-col"
+                                        className="bg-card aspect-square rounded-md shadow-lg p-4 flex flex-col cursor-pointer active:scale-95 transition-transform"
                                         onClick={() => setSelectedHomeContent(item)}
                                     >
                                         {/* Use the mock color as a gradient or a solid block */}
