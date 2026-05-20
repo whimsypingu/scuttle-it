@@ -5,12 +5,12 @@ import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
 import { HOME_CONTENTS } from "@/features/home/home.constants";
 
-import type { HomeContent, HomeViewProps } from "@/features/home/home.types";
+import type { HomeContent, HomeTabProps } from "@/features/home/home.types";
 
 
-export const MockHome = ({
+export const HomeTab = ({
     tabResetSignal
-}: HomeViewProps) => {
+}: HomeTabProps) => {
     const [selectedHomeContent, setSelectedHomeContent] = useState<HomeContent | null>(null);
 
     // Reset when the signal changes

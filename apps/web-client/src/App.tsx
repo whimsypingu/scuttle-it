@@ -18,9 +18,9 @@ import { NAV_ITEMS } from '@/features/player/player.constants';
 
 const GlobalPlayer = lazy(() => import('@/features/player/GlobalPlayer').then(m => ({ default: m.GlobalPlayer })));
 
-const MockHome = lazy(() => import('@/features/home/HomeView').then(m => ({ default: m.MockHome })));
+const HomeTab = lazy(() => import('@/features/home/HomeTab').then(m => ({ default: m.HomeTab })));
 const SearchTab = lazy(() => import('@/features/search/SearchTab').then(m => ({ default: m.SearchTab })));
-const MockLibrary = lazy(() => import('@/features/library/LibraryView').then(m => ({ default: m.MockLibrary })));
+const LibraryTab = lazy(() => import('@/features/library/LibraryTab').then(m => ({ default: m.LibraryTab })));
 const ProfileTab = lazy(() => import('@/features/profile/ProfileTab').then(m => ({ default: m.ProfileTab })));
 
 
@@ -47,11 +47,11 @@ function App() {
 	// Simple helper to render the right content based on tab
 	const renderContent = () => {
 		const TabComponent = {
-			home: MockHome,
+			home: HomeTab,
 			search: SearchTab,
-			library: MockLibrary,
+			library: LibraryTab,
 			profile: ProfileTab
-		}[activeTab] || MockHome
+		}[activeTab] || HomeTab;
 
 		return (
 			<Suspense fallback={<div className="flex-1 bg-surface" />}>

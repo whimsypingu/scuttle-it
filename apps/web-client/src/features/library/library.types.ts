@@ -1,3 +1,3 @@
-export interface LibraryViewProps {
+export interface LibraryTabProps {
     tabResetSignal: number;
 }

@@ -2,7 +2,7 @@ import type { PlaylistBase } from "@/playlist/playlist.types";
 import type React from "react";
 
 
-export interface HomeViewProps {
+export interface HomeTabProps {
     tabResetSignal: number;
 }
 
