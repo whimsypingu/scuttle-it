@@ -1,15 +1,14 @@
 import { motion } from 'framer-motion';
 import { XIcon } from '@phosphor-icons/react';
 
-import { useDownloadsContent } from '@/store/hooks/useDownloads';
+import { useRecentsContent } from '@/store/hooks/useRecents';
 
 import { PlaylistList } from '@/playlist/PlaylistList';
 
 import { formatReadableTime } from '@/features/audio/audio.utils';
 import { BOTTOM_SHELF } from '@/features/player/player.constants';
 
-import type { HomeContent, SystemPlaylist } from '@/features/home/home.types';
-import { useRecentsContent } from '@/store/hooks/useRecents';
+import type { SystemPlaylist } from '@/features/home/home.types';
 
 
 interface RecentsHomeContentViewProps {

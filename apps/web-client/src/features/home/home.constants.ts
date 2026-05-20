@@ -1,24 +1,19 @@
-import type React from "react";
+import { DownloadedHomeContentView } from "@/features/home/subcomponents/DownloadedHomeContent";
+import { LikedHomeContentView } from "@/features/home/subcomponents/LikedHomeContent";
+import { RecentsHomeContentView } from "@/features/home/subcomponents/RecentsHomeContent";
 
-import { DownloadedHomeContentView } from "./subcomponents/DownloadedHomeContent";
-import { LikedHomeContentView } from "./subcomponents/LikedHomeContent";
-
-import { OtherHomeContentView } from "./subcomponents/OtherHomeContent";
-
-import type { HomeContent } from "./home.types";
-import { RecentsHomeContentView } from "./subcomponents/RecentsHomeContent";
+import type { HomeContent } from "@/features/home/home.types";
 
 
-
-export const MOCK_HOME_CONTENTS: HomeContent[] = [
+export const HOME_CONTENTS: HomeContent[] = [
     { 
         type: "systemPlaylist",
         color: "#22c55e", // Green
-        name: "All Tracks",
-        description: "In one place.",
+        name: "Your Tracks",
+        description: "All in one place.",
         data: {
             id: "downloads",
-            name: "All Tracks",
+            name: "Tracks",
             tagline: "Everything",
             description: "Your core library. Every single track in one playlist.",
             component: DownloadedHomeContentView,
@@ -28,12 +23,12 @@ export const MOCK_HOME_CONTENTS: HomeContent[] = [
         type: "systemPlaylist",
         color: "#a855f7", // Purple
         name: "Likes",
-        description: "All your liked tracks.",
+        description: "Stuff you liked.",
         data: {
             id: "likes",
             name: "Likes",
             tagline: "Favorites",
-            description: "Stuff you liked.",
+            description: "All your favorite tracks.",
             component: LikedHomeContentView,
         }
     },
@@ -41,11 +36,11 @@ export const MOCK_HOME_CONTENTS: HomeContent[] = [
         type: "systemPlaylist",
         color: "#3b82f6", // Blue
         name: "Recent",
-        description: "The stuff you just heard.",
+        description: "Songs you just heard.",
         data: {
             id: "recents",
             name: "Recently Played",
-            tagline: "History",
+            tagline: "Listening history",
             description: "Your 100 most recently listened tracks.",
             component: RecentsHomeContentView,
         }
