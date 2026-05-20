@@ -78,6 +78,8 @@ def row_to_track_details(
 
     return TrackDetails(
         **trackbase.model_dump(),
+        listened_duration=row["listened_duration"],
+        listened_at=row["listened_at"],
         playlists=playlists
     )
 

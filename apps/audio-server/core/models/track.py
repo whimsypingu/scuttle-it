@@ -28,5 +28,7 @@ class QueueTrack(TrackBase):
 
 
 class TrackDetails(TrackBase):
+    listened_duration: int
+    listened_at: int
     playlists: list[PlaylistBase] = Field(default_factory=list)
     #include fields like last_played_at, or downloaded_at, etc.

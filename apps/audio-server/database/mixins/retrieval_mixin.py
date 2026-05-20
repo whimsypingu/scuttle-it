@@ -380,6 +380,9 @@ class RetrievalMixin:
                 t.title_display,
                 t.duration,
 
+                t.listened_duration,
+                t.listened_at,
+
                 -- ArtistBase fields
                 GROUP_CONCAT(
                     a.internal_id || '{UNIT_SEP}' ||
@@ -389,23 +392,25 @@ class RetrievalMixin:
                     '{RECORD_SEP}'
                 ) AS artist_blob,
 
-                -- PlaylistBase fields
-                GROUP_CONCAT(
-                    p.internal_id || '{UNIT_SEP}' ||
-                    COALESCE(p.id, '') || '{UNIT_SEP}' ||
-                    p.name,
-                    '{RECORD_SEP}'
+                -- PlaylistBase fields (Isolated subquery to prevent duplicates)
+                (
+                    SELECT GROUP_CONCAT(
+                        p.internal_id || '{UNIT_SEP}' ||
+                        COALESCE(p.id, '') || '{UNIT_SEP}' ||
+                        p.name,
+                        '{RECORD_SEP}'
+                    )
+                    FROM playlist_tracks pt
+                    JOIN playlists p ON pt.playlist_internal_id = p.internal_id
+                    WHERE pt.track_internal_id = t.internal_id
                 ) AS playlist_blob
+
 
             FROM tracks t
 
             -- Join artists
             JOIN track_artists ta ON ta.track_internal_id = t.internal_id
             JOIN artists a ON ta.artist_internal_id = a.internal_id
-
-            -- Join playlists
-            LEFT JOIN playlist_tracks pt ON pt.track_internal_id = t.internal_id
-            LEFT JOIN playlists p ON pt.playlist_internal_id = p.internal_id
 
             WHERE t.id = ?
 
