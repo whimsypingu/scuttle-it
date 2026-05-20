@@ -85,6 +85,7 @@ class AudioEngine implements IAudioEngine  {
 
         const payload: FlushListenDurationPayload = {
             trackId,
+            timestamp: Math.floor(Date.now() / 1000), //traditional unix timestamp in seconds
             listenDuration,
         };
 

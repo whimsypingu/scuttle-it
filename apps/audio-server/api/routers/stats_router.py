@@ -25,7 +25,10 @@ async def increment_listen_duration(
     try:
         await stats_manager.increment_listen_duration(
             payload.track_id,
-            payload.listen_duration
+            payload.listen_duration,
+        )
+        await stats_manager.updated_listened_at(
+            payload.timestamp,
         )
         return {
             "success": True,
