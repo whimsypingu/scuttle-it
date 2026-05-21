@@ -6,6 +6,7 @@ import { CreatePlaylistForm } from "@/features/edit/subcomponents/CreatePlaylist
 
 import { EDIT_CONFIG } from "@/features/edit/edit.constants";
 import { EditPlaylistForm } from "./subcomponents/EditPlaylistForm";
+import { ClearQueueForm } from "./subcomponents/ClearQueueForm";
 
 
 export const EditPopup = () => {
@@ -45,6 +46,12 @@ export const EditPopup = () => {
                         onSave={handleClose}
                     />
                 );
+            case "clearQueue":
+                return (
+                    <ClearQueueForm
+                        onSave={handleClose}
+                    />
+                )
             default:
                 return null;
         }
@@ -57,6 +64,7 @@ export const EditPopup = () => {
                     <DialogTitle>
                         {config?.title ?? "Edit"}
                     </DialogTitle>
+
                     <DialogDescription>
                         {config?.description ?? "Make changes."}
                     </DialogDescription>

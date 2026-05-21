@@ -3,8 +3,13 @@ import { ScribbleIcon } from '@phosphor-icons/react';
 
 import { useRef } from 'react';
 import { useQueue } from '@/store/hooks/useQueue';
+import { useEditTarget } from '@/features/edit/EditProvider';
 
 import { formatReadableTime } from '@/features/audio/audio.utils';
+
+import { QUEUE_CONFIG } from '@/features/player/player.constants';
+
+import type { ActiveEditTarget } from '@/features/edit/edit.types';
 
 
 export const QueueInfo = () => {
@@ -26,9 +31,14 @@ export const QueueInfo = () => {
         lastValidDuration.current = formattedDuration;
     }
 
-    //handle clearing the queue
+    // prep the 'clear queue' form popup function
+    const { setEditTarget } = useEditTarget();
     const openClearQueueForm = () => {
-        console.log("CLEAR QUEUE");
+        const createQueueTarget: ActiveEditTarget = {
+            type: "clearQueue", 
+            data: null,
+        };
+        setEditTarget(createQueueTarget);
     }
 
     return (
@@ -58,7 +68,7 @@ export const QueueInfo = () => {
                     className="px-1 py-2"
                     onClick={openClearQueueForm}
                 >
-                    <ScribbleIcon size={14} weight="light" />
+                    <ScribbleIcon size={QUEUE_CONFIG.iconSize} weight="light" />
                 </button>
             </div>
         </motion.div>
