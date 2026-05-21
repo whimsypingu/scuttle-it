@@ -20,15 +20,14 @@ export const QueueInfo = () => {
 
     const count = currentQueue?.length ?? 0;
     const duration = currentQueue?.reduce((acc, track) => acc + (track.duration || 0), 0) ?? 0;
-    const formattedDuration = formatReadableTime(duration);
 
     //keep snapshots of the memory so that we prevent showing '0 tracks' when fading out this element's data for invalid data
     const lastValidCount = useRef(count);
-    const lastValidDuration = useRef(formattedDuration);
+    const lastValidDuration = useRef(duration);
 
     if (count > 0) {
         lastValidCount.current = count;
-        lastValidDuration.current = formattedDuration;
+        lastValidDuration.current = duration;
     }
 
     // prep the 'clear queue' form popup function
@@ -51,16 +50,19 @@ export const QueueInfo = () => {
             }}
             className="flex items-center gap-2 px-2 my-1 border-y"
         >
-            <div className="flex items-center gap-1.5 text-[10px] font-medium text-white/60">
-                <div>
+            <span className="flex items-center text-[10px] font-medium text-white/60">
+                <span>
                     <span>{lastValidCount.current}</span>
-                    <span className="uppercase text-zinc-600 ml-1">{lastValidCount.current === 1 ? 'track' : 'tracks'}</span>
-                </div>
+                    
+                    <span className="uppercase tracking-wider text-zinc-600 ml-1">
+                        {lastValidCount.current === 1 ? 'track' : 'tracks'}
+                    </span>
+                </span>
 
-                <span className="text-zinc-500 font-bold mx-1 select-none">•</span>
+                <span className="text-zinc-500 font-bold mx-2 select-none">•</span>
                 
-                <span>{lastValidDuration.current}</span>
-            </div>
+                <span>{formatReadableTime(lastValidDuration.current)}</span>
+            </span>
 
             {/* CLEAR QUEUE */}
             <div className="ml-auto flex items-center text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">

@@ -1,12 +1,14 @@
-import { useState } from 'react';
 import { motion, useMotionValue, useMotionValueEvent, useTransform } from 'framer-motion';
-
 import { MusicNoteIcon } from '@phosphor-icons/react';
+
+import { useState } from 'react';
+import { usePlaylistActionHandler } from '@/playlist/playlist.utils';
+
+import { formatReadableTime } from '@/features/audio/audio.utils';
 
 import { PLAYLIST_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/playlist/playlist.constants';
 
 import type { PlaylistAction, PlaylistItemProps } from '@/playlist/playlist.types';
-import { usePlaylistActionHandler } from '@/playlist/playlist.utils';
 
 
 export const PlaylistItem = ({ 
@@ -141,9 +143,27 @@ export const PlaylistItem = ({
                     <span className="font-medium text-sm truncate text-white">
                         {playlist.name}
                     </span>
-                    <span className="text-[10px] text-white/40 truncate uppercase tracking-wider">
-                        {playlist.totalCount} tracks
+                    
+                    <span className="flex items-center text-[10px] font-regular text-white/60 truncate">
+                        <span>
+                            <span>{playlist.totalCount}</span>
+
+                            <span className="uppercase tracking-wider text-zinc-600 ml-1">
+                                {playlist.totalCount === 1 ? 'track' : 'tracks'}
+                            </span>
+                        </span>
+
+                        {playlist.totalCount > 0 && (
+                            <>
+                            <span className="text-zinc-500 font-bold mx-2 select-none">•</span>
+
+                            <span>{formatReadableTime(playlist.totalDuration)}</span>
+                            </>
+                        )}
                     </span>
+                    {/* <span className="text-[10px] text-white/40 truncate uppercase tracking-wider">
+                        {playlist.totalCount} tracks
+                    </span> */}
                 </div>
             </motion.div>
         </div>
