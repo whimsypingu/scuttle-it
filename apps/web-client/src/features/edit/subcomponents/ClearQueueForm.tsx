@@ -1,15 +1,8 @@
-import { useState } from "react";
-import { usePlaylistsMutations } from "@/store/hooks/usePlaylists";
+import { useSetQueue } from "@/store/hooks/useQueue";
 
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
-import { generateUUID } from "@/lib/generate";
-
 import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
-
-import type { CreatePlaylistPayload } from "@/store/hooks/hooks.types";
-import { useQueue, useSetQueue } from "@/store/hooks/useQueue";
 
 
 interface ClearQueueFormProps {

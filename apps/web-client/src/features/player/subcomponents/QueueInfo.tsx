@@ -66,7 +66,7 @@ export const QueueInfo = () => {
             <div className="ml-auto flex items-center text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
                 <button 
                     className="px-1 py-2"
-                    onClick={openClearQueueForm} //this triggers console accessibility warnings saying something like "Blocked aria-hidden on an element because its descendant retains focus."
+                    onClick={openClearQueueForm} //WARNING: this triggers console accessibility warnings saying something like "Blocked aria-hidden on an element because its descendant retains focus."
                 >
                     <ScribbleIcon size={QUEUE_CONFIG.iconSize} weight="light" />
                 </button>
