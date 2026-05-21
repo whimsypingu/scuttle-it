@@ -264,7 +264,43 @@ export const useSetQueue = () => {
         },
     });
 
+    // clear the remaining queue
+    const clearMutation = useMutation({
+        mutationFn: async () => {
+            const response = await fetch(`/queue/clear`, { method: "POST" });
+
+            if (!response.ok) throw new Error("Failed to clear queue");
+
+            const data = await response.json();
+            return data;
+        },
+        onMutate: async() => {
+            await queryClient.cancelQueries({ queryKey });
+            const rollbackQueue = queryClient.getQueryData(queryKey);
+
+            queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
+                if (!old || old.length === 0) return []; //should never happen, but handle
+
+                return [old[0]]; //return only first item
+            });
+
+            return { rollbackQueue };
+        },
+        onError: (err, variables, context) => {
+            if (context?.rollbackQueue) {
+                queryClient.setQueryData(queryKey, context.rollbackQueue);
+            }
+            console.log("Optimistic queue clear failed, rolling back.");
+        },
+        onSuccess: (data) => {
+            queryClient.setQueryData(queryKey, data.queue);
+
+            makeToast("", "Queue cleared");
+        },
+    });
+
     return {
         setPlaylist: setAllPlaylistMutation.mutate,
+        clearQueue: clearMutation.mutate,
     };
 };

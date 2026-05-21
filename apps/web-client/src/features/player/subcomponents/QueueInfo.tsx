@@ -47,7 +47,7 @@ export const QueueInfo = () => {
             initial={{ opacity: 0 }}
             animate={{ 
                 opacity: count > 0 ? 1 : 0, 
-                pointerEvents: count > 0 ? "auto" : "none" 
+                visibility: count > 0 ? "visible" : "hidden",
             }}
             className="flex items-center gap-2 px-2 my-1 border-y"
         >
@@ -66,7 +66,7 @@ export const QueueInfo = () => {
             <div className="ml-auto flex items-center text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
                 <button 
                     className="px-1 py-2"
-                    onClick={openClearQueueForm}
+                    onClick={openClearQueueForm} //this triggers console accessibility warnings saying something like "Blocked aria-hidden on an element because its descendant retains focus."
                 >
                     <ScribbleIcon size={QUEUE_CONFIG.iconSize} weight="light" />
                 </button>

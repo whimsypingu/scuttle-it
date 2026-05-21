@@ -9,6 +9,7 @@ import { generateUUID } from "@/lib/generate";
 import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
 
 import type { CreatePlaylistPayload } from "@/store/hooks/hooks.types";
+import { useQueue, useSetQueue } from "@/store/hooks/useQueue";
 
 
 interface ClearQueueFormProps {
@@ -20,16 +21,10 @@ export const ClearQueueForm = ({
 }: ClearQueueFormProps) => {
 
     //edit hook
-    // const { createPlaylist } = usePlaylistsMutations();
+    const { clearQueue } = useSetQueue();
 
     const handleSave = () => {
-        //finalized payload
-        // const payload: CreatePlaylistPayload = {
-        //     playlistId: generateUUID(), //generates a standard v4 UUID for the playlist ID if in a secure context, otherwise a custom `insecure-xxxx...` id
-        //     name: nameInput,
-        //     description: descriptionInput || null,
-        // };
-        // createPlaylist(payload);
+        clearQueue();
         onSave();
     }
 
