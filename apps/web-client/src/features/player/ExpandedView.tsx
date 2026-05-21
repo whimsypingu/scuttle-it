@@ -119,7 +119,7 @@ export const ExpandedView = ({ isCompact, setIsCompact, onClose, playerDragContr
                     transition={{ delay: 0.1, duration: 0.4 }} // Slight delay so the container expands first
                     className="flex flex-col gap-4 flex-1 h-full min-h-0"
                 >
-                    <div className="px-5">
+                    <div className="">
                         <QueueInfo />
                     </div>
 

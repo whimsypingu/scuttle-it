@@ -30,16 +30,16 @@ export const QueueInfo = () => {
     }
 
     return (
-        <div className="flex">
-            <AnimatePresence mode="popLayout">
-                {queueCount > 0 && (
-                    <motion.div 
-                        key="queue-area"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="flex items-center gap-1.5 text-[10px] font-medium text-white/60"             
-                    >
+        <AnimatePresence mode="popLayout">
+            {queueCount > 0 && (
+                <motion.div 
+                    key="queue-info"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex items-center gap-2 px-2 my-1 border-y"
+                >
+                    <div className="flex items-center gap-1.5 text-[10px] font-medium text-white/60">
                         <div>
                             <span>{queueCount}</span>
                             <span className="uppercase text-zinc-600 ml-1">{queueCount === 1 ? 'track' : 'tracks'}</span>
@@ -48,19 +48,19 @@ export const QueueInfo = () => {
                         <span className="text-zinc-500 font-bold mx-1 select-none">•</span>
                         
                         <span>{queueFormattedDuration}</span>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    </div>
 
-            {/* CLEAR QUEUE */}
-            <div className="ml-auto flex items-center text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
-                <button 
-                    className="p-1"
-                    onClick={openClearQueueForm}
-                >
-                    <ScribbleIcon size={14} weight="light" />
-                </button>
-            </div>
-        </div>
+                    {/* CLEAR QUEUE */}
+                    <div className="ml-auto flex items-center text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
+                        <button 
+                            className="px-1 py-2"
+                            onClick={openClearQueueForm}
+                        >
+                            <ScribbleIcon size={14} weight="light" />
+                        </button>
+                    </div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
 };

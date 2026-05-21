@@ -19,7 +19,7 @@ export const QueueList = () => {
     const loopmode = settings?.loopmode;
 
     //generate the dynamic text content to show when the queue is empty
-    const EmptyQueueContent = useMemo(() => {
+    const EmptyQueueContent = () => {
         const headline = "Your queue is empty";
         let subtext = "";
 
@@ -34,7 +34,7 @@ export const QueueList = () => {
         }
 
         return (
-            <div className="flex flex-col gap-1 items-center justify-center px-2 py-4 text-center">
+            <div className="flex flex-col gap-1 items-center justify-center px-2 py-12 text-center">
                 <p className="text-sm font-medium text-muted-foreground">
                     {headline}
                 </p>
@@ -44,7 +44,7 @@ export const QueueList = () => {
                 </p>
             </div>
         );
-    }, [loopmode]);
+    };
 
     //handle a track pick
     const handleTrackSelect = (track: TrackBase) => {
@@ -59,7 +59,7 @@ export const QueueList = () => {
             onDragCapture={(e) => e.stopPropagation()}
         >
             {currentQueue.length === 0 ? (
-                EmptyQueueContent
+                <EmptyQueueContent />
             ) : (
                 <Virtuoso 
                     data={currentQueue}
