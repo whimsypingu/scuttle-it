@@ -1,23 +1,15 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import { Virtuoso } from 'react-virtuoso';
+import { motion } from 'framer-motion';
+import { ScribbleIcon } from '@phosphor-icons/react';
 
-import { useMemo, useRef } from 'react';
+import { useRef } from 'react';
 import { useQueue } from '@/store/hooks/useQueue';
-import { useSettings } from '@/store/hooks/useSettings';
 
-import { TrackItem } from '@/track/TrackItem';
-
-import type { TrackBase } from '@/track/track.types';
-import { ScribbleIcon, TrashIcon } from '@phosphor-icons/react';
-import { formatReadableTime, formatTime } from '@/features/audio/audio.utils';
+import { formatReadableTime } from '@/features/audio/audio.utils';
 
 
 export const QueueInfo = () => {
 
-    const { queue, pop, isLoading } = useQueue();
-    const { settings } = useSettings();
-
-    const loopmode = settings?.loopmode;
+    const { queue, isLoading } = useQueue();
 
     const currentQueue = queue?.slice(1) ?? []; //take everything except currently playing, if exists
 

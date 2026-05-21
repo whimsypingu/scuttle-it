@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { Virtuoso } from 'react-virtuoso';
 
-import { useMemo } from 'react';
 import { useQueue } from '@/store/hooks/useQueue';
 import { useSettings } from '@/store/hooks/useSettings';
 
@@ -12,7 +11,7 @@ import type { TrackBase } from '@/track/track.types';
 
 export const QueueList = () => {
 
-    const { queue, pop, isLoading } = useQueue();
+    const { queue, isLoading } = useQueue();
     const { settings } = useSettings();
 
     const currentQueue = queue?.slice(1) ?? [];
@@ -34,7 +33,7 @@ export const QueueList = () => {
         }
 
         return (
-            <div className="flex flex-col gap-1 items-center justify-center px-2 py-12 text-center">
+            <div className="flex flex-col gap-1 items-center justify-center px-2 py-10 text-center">
                 <p className="text-sm font-medium text-muted-foreground">
                     {headline}
                 </p>
