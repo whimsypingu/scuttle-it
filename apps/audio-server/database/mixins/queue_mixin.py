@@ -214,6 +214,29 @@ class PlayQueueMixin:
             logger.exception(f"Failed to set playlist {playlist_id} as the Play Queue")
             raise
 
+    
+    async def clear_play_queue(self) -> bool:
+        """Clears all elements of the Play Queue except the first, if there is one"""
+        logger.info(f"Clearing the Play Queue...")
+
+        try:
+            async with self.session() as db:
+                await db.execute('''
+                    DELETE FROM play_queue
+                    WHERE queue_id NOT IN (
+                        SELECT queue_id FROM play_queue
+                        ORDER BY position ASC
+                        LIMIT 1
+                    );
+                ''')
+
+                logger.info("Successfully cleared the Play Queue")
+                return True
+        
+        except Exception:
+            logger.exception(f"Failed to clear the Play Queue")
+            raise
+
 
     async def get_play_queue(self) -> list[QueueTrack]:
         """Retrieve the full play queue with all metadata"""

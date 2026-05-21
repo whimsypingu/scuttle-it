@@ -121,6 +121,23 @@ async def set_all_play_queue(
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException
+    
+
+@QueueRouter.post("/clear")
+async def clear_play_queue_endpoint(
+    db_manager: DatabaseManager = Depends(get_db_manager)
+):
+    try:
+        success = await db_manager.clear_play_queue() #status after attempting clear
+        updated_queue = await db_manager.get_play_queue() #get the updated queue -- EMERGENCY: make this stuff not like this bruh
+
+        return {
+            "success": success,
+            "queue": updated_queue
+        }
+    except Exception as e:
+        traceback.print_exc()
+        raise DefaultCrashException
 
 
 @QueueRouter.get("/get")
