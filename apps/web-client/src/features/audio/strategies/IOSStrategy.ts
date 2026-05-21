@@ -325,6 +325,8 @@ export class IOSStrategy implements AudioStrategy {
         this.audioEl.load(); //reset
 
         this.currentTrackId = null;
+
+        this._needsRebuild = true;
         console.debug("[IOSStrategy] Cleaned up.");
     }
 }

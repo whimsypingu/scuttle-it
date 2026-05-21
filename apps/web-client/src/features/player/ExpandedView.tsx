@@ -1,17 +1,17 @@
 import { motion } from 'framer-motion';
+import { CaretDownIcon } from '@phosphor-icons/react';
 
 import { useQueue } from '@/store/hooks/useQueue';
 
-import { CaretDownIcon } from '@phosphor-icons/react';
-
 import { ExpandedViewControls } from '@/features/player/subcomponents/ExpandedViewControls';
-import { QueueList } from '@/features/queue/QueueList';
+import { QueueList } from '@/features/player/subcomponents/QueueList';
+
+import { getTrackDisplayMetadata } from '@/track/track.utils';
 
 import { PLAYER_CONFIG } from '@/features/player/player.constants';
 
 import type { ExpandedViewProps } from '@/features/player/player.types';
-import { getTrackDisplayMetadata } from '@/track/track.utils';
-
+import { QueueInfo } from './subcomponents/QueueInfo';
 
 
 //consider not propagating isCompact down to here and just start it here
@@ -112,17 +112,24 @@ export const ExpandedView = ({ isCompact, setIsCompact, onClose, playerDragContr
             {/* QUEUE AREA: Only visible in compact mode */}
             {isCompact && (
                 <>
-                {/* SCROLL AREA */}
-                <motion.div
+                <motion.div 
                     key="queue-area"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1, duration: 0.4 }} // Slight delay so the container expands first
-                    // className="flex-1 overflow-y-auto px-2 custom-scrollbar h-full"
-                    className="flex-1 overflow-hidden px-2 h-full"
-                    onPointerDown={() => playerDragControls.cancel()}
+                    className="flex flex-col gap-4 flex-1 h-full min-h-0"
                 >
-                    <QueueList />
+                    <div className="">
+                        <QueueInfo />
+                    </div>
+
+                    {/* SCROLL AREA */}
+                    <div
+                        className="flex-1 overflow-hidden px-2 h-full"
+                        onPointerDown={() => playerDragControls.cancel()}
+                    >
+                        <QueueList />
+                    </div>
                 </motion.div>
                 </>
             )}

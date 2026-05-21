@@ -13,6 +13,11 @@ export const PLAYER_CONFIG = {
     iconSize: 20,
 };
 
+//queue sizing
+export const QUEUE_CONFIG = {
+    iconSize: 14,
+}
+
 //navbar sizing
 export const NAV_CONFIG = {
     height: 32,

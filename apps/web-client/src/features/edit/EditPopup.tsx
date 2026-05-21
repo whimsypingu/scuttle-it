@@ -1,11 +1,13 @@
 import { useEditTarget } from "@/features/edit/EditProvider";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
 import { EditTrackForm } from "@/features/edit/subcomponents/EditTrackForm";
 import { CreatePlaylistForm } from "@/features/edit/subcomponents/CreatePlaylistForm";
+import { EditPlaylistForm } from "@/features/edit/subcomponents/EditPlaylistForm";
+import { ClearQueueForm } from "@/features/edit/subcomponents/ClearQueueForm";
 
 import { EDIT_CONFIG } from "@/features/edit/edit.constants";
-import { EditPlaylistForm } from "./subcomponents/EditPlaylistForm";
 
 
 export const EditPopup = () => {
@@ -45,6 +47,12 @@ export const EditPopup = () => {
                         onSave={handleClose}
                     />
                 );
+            case "clearQueue":
+                return (
+                    <ClearQueueForm
+                        onSave={handleClose}
+                    />
+                )
             default:
                 return null;
         }
@@ -57,6 +65,7 @@ export const EditPopup = () => {
                     <DialogTitle>
                         {config?.title ?? "Edit"}
                     </DialogTitle>
+
                     <DialogDescription>
                         {config?.description ?? "Make changes."}
                     </DialogDescription>

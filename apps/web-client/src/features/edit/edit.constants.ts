@@ -17,4 +17,8 @@ export const EDIT_CONFIG: Record<EditableType, EditPopupMetadata> = {
         title: "Edit Playlist",
         description: "Update the metadata for this playlist.",
     },
+    clearQueue: {
+        title: "Clear Queue?",
+        description: "",
+    },
 };
