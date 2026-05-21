@@ -161,9 +161,6 @@ export const PlaylistItem = ({
                             </>
                         )}
                     </span>
-                    {/* <span className="text-[10px] text-white/40 truncate uppercase tracking-wider">
-                        {playlist.totalCount} tracks
-                    </span> */}
                 </div>
             </motion.div>
         </div>

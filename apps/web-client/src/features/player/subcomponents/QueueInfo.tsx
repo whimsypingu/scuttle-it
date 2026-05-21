@@ -48,30 +48,31 @@ export const QueueInfo = () => {
                 opacity: count > 0 ? 1 : 0, 
                 visibility: count > 0 ? "visible" : "hidden",
             }}
-            className="flex items-center gap-2 px-2 my-1 border-y"
         >
-            <span className="flex items-center text-[10px] font-medium text-white/60">
-                <span>
-                    <span>{lastValidCount.current}</span>
-                    
-                    <span className="uppercase tracking-wider text-zinc-600 ml-1">
-                        {lastValidCount.current === 1 ? 'track' : 'tracks'}
+            <div className="flex items-center gap-2 px-2 my-1 border-y">
+                <span className="flex items-center text-[10px] font-medium text-white/60">
+                    <span>
+                        <span>{lastValidCount.current}</span>
+                        
+                        <span className="uppercase tracking-wider text-zinc-600 ml-1">
+                            {lastValidCount.current === 1 ? 'track' : 'tracks'}
+                        </span>
                     </span>
+
+                    <span className="text-zinc-500 font-bold mx-2 select-none">•</span>
+                    
+                    <span>{formatReadableTime(lastValidDuration.current)}</span>
                 </span>
 
-                <span className="text-zinc-500 font-bold mx-2 select-none">•</span>
-                
-                <span>{formatReadableTime(lastValidDuration.current)}</span>
-            </span>
-
-            {/* CLEAR QUEUE */}
-            <div className="ml-auto flex items-center text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
-                <button 
-                    className="px-1 py-2"
-                    onClick={openClearQueueForm} //WARNING: this triggers console accessibility warnings saying something like "Blocked aria-hidden on an element because its descendant retains focus."
-                >
-                    <ScribbleIcon size={QUEUE_CONFIG.iconSize} weight="light" />
-                </button>
+                {/* CLEAR QUEUE */}
+                <div className="ml-auto flex items-center text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
+                    <button 
+                        className="px-1 py-2"
+                        onClick={openClearQueueForm} //WARNING: this triggers console accessibility warnings saying something like "Blocked aria-hidden on an element because its descendant retains focus."
+                    >
+                        <ScribbleIcon size={QUEUE_CONFIG.iconSize} weight="light" />
+                    </button>
+                </div>
             </div>
         </motion.div>
     );
