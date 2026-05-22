@@ -17,13 +17,33 @@ export const ProfileTab = ({
     const { stats } = useStats();
 
     const totalTrackCountStr = stats.totalTrackCount.toString();
-    const minutesListenedStr = (stats.totalListenedDuration / 60).toFixed(2);
 
-        //get these from tanstack probably
+    
+    let durationLabel = "Minutes Listened";
+    let durationListenedStr = "0.00";
+
+    if (stats.totalListenedDuration >= (60 * 60)) {
+        durationLabel = "Hours Listened";
+        durationListenedStr = (stats.totalListenedDuration / (60 * 60)).toFixed(2);
+    } else {
+        durationListenedStr = (stats.totalListenedDuration / 60).toFixed(2);
+    }
+
+    let storageUsedStr = "0.00";
+    let storageSuffix = "MB";
+
+    if (stats.totalStorageUsed >= (1024 * 1024 * 1024)) {
+        storageUsedStr = (stats.totalStorageUsed / (1024 * 1024 * 1024)).toFixed(2);
+        storageSuffix = "GB";
+    } else {
+        storageUsedStr = (stats.totalStorageUsed / (1024 * 1024)).toFixed(2);
+    }
+
+    //get these from tanstack probably
     const displayStats = [
         { label: "Total Tracks", value: totalTrackCountStr, suffix: "", Icon: MusicNotesIcon },
-        { label: "Minutes Listened", value: minutesListenedStr, suffix: "", Icon: ClockIcon },
-        { label: "Audio Storage", value: "10.00", suffix: " GB", Icon: HardDrivesIcon },
+        { label: durationLabel, value: durationListenedStr, suffix: "", Icon: ClockIcon },
+        { label: "Audio Storage", value: storageUsedStr, suffix: storageSuffix, Icon: HardDrivesIcon },
     ];
 
     return (
@@ -45,7 +65,7 @@ export const ProfileTab = ({
                         </div> 
 
                         <div className="flex-1 flex flex-col gap-1">
-                            <h1 className="text-2xl">Whimsypingu</h1>
+                            <h1 className="text-2xl">whimsypingu</h1>
                             <p className="text-zinc-400 text-sm">Scuttling since 2026</p>
                         </div>
                     </section>

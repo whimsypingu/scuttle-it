@@ -34,11 +34,11 @@ class StatsManager:
         self.is_running = True
 
         #in-memory cache of the total audio storage
-        self.audio_storage_cache = self.audio_storage(recalculate=True)
         self.AUDIO_EXTENSIONS = (
             '.MP3', '.WAV', '.FLAC', '.M4A', '.AAC', 
             '.OGG', '.OPUS', '.AIFF', '.ALAC', '.WMA'
         )
+        self.audio_storage_cache = self.audio_storage(recalculate=True)
 
     async def increment_listened_duration(self, track_id: str, listened_duration: float):
         """Increments the listened duration buffer"""

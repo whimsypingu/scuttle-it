@@ -8,4 +8,5 @@ export interface ProfileTabProps {
 export interface UserStats {
     totalTrackCount: number;
     totalListenedDuration: number;
+    totalStorageUsed: number;
 }

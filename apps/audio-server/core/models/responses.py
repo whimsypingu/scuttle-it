@@ -13,3 +13,4 @@ class RetrievalResponse(ScuttleBase):
 class StatsResponse(ScuttleBase):
     total_track_count: int
     total_listened_duration: int
+    total_storage_used: int
