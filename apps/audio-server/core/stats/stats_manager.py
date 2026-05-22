@@ -38,7 +38,8 @@ class StatsManager:
             '.MP3', '.WAV', '.FLAC', '.M4A', '.AAC', 
             '.OGG', '.OPUS', '.AIFF', '.ALAC', '.WMA'
         )
-        self.audio_storage_cache = self.audio_storage(recalculate=True)
+        self.recalculate_storage = True
+        self.audio_storage_cache = self.audio_storage()
 
     async def increment_listened_duration(self, track_id: str, listened_duration: float):
         """Increments the listened duration buffer"""
@@ -95,8 +96,11 @@ class StatsManager:
         self.is_running = False
 
 
-    def audio_storage(self, recalculate: bool = False) -> int:
-        if recalculate:
+    def flag_audio_storage(self):
+        self.recalculate_storage = True
+
+    def audio_storage(self) -> int:
+        if self.recalculate_storage:
             total_audio_bytes = 0
             for root, _, files in os.walk(settings.DATA_DIR): #uses the settings data directory, may need configuration to support mounting folders
                 for file in files:
@@ -107,5 +111,6 @@ class StatsManager:
                         except (OSError, FileNotFoundError):
                             continue
             self.audio_storage_cache = total_audio_bytes
+            #self.recalculate_storage = False #EMERGENCY: reduce os file walks by caching the value, maybe flagging the recalculate storage variable whenever something changes
 
         return self.audio_storage_cache #super fast

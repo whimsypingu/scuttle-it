@@ -47,7 +47,7 @@ async def get_stats_endpoint(
     try:
         await stats_manager.flush()
         stats = await db_manager.get_stats() #total_track_count and total_listened_duration
-        total_storage_used = stats_manager.audio_storage(recalculate=True)
+        total_storage_used = stats_manager.audio_storage()
         return {
             **stats,
             "total_storage_used": total_storage_used
