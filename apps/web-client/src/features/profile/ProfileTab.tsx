@@ -16,34 +16,21 @@ export const ProfileTab = ({
 
     const { stats } = useStats();
 
-    const totalTrackCountStr = stats.totalTrackCount.toString();
+    //extract these values for display
+    const trackCountStr = stats.totalTrackCount.toString();
 
-    
-    let durationLabel = "Minutes Listened";
-    let durationListenedStr = "0.00";
+    const isHours = stats.totalListenedDuration >= (60 * 60);
+    const durationLabel = isHours ? "Hours Listened" : "Minutes Listened";
+    const durationStr = (stats.totalListenedDuration / (isHours ? (60 * 60) : 60)).toFixed(2);
 
-    if (stats.totalListenedDuration >= (60 * 60)) {
-        durationLabel = "Hours Listened";
-        durationListenedStr = (stats.totalListenedDuration / (60 * 60)).toFixed(2);
-    } else {
-        durationListenedStr = (stats.totalListenedDuration / 60).toFixed(2);
-    }
+    const isGB = stats.totalStorageUsed >= (1024 * 1024 * 1024);
+    let storageStr = (stats.totalStorageUsed / (isGB ? (1024 * 1024 * 1024) : (1024 * 1024))).toFixed(2);
+    let storageSuffix = isGB ? "GB" : "MB";
 
-    let storageUsedStr = "0.00";
-    let storageSuffix = "MB";
-
-    if (stats.totalStorageUsed >= (1024 * 1024 * 1024)) {
-        storageUsedStr = (stats.totalStorageUsed / (1024 * 1024 * 1024)).toFixed(2);
-        storageSuffix = "GB";
-    } else {
-        storageUsedStr = (stats.totalStorageUsed / (1024 * 1024)).toFixed(2);
-    }
-
-    //get these from tanstack probably
     const displayStats = [
-        { label: "Total Tracks", value: totalTrackCountStr, suffix: "", Icon: MusicNotesIcon },
-        { label: durationLabel, value: durationListenedStr, suffix: "", Icon: ClockIcon },
-        { label: "Audio Storage", value: storageUsedStr, suffix: storageSuffix, Icon: HardDrivesIcon },
+        { label: "Total Tracks", value: trackCountStr, suffix: "", Icon: MusicNotesIcon },
+        { label: durationLabel, value: durationStr, suffix: "", Icon: ClockIcon },
+        { label: "Audio Storage", value: storageStr, suffix: storageSuffix, Icon: HardDrivesIcon },
     ];
 
     return (
