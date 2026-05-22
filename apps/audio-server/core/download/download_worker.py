@@ -52,8 +52,8 @@ class DownloadWorker:
                 )
                 logger.info(f"[{self.worker_id}] Processing: {job.identifier}")
 
+                #determine the id to download
                 if job.query:
-                    #register tracks
                     search_results = await self.yt_client.search_by_query(q=job.query, limit=job.query_limit)
                     for search_result in search_results:
                         await self.db_manager.register_track(search_result)
@@ -61,6 +61,7 @@ class DownloadWorker:
                 else:
                     search_id = job.track_id
 
+                #perform the download, with an update fallback and retry on failure, and delete corrupted files on failure
                 try:
                     try:
                         download_result, file_path = await self.yt_client.download_by_youtube_id(search_id, parse=True)
@@ -78,8 +79,15 @@ class DownloadWorker:
                     raise e
 
                 #clean audio file
-                await self.audio_processor.clean(file_path)
-                clean_duration = await self.audio_processor.get_duration(file_path)
+                try:
+                    await self.audio_processor.clean(file_path)
+                    clean_duration = await self.audio_processor.get_duration(file_path)
+                except Exception as e:
+                    try:
+                        delete_track_file(search_id)
+                    except Exception:
+                        pass
+                    raise e
                 
                 #edit the track details
                 await self.db_manager.register_track(download_result)
