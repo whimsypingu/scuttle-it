@@ -21,6 +21,15 @@ class DownloadQueue:
     async def add(self, job: DownloadJob):
         """Adds a job"""
         async with self._lock:
+            #prevent duplicates
+            if any(active_job.identifier == job.identifier for active_job in self._processing.values()):
+                logger.warning(f"[DL-Queue] Duplicate blocked: {job.identifier} is actively being processed right now.")
+                return
+            if any(queued_job.identifier == job.identifier for queued_job in self._queue):
+                logger.warning(f"[DL-Queue] Duplicate blocked: {job.identifier} is already waiting to be processed.")
+                return
+
+            #add to the process queue
             if job.priority:
                 self._queue.appendleft(job)
                 logger.info(f"[DL-Queue] Priority job added to front of Download Queue: {job.identifier} ({job.id})")
