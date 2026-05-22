@@ -46,8 +46,12 @@ async def get_stats_endpoint(
 ):
     try:
         await stats_manager.flush()
-        stats = await db_manager.get_stats()
-        return stats
+        stats = await db_manager.get_stats() #total_track_count and total_listened_duration
+        total_audio_storage = stats_manager.audio_storage(recalculate=True)
+        return {
+            **stats,
+            total_audio_storage
+        }
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException
