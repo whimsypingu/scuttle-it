@@ -7,6 +7,7 @@ from core.youtube.youtube_client import YouTubeClient
 from database.database_manager import DatabaseManager
 from sync.pokes import WSPokeFactory
 from sync.websocket_manager import WebsocketManager
+from core.stats.stats_manager import StatsManager
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,8 @@ class DownloadWorker:
         audio_processor: AudioProcessor,
         yt_client: YouTubeClient,
         db_manager: DatabaseManager,
-        ws_manager: WebsocketManager
+        ws_manager: WebsocketManager,
+        stats_manager: StatsManager
     ):
         self.worker_id = worker_id
 
@@ -28,6 +30,7 @@ class DownloadWorker:
         self.yt_client = yt_client
         self.db_manager = db_manager
         self.ws_manager = ws_manager
+        self.stats_manager = stats_manager
 
         self.is_running = True
         self.current_job = None
@@ -90,6 +93,7 @@ class DownloadWorker:
                     await self.db_manager.build_search_index()
 
                 #status
+                self.stats_manager.flag_audio_storage() #recalculate storage next time it's needed
                 await self.dl_queue.complete_job(job.id, success=True)
 
                 #poke the frontend with update status

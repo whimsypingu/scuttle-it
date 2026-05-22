@@ -101,6 +101,8 @@ class StatsManager:
 
     def audio_storage(self) -> int:
         if self.recalculate_storage:
+            logger.info(f"Recalculating audio storage")
+            
             total_audio_bytes = 0
             for root, _, files in os.walk(settings.DATA_DIR): #uses the settings data directory, may need configuration to support mounting folders
                 for file in files:
@@ -111,6 +113,6 @@ class StatsManager:
                         except (OSError, FileNotFoundError):
                             continue
             self.audio_storage_cache = total_audio_bytes
-            #self.recalculate_storage = False #EMERGENCY: reduce os file walks by caching the value, maybe flagging the recalculate storage variable whenever something changes
+            self.recalculate_storage = False
 
         return self.audio_storage_cache #super fast
