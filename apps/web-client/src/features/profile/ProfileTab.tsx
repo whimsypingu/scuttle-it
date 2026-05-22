@@ -3,11 +3,14 @@ import { motion } from "framer-motion";
 import { User } from "lucide-react";
 import { MusicNotesIcon, ClockIcon, HardDrivesIcon } from "@phosphor-icons/react";
 
+import { useStats } from "@/store/hooks/useProfile";
+
+import { CountUp } from "@/components/ui/countup";
+import { convertDuration, convertStorage } from "@/features/profile/profile.utils";
+
 import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
 import type { ProfileTabProps } from "@/features/profile/profile.types";
-import { CountUp } from "@/components/ui/countup";
-import { useStats } from "@/store/hooks/useProfile";
 
 
 export const ProfileTab = ({
@@ -19,13 +22,8 @@ export const ProfileTab = ({
     //extract these values for display
     const trackCountStr = stats.totalTrackCount.toString();
 
-    const isHours = stats.totalListenedDuration >= (60 * 60);
-    const durationLabel = isHours ? "Hours Listened" : "Minutes Listened";
-    const durationStr = (stats.totalListenedDuration / (isHours ? (60 * 60) : 60)).toFixed(2);
-
-    const isGB = stats.totalStorageUsed >= (1024 * 1024 * 1024);
-    let storageStr = (stats.totalStorageUsed / (isGB ? (1024 * 1024 * 1024) : (1024 * 1024))).toFixed(2);
-    let storageSuffix = isGB ? "GB" : "MB";
+    const { durationLabel, durationStr } = convertDuration(stats.totalListenedDuration);
+    const { storageStr, storageSuffix} = convertStorage(stats.totalStorageUsed);
 
     const displayStats = [
         { label: "Total Tracks", value: trackCountStr, suffix: "", Icon: MusicNotesIcon },
@@ -73,7 +71,7 @@ export const ProfileTab = ({
                                             {label}
                                         </p>
                                         <p className="text-lg font-mono text-zinc-100">
-                                            <CountUp value={value} />{suffix}
+                                            <CountUp value={value} /> {suffix}
                                         </p>
                                     </div>
                                 </div>
