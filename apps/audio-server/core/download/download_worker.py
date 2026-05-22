@@ -1,9 +1,11 @@
 import logging
 
 from core.audio.processor import AudioProcessor
+from core.audio.utils import delete_track_file
 from core.download.download_queue import DownloadQueue
 from core.models.payloads import EditArtistPayload, EditTrackPayload
 from core.youtube.youtube_client import YouTubeClient
+from core.youtube.youtube_exceptions import YtdlpDownloadError, YtdlpTimeoutError
 from database.database_manager import DatabaseManager
 from sync.pokes import WSPokeFactory
 from sync.websocket_manager import WebsocketManager
@@ -55,42 +57,48 @@ class DownloadWorker:
                     search_results = await self.yt_client.search_by_query(q=job.query, limit=job.query_limit)
                     for search_result in search_results:
                         await self.db_manager.register_track(search_result)
-
-                    #register download
-                    top_search_result = search_results[0]
-                    download_result, file_path = await self.yt_client.download_by_youtube_id(top_search_result.id, parse=True)
-
-                    #clean audio file
-                    await self.audio_processor.clean(file_path)
-                    clean_duration = await self.audio_processor.get_duration(file_path)
-                    
-                    #should only run if the download is parsed for now
-                    assert top_search_result.id == download_result.id
-                    await self.db_manager.edit_track(
-                        download_result.id, 
-                        EditTrackPayload(
-                            title_display=download_result.display,
-                            duration=clean_duration,
-                            artists=[EditArtistPayload(
-                                name_display=artist.display
-                            ) for artist in download_result.artists]
-                        )
-                    )
-
-                    await self.db_manager.register_download(download_result.id)
-                    await self.db_manager.push_next_play_queue(download_result.id) #push to play queue immediately for now
-
-                    await self.db_manager.build_search_index()
-
-                #EMERGENCY: not yet implemented for non-search-queries
+                    search_id = search_results[0].id
                 else:
-                    download_result, file_path = await self.yt_client.download_by_youtube_id(job.track_id, parse=True)
+                    search_id = job.track_id
 
-                    await self.db_manager.register_track(download_result)
-                    await self.db_manager.register_download(download_result.id)
-                    await self.db_manager.push_next_play_queue(download_result.id) #push to play queue immediately for now
+                try:
+                    try:
+                        download_result, file_path = await self.yt_client.download_by_youtube_id(search_id, parse=True)
+                    except (YtdlpDownloadError, YtdlpTimeoutError) as e:
+                        logger.warning("Download failed. Updating ytdlp and retrying...")
+                        await self.yt_client.update()
+            
+                        download_result, file_path = await self.yt_client.download_by_youtube_id(search_id, parse=True)
+                except Exception as e:
+                    logger.error(f"Download failed a second time after client update: {e}")
+                    try:
+                        delete_track_file(search_id)
+                    except Exception:
+                        pass
+                    raise e
 
-                    await self.db_manager.build_search_index()
+                #clean audio file
+                await self.audio_processor.clean(file_path)
+                clean_duration = await self.audio_processor.get_duration(file_path)
+                
+                #edit the track details
+                await self.db_manager.register_track(download_result)
+                await self.db_manager.register_download(download_result.id)
+
+                await self.db_manager.edit_track(
+                    download_result.id, 
+                    EditTrackPayload(
+                        title_display=download_result.display,
+                        duration=clean_duration,
+                        artists=[EditArtistPayload(
+                            name_display=artist.display
+                        ) for artist in download_result.artists]
+                    )
+                )
+
+                await self.db_manager.push_next_play_queue(download_result.id) #push to play queue immediately for now
+
+                await self.db_manager.build_search_index()
 
                 #status
                 self.stats_manager.flag_audio_storage() #recalculate storage next time it's needed

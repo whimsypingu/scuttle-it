@@ -165,11 +165,12 @@ class YouTubeClient():
             "--quiet",
             "--no-playlist",
             "--no-cache-dir", #prevents using stale cached DASH fragments
+            "--force-overwrites", "--no-download-archive", #don't use internal ytdlp cache which can brick the system with bad output
             "--postprocessor-args", self.pp_ffmpeg,
             "--retries", "3",
             "--fragment-retries", "3", #network robustness for missing packets
             "--retry-sleep", "linear=1::5",
-            "-o", str(temp_path), #ytdlp requires temporary format
+            "-o", str(temp_path), #ytdlp requires temporary format  
             "--extractor-args", "youtube:player_client=default,-android_sdkless",
             "--js-runtimes", f"deno:{str(self.js_runtime_bin)}", #jsruntime
             "--ffmpeg-location", str(self.ffmpeg_dir), #explicitly provide ffmpeg location
