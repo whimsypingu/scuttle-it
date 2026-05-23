@@ -181,8 +181,8 @@ class PlayQueueMixin:
             raise
 
 
-    async def set_all_play_queue(self, playlist_id, sortmode) -> bool:
-        """Setting a playlist with a sort order as the Play Queue"""
+    async def set_all_play_queue(self, playlist_id, sortmode) -> list[str]:
+        """Setting a playlist with a sort order as the Play Queue, returns ids of tracks requiring downloads"""
         logger.info(f"Setting playlist with playlist_id {playlist_id} as the Play Queue...")
 
         #see: apps/audio-server/api/routers/retrieval_router.py for mapping

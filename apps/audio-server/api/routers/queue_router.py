@@ -1,8 +1,11 @@
 import traceback
 
 from fastapi import APIRouter, Depends, Path, Query, HTTPException
-from api.dependencies import get_db_manager
+
+from api.dependencies import get_db_manager, get_dl_queue
 from database.database_manager import DatabaseManager
+from core.download.download_queue import DownloadQueue
+from core.models.jobs import DownloadJob
 
 QueueRouter = APIRouter(prefix="/queue", tags=["Queue"])
 
@@ -103,11 +106,19 @@ async def pop_play_queue(
 async def set_all_play_queue( 
     playlist_id: str = Path(..., min_length=1, description="Playlist ID"),
     sortmode: int = Query(default=0, ge=0, le=1, description="0=position, 1=added_at"),
-    db_manager: DatabaseManager = Depends(get_db_manager)
+    db_manager: DatabaseManager = Depends(get_db_manager),
+    dl_queue: DownloadQueue = Depends(get_dl_queue)
 ):
     try:
-        await db_manager.set_all_play_queue(playlist_id, sortmode) #status after attempting set
+        skipped = await db_manager.set_all_play_queue(playlist_id, sortmode) #status after attempting set
         updated_queue = await db_manager.get_play_queue() #get the updated queue -- EMERGENCY: make this stuff not like this bruh
+
+        for track_id in skipped:
+            job = DownloadJob(
+                track_id=track_id,
+                priority=False
+            )
+            await dl_queue.add(job)
 
         return {
             "queue": updated_queue
