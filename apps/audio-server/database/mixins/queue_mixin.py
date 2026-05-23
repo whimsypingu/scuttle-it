@@ -186,6 +186,7 @@ class PlayQueueMixin:
         logger.info(f"Setting playlist with playlist_id {playlist_id} as the Play Queue...")
 
         #see: apps/audio-server/api/routers/retrieval_router.py for mapping
+        #select only the track internal_id, id, and download status, to perform splitting later since we need the not-downloaded tracks
         match playlist_id:
             case "likes":
                 SORT_MAP = {
@@ -193,19 +194,14 @@ class PlayQueueMixin:
                     1: "liked_at DESC",
                 }
                 query = f'''
-                    INSERT INTO play_queue (track_internal_id, position)
                     SELECT
-                        l.track_internal_id,
-                        (ROW_NUMBER() OVER (ORDER BY l.{SORT_MAP[sortmode]})) * 100
-                    FROM likes l
-                    JOIN downloads d ON d.track_internal_id = l.track_internal_id;
-                '''
-                skipped_query = f'''
-                    SELECT t.id
+                        t.internal_id,
+                        t.id,
+                        CASE WHEN d.track_internal_id IS NOT NULL THEN 1 ELSE 0 END AS downloaded
                     FROM likes l
                     JOIN tracks t ON t.internal_id = l.track_internal_id
-                    LEFT JOIN downloads d ON d.track_internal_id = l.track_internal_id
-                    WHERE d.track_internal_id IS NULL;
+                    LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
+                    ORDER BY {SORT_MAP[sortmode]};
                 '''
                 params = ()
             case _:
@@ -214,33 +210,38 @@ class PlayQueueMixin:
                     1: "added_at DESC",
                 }
                 query = f'''
-                    INSERT INTO play_queue (track_internal_id, position)
                     SELECT
-                        pt.track_internal_id,
-                        (ROW_NUMBER() OVER (ORDER BY pt.{SORT_MAP[sortmode]})) * 100
-                    FROM playlist_tracks pt
-                    JOIN playlists p ON p.internal_id = pt.playlist_internal_id
-                    JOIN downloads d ON d.track_internal_id = pt.track_internal_id
-                    WHERE p.id = ?;
-                '''
-                skipped_query = f'''
-                    SELECT t.id
+                        t.internal_id,
+                        t.id,
+                        CASE WHEN d.track_internal_id IS NOT NULL THEN 1 ELSE 0 END AS downloaded
                     FROM playlist_tracks pt
                     JOIN playlists p ON p.internal_id = pt.playlist_internal_id
                     JOIN tracks t ON t.internal_id = pt.track_internal_id
                     LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
-                    WHERE p.id = ? AND d.track_internal_id IS NULL;
+                    WHERE p.id = ?
+                    ORDER BY {SORT_MAP[sortmode]};
                 '''
                 params = (playlist_id,)
 
         try:
             async with self.session() as db:
+                cursor = await db.execute(query, params)
+                rows = await cursor.fetchall()
+
+                #calculate the split between tracks that are ready to go (and should be in the queue) vs the ones that need to be downloaded
+                to_queue = [
+                    (row["internal_id"], (idx + 1) * 100) 
+                    for idx, row in enumerate(rows) if row["downloaded"]
+                ]
+                skipped = [row["id"] for row in rows if not row["downloaded"]] #tracks requiring download
+
                 await db.execute("DELETE FROM play_queue;")
 
-                await db.execute(query, params)
+                if to_queue:
+                    await db.executemany("INSERT INTO play_queue (track_internal_id, position) VALUES (?, ?);", to_queue)
                     
                 logger.info(f"Successfully set playlist {playlist_id} as the Play Queue")
-                return True
+                return skipped
 
         except Exception:
             logger.exception(f"Failed to set playlist {playlist_id} as the Play Queue")
