@@ -200,6 +200,13 @@ class PlayQueueMixin:
                     FROM likes l
                     JOIN downloads d ON d.track_internal_id = l.track_internal_id;
                 '''
+                skipped_query = f'''
+                    SELECT t.id
+                    FROM likes l
+                    JOIN tracks t ON t.internal_id = l.track_internal_id
+                    LEFT JOIN downloads d ON d.track_internal_id = l.track_internal_id
+                    WHERE d.track_internal_id IS NULL;
+                '''
                 params = ()
             case _:
                 SORT_MAP = {
@@ -215,6 +222,14 @@ class PlayQueueMixin:
                     JOIN playlists p ON p.internal_id = pt.playlist_internal_id
                     JOIN downloads d ON d.track_internal_id = pt.track_internal_id
                     WHERE p.id = ?;
+                '''
+                skipped_query = f'''
+                    SELECT t.id
+                    FROM playlist_tracks pt
+                    JOIN playlists p ON p.internal_id = pt.playlist_internal_id
+                    JOIN tracks t ON t.internal_id = pt.track_internal_id
+                    LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
+                    WHERE p.id = ? AND d.track_internal_id IS NULL;
                 '''
                 params = (playlist_id,)
 
