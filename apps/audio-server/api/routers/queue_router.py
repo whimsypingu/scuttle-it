@@ -19,11 +19,10 @@ async def set_first_play_queue(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.set_first_play_queue(track_id) #status after attempting push
+        await db_manager.set_first_play_queue(track_id) #status after attempting push
         updated_queue = await db_manager.get_play_queue() #get the updated queue
 
         return {
-            "success": success,
             "queue": updated_queue
         }
     except Exception as e:
@@ -38,11 +37,10 @@ async def reorder_queue(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.reorder_queue(queue_id, target_position) #status after attempting reorder
+        await db_manager.reorder_queue(queue_id, target_position) #status after attempting reorder
         updated_queue = await db_manager.get_play_queue() #get the updated queue
 
         return {
-            "success": success,
             "queue": updated_queue
         }
     except Exception as e:
@@ -56,11 +54,10 @@ async def push_play_queue(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.push_play_queue(track_id) #status after attempting push
+        await db_manager.push_play_queue(track_id) #status after attempting push
         updated_queue = await db_manager.get_play_queue() #get the updated queue
 
         return {
-            "success": success,
             "queue": updated_queue
         }
     except Exception as e:
@@ -74,11 +71,10 @@ async def push_next_play_queue(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.push_next_play_queue(track_id) #status after attempting push
+        await db_manager.push_next_play_queue(track_id) #status after attempting push
         updated_queue = await db_manager.get_play_queue() #get the updated queue
 
         return {
-            "success": success,
             "queue": updated_queue
         }
     except Exception as e:
@@ -92,11 +88,10 @@ async def pop_play_queue(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.pop_play_queue(queue_id) #status after attempting pop
+        await db_manager.pop_play_queue(queue_id) #status after attempting pop
         updated_queue = await db_manager.get_play_queue() #get the updated queue
 
         return {
-            "success": success,
             "queue": updated_queue
         }
     except Exception as e:
@@ -111,11 +106,10 @@ async def set_all_play_queue(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.set_all_play_queue(playlist_id, sortmode) #status after attempting set
+        await db_manager.set_all_play_queue(playlist_id, sortmode) #status after attempting set
         updated_queue = await db_manager.get_play_queue() #get the updated queue -- EMERGENCY: make this stuff not like this bruh
 
         return {
-            "success": success,
             "queue": updated_queue
         }
     except Exception as e:
@@ -128,11 +122,10 @@ async def clear_play_queue_endpoint(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.clear_play_queue() #status after attempting clear
+        await db_manager.clear_play_queue() #status after attempting clear
         updated_queue = await db_manager.get_play_queue() #get the updated queue -- EMERGENCY: make this stuff not like this bruh
 
         return {
-            "success": success,
             "queue": updated_queue
         }
     except Exception as e:
@@ -147,7 +140,6 @@ async def get_play_queue(
     try: 
         results = await db_manager.get_play_queue()
         return {
-            "success": True,
             "queue": results
         }
     except Exception as e:
