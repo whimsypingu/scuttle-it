@@ -93,6 +93,7 @@ class SearchMixin:
                 t.title,
                 t.title_display,
                 t.duration,
+                CASE WHEN d.track_internal_id IS NOT NULL THEN 1 ELSE 0 END AS downloaded,
 
                 -- ArtistBase fields
                 GROUP_CONCAT(
@@ -108,6 +109,7 @@ class SearchMixin:
             JOIN tracks t ON t.internal_id = r.internal_id
             JOIN track_artists ta ON ta.track_internal_id = t.internal_id
             JOIN artists a ON a.internal_id = ta.artist_internal_id
+            LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
             GROUP BY t.internal_id
             ORDER BY r.final_rank ASC;
         '''

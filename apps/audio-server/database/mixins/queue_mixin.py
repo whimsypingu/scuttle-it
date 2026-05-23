@@ -252,6 +252,7 @@ class PlayQueueMixin:
                 t.title,
                 t.title_display,
                 t.duration,
+                1 AS downloaded,
 
                 -- ArtistBase fields
                 GROUP_CONCAT(

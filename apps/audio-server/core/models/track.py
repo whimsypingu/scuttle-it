@@ -12,6 +12,8 @@ class TrackBase(ScuttleBase):
 
     artists: list[ArtistBase] = Field(..., min_length=1)
 
+    downloaded: bool | None = None
+
     @property
     def display(self) -> str:
         return self.title_display or self.title

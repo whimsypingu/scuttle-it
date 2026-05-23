@@ -18,7 +18,7 @@ export interface TrackBase {
     titleDisplay?: string;
     artists: ArtistBase[];
     duration: number;
-    //downloaded: boolean;
+    downloaded: boolean; //must be specifically 'false' to show a download option
 }
 export interface PlaylistTrack extends TrackBase {
     addedAt: number;

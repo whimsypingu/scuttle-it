@@ -181,7 +181,7 @@ export const TrackItem = ({
 				</div>
 
 				<div className="text-right flex gap-2 items-center">
-					{true && (
+					{track.downloaded === false && (
 						<div className="text-white/40 pt-[2px]">
 							<ShoppingBagIcon size={ICON_SIZE_PX * 0.6} />
 						</div>

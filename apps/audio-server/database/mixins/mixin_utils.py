@@ -37,7 +37,8 @@ def row_to_trackbase(
         title=row["title"],
         title_display=row["title_display"],
         duration=row["duration"],
-        artists=artists
+        artists=artists,
+        downloaded=row["downloaded"]
     )
     
 def row_to_playlist_track(
