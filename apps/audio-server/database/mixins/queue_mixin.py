@@ -186,26 +186,43 @@ class PlayQueueMixin:
         logger.info(f"Setting playlist with playlist_id {playlist_id} as the Play Queue...")
 
         #see: apps/audio-server/api/routers/retrieval_router.py for mapping
-        SORT_MAP = {
-            0: "position ASC",
-            1: "added_at DESC",
-        }
-
-        query = f'''
-            INSERT INTO play_queue (track_internal_id, position)
-            SELECT
-                pt.track_internal_id,
-                (ROW_NUMBER() OVER (ORDER BY pt.{SORT_MAP[sortmode]})) * 100
-            FROM playlist_tracks pt
-            JOIN playlists p ON p.internal_id = pt.playlist_internal_id
-            WHERE p.id = ?;
-        '''
+        match playlist_id:
+            case "likes":
+                SORT_MAP = {
+                    0: "position ASC",
+                    1: "liked_at DESC",
+                }
+                query = f'''
+                    INSERT INTO play_queue (track_internal_id, position)
+                    SELECT
+                        l.track_internal_id,
+                        (ROW_NUMBER() OVER (ORDER BY l.{SORT_MAP[sortmode]})) * 100
+                    FROM likes l
+                    JOIN downloads d ON d.track_internal_id = l.track_internal_id;
+                '''
+                params = ()
+            case _:
+                SORT_MAP = {
+                    0: "position ASC",
+                    1: "added_at DESC",
+                }
+                query = f'''
+                    INSERT INTO play_queue (track_internal_id, position)
+                    SELECT
+                        pt.track_internal_id,
+                        (ROW_NUMBER() OVER (ORDER BY pt.{SORT_MAP[sortmode]})) * 100
+                    FROM playlist_tracks pt
+                    JOIN playlists p ON p.internal_id = pt.playlist_internal_id
+                    JOIN downloads d ON d.track_internal_id = pt.track_internal_id
+                    WHERE p.id = ?;
+                '''
+                params = (playlist_id,)
 
         try:
             async with self.session() as db:
                 await db.execute("DELETE FROM play_queue;")
 
-                await db.execute(query, (playlist_id,))
+                await db.execute(query, params)
                     
                 logger.info(f"Successfully set playlist {playlist_id} as the Play Queue")
                 return True
