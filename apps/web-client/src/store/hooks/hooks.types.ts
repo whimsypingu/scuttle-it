@@ -40,7 +40,6 @@ export interface EditPlaylistPayload {
  */
 export interface SetFirstMutationProps {
     track: TrackBase;
-    successMsg?: string;
 }
 
 export interface ReorderMutationProps {

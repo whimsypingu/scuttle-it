@@ -7,7 +7,7 @@ import { makeToast } from '@/features/toast/Toast';
 
 import type { PlaylistTrack, QueueId, QueueTrack, TrackActionProps, TrackBase } from '@/track/track.types';
 import type { ActiveEditTarget } from '@/features/edit/edit.types';
-import type { PopMutationProps, PushMutationProps, PushNextMutationProps, SetFirstMutationProps, SetLikeMutationProps } from '@/store/hooks/hooks.types';
+import type { PopMutationProps, PushMutationProps, PushNextMutationProps, SetLikeMutationProps } from '@/store/hooks/hooks.types';
 
 
 export const useTrackActionHandler = () => {
@@ -21,11 +21,9 @@ export const useTrackActionHandler = () => {
         
         switch (props.action) {
             case "setFirst": //set first in queue
-                const setFirstTrackVars: SetFirstMutationProps = {
-                    track: props.track,
-                    successMsg: "Playing",
-                };
-                setFirst(setFirstTrackVars);
+                setFirst({
+                    track: props.track
+                });
                 break;
 
             case "queueLast": //add to queue
