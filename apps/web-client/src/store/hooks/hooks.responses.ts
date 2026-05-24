@@ -15,6 +15,9 @@ export interface PushNextQueueResponse {
     downloadRequired: boolean;
     queue: QueueTrack[];
 }
+export interface PopQueueResponse {
+    queue: QueueTrack[];
+}
 export interface SetAllQueueResponse {
     setCount: number;
     skipCount: number;

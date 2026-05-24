@@ -7,7 +7,7 @@ from database.database_manager import DatabaseManager
 from core.download.download_queue import DownloadQueue
 from core.models.jobs import DownloadJob
 
-from core.models.responses import PushNextQueueResponse, PushQueueResponse, SetAllQueueResponse, SetFirstQueueResponse
+from core.models.responses import PopQueueResponse, PushNextQueueResponse, PushQueueResponse, SetAllQueueResponse, SetFirstQueueResponse
 
 QueueRouter = APIRouter(prefix="/queue", tags=["Queue"])
 
@@ -120,7 +120,7 @@ async def push_next_play_queue(
         raise DefaultCrashException
 
 
-@QueueRouter.post("/pop")
+@QueueRouter.post("/pop", response_model=PopQueueResponse)
 async def pop_play_queue(
     queue_id: int = Query(..., description="Unique instance ID of the queued track to pop"),
     db_manager: DatabaseManager = Depends(get_db_manager)

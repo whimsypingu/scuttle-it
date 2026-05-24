@@ -54,7 +54,7 @@ export interface PushNextMutationProps {
 }
 export interface PopMutationProps {
     queueTrack: QueueTrack;
-    successMsg?: string;
+    showToast: boolean;
 }
 export interface SetAllPlaylistMutationProps {
     playlist: PlaylistBase;

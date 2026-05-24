@@ -7,7 +7,7 @@ import { makeToast } from '@/features/toast/Toast';
 
 import type { PlaylistTrack, QueueId, QueueTrack, TrackActionProps, TrackBase } from '@/track/track.types';
 import type { ActiveEditTarget } from '@/features/edit/edit.types';
-import type { PopMutationProps, SetLikeMutationProps } from '@/store/hooks/hooks.types';
+import type { SetLikeMutationProps } from '@/store/hooks/hooks.types';
 
 
 export const useTrackActionHandler = () => {
@@ -43,11 +43,10 @@ export const useTrackActionHandler = () => {
                 break;
 
             case "deleteQueue": //delete from queue
-                const popTrackVars: PopMutationProps = {
+                pop({
                     queueTrack: props.queueTrack,
-                    successMsg: "Removed",
-                };
-                pop(popTrackVars);
+                    showToast: true,
+                });
                 break;
 
             case "edit": //open a track editing popup

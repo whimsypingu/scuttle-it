@@ -7,7 +7,7 @@ import { getTrackDisplayMetadata, trackBaseToQueueTrack } from "@/track/track.ut
 
 import type { QueueTrack } from "@/track/track.types";
 import type { PopMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetAllPlaylistMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
-import type { SetFirstQueueResponse, SetAllQueueResponse, PushQueueResponse, PushNextQueueResponse } from "./hooks.responses";
+import type { SetFirstQueueResponse, SetAllQueueResponse, PushQueueResponse, PushNextQueueResponse, PopQueueResponse } from "./hooks.responses";
 
 
 export const useQueue = () => {
@@ -203,11 +203,11 @@ export const useQueue = () => {
             if (!response.ok) throw new Error("Failed to pop from queue");
 
             const data = await response.json();
-            return data;
+            return data as PopQueueResponse;
         },
         onMutate: async (variables) => {
             await queryClient.cancelQueries({ queryKey });
-            const rollbackQueue = queryClient.getQueryData(queryKey);
+            const rollbackQueue = queryClient.getQueryData<QueueTrack[]>(queryKey);
 
             queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
                 return old?.filter(t => t.queueId !== variables.queueTrack.queueId); //filter out by the unique queueId
@@ -224,9 +224,9 @@ export const useQueue = () => {
         onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue);
 
-            if (variables.successMsg) {
+            if (variables.showToast) {
                 const { titleDisplay } = getTrackDisplayMetadata(variables.queueTrack);
-                makeToast(`${variables.successMsg}: `, titleDisplay);
+                makeToast("Removed: ", titleDisplay);
             }
         },
     });

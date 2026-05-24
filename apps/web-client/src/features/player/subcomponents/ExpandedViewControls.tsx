@@ -49,7 +49,10 @@ const ExpandedViewButtons = () => {
         //plays a next track right away if available (ignores pause status), otherwise reset if no next track
         if (nextTrack) {
             console.log(`[ExpandingViewControls] Skipping track: ${currentTrack.title}`);
-            pop({ queueTrack: currentTrack });
+            pop({ 
+                queueTrack: currentTrack,
+                showToast: false,
+            });
             audioEngine.playTrack({ trackId: nextTrack.id, forceRestart: true });
         } else {
             console.log("[ExpandingViewControls] Skip but no tracks remaining. Pausing and resetting.");
