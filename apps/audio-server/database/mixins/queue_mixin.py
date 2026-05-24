@@ -181,8 +181,8 @@ class PlayQueueMixin:
             raise
 
 
-    async def set_all_play_queue(self, playlist_id, sortmode) -> list[str]:
-        """Setting a playlist with a sort order as the Play Queue, returns ids of tracks requiring downloads"""
+    async def set_all_play_queue(self, playlist_id, sortmode) -> tuple[int, list[str]]:
+        """Setting a playlist with a sort order as the Play Queue, returns set_count and ids of tracks requiring downloads"""
         logger.info(f"Setting playlist with playlist_id {playlist_id} as the Play Queue...")
 
         #see: apps/audio-server/api/routers/retrieval_router.py for mapping
@@ -235,13 +235,12 @@ class PlayQueueMixin:
                 ]
                 skipped = [row["id"] for row in rows if not row["downloaded"]] #tracks requiring download
 
-                await db.execute("DELETE FROM play_queue;")
-
                 if to_queue:
+                    await db.execute("DELETE FROM play_queue;")
                     await db.executemany("INSERT INTO play_queue (track_internal_id, position) VALUES (?, ?);", to_queue)
                     
                 logger.info(f"Successfully set playlist {playlist_id} as the Play Queue")
-                return skipped
+                return len(to_queue), skipped
 
         except Exception:
             logger.exception(f"Failed to set playlist {playlist_id} as the Play Queue")

@@ -7,6 +7,7 @@ import { getTrackDisplayMetadata, trackBaseToQueueTrack } from "@/track/track.ut
 
 import type { QueueTrack } from "@/track/track.types";
 import type { PopMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetAllPlaylistMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
+import type { SetAllResponse } from "./hooks.responses";
 
 
 export const useQueue = () => {
@@ -245,18 +246,25 @@ export const useSetQueue = () => {
             if (!response.ok) throw new Error("Failed to set queue");
 
             const data = await response.json();
-            return data;
+            return data as SetAllResponse;
         },
         onSuccess: (data, variables) => {
-            queryClient.setQueryData(queryKey, data.queue);
+            //when tracks are able to be set (non-empty playlist and downloaded tracks) then modify the queue and audio.
+            if (data.setCount > 0) {
+                queryClient.setQueryData(queryKey, data.queue);
 
-            if (data.queue && data.queue.length > 0) {
-                const firstTrack = data.queue[0];
-                audioEngine.playTrack({ trackId: firstTrack.id, forceRestart: true }); //immediately start playing on success
-            }
+                if (data.queue && data.queue.length > 0) {
+                    const firstTrack = data.queue[0];
+                    audioEngine.playTrack({ trackId: firstTrack.id, forceRestart: true }); //immediately start playing on success
+                }
 
-            if (variables.successMsg) {
-                makeToast(`${variables.successMsg}: `, variables.playlist.name);
+                if (variables.successMsg) {
+                    makeToast(`${variables.successMsg}: `, variables.playlist.name);
+                }
+            } else if (data.skipCount > 0) {
+                makeToast("Queueing: ", variables.playlist.name); //no downloaded tracks available, but downloading is happening on skipCount tracks
+            } else {
+                makeToast("Empty: ", variables.playlist.name); //empty playlist
             }
         },
         onError: (err) => {

@@ -7,6 +7,8 @@ from database.database_manager import DatabaseManager
 from core.download.download_queue import DownloadQueue
 from core.models.jobs import DownloadJob
 
+from core.models.responses import SetAllQueueResponse
+
 QueueRouter = APIRouter(prefix="/queue", tags=["Queue"])
 
 #temporary crash exception
@@ -102,7 +104,7 @@ async def pop_play_queue(
         raise DefaultCrashException
     
 
-@QueueRouter.post("/set-all/playlist/{playlist_id}")
+@QueueRouter.post("/set-all/playlist/{playlist_id}", response_model=SetAllQueueResponse)
 async def set_all_play_queue( 
     playlist_id: str = Path(..., min_length=1, description="Playlist ID"),
     sortmode: int = Query(default=0, ge=0, le=1, description="0=position, 1=added_at"),
@@ -110,7 +112,7 @@ async def set_all_play_queue(
     dl_queue: DownloadQueue = Depends(get_dl_queue)
 ):
     try:
-        skipped = await db_manager.set_all_play_queue(playlist_id, sortmode) #status after attempting set
+        set_count, skipped = await db_manager.set_all_play_queue(playlist_id, sortmode) #status after attempting set
         updated_queue = await db_manager.get_play_queue() #get the updated queue -- EMERGENCY: make this stuff not like this bruh
 
         for track_id in skipped:
@@ -121,6 +123,8 @@ async def set_all_play_queue(
             await dl_queue.add(job)
 
         return {
+            "set_count": set_count,
+            "skip_count": len(skipped),
             "queue": updated_queue
         }
     except Exception as e:
