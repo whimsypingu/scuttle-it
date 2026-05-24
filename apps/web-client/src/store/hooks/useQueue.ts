@@ -7,7 +7,7 @@ import { getTrackDisplayMetadata, trackBaseToQueueTrack } from "@/track/track.ut
 
 import type { QueueTrack } from "@/track/track.types";
 import type { PopMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetAllPlaylistMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
-import type { SetFirstQueueResponse, SetAllQueueResponse, PushQueueResponse } from "./hooks.responses";
+import type { SetFirstQueueResponse, SetAllQueueResponse, PushQueueResponse, PushNextQueueResponse } from "./hooks.responses";
 
 
 export const useQueue = () => {
@@ -159,7 +159,7 @@ export const useQueue = () => {
             if (!response.ok) throw new Error("Failed to push to queue");
 
             const data = await response.json();
-            return data;
+            return data as PushNextQueueResponse;
         },
         onMutate: async (variables) => {
             await queryClient.cancelQueries({ queryKey });
@@ -186,9 +186,11 @@ export const useQueue = () => {
         onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue);
 
-            if (variables.successMsg) {
-                const { titleDisplay } = getTrackDisplayMetadata(variables.track);
-                makeToast(`${variables.successMsg}: `, titleDisplay);
+            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+            if (data.downloadRequired) {
+                makeToast("Downloading: ", titleDisplay);
+            } else {
+                makeToast("Next: ", titleDisplay);
             }
         },
     });

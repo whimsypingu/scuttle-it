@@ -41,27 +41,21 @@ export interface EditPlaylistPayload {
 export interface SetFirstMutationProps {
     track: TrackBase;
 }
-
 export interface ReorderMutationProps {
     queueTrack: QueueTrack;
     targetPosition: number;
     successMsg?: string;
 }
-
 export interface PushMutationProps {
     track: TrackBase;
 }
-
 export interface PushNextMutationProps {
     track: TrackBase;
-    successMsg?: string;
 }
-
 export interface PopMutationProps {
     queueTrack: QueueTrack;
     successMsg?: string;
 }
-
 export interface SetAllPlaylistMutationProps {
     playlist: PlaylistBase;
     sortmode?: Sortmode;

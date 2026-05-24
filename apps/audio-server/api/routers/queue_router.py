@@ -7,7 +7,7 @@ from database.database_manager import DatabaseManager
 from core.download.download_queue import DownloadQueue
 from core.models.jobs import DownloadJob
 
-from core.models.responses import PushQueueResponse, SetAllQueueResponse, SetFirstQueueResponse
+from core.models.responses import PushNextQueueResponse, PushQueueResponse, SetAllQueueResponse, SetFirstQueueResponse
 
 QueueRouter = APIRouter(prefix="/queue", tags=["Queue"])
 
@@ -92,16 +92,27 @@ async def push_play_queue(
         raise DefaultCrashException
     
 
-@QueueRouter.post("/push-next")
+@QueueRouter.post("/push-next", response_model=PushNextQueueResponse)
 async def push_next_play_queue(
     track_id: str = Query(..., min_length=1, description="Track ID to push next"),
-    db_manager: DatabaseManager = Depends(get_db_manager)
+    db_manager: DatabaseManager = Depends(get_db_manager),
+    dl_queue: DownloadQueue = Depends(get_dl_queue)
 ):
     try:
-        await db_manager.push_next_play_queue(track_id) #status after attempting push
+        download_required = not await db_manager.is_track_downloaded(track_id) #playing a track that isn't available will begin a download
+        if download_required: 
+            job = DownloadJob(
+                track_id=track_id,
+                priority=True #high priority, prepend to front of queue
+            )
+            await dl_queue.add(job)
+        else:
+            await db_manager.push_next_play_queue(track_id) #status after attempting push
+    
         updated_queue = await db_manager.get_play_queue() #get the updated queue
 
         return {
+            "download_required": download_required,
             "queue": updated_queue
         }
     except Exception as e:

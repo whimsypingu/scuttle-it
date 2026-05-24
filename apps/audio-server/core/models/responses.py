@@ -22,6 +22,9 @@ class SetFirstQueueResponse(ScuttleBase):
 class PushQueueResponse(ScuttleBase):
     download_required: bool
     queue: list[QueueTrack]
+class PushNextQueueResponse(ScuttleBase):
+    download_required: bool
+    queue: list[QueueTrack]
 
 class SetAllQueueResponse(ScuttleBase):
     set_count: int
