@@ -50,7 +50,6 @@ export interface ReorderMutationProps {
 
 export interface PushMutationProps {
     track: TrackBase;
-    successMsg?: string;
 }
 
 export interface PushNextMutationProps {
