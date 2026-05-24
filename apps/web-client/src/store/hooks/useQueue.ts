@@ -7,7 +7,7 @@ import { getTrackDisplayMetadata, trackBaseToQueueTrack } from "@/track/track.ut
 
 import type { QueueTrack } from "@/track/track.types";
 import type { PopMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetAllPlaylistMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
-import type { SetAllResponse } from "./hooks.responses";
+import type { SetFirstQueueResponse, SetAllQueueResponse } from "./hooks.responses";
 
 
 export const useQueue = () => {
@@ -37,18 +37,23 @@ export const useQueue = () => {
             if (!response.ok) throw new Error("Failed to set first entry in queue");
 
             const data = await response.json();
-            return data;
+            return data as SetFirstQueueResponse;
         },
         onMutate: async (variables) => {
             await queryClient.cancelQueries({ queryKey }); // cancel outgoing refetches so they dont rewrite optimistic changes
 
             const rollbackQueue = queryClient.getQueryData(queryKey); //get the rollback state
 
-            const tempQueueTrack = trackBaseToQueueTrack(variables.track, -1); //typecast to a QueueTrack with -1 default queueId field
+            //play audio and update the local cached queue optimistically
+			if (variables.track.downloaded) {
+				audioEngine.playTrack({ trackId: variables.track.id, forceRestart: true });
 
-            queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
-                return [tempQueueTrack, ...(old?.slice(1) || [])];
-            });
+                const tempQueueTrack = trackBaseToQueueTrack(variables.track, -1); //typecast to a QueueTrack with -1 default queueId field
+
+                queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
+                    return [tempQueueTrack, ...(old?.slice(1) || [])];
+                });
+			}
 
             return { rollbackQueue }; //return context for rollback
         },
@@ -61,9 +66,11 @@ export const useQueue = () => {
         onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue); //immediately swap the optimistic -1 queueId for DB-assigned queueId
 
-            if (variables.successMsg) {
-                const { titleDisplay } = getTrackDisplayMetadata(variables.track);
-                makeToast(`${variables.successMsg}: `, titleDisplay);
+            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+            if (data.downloadRequired) {
+                makeToast("Downloading: ", titleDisplay);
+            } else {
+                makeToast("Playing: ", titleDisplay);
             }
         },
     });
@@ -246,7 +253,7 @@ export const useSetQueue = () => {
             if (!response.ok) throw new Error("Failed to set queue");
 
             const data = await response.json();
-            return data as SetAllResponse;
+            return data as SetAllQueueResponse;
         },
         onSuccess: (data, variables) => {
             //when tracks are able to be set (non-empty playlist and downloaded tracks) then modify the queue and audio.

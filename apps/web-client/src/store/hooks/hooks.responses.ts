@@ -1,6 +1,14 @@
 import type { QueueTrack } from "@/track/track.types";
 
-export interface SetAllResponse {
+/**
+ * useQueue
+ */
+export interface SetFirstQueueResponse {
+    downloadRequired: boolean;
+    queue: QueueTrack[];
+}
+
+export interface SetAllQueueResponse {
     setCount: number;
     skipCount: number;
     queue: QueueTrack[];

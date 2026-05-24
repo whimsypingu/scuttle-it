@@ -108,9 +108,6 @@ export const TrackItem = ({
         if (isDragging) return; //cancel taps on drags
 
 		try {
-			//play audio
-			audioEngine.playTrack({ trackId: track.id, forceRestart: true });
-
 			//wrapper for actionHandler, see models.utils.ts for implementation
 			triggerAction("setFirst");
 

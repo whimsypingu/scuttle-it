@@ -15,6 +15,11 @@ class StatsResponse(ScuttleBase):
     total_listened_duration: int
     total_storage_used: int
 
+
+class SetFirstQueueResponse(ScuttleBase):
+    download_required: bool
+    queue: list[QueueTrack]
+
 class SetAllQueueResponse(ScuttleBase):
     set_count: int
     skip_count: int
