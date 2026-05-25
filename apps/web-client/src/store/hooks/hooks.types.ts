@@ -59,7 +59,6 @@ export interface PopMutationProps {
 export interface SetAllPlaylistMutationProps {
     playlist: PlaylistBase;
     sortmode?: Sortmode;
-    successMsg?: string;
 }
 
 

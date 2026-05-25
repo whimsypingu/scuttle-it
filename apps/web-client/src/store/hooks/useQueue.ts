@@ -272,9 +272,7 @@ export const useSetQueue = () => {
                     audioEngine.playTrack({ trackId: firstTrack.id, forceRestart: true }); //immediately start playing on success
                 }
 
-                if (variables.successMsg) {
-                    makeToast(`${variables.successMsg}: `, variables.playlist.name);
-                }
+                makeToast("Playing: ", variables.playlist.name);
             } else if (data.skipCount > 0) {
                 makeToast("Queueing: ", variables.playlist.name); //no downloaded tracks available, but downloading is happening on skipCount tracks
             } else {
