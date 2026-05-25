@@ -1,9 +1,12 @@
+import os
 import asyncio
 import logging
 
 from database.database_manager import DatabaseManager
 from sync.pokes import WSPokeFactory
 from sync.websocket_manager import WebsocketManager
+
+from config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +32,14 @@ class StatsManager:
         self.lock = asyncio.Lock()
 
         self.is_running = True
+
+        #in-memory cache of the total audio storage
+        self.AUDIO_EXTENSIONS = (
+            '.MP3', '.WAV', '.FLAC', '.M4A', '.AAC', 
+            '.OGG', '.OPUS', '.AIFF', '.ALAC', '.WMA'
+        )
+        self.recalculate_storage = True
+        self.audio_storage_cache = self.audio_storage()
 
     async def increment_listened_duration(self, track_id: str, listened_duration: float):
         """Increments the listened duration buffer"""
@@ -83,3 +94,25 @@ class StatsManager:
 
     def stop(self):
         self.is_running = False
+
+
+    def flag_audio_storage(self):
+        self.recalculate_storage = True
+
+    def audio_storage(self) -> int:
+        if self.recalculate_storage:
+            logger.info(f"Recalculating audio storage")
+            
+            total_audio_bytes = 0
+            for root, _, files in os.walk(settings.DATA_DIR): #uses the settings data directory, may need configuration to support mounting folders
+                for file in files:
+                    if file.upper().endswith(self.AUDIO_EXTENSIONS):
+                        file_path = os.path.join(root, file)
+                        try:
+                            total_audio_bytes += os.path.getsize(file_path)
+                        except (OSError, FileNotFoundError):
+                            continue
+            self.audio_storage_cache = total_audio_bytes
+            self.recalculate_storage = False
+
+        return self.audio_storage_cache #super fast

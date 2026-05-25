@@ -3,11 +3,14 @@ import { motion } from "framer-motion";
 import { User } from "lucide-react";
 import { MusicNotesIcon, ClockIcon, HardDrivesIcon } from "@phosphor-icons/react";
 
+import { useStats } from "@/store/hooks/useProfile";
+
+import { CountUp } from "@/components/ui/countup";
+import { convertDuration, convertStorage } from "@/features/profile/profile.utils";
+
 import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
 import type { ProfileTabProps } from "@/features/profile/profile.types";
-import { CountUp } from "@/components/ui/countup";
-import { useStats } from "@/store/hooks/useProfile";
 
 
 export const ProfileTab = ({
@@ -16,14 +19,16 @@ export const ProfileTab = ({
 
     const { stats } = useStats();
 
-    const totalTrackCountStr = stats.totalTrackCount.toString();
-    const minutesListenedStr = (stats.totalListenedDuration / 60).toFixed(2);
+    //extract these values for display
+    const trackCountStr = stats.totalTrackCount.toString();
 
-        //get these from tanstack probably
+    const { durationLabel, durationStr } = convertDuration(stats.totalListenedDuration);
+    const { storageStr, storageSuffix} = convertStorage(stats.totalStorageUsed);
+
     const displayStats = [
-        { label: "Total Tracks", value: totalTrackCountStr, suffix: "", Icon: MusicNotesIcon },
-        { label: "Minutes Listened", value: minutesListenedStr, suffix: "", Icon: ClockIcon },
-        { label: "Audio Storage", value: "10.00", suffix: " GB", Icon: HardDrivesIcon },
+        { label: "Total Tracks", value: trackCountStr, suffix: "", Icon: MusicNotesIcon },
+        { label: durationLabel, value: durationStr, suffix: "", Icon: ClockIcon },
+        { label: "Audio Storage", value: storageStr, suffix: storageSuffix, Icon: HardDrivesIcon },
     ];
 
     return (
@@ -45,7 +50,7 @@ export const ProfileTab = ({
                         </div> 
 
                         <div className="flex-1 flex flex-col gap-1">
-                            <h1 className="text-2xl">Whimsypingu</h1>
+                            <h1 className="text-2xl">whimsypingu</h1>
                             <p className="text-zinc-400 text-sm">Scuttling since 2026</p>
                         </div>
                     </section>
@@ -66,7 +71,7 @@ export const ProfileTab = ({
                                             {label}
                                         </p>
                                         <p className="text-lg font-mono text-zinc-100">
-                                            <CountUp value={value} />{suffix}
+                                            <CountUp value={value} /> {suffix}
                                         </p>
                                     </div>
                                 </div>

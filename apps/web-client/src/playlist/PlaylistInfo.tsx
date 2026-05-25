@@ -7,7 +7,7 @@ import { SORTMODE_CONFIG } from '@/store/hooks/hooks.constants';
 import { PLAYLIST_CONFIG } from '@/playlist/playlist.constants';
 
 import type { PlaylistInfoProps } from '@/playlist/playlist.types';
-import type { SetAllPlaylistMutationProps, Sortmode } from '@/store/hooks/hooks.types';
+import type { Sortmode } from '@/store/hooks/hooks.types';
 import { useSetQueue } from '@/store/hooks/useQueue';
 
 
@@ -29,12 +29,10 @@ export const PlaylistInfo = ({
 
     //play the entire playlist with the given sorted order
     const handlePlay = () => {
-        const setAllPlaylistVars: SetAllPlaylistMutationProps = {
+        setPlaylist({
             playlist,
             sortmode,
-            successMsg: "Playing",
-        };
-        setPlaylist(setAllPlaylistVars);
+        });
     }
 
     return (

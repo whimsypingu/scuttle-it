@@ -7,6 +7,7 @@ import { getTrackDisplayMetadata, trackBaseToQueueTrack } from "@/track/track.ut
 
 import type { QueueTrack } from "@/track/track.types";
 import type { PopMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetAllPlaylistMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
+import type { SetFirstQueueResponse, SetAllQueueResponse, PushQueueResponse, PushNextQueueResponse, PopQueueResponse } from "./hooks.responses";
 
 
 export const useQueue = () => {
@@ -36,18 +37,23 @@ export const useQueue = () => {
             if (!response.ok) throw new Error("Failed to set first entry in queue");
 
             const data = await response.json();
-            return data;
+            return data as SetFirstQueueResponse;
         },
         onMutate: async (variables) => {
             await queryClient.cancelQueries({ queryKey }); // cancel outgoing refetches so they dont rewrite optimistic changes
 
             const rollbackQueue = queryClient.getQueryData(queryKey); //get the rollback state
 
-            const tempQueueTrack = trackBaseToQueueTrack(variables.track, -1); //typecast to a QueueTrack with -1 default queueId field
+            //play audio and update the local cached queue optimistically
+			if (variables.track.downloaded) {
+				audioEngine.playTrack({ trackId: variables.track.id, forceRestart: true });
 
-            queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
-                return [tempQueueTrack, ...(old?.slice(1) || [])];
-            });
+                const tempQueueTrack = trackBaseToQueueTrack(variables.track, -1); //typecast to a QueueTrack with -1 default queueId field
+
+                queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
+                    return [tempQueueTrack, ...(old?.slice(1) || [])];
+                });
+			}
 
             return { rollbackQueue }; //return context for rollback
         },
@@ -60,9 +66,11 @@ export const useQueue = () => {
         onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue); //immediately swap the optimistic -1 queueId for DB-assigned queueId
 
-            if (variables.successMsg) {
-                const { titleDisplay } = getTrackDisplayMetadata(variables.track);
-                makeToast(`${variables.successMsg}: `, titleDisplay);
+            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+            if (data.downloadRequired) {
+                makeToast("Downloading: ", titleDisplay);
+            } else {
+                makeToast("Playing: ", titleDisplay);
             }
         },
     });
@@ -108,17 +116,20 @@ export const useQueue = () => {
             if (!response.ok) throw new Error("Failed to push to queue");
 
             const data = await response.json();
-            return data;
+            return data as PushQueueResponse;
         },
         onMutate: async (variables) => {
             await queryClient.cancelQueries({ queryKey });
             const rollbackQueue = queryClient.getQueryData(queryKey);
 
-            const tempQueueTrack = trackBaseToQueueTrack(variables.track, -1); //typecast to a QueueTrack with -1 default queueId field
+            //optimistically update queue if available immediately
+            if (variables.track.downloaded) {
+                const tempQueueTrack = trackBaseToQueueTrack(variables.track, -1); //typecast to a QueueTrack with -1 default queueId field
 
-            queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
-                return [...(old || []), tempQueueTrack];
-            });
+                queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
+                    return [...(old || []), tempQueueTrack];
+                });
+            }
 
             return { rollbackQueue };
         },
@@ -131,9 +142,11 @@ export const useQueue = () => {
         onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue);
 
-            if (variables.successMsg) {
-                const { titleDisplay } = getTrackDisplayMetadata(variables.track);
-                makeToast(`${variables.successMsg}: `, titleDisplay);
+            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+            if (data.downloadRequired) {
+                makeToast("Downloading: ", titleDisplay);
+            } else {
+                makeToast("Queued: ", titleDisplay);
             }
         },
     });
@@ -146,7 +159,7 @@ export const useQueue = () => {
             if (!response.ok) throw new Error("Failed to push to queue");
 
             const data = await response.json();
-            return data;
+            return data as PushNextQueueResponse;
         },
         onMutate: async (variables) => {
             await queryClient.cancelQueries({ queryKey });
@@ -173,9 +186,11 @@ export const useQueue = () => {
         onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue);
 
-            if (variables.successMsg) {
-                const { titleDisplay } = getTrackDisplayMetadata(variables.track);
-                makeToast(`${variables.successMsg}: `, titleDisplay);
+            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+            if (data.downloadRequired) {
+                makeToast("Downloading: ", titleDisplay);
+            } else {
+                makeToast("Next: ", titleDisplay);
             }
         },
     });
@@ -188,11 +203,11 @@ export const useQueue = () => {
             if (!response.ok) throw new Error("Failed to pop from queue");
 
             const data = await response.json();
-            return data;
+            return data as PopQueueResponse;
         },
         onMutate: async (variables) => {
             await queryClient.cancelQueries({ queryKey });
-            const rollbackQueue = queryClient.getQueryData(queryKey);
+            const rollbackQueue = queryClient.getQueryData<QueueTrack[]>(queryKey);
 
             queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
                 return old?.filter(t => t.queueId !== variables.queueTrack.queueId); //filter out by the unique queueId
@@ -209,9 +224,9 @@ export const useQueue = () => {
         onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue);
 
-            if (variables.successMsg) {
+            if (variables.showToast) {
                 const { titleDisplay } = getTrackDisplayMetadata(variables.queueTrack);
-                makeToast(`${variables.successMsg}: `, titleDisplay);
+                makeToast("Removed: ", titleDisplay);
             }
         },
     });
@@ -245,18 +260,23 @@ export const useSetQueue = () => {
             if (!response.ok) throw new Error("Failed to set queue");
 
             const data = await response.json();
-            return data;
+            return data as SetAllQueueResponse;
         },
         onSuccess: (data, variables) => {
-            queryClient.setQueryData(queryKey, data.queue);
+            //when tracks are able to be set (non-empty playlist and downloaded tracks) then modify the queue and audio.
+            if (data.setCount > 0) {
+                queryClient.setQueryData(queryKey, data.queue);
 
-            if (data.queue && data.queue.length > 0) {
-                const firstTrack = data.queue[0];
-                audioEngine.playTrack({ trackId: firstTrack.id, forceRestart: true }); //immediately start playing on success
-            }
+                if (data.queue && data.queue.length > 0) {
+                    const firstTrack = data.queue[0];
+                    audioEngine.playTrack({ trackId: firstTrack.id, forceRestart: true }); //immediately start playing on success
+                }
 
-            if (variables.successMsg) {
-                makeToast(`${variables.successMsg}: `, variables.playlist.name);
+                makeToast("Playing: ", variables.playlist.name);
+            } else if (data.skipCount > 0) {
+                makeToast("Queueing: ", variables.playlist.name); //no downloaded tracks available, but downloading is happening on skipCount tracks
+            } else {
+                makeToast("Empty: ", variables.playlist.name); //empty playlist
             }
         },
         onError: (err) => {

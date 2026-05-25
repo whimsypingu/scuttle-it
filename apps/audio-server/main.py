@@ -73,7 +73,8 @@ async def lifespan(app: FastAPI):
             audio_processor=audio_processor,
             yt_client=YouTubeClient(),
             db_manager=db_manager,
-            ws_manager=ws_manager
+            ws_manager=ws_manager,
+            stats_manager=stats_manager
         )
         workers.append(dl_worker)
 

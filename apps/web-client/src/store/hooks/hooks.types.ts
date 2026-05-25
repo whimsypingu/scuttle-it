@@ -1,4 +1,4 @@
-import type { PlaylistBase, PlaylistId, SummaryPlaylist } from "@/playlist/playlist.types";
+import type { PlaylistBase, PlaylistId } from "@/playlist/playlist.types";
 import type { QueueTrack, TrackBase, TrackId } from "@/track/track.types";
 import type { IconProps } from "@phosphor-icons/react";
 
@@ -40,34 +40,25 @@ export interface EditPlaylistPayload {
  */
 export interface SetFirstMutationProps {
     track: TrackBase;
-    successMsg?: string;
 }
-
 export interface ReorderMutationProps {
     queueTrack: QueueTrack;
     targetPosition: number;
     successMsg?: string;
 }
-
 export interface PushMutationProps {
     track: TrackBase;
-    successMsg?: string;
 }
-
 export interface PushNextMutationProps {
     track: TrackBase;
-    successMsg?: string;
 }
-
 export interface PopMutationProps {
     queueTrack: QueueTrack;
-    successMsg?: string;
+    showToast: boolean;
 }
-
 export interface SetAllPlaylistMutationProps {
     playlist: PlaylistBase;
     sortmode?: Sortmode;
-    successMsg?: string;
 }
 
 

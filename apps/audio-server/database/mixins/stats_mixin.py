@@ -90,7 +90,7 @@ class StatsMixin:
 
 
     async def get_stats(self) -> dict:
-        """Get the stats"""
+        """Get the stats for total downloads and listened duration"""
 
         query = """
             SELECT

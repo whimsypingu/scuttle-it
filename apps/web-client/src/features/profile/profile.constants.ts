@@ -7,6 +7,7 @@ import type { UserStats } from "./profile.types";
 export const DEFAULT_STATS: UserStats = {
     totalTrackCount: 0,
     totalListenedDuration: 0,
+    totalStorageUsed: 0,
     // Add future defaults here:
     // totalAudioStorage: 0
 };

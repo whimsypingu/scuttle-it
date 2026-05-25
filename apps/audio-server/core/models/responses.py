@@ -1,5 +1,5 @@
 from core.models.base import ScuttleBase
-from core.models.track import TrackBase
+from core.models.track import QueueTrack, TrackBase
 
 
 class RetrievalResponse(ScuttleBase):
@@ -13,3 +13,21 @@ class RetrievalResponse(ScuttleBase):
 class StatsResponse(ScuttleBase):
     total_track_count: int
     total_listened_duration: int
+    total_storage_used: int
+
+
+class SetFirstQueueResponse(ScuttleBase):
+    download_required: bool
+    queue: list[QueueTrack]
+class PushQueueResponse(ScuttleBase):
+    download_required: bool
+    queue: list[QueueTrack]
+class PushNextQueueResponse(ScuttleBase):
+    download_required: bool
+    queue: list[QueueTrack]
+class PopQueueResponse(ScuttleBase):
+    queue: list[QueueTrack]
+class SetAllQueueResponse(ScuttleBase):
+    set_count: int
+    skip_count: int
+    queue: list[QueueTrack]

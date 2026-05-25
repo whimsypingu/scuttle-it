@@ -59,6 +59,7 @@ class RetrievalMixin:
                 t.title,
                 t.title_display,
                 t.duration,
+                1 AS downloaded,
 
                 -- ArtistBase fields
                 GROUP_CONCAT(
@@ -144,6 +145,7 @@ class RetrievalMixin:
                 t.title,
                 t.title_display,
                 t.duration,
+                CASE WHEN d.track_internal_id IS NOT NULL THEN 1 ELSE 0 END AS downloaded,
 
                 -- ArtistBase fields
                 GROUP_CONCAT(
@@ -160,6 +162,7 @@ class RetrievalMixin:
             JOIN tracks t ON t.internal_id = l.track_internal_id
             JOIN track_artists ta ON ta.track_internal_id = t.internal_id
             JOIN artists a ON ta.artist_internal_id = a.internal_id
+            LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
             GROUP BY t.internal_id
             ORDER BY l.{SORT_MAP[sortmode]};
         '''
@@ -242,6 +245,7 @@ class RetrievalMixin:
                 t.title,
                 t.title_display,
                 t.duration,
+                CASE WHEN d.track_internal_id IS NOT NULL THEN 1 ELSE 0 END AS downloaded,
 
                 -- ArtistBase fields
                 GROUP_CONCAT(
@@ -254,6 +258,7 @@ class RetrievalMixin:
             FROM recently_played_subset_tracks t
             JOIN track_artists ta ON ta.track_internal_id = t.internal_id
             JOIN artists a ON ta.artist_internal_id = a.internal_id
+            LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
             GROUP BY t.internal_id
             ORDER BY t.listened_at DESC;
         '''
@@ -330,6 +335,7 @@ class RetrievalMixin:
                 t.title,
                 t.title_display,
                 t.duration,
+                CASE WHEN d.track_internal_id IS NOT NULL THEN 1 ELSE 0 END AS downloaded,
 
                 -- ArtistBase fields
                 GROUP_CONCAT(
@@ -346,6 +352,7 @@ class RetrievalMixin:
             JOIN tracks t ON t.internal_id = s.track_internal_id
             JOIN track_artists ta ON ta.track_internal_id = t.internal_id
             JOIN artists a ON ta.artist_internal_id = a.internal_id
+            LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
             GROUP BY t.internal_id
             ORDER BY s.{SORT_MAP[sortmode]};
         '''
@@ -384,6 +391,8 @@ class RetrievalMixin:
                 t.listened_duration,
                 t.listened_at,
 
+                CASE WHEN d.track_internal_id IS NOT NULL THEN 1 ELSE 0 END AS downloaded,
+
                 -- ArtistBase fields
                 GROUP_CONCAT(
                     a.internal_id || '{UNIT_SEP}' ||
@@ -412,6 +421,8 @@ class RetrievalMixin:
             -- Join artists
             JOIN track_artists ta ON ta.track_internal_id = t.internal_id
             JOIN artists a ON ta.artist_internal_id = a.internal_id
+
+            LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
 
             WHERE t.id = ?
 

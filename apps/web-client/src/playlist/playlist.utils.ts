@@ -6,7 +6,6 @@ import { makeToast } from '@/features/toast/Toast';
 
 import type { ActiveEditTarget } from '@/features/edit/edit.types';
 import type { PlaylistActionProps } from '@/playlist/playlist.types';
-import type { SetAllPlaylistMutationProps } from '@/store/hooks/hooks.types';
 
 
 export const usePlaylistActionHandler = () => {
@@ -27,11 +26,9 @@ export const usePlaylistActionHandler = () => {
                 break;
 
             case "play":
-                const setAllPlaylistVars: SetAllPlaylistMutationProps = {
+                setPlaylist({
                     playlist: props.playlist,
-                    successMsg: "Playing",
-                };
-                setPlaylist(setAllPlaylistVars);
+                });
                 break;
 
             case "delete":

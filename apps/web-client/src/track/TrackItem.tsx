@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, useMotionValue, useMotionValueEvent, useTransform } from 'framer-motion';
 import { useQueue } from '@/store/hooks/useQueue';
 
-import { MusicNoteIcon } from '@phosphor-icons/react';
+import { MusicNoteIcon, ShoppingBagIcon } from '@phosphor-icons/react';
 
 import { getTrackDisplayMetadata, useTrackActionHandler } from '@/track/track.utils';
 import { formatTime } from '@/features/audio/audio.utils';
@@ -108,9 +108,6 @@ export const TrackItem = ({
         if (isDragging) return; //cancel taps on drags
 
 		try {
-			//play audio
-			audioEngine.playTrack({ trackId: track.id, forceRestart: true });
-
 			//wrapper for actionHandler, see models.utils.ts for implementation
 			triggerAction("setFirst");
 
@@ -180,7 +177,13 @@ export const TrackItem = ({
 					</span>
 				</div>
 
-				<div className="text-right flex flex-col">
+				<div className="text-right flex gap-2 items-center">
+					{track.downloaded === false && (
+						<div className="text-white/40 pt-[2px]">
+							<ShoppingBagIcon size={ICON_SIZE_PX * 0.6} />
+						</div>
+					)}
+
 					<span className="text-xs text-white/40">
 						{duration}
 					</span>

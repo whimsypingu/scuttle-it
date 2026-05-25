@@ -7,7 +7,7 @@ import { makeToast } from '@/features/toast/Toast';
 
 import type { PlaylistTrack, QueueId, QueueTrack, TrackActionProps, TrackBase } from '@/track/track.types';
 import type { ActiveEditTarget } from '@/features/edit/edit.types';
-import type { PopMutationProps, PushMutationProps, PushNextMutationProps, SetFirstMutationProps, SetLikeMutationProps } from '@/store/hooks/hooks.types';
+import type { SetLikeMutationProps } from '@/store/hooks/hooks.types';
 
 
 export const useTrackActionHandler = () => {
@@ -21,27 +21,21 @@ export const useTrackActionHandler = () => {
         
         switch (props.action) {
             case "setFirst": //set first in queue
-                const setFirstTrackVars: SetFirstMutationProps = {
+                setFirst({
                     track: props.track,
-                    successMsg: "Playing",
-                };
-                setFirst(setFirstTrackVars);
+                });
                 break;
 
             case "queueLast": //add to queue
-                const pushTrackVars: PushMutationProps = {
+                push({
                     track: props.track,
-                    successMsg: "Queued",
-                };
-                push(pushTrackVars);
+                });
                 break;
 
             case "queueNext": //push next
-                const pushNextTrackVars: PushNextMutationProps = {
+                pushNext({
                     track: props.track,
-                    successMsg: "Next",
-                };
-                pushNext(pushNextTrackVars);
+                });
                 break;
 
             case "delete": //NOT USED
@@ -49,11 +43,10 @@ export const useTrackActionHandler = () => {
                 break;
 
             case "deleteQueue": //delete from queue
-                const popTrackVars: PopMutationProps = {
+                pop({
                     queueTrack: props.queueTrack,
-                    successMsg: "Removed",
-                };
-                pop(popTrackVars);
+                    showToast: true,
+                });
                 break;
 
             case "edit": //open a track editing popup

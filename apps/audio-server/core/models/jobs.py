@@ -24,7 +24,8 @@ class JobBase(ScuttleBase):
 class DownloadJob(JobBase):
     track_id: str | None = None
     query: str | None = None
-    priority: bool = False #is it important or not
+    to_queue: bool = True #do we put this in the queue after download
+    priority: bool = False #is it important or not for queue priority, if to_queue is true
 
     query_limit: int = Field(default=3, ge=1, le=10)
 
