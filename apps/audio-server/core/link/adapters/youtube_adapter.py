@@ -12,6 +12,7 @@ class YouTubeAdapter:
         self._id_pattern = re.compile(r'^[a-zA-Z0-9_-]{11}$') #https://dev.to/muhammadsaim/discover-the-magic-behind-youtubes-unique-video-ids-21ll
 
     def extract_id(self, parsed_url: str) -> str | None:
+        """Attempts to find the YouTube id from a parsed url"""
         #first check the query v parameter which is most common, looks like ?v=dQw4w9WgXcQ
         q = parse_qs(parsed_url.query)
         v = q.get("v") #returns a list: ["dQw4w9WgXcQ"]
@@ -27,6 +28,7 @@ class YouTubeAdapter:
         return None
 
     def expand_jobs(self, parsed_url: str) -> list[DownloadJob]:
+        """Given a parsed url, attempt to return a list of DownloadJobs, either a single track in a list or a playlist."""
         extracted_id = self.extract_id(parsed_url)
         if extracted_id is not None:
             return [

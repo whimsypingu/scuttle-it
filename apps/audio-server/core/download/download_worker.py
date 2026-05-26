@@ -65,7 +65,7 @@ class DownloadWorker:
                     if len(generated_jobs):
                         for j in generated_jobs:
                             await self.dl_queue.add(j)
-                        raise DownloadWorkerJobExpanded()
+                        raise DownloadWorkerJobExpanded() #exit job handling here with a successful custom exception
 
                     search_results = await self.yt_client.search_by_query(q=job.query, limit=job.query_limit)
                     for search_result in search_results:

@@ -46,6 +46,7 @@ class LinkAdapter():
     
     #public methods are safe and sort of compact this way    
     def extract_id(self, url: str) -> str | None:
+        """Extract an id with the optimal adapter."""
         adapter, parsed_url = self._get_adapter(url)
 
         if adapter and hasattr(adapter, "extract_id"):
@@ -55,6 +56,11 @@ class LinkAdapter():
     
     #attempt internal conversion to the right kind of adapter and convert into a list of download jobs
     def expand_jobs(self, url: str) -> list[DownloadJob]:
+        """
+        Given a url, attempt to parse it with the optimal adapter and extract a list of DownloadJobs.
+        A single track will be returned as a single DownloadJob in a list.
+        Failure to find a result will return an empty list.
+        """
         adapter, parsed_url = self._get_adapter(url)
 
         if adapter and hasattr(adapter, "expand_jobs"):
