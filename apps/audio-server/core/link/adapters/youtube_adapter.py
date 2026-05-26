@@ -2,12 +2,17 @@ import logging
 import re
 from urllib.parse import parse_qs
 
+from core.link.link_types import LinkType
+
 logger = logging.getLogger(__name__)
 
 
 class YouTubeAdapter:
     def __init__(self):
         self._id_pattern = re.compile(r'^[a-zA-Z0-9_-]{11}$') #https://dev.to/muhammadsaim/discover-the-magic-behind-youtubes-unique-video-ids-21ll
+
+    def identify_type(self, parsed_url: str) -> LinkType | None:
+        return LinkType.YOUTUBE #for now just return the adapter type
 
     def extract_id(self, parsed_url: str) -> str | None:
         #first check the query v parameter which is most common, looks like ?v=dQw4w9WgXcQ

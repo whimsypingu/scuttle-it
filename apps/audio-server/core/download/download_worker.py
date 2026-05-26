@@ -1,8 +1,10 @@
 import logging
 
-from core.audio.processor import AudioProcessor
 from core.audio.utils import delete_track_file
+
+from core.download.download_exceptions import DownloadWorkerJobExpanded
 from core.download.download_queue import DownloadQueue
+from core.link.link_adapter import LinkAdapter
 from core.models.payloads import EditArtistPayload, EditTrackPayload
 from core.youtube.youtube_client import YouTubeClient
 from core.youtube.youtube_exceptions import YtdlpDownloadError, YtdlpTimeoutError
@@ -10,6 +12,7 @@ from database.database_manager import DatabaseManager
 from sync.pokes import WSPokeFactory
 from sync.websocket_manager import WebsocketManager
 from core.stats.stats_manager import StatsManager
+from core.audio.processor import AudioProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +26,8 @@ class DownloadWorker:
         yt_client: YouTubeClient,
         db_manager: DatabaseManager,
         ws_manager: WebsocketManager,
-        stats_manager: StatsManager
+        stats_manager: StatsManager,
+        link_adapter: LinkAdapter
     ):
         self.worker_id = worker_id
 
@@ -33,6 +37,7 @@ class DownloadWorker:
         self.db_manager = db_manager
         self.ws_manager = ws_manager
         self.stats_manager = stats_manager
+        self.link_adapter = link_adapter
 
         self.is_running = True
         self.current_job = None
@@ -54,6 +59,14 @@ class DownloadWorker:
 
                 #determine the id to download
                 if job.query:
+
+                    #try extracting and parsing any possible links
+                    generated_jobs = self.link_adapter.convert_to_download_jobs(url=job.query)
+                    if len(generated_jobs):
+                        for j in generated_jobs:
+                            await self.dl_queue.add(j)
+                        raise DownloadWorkerJobExpanded()
+
                     search_results = await self.yt_client.search_by_query(q=job.query, limit=job.query_limit)
                     for search_result in search_results:
                         await self.db_manager.register_track(search_result)
@@ -118,10 +131,16 @@ class DownloadWorker:
                 )
                 logger.info(f"[{self.worker_id}] Successfully finished {job.identifier}")
 
+            except DownloadWorkerJobExpanded as e:
+                await self.dl_queue.complete_job(job.id, success=True)
+                await self.ws_manager.broadcast(
+                    WSPokeFactory.download_job_status_update(job)
+                )
+                logger.info(f"[{self.worker_id}] Successfully expanded jobs from {job.identifier}")
+
+            #fall through error
             except Exception as e:
-                #status
                 await self.dl_queue.complete_job(job.id, success=False)
-            
                 await self.ws_manager.broadcast(
                     WSPokeFactory.download_job_status_update(job)
                 )

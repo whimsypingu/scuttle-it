@@ -1,8 +1,10 @@
 import logging
 from urllib.parse import urlparse
 
+from core.link.link_types import LinkType
 from core.link.adapters.spotify_adapter import SpotifyAdapter
 from core.link.adapters.youtube_adapter import YouTubeAdapter
+from core.models.jobs import DownloadJob
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +45,15 @@ class LinkAdapter():
             return None, None
         
     
-    # public methods are safe and sort of compact this way
+    #public methods are safe and sort of compact this way
+    def identify_type(self, url: str) -> LinkType | None:
+        adapter, parsed_url = self._get_adapter(url)
+
+        if adapter and hasattr(adapter, "identify_type"):
+            return adapter.identify_type(parsed_url)
+        return None
+
+    
     def extract_id(self, url: str) -> str | None:
         adapter, parsed_url = self._get_adapter(url)
 
@@ -51,6 +61,26 @@ class LinkAdapter():
             return adapter.extract_id(parsed_url)
         return None
     
+    
+    #attempt internal conversion to the right kind of adapter and convert into a list of download jobs
+    def convert_to_download_jobs(self, url: str) -> list[DownloadJob]:
+        match self.identify_type(url):
+            case LinkType.YOUTUBE:
+                extracted_id = self.extract_id(url)
+                if extracted_id is not None:
+                    return [
+                        DownloadJob(
+                            track_id=extracted_id,
+                            priority=True,
+                        )
+                    ]
+            case _:
+                return []
+
+
+
+
+
     
 
 if __name__ == "__main__":
