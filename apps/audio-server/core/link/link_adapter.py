@@ -76,7 +76,8 @@ class LinkAdapter():
         adapter, parsed_url = self._get_adapter(url)
 
         if adapter and hasattr(adapter, "resolve_metadata"):
-            metadata = await adapter.resolve_metadata(parsed_url)
+            metadata = await adapter._resolve_track(parsed_url)
+            print(metadata)
             return metadata
         return None
     

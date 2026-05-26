@@ -30,6 +30,29 @@ class SpotifyAdapter:
         return None
     
     
+    async def _resolve_track(self, parsed_url) -> dict | None:
+        track_id = self.extract_id(parsed_url)
+        if track_id is not None:
+            embed_url = f"https://open.spotify.com/embed/track/{track_id}"
+
+            async with httpx.AsyncClient(headers=self._headers, timeout=self._timeout) as client:
+                try:
+                    response = await client.get(embed_url)
+                    m = self._title_artist_pattern.search(response.text)
+
+                    #try catch block will catch any errors
+                    title = m.group(1)
+                    artists = ", ".join([a.get("name") for a in json.loads(m.group(2))])
+                    return {
+                        "title": title,
+                        "artists": artists,
+                    }
+                except Exception as e:
+                    logger.error(f"Failed to resolve track metadata from Spotify")
+        return None
+        
+
+
     async def resolve_metadata(self, parsed_url) -> dict | None:
         track_id = self.extract_id(parsed_url)
         if not track_id:
