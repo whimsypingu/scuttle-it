@@ -306,4 +306,4 @@ class YouTubeClient():
         except Exception as e:
             logger.exception(f"Unexpected error during yt-dlp search: {e}")
             raise YtdlpSearchError() from e
-
+        

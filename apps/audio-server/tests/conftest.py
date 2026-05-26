@@ -5,6 +5,7 @@ from pathlib import Path
 from core.models.artist import ArtistBase
 from core.models.track import TrackBase
 from database.database_manager import DatabaseManager
+from core.youtube.youtube_client import YouTubeClient
 
 @pytest.fixture
 def sample_artist():
@@ -47,3 +48,10 @@ async def db():
 
     if test_db_file_path.exists():
         test_db_file_path.unlink()
+
+
+@pytest_asyncio.fixture
+async def yt():
+    client = YouTubeClient()
+
+    yield client
