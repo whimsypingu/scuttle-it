@@ -17,7 +17,7 @@ class LinkAdapter():
             "youtube.com": YouTubeAdapter(),
             "m.youtube.com": YouTubeAdapter(),
             "youtu.be": YouTubeAdapter(),
-            "spotify.com": SpotifyAdapter(),
+            "open.spotify.com": SpotifyAdapter(),
         }
 
         for key, value in overrides.items():
@@ -71,10 +71,20 @@ class LinkAdapter():
 
 
 
+    async def resolve_metadata(self, url: str) -> str | None:
+        """Extract an id with the optimal adapter."""
+        adapter, parsed_url = self._get_adapter(url)
+
+        if adapter and hasattr(adapter, "resolve_metadata"):
+            metadata = await adapter.resolve_metadata(parsed_url)
+            return metadata
+        return None
+    
 
     
 
-if __name__ == "__main__":
+import asyncio
+async def main():
     # Configure basic console logging so we can see the logger output
     logging.basicConfig(
         level=logging.INFO,
@@ -109,3 +119,9 @@ if __name__ == "__main__":
         print(f"\nInput: {url}")
         extracted_id = adapter.extract_id(url)
         print(f"Result: {extracted_id}")
+
+    print("\n--- Test Extractions ---")
+    await adapter.resolve_metadata("https://open.spotify.com/track/4PTG3Z6ehGkBFwjybzWkR8")
+if __name__ == "__main__":
+    # asyncio.run handles opening the event loop, executing main(), and closing it out
+    asyncio.run(main())
