@@ -67,6 +67,8 @@ if __name__ == "__main__":
     test_urls = [
         # Standard YouTube Desktop
         "https://www.youtube.com/watch?v=dQw4w9WgXcQ&feature=shared",
+        # YouTube other
+        "https://www.youtube.com/v/dQw4w9WgXcQ",
         # YouTube Mobile
         "https://m.youtube.com/watch?v=dQw4w9WgXcQ",
         # YouTube Shortener
