@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+from core.link.exceptions import PlaylistResolutionError, TrackResolutionError
 from core.models.payloads import CreatePlaylistPayload
 import httpx
 
@@ -42,7 +43,7 @@ class SpotifyAdapter:
         return link_type, potential_id
 
 
-    async def _resolve_track(self, id) -> str | None:
+    async def _resolve_track(self, id) -> str:
         """Internally handle converting a track url to a query "track - artists" like this"""
         embed_url = f"https://open.spotify.com/embed/track/{id}"
 
@@ -56,12 +57,31 @@ class SpotifyAdapter:
                 artists = ", ".join([a.get("name") for a in json.loads(m.group(2))])
                 return self._clean(f"{title} - {artists}")
             except Exception as e:
-                logger.error(f"Failed to resolve track metadata from Spotify")
-        return None
+                raise TrackResolutionError(f"Failed to resolve track metadata from Spotify") from e
         
 
-    async def _resolve_playlist(self, id) -> tuple[str | None, str | None, list[str]]:
-        """Internally handle converting a playlist url to a list of queries ["track - artists"...]"""
+    async def _resolve_playlist(self, id) -> tuple[str, str, list[str]]:
+        """Extracts the tracks and metadata of a Spotify playlist via an embed proxy layout.
+
+        This method scrapes the raw underlying HTML response from a proxy shell, parses out 
+        the playlist's structural definition fields, isolates the target search strings, 
+        and maps them cleanly into formatted worker query components.
+
+        Args:
+            id: The unique, alphanumeric string identifier of the target Spotify playlist.
+
+        Returns:
+            A tuple containing:
+                - str: The sanitized name of the playlist.
+                - str: The sanitized creator or description metadata block.
+                - list[str]: A list of cleanly formatted "Track Title - Artist Name" strings
+                  representing every discovered item inside the playlist.
+
+        Raises:
+            PlaylistResolutionError(): If the remote network endpoint returns an error,
+                the HTML response payload is empty, or the internal regex extraction parser 
+                fails to locate compliant tracks inside the structure frame.
+        """
         embed_url = f"https://open.spotify.com/embed/playlist/{id}"
         
         async with httpx.AsyncClient(headers=self._headers, timeout=self._timeout) as client:
@@ -74,6 +94,9 @@ class SpotifyAdapter:
                 m = self._playlist_pattern.findall(response.text)
 
                 queries = []
+                name = None
+                description = None
+
                 for i, (title, artist) in enumerate(m):
                     if i == 0:
                         name = self._clean(title.strip())
@@ -81,11 +104,13 @@ class SpotifyAdapter:
                     else:
                         queries.append(self._clean(f"{title.strip()} - {artist.strip()}"))
 
+                if name is None: #for whatever reason if somehow a playlist name is not extracted raise an error
+                    raise AttributeError()
+                
                 return name, description, queries
             except Exception as e:
-                logger.error(f"Failed to resolve playlist metadata from Spotify: {e}")
-        return None, None, []
-
+                raise PlaylistResolutionError(f"Failed to resolve playlist metadata from Spotify: {e}") from e
+            
 
     async def expand_jobs(self, parsed_url: str) -> tuple[list[DownloadJob], CreatePlaylistPayload | None]:
         """Given a parsed url, attempt to return a list of DownloadJobs, either a single track in a list or a playlist."""
@@ -95,25 +120,31 @@ class SpotifyAdapter:
             return [], None
         
         if link_type == "track":
-            query = await self._resolve_track(extracted_id)
-            
-            if not query:
+            try:
+                query = await self._resolve_track(extracted_id)
+
+                job = DownloadJob(query=query, priority=True)
+                return [job], None
+            except TrackResolutionError as e:
+                logger.error(e)
                 return [], None
-            
-            job = DownloadJob(query=query, priority=True)
-            return [job], None
 
         if link_type == "playlist":
-            name, description, queries = await self._resolve_playlist(extracted_id)
+            try:
+                name, description, queries = await self._resolve_playlist(extracted_id)
 
-            jobs = [
-                DownloadJob(query=q, priority=False, playlist_ids=[extracted_id])
-                for q in queries
-            ]
-            payload = CreatePlaylistPayload(
-                playlist_id=extracted_id,
-                name=name,
-                description=description,
-            )
-            return jobs, payload
+                jobs = [
+                    DownloadJob(query=q, priority=False, playlist_ids=[extracted_id])
+                    for q in queries
+                ]
+                payload = CreatePlaylistPayload(
+                    playlist_id=extracted_id,
+                    name=name,
+                    description=description,
+                )
+                return jobs, payload
+            except PlaylistResolutionError as e:
+                logger.error(e)
+                return [], None
+
         return [], None

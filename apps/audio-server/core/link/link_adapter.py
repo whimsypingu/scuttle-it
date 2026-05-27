@@ -57,11 +57,26 @@ class LinkAdapter():
     
     #attempt internal conversion to the right kind of adapter and convert into a list of download jobs
     async def expand_jobs(self, url: str) -> tuple[list[DownloadJob], CreatePlaylistPayload | None]:
-        """
-        Given a url, attempt to parse it with the optimal adapter and extract a list of DownloadJobs.
-        A single track will be returned as a single DownloadJob in a list.
-        Failure to find a result will return an empty list.
-        Includes an optional CreatePlaylistPayload field or None if a playlist was expanded.
+        """Resolves a raw URL using the optimal adapter and extracts individual download jobs.
+
+        This method acts as a router that identifies the correct source adapter 
+        (e.g., YouTube, Spotify), parses the incoming URL, and flattens the target 
+        media into granular worker tasks.
+
+        Args:
+            url: The raw, unparsed media or playlist URL from the client.
+
+        Returns:
+            A tuple containing:
+                - list[DownloadJob]: A list of generated track download jobs. For a single
+                  track, this contains one high-priority job. For a playlist, it contains
+                  all extracted tracks mapped as lower-priority sibling jobs.
+                - CreatePlaylistPayload | None: The structural metadata payload required 
+                  to initialize the playlist in the database, or None if the incoming URL
+                  was a single track or resolution failed.
+
+        Raises:
+            # specific exceptions adapters bubbles up here, if applicable.
         """
         adapter, parsed_url = self._get_adapter(url)
 

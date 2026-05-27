@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+from core.link.exceptions import PlaylistResolutionError
 from core.models.payloads import CreatePlaylistPayload
 import httpx
 from urllib.parse import parse_qs
@@ -51,7 +52,27 @@ class YouTubeAdapter:
     
 
     async def _resolve_playlist(self, playlist_id) -> tuple[str | None, str | None, list[str]]:
-        """Internally handle converting a YouTube playlist id to a tuple with playlist name, playlist description, and list of track_ids ["track_id"...]"""
+        """Extracts the tracks and metadata of a YouTube playlist via an embed proxy layout.
+
+        This method scrapes the raw underlying HTML response from a proxy shell, parses out 
+        the playlist's structural definition fields, isolates the target search strings, 
+        and maps them cleanly into formatted worker query components.
+
+        Args:
+            id: The unique, alphanumeric string identifier of the target YouTube playlist.
+
+        Returns:
+            A tuple containing:
+                - str: The name of the playlist.
+                - str: The description metadata block.
+                - list[str]: A list of cleanly formatted "Track ID" strings
+                  representing every discovered item inside the playlist.
+
+        Raises:
+            PlaylistResolutionError(): If the remote network endpoint returns an error,
+                the HTML response payload is empty, or the internal regex extraction parser 
+                fails to locate compliant tracks inside the structure frame.
+        """
         search_url = f"https://www.youtube.com/playlist?list={playlist_id}"
 
         async with httpx.AsyncClient(headers=self._headers, timeout=self._timeout) as client:
@@ -70,8 +91,7 @@ class YouTubeAdapter:
 
                 return name, description, track_ids
             except Exception as e:
-                logger.error(f"Failed to playlist track metadata from YouTube: {e}")
-        return None, None, []
+                raise PlaylistResolutionError(f"Failed to playlist track metadata from YouTube: {e}") from e
 
 
     async def expand_jobs(self, parsed_url: str) -> tuple[list[DownloadJob], CreatePlaylistPayload | None]:
@@ -86,16 +106,20 @@ class YouTubeAdapter:
             return [job], None
         
         if link_type == "playlist":
-            name, description, track_ids = await self._resolve_playlist(extracted_id)
+            try:
+                name, description, track_ids = await self._resolve_playlist(extracted_id)
 
-            jobs = [
-                DownloadJob(track_id=t, priority=False, playlist_ids=[extracted_id])
-                for t in track_ids
-            ]
-            payload = CreatePlaylistPayload(
-                playlist_id=extracted_id,
-                name=name,
-                description=description,
-            )
-            return jobs, payload
+                jobs = [
+                    DownloadJob(track_id=t, priority=False, playlist_ids=[extracted_id])
+                    for t in track_ids
+                ]
+                payload = CreatePlaylistPayload(
+                    playlist_id=extracted_id,
+                    name=name,
+                    description=description,
+                )
+                return jobs, payload
+            except PlaylistResolutionError as e:
+                logger.error(e)
+                return [], None
         return [], None
