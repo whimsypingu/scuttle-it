@@ -61,9 +61,12 @@ class DownloadWorker:
                 if job.query:
 
                     #try extracting and parsing any possible links
-                    generated_jobs = await self.link_adapter.expand_jobs(url=job.query)
-                    if len(generated_jobs) >= 1:
-                        #await self.db_manager.create_playlist
+                    generated_jobs, generated_playlist_payload = await self.link_adapter.expand_jobs(url=job.query)
+
+                    if len(generated_jobs) >= 1 or generated_playlist_payload is not None:
+                        if generated_playlist_payload is not None:
+                            await self.db_manager.create_playlist(generated_playlist_payload)
+
                         for j in generated_jobs:
                             await self.dl_queue.add(j)
                         raise DownloadWorkerJobExpanded() #exit job handling here with a successful custom exception
@@ -114,7 +117,8 @@ class DownloadWorker:
                         duration=clean_duration,
                         artists=[EditArtistPayload(
                             name_display=artist.display
-                        ) for artist in download_result.artists]
+                        ) for artist in download_result.artists],
+                        playlist_ids=job.playlist_ids,
                     )
                 )
 
