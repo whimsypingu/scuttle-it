@@ -3,7 +3,7 @@ import pytest
 from core.link.link_adapter import LinkAdapter
 
 
-def test_youtube_link_extract_id(la: LinkAdapter):
+def test_youtube_adapter_extract_track_id(la: LinkAdapter):
     # List of various URLs to test the routing logic -- https://gist.github.com/rodrigoborgesdeoliveira/987683cfbfcc8d800192da1e73adc486
     test_urls = [
         # Standard YouTube Desktop
@@ -20,5 +20,43 @@ def test_youtube_link_extract_id(la: LinkAdapter):
         "youtu.be/dQw4w9WgXcQ",
     ]
     for url in test_urls:
-        assert la.extract_id(url) == "dQw4w9WgXcQ"
+        assert la.extract_id(url) == ("track", "dQw4w9WgXcQ")
+
+
+@pytest.mark.asyncio
+async def test_youtube_adapter_expand_jobs(la: LinkAdapter):
+    u1 = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&feature=shared"
+    j1 = await la.expand_jobs(u1)
+    assert len(j1) == 1
+    for job in j1:
+        assert job.track_id == "dQw4w9WgXcQ"
+        assert job.priority is True
+
+
+
+def test_spotify_adapter_extract_track_id(la: LinkAdapter):
+    url = "https://open.spotify.com/track/4PTG3Z6ehGkBFwjybzWkR8" #rickroll
+    assert la.extract_id(url) == ("track", "4PTG3Z6ehGkBFwjybzWkR8")
+
+
+def test_spotify_adapter_extract_playlist_id(la: LinkAdapter):
+    url = "https://open.spotify.com/playlist/37i9dQZEVXbMDoHDwVN2tF" #daily top 50 global
+    assert la.extract_id(url) == ("playlist", "37i9dQZEVXbMDoHDwVN2tF")
+
+
+@pytest.mark.asyncio
+async def test_spotify_adapter_expand_jobs(la: LinkAdapter):
+    u1 = "https://open.spotify.com/track/4PTG3Z6ehGkBFwjybzWkR8" #rickroll
+    j1 = await la.expand_jobs(u1)
+    assert len(j1) == 1 #single track
+    for job in j1:
+        assert job.query is not None
+        assert job.priority is True
+
+    u2 = "https://open.spotify.com/playlist/37i9dQZEVXbMDoHDwVN2tF" #daily top 50 global
+    j2 = await la.expand_jobs(u2)
+    assert len(j2) == 50
+    for job in j2:
+        assert job.query is not None # each track becomes a valid query
+        assert job.priority is False # each track gets pushed to the back of the play queue
 
