@@ -1,9 +1,9 @@
 import logging
 import re
+import httpx
 from urllib.parse import parse_qs
 
 from core.models.jobs import DownloadJob
-import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class YouTubeAdapter:
 
         self._track_id_pattern = re.compile(r'^[a-zA-Z0-9_-]{11}$') #https://dev.to/muhammadsaim/discover-the-magic-behind-youtubes-unique-video-ids-21ll
         self._playlist_id_pattern = re.compile(r'^[a-zA-Z0-9_-]{16,50}$') #google gemini lied about it being alphanumeric between 16-34 chars, couldnt find a source so this is a minor safety check
-        self._playlist_pattern = re.compile(r'"videoId"\s*:\s*"([a-zA-Z0-9-_]{11})"')
+        self._playlist_pattern = re.compile(r'"videoId"\s*:\s*"([a-zA-Z0-9-_]{11})"') #all youtube links are hidden in this regex, there may be duplicates
 
 
     def extract_id(self, parsed_url: str) -> tuple[str | None, str | None]:
@@ -47,16 +47,14 @@ class YouTubeAdapter:
     
 
     async def _resolve_playlist_to_track_ids(self, id) -> list[str] | None:
-        """Internally handle converting a playlist url to a list of queries [(track - artists)...]"""
+        """Internally handle converting a playlist url to a list of track_ids ["track_id"...]"""
         search_url = f"https://www.youtube.com/playlist?list={id}"
 
         async with httpx.AsyncClient(headers=self._headers, timeout=self._timeout) as client:
             try:
                 response = await client.get(search_url)
-
-                m = self._playlist_pattern.findall(response.text)
-
-                return list(dict.fromkeys(m))
+                m = self._playlist_pattern.findall(response.text) #searches for "videoId":"XX" as regex
+                return list(dict.fromkeys(m)) #might return empty list [] but this is handled later, clean this up in the future if it becomes a problem
             except Exception as e:
                 logger.error(f"Failed to playlist track metadata from YouTube: {e}")
         return None
@@ -82,6 +80,4 @@ class YouTubeAdapter:
                         priority=False,
                     ) for t in track_ids
                 ]
-
-
         return []

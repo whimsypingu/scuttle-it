@@ -1,9 +1,9 @@
 import json
 import logging
 import re
+import httpx
 
 from core.models.jobs import DownloadJob
-import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class SpotifyAdapter:
 
 
     async def _resolve_track_to_query(self, id) -> str | None:
-        """Internally handle converting a track url to a query (track - artists)"""
+        """Internally handle converting a track url to a query "track - artists" like this"""
         embed_url = f"https://open.spotify.com/embed/track/{id}"
 
         async with httpx.AsyncClient(headers=self._headers, timeout=self._timeout) as client:
@@ -60,7 +60,7 @@ class SpotifyAdapter:
         
 
     async def _resolve_playlist_to_queries(self, id) -> list[str] | None:
-        """Internally handle converting a playlist url to a list of queries [(track - artists)...]"""
+        """Internally handle converting a playlist url to a list of queries ["track - artists"...]"""
         embed_url = f"https://open.spotify.com/embed/playlist/{id}"
         
         async with httpx.AsyncClient(headers=self._headers, timeout=self._timeout) as client:

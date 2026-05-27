@@ -23,7 +23,7 @@ def test_youtube_adapter_extract_track_id(la: LinkAdapter):
         assert la.extract_id(url) == ("track", "dQw4w9WgXcQ")
 
 def test_youtube_adapter_extract_playlist_id(la: LinkAdapter):
-    u1 = "https://www.youtube.com/watch?v=jNQXAC9IVRw&list=PLbpi6ZahtOH75Gj-P-YZYV6hSY5SHQKeV&index=1"
+    u1 = "https://www.youtube.com/watch?v=jNQXAC9IVRw&list=PLbpi6ZahtOH75Gj-P-YZYV6hSY5SHQKeV&index=1" #first track in a playlist
     assert la.extract_id(u1) == ("track", "jNQXAC9IVRw")
 
     u2 = "https://www.youtube.com/playlist?list=PLbpi6ZahtOH75Gj-P-YZYV6hSY5SHQKeV" #20 years 20 breakthrough videos
@@ -31,14 +31,14 @@ def test_youtube_adapter_extract_playlist_id(la: LinkAdapter):
 
 @pytest.mark.asyncio
 async def test_youtube_adapter_expand_jobs(la: LinkAdapter):
-    u1 = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&feature=shared"
+    u1 = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&feature=shared" #first track in a playlist, should be handled like just a track
     j1 = await la.expand_jobs(u1)
     assert len(j1) == 1
     for job in j1:
         assert job.track_id == "dQw4w9WgXcQ"
         assert job.priority is True
 
-    u2 = "https://www.youtube.com/playlist?list=PLbpi6ZahtOH75Gj-P-YZYV6hSY5SHQKeV"
+    u2 = "https://www.youtube.com/playlist?list=PLbpi6ZahtOH75Gj-P-YZYV6hSY5SHQKeV" #20 years 20 breakthrough videos
     j2 = await la.expand_jobs(u2)
     assert len(j2) == 20
     for job in j2:
@@ -46,17 +46,13 @@ async def test_youtube_adapter_expand_jobs(la: LinkAdapter):
         assert job.priority is False
 
 
-
-
 def test_spotify_adapter_extract_track_id(la: LinkAdapter):
     url = "https://open.spotify.com/track/4PTG3Z6ehGkBFwjybzWkR8" #rickroll
     assert la.extract_id(url) == ("track", "4PTG3Z6ehGkBFwjybzWkR8")
 
-
 def test_spotify_adapter_extract_playlist_id(la: LinkAdapter):
     url = "https://open.spotify.com/playlist/37i9dQZEVXbMDoHDwVN2tF" #daily top 50 global
     assert la.extract_id(url) == ("playlist", "37i9dQZEVXbMDoHDwVN2tF")
-
 
 @pytest.mark.asyncio
 async def test_spotify_adapter_expand_jobs(la: LinkAdapter):
@@ -73,4 +69,3 @@ async def test_spotify_adapter_expand_jobs(la: LinkAdapter):
     for job in j2:
         assert job.query is not None # each track becomes a valid query
         assert job.priority is False # each track gets pushed to the back of the play queue
-
