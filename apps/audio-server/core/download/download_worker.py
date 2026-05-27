@@ -117,7 +117,12 @@ class DownloadWorker:
                     )
                 )
 
-                await self.db_manager.push_next_play_queue(download_result.id) #push to play queue immediately for now
+                #play queue modification
+                if job.to_queue:
+                    if job.priority:
+                        await self.db_manager.push_next_play_queue(download_result.id) #push to front of the play queue
+                    else:
+                        await self.db_manager.push_play_queue(download_result.id) #push to end of the play queue
 
                 await self.db_manager.build_search_index()
 
@@ -131,6 +136,7 @@ class DownloadWorker:
                 )
                 logger.info(f"[{self.worker_id}] Successfully finished {job.identifier}")
 
+            #playlist caught, expanded into new download jobs per song
             except DownloadWorkerJobExpanded as e:
                 await self.dl_queue.complete_job(job.id, success=True)
                 await self.ws_manager.broadcast(
