@@ -36,7 +36,7 @@ class SpotifyAdapter:
         link_type = path_parts[0].lower()   # "track" or "playlist"
         potential_id = path_parts[1]        # 4PTG3Z6ehGkBFwjybzWkR8
 
-        if not self._id_pattern.match(potential_id):
+        if not self._id_pattern.match(potential_id) or (link_type not in ("track", "playlist")):
             return None, None
         return link_type, potential_id
 

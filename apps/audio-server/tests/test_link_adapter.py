@@ -7,7 +7,7 @@ def test_youtube_adapter_extract_track_id(la: LinkAdapter):
     # List of various URLs to test the routing logic -- https://gist.github.com/rodrigoborgesdeoliveira/987683cfbfcc8d800192da1e73adc486
     test_urls = [
         # Standard YouTube Desktop
-        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&feature=shared",
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&feature=shared", #rickroll
         # YouTube other
         "https://www.youtube.com/v/dQw4w9WgXcQ",
         # YouTube Mobile
@@ -22,6 +22,12 @@ def test_youtube_adapter_extract_track_id(la: LinkAdapter):
     for url in test_urls:
         assert la.extract_id(url) == ("track", "dQw4w9WgXcQ")
 
+def test_youtube_adapter_extract_playlist_id(la: LinkAdapter):
+    u1 = "https://www.youtube.com/watch?v=jNQXAC9IVRw&list=PLbpi6ZahtOH75Gj-P-YZYV6hSY5SHQKeV&index=1"
+    assert la.extract_id(u1) == ("track", "jNQXAC9IVRw")
+
+    u2 = "https://www.youtube.com/playlist?list=PLbpi6ZahtOH75Gj-P-YZYV6hSY5SHQKeV" #20 years 20 breakthrough videos
+    assert la.extract_id(u2) == ("playlist", "PLbpi6ZahtOH75Gj-P-YZYV6hSY5SHQKeV")
 
 @pytest.mark.asyncio
 async def test_youtube_adapter_expand_jobs(la: LinkAdapter):
@@ -31,6 +37,7 @@ async def test_youtube_adapter_expand_jobs(la: LinkAdapter):
     for job in j1:
         assert job.track_id == "dQw4w9WgXcQ"
         assert job.priority is True
+
 
 
 
