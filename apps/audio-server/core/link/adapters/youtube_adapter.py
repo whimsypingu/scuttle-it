@@ -50,8 +50,8 @@ class YouTubeAdapter:
         return None, None
     
 
-    async def _resolve_playlist_to_track_ids(self, playlist_id) -> tuple[str | None, str | None, list[str]]:
-        """Internally handle converting a playlist url to a tuple with playlist name, playlist description, and list of track_ids ["track_id"...]"""
+    async def _resolve_playlist(self, playlist_id) -> tuple[str | None, str | None, list[str]]:
+        """Internally handle converting a YouTube playlist id to a tuple with playlist name, playlist description, and list of track_ids ["track_id"...]"""
         search_url = f"https://www.youtube.com/playlist?list={playlist_id}"
 
         async with httpx.AsyncClient(headers=self._headers, timeout=self._timeout) as client:
@@ -77,25 +77,25 @@ class YouTubeAdapter:
     async def expand_jobs(self, parsed_url: str) -> tuple[list[DownloadJob], CreatePlaylistPayload | None]:
         """Given a parsed url, attempt to return a list of DownloadJobs, either a single track in a list or a playlist."""
         link_type, extracted_id = self.extract_id(parsed_url)
+
+        if not extracted_id:
+            return [], None
+        
         if link_type == "track":
-            if extracted_id is not None:
-                return [
-                    DownloadJob(
-                        track_id=extracted_id,
-                        priority=True,
-                    )
-                ], None
-        elif link_type == "playlist":
-            name, description, track_ids = await self._resolve_playlist_to_track_ids(extracted_id)
-            return [
-                DownloadJob(
-                    track_id=t,
-                    priority=False,
-                    playlist_ids=[extracted_id], #include into this playlist on creation
-                ) for t in track_ids
-            ], CreatePlaylistPayload(
+            job = DownloadJob(track_id=extracted_id, priority=True)
+            return [job], None
+        
+        if link_type == "playlist":
+            name, description, track_ids = await self._resolve_playlist(extracted_id)
+
+            jobs = [
+                DownloadJob(track_id=t, priority=False, playlist_ids=[extracted_id])
+                for t in track_ids
+            ]
+            payload = CreatePlaylistPayload(
                 playlist_id=extracted_id,
                 name=name,
                 description=description,
             )
+            return jobs, payload
         return [], None

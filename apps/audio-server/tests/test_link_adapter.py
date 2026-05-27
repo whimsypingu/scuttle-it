@@ -50,8 +50,6 @@ async def test_youtube_adapter_expand_jobs(la: LinkAdapter):
     assert p2.playlist_id == "PLbpi6ZahtOH75Gj-P-YZYV6hSY5SHQKeV"
     assert p2.name is not None
 
-    print(p2.name, p2.description)
-
 
 def test_spotify_adapter_extract_track_id(la: LinkAdapter):
     url = "https://open.spotify.com/track/4PTG3Z6ehGkBFwjybzWkR8" #rickroll
@@ -77,3 +75,7 @@ async def test_spotify_adapter_expand_jobs(la: LinkAdapter):
     for job in j2:
         assert job.query is not None # each track becomes a valid query
         assert job.priority is False # each track gets pushed to the back of the play queue
+        assert job.playlist_ids[0] == "37i9dQZEVXbMDoHDwVN2tF"
+    assert p2 is not None
+    assert p2.playlist_id == "37i9dQZEVXbMDoHDwVN2tF"
+    assert p2.name is not None

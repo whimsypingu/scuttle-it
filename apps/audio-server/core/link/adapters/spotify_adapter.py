@@ -42,7 +42,7 @@ class SpotifyAdapter:
         return link_type, potential_id
 
 
-    async def _resolve_track_to_query(self, id) -> str | None:
+    async def _resolve_track(self, id) -> str | None:
         """Internally handle converting a track url to a query "track - artists" like this"""
         embed_url = f"https://open.spotify.com/embed/track/{id}"
 
@@ -60,44 +60,60 @@ class SpotifyAdapter:
         return None
         
 
-    async def _resolve_playlist_to_queries(self, id) -> list[str]:
+    async def _resolve_playlist(self, id) -> tuple[str | None, str | None, list[str]]:
         """Internally handle converting a playlist url to a list of queries ["track - artists"...]"""
         embed_url = f"https://open.spotify.com/embed/playlist/{id}"
         
         async with httpx.AsyncClient(headers=self._headers, timeout=self._timeout) as client:
             try:
                 response = await client.get(embed_url)
-                #print(response.text)
+
+                with open("spotify_dump.html", "w", encoding="utf-8") as f:
+                    f.write(response.text)
+
                 m = self._playlist_pattern.findall(response.text)
 
                 queries = []
-                for title, artist in m:
-                    queries.append(self._clean(f"{title.strip()} - {artist.strip()}"))
+                for i, (title, artist) in enumerate(m):
+                    if i == 0:
+                        name = self._clean(title.strip())
+                        description = self._clean(artist.strip()) #spotify embed links don't contain the actual description, so we will just use the user instead
+                    else:
+                        queries.append(self._clean(f"{title.strip()} - {artist.strip()}"))
 
-                return queries[1:] #ignore the playlist title and author
+                return name, description, queries
             except Exception as e:
                 logger.error(f"Failed to resolve playlist metadata from Spotify: {e}")
-        return []
+        return None, None, []
 
 
     async def expand_jobs(self, parsed_url: str) -> tuple[list[DownloadJob], CreatePlaylistPayload | None]:
         """Given a parsed url, attempt to return a list of DownloadJobs, either a single track in a list or a playlist."""
         link_type, extracted_id = self.extract_id(parsed_url)
+
+        if not extracted_id:
+            return [], None
+        
         if link_type == "track":
-            query = await self._resolve_track_to_query(extracted_id)
-            if query is not None:
-                return [
-                    DownloadJob(
-                        query=query,
-                        priority=True,
-                    )
-                ], None
-        elif link_type == "playlist":
-            queries = await self._resolve_playlist_to_queries(extracted_id)
-            return [
-                DownloadJob(
-                    query=query,
-                    priority=False,
-                ) for query in queries
-            ], None
+            query = await self._resolve_track(extracted_id)
+            
+            if not query:
+                return [], None
+            
+            job = DownloadJob(query=query, priority=True)
+            return [job], None
+
+        if link_type == "playlist":
+            name, description, queries = await self._resolve_playlist(extracted_id)
+
+            jobs = [
+                DownloadJob(query=q, priority=False, playlist_ids=[extracted_id])
+                for q in queries
+            ]
+            payload = CreatePlaylistPayload(
+                playlist_id=extracted_id,
+                name=name,
+                description=description,
+            )
+            return jobs, payload
         return [], None
