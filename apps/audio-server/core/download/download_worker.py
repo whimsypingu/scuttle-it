@@ -61,11 +61,11 @@ class DownloadWorker:
                 if job.query:
 
                     #try extracting and parsing any possible links
-                    generated_jobs, generated_playlist_payload = await self.link_adapter.expand_jobs(url=job.query)
+                    generated_jobs, generated_payload = await self.link_adapter.expand_jobs(url=job.query)
 
-                    if len(generated_jobs) >= 1 or generated_playlist_payload is not None:
-                        if generated_playlist_payload is not None:
-                            await self.db_manager.create_playlist(generated_playlist_payload)
+                    if generated_jobs or generated_payload is not None:
+                        if generated_payload is not None:
+                            await self.db_manager.create_playlist(generated_payload)
 
                         for j in generated_jobs:
                             await self.dl_queue.add(j)
