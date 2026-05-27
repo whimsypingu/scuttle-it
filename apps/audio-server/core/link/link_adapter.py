@@ -45,17 +45,17 @@ class LinkAdapter():
         
     
     #public methods are safe and sort of compact this way    
-    def extract_id(self, url: str) -> str | None:
-        """Extract an id with the optimal adapter."""
+    def extract_id(self, url: str) -> tuple[str | None, str | None]:
+        """Extract an id with the optimal adapter. Returns link_type as a string of 'playlist' or 'track', and extracted_id."""
         adapter, parsed_url = self._get_adapter(url)
 
         if adapter and hasattr(adapter, "extract_id"):
             return adapter.extract_id(parsed_url)
-        return None
+        return None, None
     
     
     #attempt internal conversion to the right kind of adapter and convert into a list of download jobs
-    def expand_jobs(self, url: str) -> list[DownloadJob]:
+    async def expand_jobs(self, url: str) -> list[DownloadJob]:
         """
         Given a url, attempt to parse it with the optimal adapter and extract a list of DownloadJobs.
         A single track will be returned as a single DownloadJob in a list.
@@ -64,23 +64,10 @@ class LinkAdapter():
         adapter, parsed_url = self._get_adapter(url)
 
         if adapter and hasattr(adapter, "expand_jobs"):
-            return adapter.expand_jobs(parsed_url)
+            return await adapter.expand_jobs(parsed_url)
         return []
 
 
-
-
-
-    async def resolve_metadata(self, url: str) -> str | None:
-        """Extract an id with the optimal adapter."""
-        adapter, parsed_url = self._get_adapter(url)
-
-        if adapter and hasattr(adapter, "resolve_metadata"):
-            metadata = await adapter._resolve_track(parsed_url)
-            print(metadata)
-            return metadata
-        return None
-    
 
     
 
@@ -122,7 +109,12 @@ async def main():
         print(f"Result: {extracted_id}")
 
     print("\n--- Test Extractions ---")
-    await adapter.resolve_metadata("https://open.spotify.com/track/4PTG3Z6ehGkBFwjybzWkR8")
+    x = await adapter.expand_jobs("https://open.spotify.com/playlist/5LpUUXIye736UctijlMQhD?si=4GtPCjMHTv2XG4TK7TiU2Q&pi=yFablJOMSfG-X") #https://open.spotify.com/playlist/34PPB1b1g8u3kERa58R55D")
+    for d in x:
+        print(d)
+
+    y = await adapter.expand_jobs("https://open.spotify.com/track/4PTG3Z6ehGkBFwjybzWkR8")
+    print(y)
 if __name__ == "__main__":
     # asyncio.run handles opening the event loop, executing main(), and closing it out
     asyncio.run(main())
