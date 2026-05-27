@@ -1,11 +1,12 @@
 import json
 import logging
 import re
-from core.link.exceptions import PlaylistResolutionError, TrackResolutionError
-from core.models.payloads import CreatePlaylistPayload
 import httpx
 
 from core.models.jobs import DownloadJob
+from core.models.payloads import CreatePlaylistPayload
+
+from core.link.exceptions import PlaylistResolutionError, TrackResolutionError
 
 logger = logging.getLogger(__name__)
 
@@ -88,8 +89,9 @@ class SpotifyAdapter:
             try:
                 response = await client.get(embed_url)
 
-                with open("spotify_dump.html", "w", encoding="utf-8") as f:
-                    f.write(response.text)
+                # === DEBUGGING ===
+                # with open("spotify_dump.html", "w", encoding="utf-8") as f:
+                #     f.write(response.text)
 
                 m = self._playlist_pattern.findall(response.text)
 

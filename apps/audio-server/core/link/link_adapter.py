@@ -74,9 +74,6 @@ class LinkAdapter():
                 - CreatePlaylistPayload | None: The structural metadata payload required 
                   to initialize the playlist in the database, or None if the incoming URL
                   was a single track or resolution failed.
-
-        Raises:
-            # specific exceptions adapters bubbles up here, if applicable.
         """
         adapter, parsed_url = self._get_adapter(url)
 

@@ -1,12 +1,12 @@
-import json
 import logging
 import re
-from core.link.exceptions import PlaylistResolutionError
-from core.models.payloads import CreatePlaylistPayload
 import httpx
 from urllib.parse import parse_qs
 
 from core.models.jobs import DownloadJob
+from core.models.payloads import CreatePlaylistPayload
+
+from core.link.exceptions import PlaylistResolutionError
 
 logger = logging.getLogger(__name__)
 
@@ -79,9 +79,11 @@ class YouTubeAdapter:
             try:
                 response = await client.get(search_url)
 
-                yt_initial_data = json.loads(re.search(r'ytInitialData\s*=\s*({.*?});\s*</script>', response.text).group(1))
-                with open("yt_initial_data.json", "w", encoding="utf-8") as f:
-                    json.dump(yt_initial_data, f, indent=2, ensure_ascii=False)
+                # === DEBUGGING ===
+                # import json
+                # yt_initial_data = json.loads(re.search(r'ytInitialData\s*=\s*({.*?});\s*</script>', response.text).group(1))
+                # with open("yt_initial_data.json", "w", encoding="utf-8") as f:
+                #     json.dump(yt_initial_data, f, indent=2, ensure_ascii=False)
 
                 m = self._playlist_name_desc_pattern.search(response.text) #searches for "title":"XX","description":"XX" as regex
                 name, description = m.groups()
