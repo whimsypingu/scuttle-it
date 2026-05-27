@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 from core.models.payloads import CreatePlaylistPayload
@@ -20,7 +21,9 @@ class YouTubeAdapter:
 
         self._track_id_pattern = re.compile(r'^[a-zA-Z0-9_-]{11}$') #https://dev.to/muhammadsaim/discover-the-magic-behind-youtubes-unique-video-ids-21ll
         self._playlist_id_pattern = re.compile(r'^[a-zA-Z0-9_-]{16,50}$') #google gemini lied about it being alphanumeric between 16-34 chars, couldnt find a source so this is a minor safety check
-        self._playlist_pattern = re.compile(r'"videoId"\s*:\s*"([a-zA-Z0-9-_]{11})"') #all youtube links are hidden in this regex, there may be duplicates
+
+        self._playlist_name_desc_pattern = re.compile(r'"title"\s*:\s*"([^"]+)"\s*,\s*"description"\s*:\s*"([^"]*)"')
+        self._playlist_video_id_pattern = re.compile(r'"videoId"\s*:\s*"([a-zA-Z0-9-_]{11})"') #all youtube links are hidden in this regex, there may be duplicates
 
 
     def extract_id(self, parsed_url: str) -> tuple[str | None, str | None]:
@@ -47,18 +50,28 @@ class YouTubeAdapter:
         return None, None
     
 
-    async def _resolve_playlist_to_track_ids(self, id) -> list[str]:
-        """Internally handle converting a playlist url to a list of track_ids ["track_id"...]"""
-        search_url = f"https://www.youtube.com/playlist?list={id}"
+    async def _resolve_playlist_to_track_ids(self, playlist_id) -> tuple[str | None, str | None, list[str]]:
+        """Internally handle converting a playlist url to a tuple with playlist name, playlist description, and list of track_ids ["track_id"...]"""
+        search_url = f"https://www.youtube.com/playlist?list={playlist_id}"
 
         async with httpx.AsyncClient(headers=self._headers, timeout=self._timeout) as client:
             try:
                 response = await client.get(search_url)
-                m = self._playlist_pattern.findall(response.text) #searches for "videoId":"XX" as regex
-                return list(dict.fromkeys(m))
+
+                yt_initial_data = json.loads(re.search(r'ytInitialData\s*=\s*({.*?});\s*</script>', response.text).group(1))
+                with open("yt_initial_data.json", "w", encoding="utf-8") as f:
+                    json.dump(yt_initial_data, f, indent=2, ensure_ascii=False)
+
+                m = self._playlist_name_desc_pattern.search(response.text) #searches for "title":"XX","description":"XX" as regex
+                name, description = m.groups()
+
+                m = self._playlist_video_id_pattern.findall(response.text) #searches for "videoId":"XX" as regex
+                track_ids = list(dict.fromkeys(m))
+
+                return name, description, track_ids
             except Exception as e:
                 logger.error(f"Failed to playlist track metadata from YouTube: {e}")
-        return []
+        return None, None, []
 
 
     async def expand_jobs(self, parsed_url: str) -> tuple[list[DownloadJob], CreatePlaylistPayload | None]:
@@ -73,11 +86,16 @@ class YouTubeAdapter:
                     )
                 ], None
         elif link_type == "playlist":
-            track_ids = await self._resolve_playlist_to_track_ids(extracted_id)
+            name, description, track_ids = await self._resolve_playlist_to_track_ids(extracted_id)
             return [
                 DownloadJob(
                     track_id=t,
                     priority=False,
+                    playlist_ids=[extracted_id], #include into this playlist on creation
                 ) for t in track_ids
-            ], None
+            ], CreatePlaylistPayload(
+                playlist_id=extracted_id,
+                name=name,
+                description=description,
+            )
         return [], None
