@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 from core.link.adapters.spotify_adapter import SpotifyAdapter
 from core.link.adapters.youtube_adapter import YouTubeAdapter
 from core.models.jobs import DownloadJob
+from core.models.payloads import CreatePlaylistPayload
 
 logger = logging.getLogger(__name__)
 
@@ -55,15 +56,16 @@ class LinkAdapter():
     
     
     #attempt internal conversion to the right kind of adapter and convert into a list of download jobs
-    async def expand_jobs(self, url: str) -> list[DownloadJob]:
+    async def expand_jobs(self, url: str) -> tuple[list[DownloadJob], CreatePlaylistPayload | None]:
         """
         Given a url, attempt to parse it with the optimal adapter and extract a list of DownloadJobs.
         A single track will be returned as a single DownloadJob in a list.
         Failure to find a result will return an empty list.
+        Includes an optional CreatePlaylistPayload field or None if a playlist was expanded.
         """
         adapter, parsed_url = self._get_adapter(url)
 
         if adapter and hasattr(adapter, "expand_jobs"):
             return await adapter.expand_jobs(parsed_url)
-        return []
+        return [], None
 

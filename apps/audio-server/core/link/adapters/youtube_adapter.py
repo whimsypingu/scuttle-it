@@ -1,5 +1,6 @@
 import logging
 import re
+from core.models.payloads import CreatePlaylistPayload
 import httpx
 from urllib.parse import parse_qs
 
@@ -60,7 +61,7 @@ class YouTubeAdapter:
         return []
 
 
-    async def expand_jobs(self, parsed_url: str) -> list[DownloadJob]:
+    async def expand_jobs(self, parsed_url: str) -> tuple[list[DownloadJob], CreatePlaylistPayload | None]:
         """Given a parsed url, attempt to return a list of DownloadJobs, either a single track in a list or a playlist."""
         link_type, extracted_id = self.extract_id(parsed_url)
         if link_type == "track":
@@ -70,7 +71,7 @@ class YouTubeAdapter:
                         track_id=extracted_id,
                         priority=True,
                     )
-                ]
+                ], None
         elif link_type == "playlist":
             track_ids = await self._resolve_playlist_to_track_ids(extracted_id)
             return [
@@ -78,5 +79,5 @@ class YouTubeAdapter:
                     track_id=t,
                     priority=False,
                 ) for t in track_ids
-            ]
-        return []
+            ], None
+        return [], None

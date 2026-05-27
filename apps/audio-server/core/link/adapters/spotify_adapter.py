@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+from core.models.payloads import CreatePlaylistPayload
 import httpx
 
 from core.models.jobs import DownloadJob
@@ -79,7 +80,7 @@ class SpotifyAdapter:
         return []
 
 
-    async def expand_jobs(self, parsed_url: str) -> list[DownloadJob]:
+    async def expand_jobs(self, parsed_url: str) -> tuple[list[DownloadJob], CreatePlaylistPayload | None]:
         """Given a parsed url, attempt to return a list of DownloadJobs, either a single track in a list or a playlist."""
         link_type, extracted_id = self.extract_id(parsed_url)
         if link_type == "track":
@@ -90,7 +91,7 @@ class SpotifyAdapter:
                         query=query,
                         priority=True,
                     )
-                ]
+                ], None
         elif link_type == "playlist":
             queries = await self._resolve_playlist_to_queries(extracted_id)
             return [
@@ -98,5 +99,5 @@ class SpotifyAdapter:
                     query=query,
                     priority=False,
                 ) for query in queries
-            ]
-        return []
+            ], None
+        return [], None
