@@ -48,22 +48,15 @@ class YouTubeAdapter:
 
     async def _resolve_playlist_to_track_ids(self, id) -> list[str] | None:
         """Internally handle converting a playlist url to a list of queries [(track - artists)...]"""
-        search_url = f"https://youtube.com/playlist?list={id}"
-        
+        search_url = f"https://www.youtube.com/playlist?list={id}"
+
         async with httpx.AsyncClient(headers=self._headers, timeout=self._timeout) as client:
             try:
                 response = await client.get(search_url)
 
-                with open("youtube_dump.html", "w", encoding="utf-8") as f:
-                    f.write(response.text)
-                print("!!! DUMPED HTML TO FILE SUCCESSFULLY !!!")
-
                 m = self._playlist_pattern.findall(response.text)
 
-                track_ids = []
-                for t in m:
-                    track_ids.append(t)
-                return track_ids
+                return list(dict.fromkeys(m))
             except Exception as e:
                 logger.error(f"Failed to playlist track metadata from YouTube: {e}")
         return None
