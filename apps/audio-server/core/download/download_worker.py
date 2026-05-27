@@ -61,7 +61,7 @@ class DownloadWorker:
                 if job.query:
 
                     #try extracting and parsing any possible links
-                    generated_jobs = self.link_adapter.expand_jobs(url=job.query)
+                    generated_jobs = await self.link_adapter.expand_jobs(url=job.query)
                     if len(generated_jobs):
                         for j in generated_jobs:
                             await self.dl_queue.add(j)

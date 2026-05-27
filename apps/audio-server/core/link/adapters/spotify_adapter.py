@@ -42,6 +42,7 @@ class SpotifyAdapter:
 
 
     async def _resolve_track_to_query(self, id) -> str | None:
+        """Internally handle converting a track url to a query (track - artists)"""
         embed_url = f"https://open.spotify.com/embed/track/{id}"
 
         async with httpx.AsyncClient(headers=self._headers, timeout=self._timeout) as client:
@@ -59,6 +60,7 @@ class SpotifyAdapter:
         
 
     async def _resolve_playlist_to_queries(self, id) -> list[str] | None:
+        """Internally handle converting a playlist url to a list of queries [(track - artists)...]"""
         embed_url = f"https://open.spotify.com/embed/playlist/{id}"
         
         async with httpx.AsyncClient(headers=self._headers, timeout=self._timeout) as client:
@@ -71,64 +73,10 @@ class SpotifyAdapter:
                 for title, artist in m:
                     queries.append(self._clean(f"{title.strip()} - {artist.strip()}"))
 
-                return queries
+                return queries[1:] #ignore the playlist title and author
             except Exception as e:
                 logger.error(f"Failed to resolve track metadata from Spotify: {e}")
         return None
-
-
-
-
-
-    async def resolve_metadata(self, parsed_url) -> dict | None:
-        track_id = self.extract_id(parsed_url)
-        if not track_id:
-            logger.warning(f"Could not extract a valid Spotify ID from path: {parsed_url.path}")
-            return None
-
-        # Hit the unauthenticated endpoint that handles standard web embedding queries
-        oembed_url = f"https://open.spotify.com/oembed?url=spotify:track:{track_id}"
-        oembed_url = f"https://open.spotify.com/embed/track/{track_id}"
-
-        async with httpx.AsyncClient(headers=self._headers, timeout=5.0) as client:
-            try:
-                response = await client.get(oembed_url)
-                if response.status_code == 200:
-                    print("\n=== PRETTY PRINTED HTML RESPONSE ===")
-                    m = self._title_artist_pattern.search(response.text)
-                    if m:
-                        track_title = m.group(1)
-                        raw_artists_json = m.group(2)
-
-                        print(track_title, raw_artists_json)
-
-                        try:
-                            artists_data = json.loads(raw_artists_json)
-                            artist_names = ", ".join([artist.get("name") for artist in artists_data])
-                        except json.JSONDecodeError:
-                            logger.error("Extracted artists string wasn't perfectly clean JSON.")
-
-                    print("=====================================\n")
-                    return None
-                                    
-                if response.status_code != 200:
-                    logger.warning(f"Spotify oEmbed API returned status {response.status_code} for ID: {track_id}")
-                    return None
-                
-                data = response.json()
-                print(data)
-                
-                #formulate a clean dict payload matching what Scuttle's download pipeline expects
-                return {
-                    "id": track_id,
-                    "title": data.get("title"),
-                    "artist": data.get("author_name"),  # Spotify maps primary artists to 'author_name'
-                    "search_query": f"{data.get('author_name')} - {data.get('title')}"
-                }
-
-            except httpx.HTTPError as e:
-                logger.error(f"Network error while fetching Spotify metadata for {track_id}: {str(e)}")
-                return None
 
 
     async def expand_jobs(self, parsed_url: str) -> list[DownloadJob]:

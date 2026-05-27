@@ -111,10 +111,14 @@ async def main():
     print("\n--- Test Extractions ---")
     x = await adapter.expand_jobs("https://open.spotify.com/playlist/5LpUUXIye736UctijlMQhD?si=4GtPCjMHTv2XG4TK7TiU2Q&pi=yFablJOMSfG-X") #https://open.spotify.com/playlist/34PPB1b1g8u3kERa58R55D")
     for d in x:
-        print(d)
+        print(d.query)
 
     y = await adapter.expand_jobs("https://open.spotify.com/track/4PTG3Z6ehGkBFwjybzWkR8")
     print(y)
+
+    z = await adapter.expand_jobs("https://open.spotify.com/playlist/3yRLE5WjV0oVQqD9DIb9TH?si=ezaEI42kRzylmgrQJCIDmA&pi=1hW3HqgjQZiL-")
+    for d in z:
+        print("a", d.query)
 if __name__ == "__main__":
     # asyncio.run handles opening the event loop, executing main(), and closing it out
     asyncio.run(main())

@@ -30,12 +30,13 @@ class YouTubeAdapter:
 
     def expand_jobs(self, parsed_url: str) -> list[DownloadJob]:
         """Given a parsed url, attempt to return a list of DownloadJobs, either a single track in a list or a playlist."""
-        extracted_id = self.extract_id(parsed_url)
-        if extracted_id is not None:
-            return [
-                DownloadJob(
-                    track_id=extracted_id,
-                    priority=True,
-                )
-            ]
+        link_type, extracted_id = self.extract_id(parsed_url)
+        if link_type == "track":
+            if extracted_id is not None:
+                return [
+                    DownloadJob(
+                        track_id=extracted_id,
+                        priority=True,
+                    )
+                ]
         return []
