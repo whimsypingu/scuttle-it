@@ -46,7 +46,7 @@ class YouTubeAdapter:
         return None, None
     
 
-    async def _resolve_playlist_to_track_ids(self, id) -> list[str] | None:
+    async def _resolve_playlist_to_track_ids(self, id) -> list[str]:
         """Internally handle converting a playlist url to a list of track_ids ["track_id"...]"""
         search_url = f"https://www.youtube.com/playlist?list={id}"
 
@@ -54,10 +54,10 @@ class YouTubeAdapter:
             try:
                 response = await client.get(search_url)
                 m = self._playlist_pattern.findall(response.text) #searches for "videoId":"XX" as regex
-                return list(dict.fromkeys(m)) #might return empty list [] but this is handled later, clean this up in the future if it becomes a problem
+                return list(dict.fromkeys(m))
             except Exception as e:
                 logger.error(f"Failed to playlist track metadata from YouTube: {e}")
-        return None
+        return []
 
 
     async def expand_jobs(self, parsed_url: str) -> list[DownloadJob]:
@@ -73,11 +73,10 @@ class YouTubeAdapter:
                 ]
         elif link_type == "playlist":
             track_ids = await self._resolve_playlist_to_track_ids(extracted_id)
-            if track_ids is not None:
-                return [
-                    DownloadJob(
-                        track_id=t,
-                        priority=False,
-                    ) for t in track_ids
-                ]
+            return [
+                DownloadJob(
+                    track_id=t,
+                    priority=False,
+                ) for t in track_ids
+            ]
         return []

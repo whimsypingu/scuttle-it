@@ -62,7 +62,8 @@ class DownloadWorker:
 
                     #try extracting and parsing any possible links
                     generated_jobs = await self.link_adapter.expand_jobs(url=job.query)
-                    if len(generated_jobs):
+                    if len(generated_jobs) >= 1:
+                        #await self.db_manager.create_playlist
                         for j in generated_jobs:
                             await self.dl_queue.add(j)
                         raise DownloadWorkerJobExpanded() #exit job handling here with a successful custom exception

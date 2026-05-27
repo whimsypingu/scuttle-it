@@ -59,7 +59,7 @@ class SpotifyAdapter:
         return None
         
 
-    async def _resolve_playlist_to_queries(self, id) -> list[str] | None:
+    async def _resolve_playlist_to_queries(self, id) -> list[str]:
         """Internally handle converting a playlist url to a list of queries ["track - artists"...]"""
         embed_url = f"https://open.spotify.com/embed/playlist/{id}"
         
@@ -76,7 +76,7 @@ class SpotifyAdapter:
                 return queries[1:] #ignore the playlist title and author
             except Exception as e:
                 logger.error(f"Failed to resolve playlist metadata from Spotify: {e}")
-        return None
+        return []
 
 
     async def expand_jobs(self, parsed_url: str) -> list[DownloadJob]:
@@ -93,11 +93,10 @@ class SpotifyAdapter:
                 ]
         elif link_type == "playlist":
             queries = await self._resolve_playlist_to_queries(extracted_id)
-            if queries is not None:
-                return [
-                    DownloadJob(
-                        query=query,
-                        priority=False,
-                    ) for query in queries
-                ]
+            return [
+                DownloadJob(
+                    query=query,
+                    priority=False,
+                ) for query in queries
+            ]
         return []
