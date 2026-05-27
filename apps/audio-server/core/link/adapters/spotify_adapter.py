@@ -75,7 +75,7 @@ class SpotifyAdapter:
 
                 return queries[1:] #ignore the playlist title and author
             except Exception as e:
-                logger.error(f"Failed to resolve track metadata from Spotify: {e}")
+                logger.error(f"Failed to resolve playlist metadata from Spotify: {e}")
         return None
 
 

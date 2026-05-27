@@ -3,14 +3,23 @@ import re
 from urllib.parse import parse_qs
 
 from core.models.jobs import DownloadJob
+import httpx
 
 logger = logging.getLogger(__name__)
 
 
 class YouTubeAdapter:
     def __init__(self):
+        self._headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+        }
+        self._timeout = 15.0
+
         self._track_id_pattern = re.compile(r'^[a-zA-Z0-9_-]{11}$') #https://dev.to/muhammadsaim/discover-the-magic-behind-youtubes-unique-video-ids-21ll
         self._playlist_id_pattern = re.compile(r'^[a-zA-Z0-9_-]{16,50}$') #google gemini lied about it being alphanumeric between 16-34 chars, couldnt find a source so this is a minor safety check
+        self._playlist_pattern = re.compile(r'"videoId"\s*:\s*"([a-zA-Z0-9-_]{11})"')
 
 
     def extract_id(self, parsed_url: str) -> tuple[str | None, str | None]:
@@ -37,6 +46,29 @@ class YouTubeAdapter:
         return None, None
     
 
+    async def _resolve_playlist_to_track_ids(self, id) -> list[str] | None:
+        """Internally handle converting a playlist url to a list of queries [(track - artists)...]"""
+        search_url = f"https://youtube.com/playlist?list={id}"
+        
+        async with httpx.AsyncClient(headers=self._headers, timeout=self._timeout) as client:
+            try:
+                response = await client.get(search_url)
+
+                with open("youtube_dump.html", "w", encoding="utf-8") as f:
+                    f.write(response.text)
+                print("!!! DUMPED HTML TO FILE SUCCESSFULLY !!!")
+
+                m = self._playlist_pattern.findall(response.text)
+
+                track_ids = []
+                for t in m:
+                    track_ids.append(t)
+                return track_ids
+            except Exception as e:
+                logger.error(f"Failed to playlist track metadata from YouTube: {e}")
+        return None
+
+
     async def expand_jobs(self, parsed_url: str) -> list[DownloadJob]:
         """Given a parsed url, attempt to return a list of DownloadJobs, either a single track in a list or a playlist."""
         link_type, extracted_id = self.extract_id(parsed_url)
@@ -48,6 +80,15 @@ class YouTubeAdapter:
                         priority=True,
                     )
                 ]
-        #elif link_type == "playlist":
+        elif link_type == "playlist":
+            track_ids = await self._resolve_playlist_to_track_ids(extracted_id)
+            if track_ids is not None:
+                return [
+                    DownloadJob(
+                        track_id=t,
+                        priority=False,
+                    ) for t in track_ids
+                ]
+
 
         return []

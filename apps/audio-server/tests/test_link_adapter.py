@@ -38,6 +38,13 @@ async def test_youtube_adapter_expand_jobs(la: LinkAdapter):
         assert job.track_id == "dQw4w9WgXcQ"
         assert job.priority is True
 
+    u2 = "https://www.youtube.com/playlist?list=PLbpi6ZahtOH75Gj-P-YZYV6hSY5SHQKeV"
+    j2 = await la.expand_jobs(u2)
+    assert len(j2) == 20
+    for job in j2:
+        assert job.track_id is not None
+        assert job.priority is False
+
 
 
 
