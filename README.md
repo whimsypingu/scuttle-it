@@ -3,10 +3,6 @@
 
 Scuttle is an audio archival tool for managing and playing your personal audio collection. Self-host your audio library from your laptop and stream to any device with a browser.
 
-* Search and download audio
-* Play, pause, and skip tracks
-* Create and manage playlists
-
 ---
 
 <table>
@@ -26,15 +22,42 @@ Scuttle is an audio archival tool for managing and playing your personal audio c
 
 ---
 
-## Features
-* **Completely free:** The only cost is electricity for self-hosting, and the resources for your computer to handle serving audio files.
-* **Safe downloading:** Downloading is currently based on [yt-dlp](https://github.com/yt-dlp/yt-dlp).
-* **Integrated orchestration:** A native desktop launcher handles the lifecycle of your server, including accessibility via a Discord webhook, and manages uptime of a Cloudflared tunnel to ensure maximum availability. On setup, installs all required software prerequisites and maintains updates of frequently updating critical packages.
-* **Better queue functionality:** Swipe to queue a song to the front or the back of the queue, and swipe on playlists to play them directly.
+# Features
+
+### Completely free
+The only cost is electricity for self-hosting, and the resources for your computer to handle serving audio files.
+
+### Safe downloading
+Downloading is currently based on [yt-dlp](https://github.com/yt-dlp/yt-dlp). Scuttle uses the nightly version and automatically performs self-healing updates to the most recently available version on download failures.
+
+### Audio quality and compatibilty
+* Audio files have a target of `192kbps` in `m4a` format for maximum device compatibility, and the web client streams audio even with mobile device screens powered off on iOS devices. 
+(For reference, about 3:30 of audio is around 5MB at this quality).
+* Leading and trailing silence is stripped for the purpose of minimizing file size and listening consistency.
+* To eliminate volume disparity audio loudness is explicitly calibrated to **-16 LUFS** which follows [AES recommendations](https://www.radioworld.com/tech-and-gear/tech-tips/streaming-audio-loudness-guidelines-explained) for internet audio tracking.
+
+### Integrated orchestration
+* A native desktop launcher handles the lifecycle of your server, including accessibility via a Discord webhook, and manages uptime of a Cloudflared tunnel to ensure maximum availability. **At the cost of being free, this could mean sudden rotations of user-accessible links to the web-client if the tunnel breaks.**
+* On setup, installs all required software prerequisites and maintains updates of frequently updating critical packages.
+
+### Better queue functionality
+* Swipe to queue a song to the front **or** the back of the queue.
+* Swipe on playlists (just like you would a track) to play them directly. 
+* Due to unavoidable download and processing time, first download/plays are immediately sent to the front of the queue when available and are **not** instantly streamable.
+
+### Import playlists
+Use native site share links to import playlists and tracks from other sources. Paste links directly into the search bar and press `Enter` to begin downloading playlists or tracks. Single track links are treated like regular searches and are pushed to the front of the play queue when available, while playlists are automatically pushed to the back of the queue as they populate for an ordered listening experience.
+
+Currently supported sites:
+* YouTube
+* Spotify
+
+### Listening stats
+Track your own statistics on listening time and monitor total audio storage usage as you expand your library.
 
 ---
 
-## Quick Start
+# Quick Start
 1. Go to **[Latest Releases](https://github.com/whimsypingu/scuttle-it/releases/latest)**.
 2. Download the bundle for your OS (currently only Windows is supported).
 3. Run the `scuttle` executable, and follow steps to initialize the environment and start the audio server.
