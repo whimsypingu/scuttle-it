@@ -77,7 +77,8 @@ export interface YTSearchMutationProps {
  */
 export type SortmodeProps = 
     | { sortmode: 0; desc: "Position descending" }
-    | { sortmode: 1; desc: "Date added descending" };
+    | { sortmode: 1; desc: "Date added descending" }
+    | { sortmode: 2; desc: "Shuffle" };
 export type Sortmode = SortmodeProps["sortmode"];
 
 export interface SortmodeConfig { //corresponding phosphor icon for each Sortmode

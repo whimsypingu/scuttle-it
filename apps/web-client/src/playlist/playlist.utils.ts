@@ -36,7 +36,10 @@ export const usePlaylistActionHandler = () => {
                 break;
 
             case "shufflePlay":
-                makeToast(props.action);
+                setPlaylist({
+                    playlist: props.playlist,
+                    sortmode: 2,
+                });
                 break;
 
             case "edit": //open a playlist editing popup
