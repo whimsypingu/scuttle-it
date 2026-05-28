@@ -3,10 +3,13 @@ import asyncio
 from pathlib import Path
 
 from config import settings
+
 from core.models.track import TrackBase
 from core.models.artist import ArtistBase
+
 from core.youtube.metadata_parser.parser import YouTubeParser
-from core.youtube.youtube_exceptions import YtdlpDownloadError, YtdlpMetadataError, YtdlpSearchError, YtdlpTimeoutError, YtdlpUpdateError
+
+from core.youtube.exceptions import YtdlpDownloadError, YtdlpMetadataError, YtdlpSearchError, YtdlpTimeoutError, YtdlpUpdateError
 
 logger = logging.getLogger(__name__)
 
@@ -306,4 +309,4 @@ class YouTubeClient():
         except Exception as e:
             logger.exception(f"Unexpected error during yt-dlp search: {e}")
             raise YtdlpSearchError() from e
-
+        

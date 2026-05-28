@@ -1,15 +1,21 @@
 import logging
 
-from core.audio.processor import AudioProcessor
 from core.audio.utils import delete_track_file
-from core.download.download_queue import DownloadQueue
+
 from core.models.payloads import EditArtistPayload, EditTrackPayload
+
+from core.download.download_queue import DownloadQueue
+from core.link.link_adapter import LinkAdapter
 from core.youtube.youtube_client import YouTubeClient
-from core.youtube.youtube_exceptions import YtdlpDownloadError, YtdlpTimeoutError
+from core.stats.stats_manager import StatsManager
+from core.audio.processor import AudioProcessor
 from database.database_manager import DatabaseManager
+
 from sync.pokes import WSPokeFactory
 from sync.websocket_manager import WebsocketManager
-from core.stats.stats_manager import StatsManager
+
+from core.download.exceptions import DownloadWorkerJobExpanded
+from core.youtube.exceptions import YtdlpDownloadError, YtdlpTimeoutError
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +29,8 @@ class DownloadWorker:
         yt_client: YouTubeClient,
         db_manager: DatabaseManager,
         ws_manager: WebsocketManager,
-        stats_manager: StatsManager
+        stats_manager: StatsManager,
+        link_adapter: LinkAdapter
     ):
         self.worker_id = worker_id
 
@@ -33,6 +40,7 @@ class DownloadWorker:
         self.db_manager = db_manager
         self.ws_manager = ws_manager
         self.stats_manager = stats_manager
+        self.link_adapter = link_adapter
 
         self.is_running = True
         self.current_job = None
@@ -54,6 +62,18 @@ class DownloadWorker:
 
                 #determine the id to download
                 if job.query:
+
+                    #try extracting and parsing any possible links
+                    generated_jobs, generated_payload = await self.link_adapter.expand_jobs(url=job.query)
+
+                    if generated_jobs or generated_payload is not None:
+                        if generated_payload is not None:
+                            await self.db_manager.create_playlist(generated_payload)
+
+                        for j in generated_jobs:
+                            await self.dl_queue.add(j)
+                        raise DownloadWorkerJobExpanded() #exit job handling here with a successful custom exception
+
                     search_results = await self.yt_client.search_by_query(q=job.query, limit=job.query_limit)
                     for search_result in search_results:
                         await self.db_manager.register_track(search_result)
@@ -100,11 +120,17 @@ class DownloadWorker:
                         duration=clean_duration,
                         artists=[EditArtistPayload(
                             name_display=artist.display
-                        ) for artist in download_result.artists]
+                        ) for artist in download_result.artists],
+                        playlist_ids=job.playlist_ids,
                     )
                 )
 
-                await self.db_manager.push_next_play_queue(download_result.id) #push to play queue immediately for now
+                #play queue modification
+                if job.to_queue:
+                    if job.priority:
+                        await self.db_manager.push_next_play_queue(download_result.id) #push to front of the play queue
+                    else:
+                        await self.db_manager.push_play_queue(download_result.id) #push to end of the play queue
 
                 await self.db_manager.build_search_index()
 
@@ -118,10 +144,17 @@ class DownloadWorker:
                 )
                 logger.info(f"[{self.worker_id}] Successfully finished {job.identifier}")
 
+            #playlist caught, expanded into new download jobs per song
+            except DownloadWorkerJobExpanded as e:
+                await self.dl_queue.complete_job(job.id, success=True)
+                await self.ws_manager.broadcast(
+                    WSPokeFactory.download_job_status_update(job)
+                )
+                logger.info(f"[{self.worker_id}] Successfully expanded jobs from {job.identifier}")
+
+            #fall through error
             except Exception as e:
-                #status
                 await self.dl_queue.complete_job(job.id, success=False)
-            
                 await self.ws_manager.broadcast(
                     WSPokeFactory.download_job_status_update(job)
                 )

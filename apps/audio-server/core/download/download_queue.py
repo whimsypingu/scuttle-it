@@ -1,7 +1,7 @@
 import asyncio
 import logging
-
 from collections import deque
+
 from core.models.jobs import DownloadJob, JobStatus
 
 logger = logging.getLogger(__name__)

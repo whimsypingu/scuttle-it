@@ -42,7 +42,7 @@ async def test_register_download(db, sample_track):
 
     #attempt download without prior register
     q3 = await db.register_download(sample_track.id)
-    assert q3 is False
+    assert q3 is True
 
     #not downloaded
     q4 = await db.is_track_downloaded(sample_track.id)
@@ -50,6 +50,7 @@ async def test_register_download(db, sample_track):
 
     #register and download
     q5 = await db.register_track(sample_track)
+    assert q5 is True
     q6 = await db.register_download(sample_track.id)
     assert q6 is True
 

@@ -32,6 +32,7 @@ from sync.websocket_manager import WebsocketManager
 from core.download.download_queue import DownloadQueue
 from core.download.download_worker import DownloadWorker
 from core.stats.stats_manager import StatsManager
+from core.link.link_adapter import LinkAdapter
 
 logging.basicConfig(
     level=logging.INFO,
@@ -58,6 +59,9 @@ async def lifespan(app: FastAPI):
     )
     app.state.stats_manager = stats_manager
 
+    link_adapter = LinkAdapter()
+    app.state.link_adapter = link_adapter
+
     #global
     dl_queue = DownloadQueue()
     app.state.dl_queue = dl_queue
@@ -74,7 +78,8 @@ async def lifespan(app: FastAPI):
             yt_client=YouTubeClient(),
             db_manager=db_manager,
             ws_manager=ws_manager,
-            stats_manager=stats_manager
+            stats_manager=stats_manager,
+            link_adapter=link_adapter,
         )
         workers.append(dl_worker)
 

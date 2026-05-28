@@ -16,8 +16,9 @@ export function handleWSPoke(poke: WSPoke): void {
             const updatedJob = payload as DownloadJob;
 
             if (updatedJob.status === "completed") {
-                queryClient.invalidateQueries({ queryKey: ["tracks"] });
-                queryClient.invalidateQueries({ queryKey: ["profile", "stats"]});
+                queryClient.invalidateQueries({ queryKey: ["tracks"] });            //all tracks
+                queryClient.invalidateQueries({ queryKey: ["profile", "stats"]});   //storage
+                queryClient.invalidateQueries({ queryKey: ["playlists"] });         //automatically created playlists
             }
             
             //update the cache to reflect the processing status of the job

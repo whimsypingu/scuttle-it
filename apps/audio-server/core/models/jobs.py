@@ -24,10 +24,12 @@ class JobBase(ScuttleBase):
 class DownloadJob(JobBase):
     track_id: str | None = None
     query: str | None = None
+    
+    query_limit: int = Field(default=3, ge=1, le=10)
+    
     to_queue: bool = True #do we put this in the queue after download
     priority: bool = False #is it important or not for queue priority, if to_queue is true
-
-    query_limit: int = Field(default=3, ge=1, le=10)
+    playlist_ids: list[str] | None = None #list of playlist IDs, if instantiating
 
     @model_validator(mode="after")
     def validate_constraints(self) -> "DownloadJob":
