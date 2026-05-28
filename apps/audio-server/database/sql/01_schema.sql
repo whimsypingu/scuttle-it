@@ -59,6 +59,14 @@ CREATE TABLE IF NOT EXISTS playlists (
     description TEXT
 );
 
+-- pinned playlists table
+CREATE TABLE IF NOT EXISTS pins (
+    playlist_internal_id INTEGER PRIMARY KEY,
+    position REAL NOT NULL UNIQUE,
+    pinned_at INTEGER DEFAULT (unixepoch()),
+    FOREIGN KEY (playlist_internal_id) REFERENCES playlists(internal_id) ON DELETE CASCADE
+);
+
 -- playlist and titles junction table
 CREATE TABLE IF NOT EXISTS playlist_tracks (
     playlist_internal_id INTEGER NOT NULL,

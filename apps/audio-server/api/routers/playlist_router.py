@@ -1,6 +1,6 @@
 import traceback
 
-from fastapi import APIRouter, Body, Depends, Path, HTTPException
+from fastapi import APIRouter, Body, Depends, Path, HTTPException, Query
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
 
@@ -78,3 +78,38 @@ async def get_playlists_endpoint(
         traceback.print_exc()
         raise DefaultCrashException
     
+
+@PlaylistRouter.post("/pin/set")
+async def set_pin(
+    playlist_id: str = Query(..., min_length=1, description="Playlist ID to set pin or unpin"),
+    pinned: bool = Query(...),
+    db_manager: DatabaseManager = Depends(get_db_manager)
+):
+    try:
+        #explicitly choose the action to have toggle behavior
+        if pinned:
+            success = await db_manager.pin(playlist_id)
+        else:
+            success = await db_manager.unpin(playlist_id)
+
+        return {
+            "success": success,
+        }
+    except Exception as e:
+        traceback.print_exc()
+        raise DefaultCrashException
+
+
+@PlaylistRouter.get("/pinned")
+async def get_pinned_playlists_endpoint(
+    db_manager: DatabaseManager = Depends(get_db_manager)
+):
+    try:
+        results = await db_manager.get_pinned_playlists()
+        return {
+            "success": True,
+            "playlists": results,
+        }
+    except Exception as e:
+        traceback.print_exc()
+        raise DefaultCrashException

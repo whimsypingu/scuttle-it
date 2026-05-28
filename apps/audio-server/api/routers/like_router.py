@@ -15,7 +15,7 @@ DefaultCrashException = HTTPException(
 
 @LikeRouter.post("/set")
 async def set_like(
-    track_id: str = Query(..., min_length=1, description="Track ID to set first"),
+    track_id: str = Query(..., min_length=1, description="Track ID to set like or unlike status"),
     liked: bool = Query(...),
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
