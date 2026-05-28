@@ -2,17 +2,20 @@ import logging
 
 from core.audio.utils import delete_track_file
 
-from core.download.download_exceptions import DownloadWorkerJobExpanded
+from core.models.payloads import EditArtistPayload, EditTrackPayload
+
 from core.download.download_queue import DownloadQueue
 from core.link.link_adapter import LinkAdapter
-from core.models.payloads import EditArtistPayload, EditTrackPayload
 from core.youtube.youtube_client import YouTubeClient
-from core.youtube.youtube_exceptions import YtdlpDownloadError, YtdlpTimeoutError
-from database.database_manager import DatabaseManager
-from sync.pokes import WSPokeFactory
-from sync.websocket_manager import WebsocketManager
 from core.stats.stats_manager import StatsManager
 from core.audio.processor import AudioProcessor
+from database.database_manager import DatabaseManager
+
+from sync.pokes import WSPokeFactory
+from sync.websocket_manager import WebsocketManager
+
+from core.download.exceptions import DownloadWorkerJobExpanded
+from core.youtube.exceptions import YtdlpDownloadError, YtdlpTimeoutError
 
 logger = logging.getLogger(__name__)
 
