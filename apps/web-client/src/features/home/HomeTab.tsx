@@ -73,34 +73,36 @@ export const HomeTab = ({
                         {/* CONTENT AREA */}
                         <div className="flex-1 overflow-y-auto no-scrollbar">
                             <div 
-                                className="flex flex-col" 
+                                className="flex flex-col gap-4" 
                                 style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
                             >
 
                                 {/* DEFAULT CONTENTS */}
                                 <div className="grid grid-cols-2 gap-4">
-                                    {HOME_CONTENTS.map((item, index) => (
-                                        <div 
-                                            key={index} 
-                                            className="bg-card aspect-square rounded-md shadow-lg p-4 flex flex-col cursor-pointer active:scale-95 transition-transform"
-                                            onClick={() => setSelectedHomeContent(item)}
-                                        >
-                                            {/* Use the mock color as a gradient or a solid block */}
+                                    {HOME_CONTENTS
+                                        .slice(0, 2)
+                                        .map((item, index) => (
                                             <div 
-                                                className="w-full h-3/4 rounded mb-2 transition-opacity hover:opacity-80" 
-                                                style={{ backgroundColor: item.color }}
-                                            />
-                                            <div className="flex flex-col overflow-hidden">
-                                                <h3 className="text-sm font-bold truncate text-zinc-100">{item.name}</h3>
-                                                <p className="text-[10px] text-zinc-400 line-clamp-1">{item.description}</p>
+                                                key={index} 
+                                                className="bg-card aspect-square rounded-md shadow-lg p-4 flex flex-col cursor-pointer active:scale-95 transition-transform"
+                                                onClick={() => setSelectedHomeContent(item)}
+                                            >
+                                                {/* Use the mock color as a gradient or a solid block */}
+                                                <div 
+                                                    className="w-full h-3/4 rounded mb-2 transition-opacity hover:opacity-80" 
+                                                    style={{ backgroundColor: item.color }}
+                                                />
+                                                <div className="flex flex-col overflow-hidden">
+                                                    <h3 className="text-sm font-bold truncate text-zinc-100">{item.name}</h3>
+                                                    <p className="text-[10px] text-zinc-400 line-clamp-1">{item.description}</p>
+                                                </div>
                                             </div>
-                                        </div>
                                     ))}
                                 </div>
 
                                 {true && (
                                     <div 
-                                        className="flex flex-col gap-1 my-4"
+                                        className="flex flex-col gap-1"
                                     >
                                         <PlaylistItem
                                             key={MOCK_PLAYLIST_SUMMARY.id}
@@ -109,6 +111,30 @@ export const HomeTab = ({
                                         />
                                     </div>
                                 )}
+
+                                {/* DEFAULT CONTENTS */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    {HOME_CONTENTS
+                                        .slice(2)
+                                        .map((item, index) => (
+                                            <div 
+                                                key={index} 
+                                                className="bg-card aspect-square rounded-md shadow-lg p-4 flex flex-col cursor-pointer active:scale-95 transition-transform"
+                                                onClick={() => setSelectedHomeContent(item)}
+                                            >
+                                                {/* Use the mock color as a gradient or a solid block */}
+                                                <div 
+                                                    className="w-full h-3/4 rounded mb-2 transition-opacity hover:opacity-80" 
+                                                    style={{ backgroundColor: item.color }}
+                                                />
+                                                <div className="flex flex-col overflow-hidden">
+                                                    <h3 className="text-sm font-bold truncate text-zinc-100">{item.name}</h3>
+                                                    <p className="text-[10px] text-zinc-400 line-clamp-1">{item.description}</p>
+                                                </div>
+                                            </div>
+                                    ))}
+                                </div>
+
                             </div>
                         </div>
                     </motion.div>
