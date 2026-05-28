@@ -6,6 +6,8 @@ import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 import { HOME_CONTENTS } from "@/features/home/home.constants";
 
 import type { HomeContent, HomeTabProps } from "@/features/home/home.types";
+import type { SummaryPlaylist } from "@/playlist/playlist.types";
+import { PlaylistItem } from "@/playlist/PlaylistItem";
 
 
 export const HomeTab = ({
@@ -71,26 +73,42 @@ export const HomeTab = ({
                         {/* CONTENT AREA */}
                         <div className="flex-1 overflow-y-auto no-scrollbar">
                             <div 
-                                className="grid grid-cols-2 gap-4"
+                                className="flex flex-col" 
                                 style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
                             >
-                                {HOME_CONTENTS.map((item, index) => (
-                                    <div 
-                                        key={index} 
-                                        className="bg-card aspect-square rounded-md shadow-lg p-4 flex flex-col cursor-pointer active:scale-95 transition-transform"
-                                        onClick={() => setSelectedHomeContent(item)}
-                                    >
-                                        {/* Use the mock color as a gradient or a solid block */}
+
+                                {/* DEFAULT CONTENTS */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    {HOME_CONTENTS.map((item, index) => (
                                         <div 
-                                            className="w-full h-3/4 rounded mb-2 transition-opacity hover:opacity-80" 
-                                            style={{ backgroundColor: item.color }}
-                                        />
-                                        <div className="flex flex-col overflow-hidden">
-                                            <h3 className="text-sm font-bold truncate text-zinc-100">{item.name}</h3>
-                                            <p className="text-[10px] text-zinc-400 line-clamp-1">{item.description}</p>
+                                            key={index} 
+                                            className="bg-card aspect-square rounded-md shadow-lg p-4 flex flex-col cursor-pointer active:scale-95 transition-transform"
+                                            onClick={() => setSelectedHomeContent(item)}
+                                        >
+                                            {/* Use the mock color as a gradient or a solid block */}
+                                            <div 
+                                                className="w-full h-3/4 rounded mb-2 transition-opacity hover:opacity-80" 
+                                                style={{ backgroundColor: item.color }}
+                                            />
+                                            <div className="flex flex-col overflow-hidden">
+                                                <h3 className="text-sm font-bold truncate text-zinc-100">{item.name}</h3>
+                                                <p className="text-[10px] text-zinc-400 line-clamp-1">{item.description}</p>
+                                            </div>
                                         </div>
+                                    ))}
+                                </div>
+
+                                {true && (
+                                    <div 
+                                        className="flex flex-col gap-1 my-4"
+                                    >
+                                        <PlaylistItem
+                                            key={MOCK_PLAYLIST_SUMMARY.id}
+                                            playlist={MOCK_PLAYLIST_SUMMARY}
+                                            onSelect={(p) => {}}
+                                        />
                                     </div>
-                                ))}
+                                )}
                             </div>
                         </div>
                     </motion.div>
@@ -105,3 +123,14 @@ export const HomeTab = ({
         </>
     );
 };
+
+
+
+
+const MOCK_PLAYLIST_SUMMARY: SummaryPlaylist = {
+    id: "hello-world",
+    name: "mock playlist",
+    totalCount: 20,
+    totalDuration: 3000,
+    description: "mocking a playlist",
+}
