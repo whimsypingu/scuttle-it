@@ -192,6 +192,7 @@ class PlayQueueMixin:
                 SORT_MAP = {
                     0: "position ASC",
                     1: "liked_at DESC",
+                    2: "RANDOM()",
                 }
                 query = f'''
                     SELECT
@@ -208,6 +209,7 @@ class PlayQueueMixin:
                 SORT_MAP = {
                     0: "position ASC",
                     1: "added_at DESC",
+                    2: "RANDOM()",
                 }
                 query = f'''
                     SELECT
