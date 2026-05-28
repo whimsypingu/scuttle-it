@@ -269,10 +269,11 @@ export const useSetQueue = () => {
 
                 if (data.queue && data.queue.length > 0) {
                     const firstTrack = data.queue[0];
+                    audioEngine.clear(); //EMERGENCY: occasionally shuffling/playing playlists does not start audio correctly. seems like iOS requires a tap event to unlock the audio element
                     audioEngine.playTrack({ trackId: firstTrack.id, forceRestart: true }); //immediately start playing on success
                 }
 
-                makeToast("Playing: ", variables.playlist.name);
+                makeToast(variables.sortmode !== 2 ? "Playing: " : "Shuffled: ", variables.playlist.name);
             } else if (data.skipCount > 0) {
                 makeToast("Queueing: ", variables.playlist.name); //no downloaded tracks available, but downloading is happening on skipCount tracks
             } else {
