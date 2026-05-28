@@ -38,6 +38,8 @@ jobs:
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
+        env:
+          NODE_OPTIONS: "--no-deprecation"
         with:
           workspaces: apps/desktop-launcher -> target
       
