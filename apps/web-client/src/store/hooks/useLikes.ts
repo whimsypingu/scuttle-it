@@ -78,7 +78,7 @@ export const useLikesMutations = () => {
         mutationFn: async ({ track, liked }: SetLikeMutationProps) => {
             const response = await fetch(`/like/set?track_id=${track.id}&liked=${liked}`, { method: "POST" });
 
-            if (!response.ok) throw new Error("Failed to push to queue");
+            if (!response.ok) throw new Error(`Failed to ${liked ? "like" : "unlike"}`);
 
             const data = await response.json();
             return data;

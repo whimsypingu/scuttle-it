@@ -8,12 +8,16 @@ import { HOME_CONTENTS } from "@/features/home/home.constants";
 import type { HomeContent, HomeTabProps } from "@/features/home/home.types";
 import type { SummaryPlaylist } from "@/playlist/playlist.types";
 import { PlaylistItem } from "@/playlist/PlaylistItem";
+import { usePins } from "@/store/hooks/usePlaylists";
 
 
 export const HomeTab = ({
     tabResetSignal
 }: HomeTabProps) => {
     const [selectedHomeContent, setSelectedHomeContent] = useState<HomeContent | null>(null);
+
+    const { playlists } = usePins();
+    
 
     // Reset when the signal changes
     useEffect(() => {
@@ -100,15 +104,18 @@ export const HomeTab = ({
                                     ))}
                                 </div>
 
-                                {true && (
+                                {playlists.length >= 1 && (
                                     <div 
                                         className="flex flex-col gap-1"
                                     >
-                                        <PlaylistItem
-                                            key={MOCK_PLAYLIST_SUMMARY.id}
-                                            playlist={MOCK_PLAYLIST_SUMMARY}
-                                            onSelect={(p) => {}}
-                                        />
+                                        {/* PINNED PLAYLIST LIST */}
+                                        {playlists.map((p) => (
+                                            <PlaylistItem
+                                                key={p.id}
+                                                playlist={p}
+                                                onSelect={(p) => {}}
+                                            />
+                                        ))}
                                     </div>
                                 )}
 

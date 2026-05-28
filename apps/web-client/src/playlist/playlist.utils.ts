@@ -6,11 +6,13 @@ import { makeToast } from '@/features/toast/Toast';
 
 import type { ActiveEditTarget } from '@/features/edit/edit.types';
 import type { PlaylistActionProps } from '@/playlist/playlist.types';
+import { usePinsMutations } from '@/store/hooks/usePlaylists';
 
 
 export const usePlaylistActionHandler = () => {
     //access the mutations from the tanstack query hook
     const { setPlaylist } = useSetQueue();
+    const { setPin } = usePinsMutations();
     const { setEditTarget } = useEditTarget();
 
     const handleAction = (props: PlaylistActionProps) => {
@@ -18,7 +20,10 @@ export const usePlaylistActionHandler = () => {
         
         switch (props.action) {
             case "pin": //pin a playlist
-                makeToast(props.action);
+                setPin({
+                    playlist: props.playlist,
+                    pinned: true,
+                });
                 break;
 
             case "delete":

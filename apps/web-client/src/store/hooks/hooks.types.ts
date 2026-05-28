@@ -1,4 +1,4 @@
-import type { PlaylistBase, PlaylistId } from "@/playlist/playlist.types";
+import type { PlaylistBase, PlaylistId, SummaryPlaylist } from "@/playlist/playlist.types";
 import type { QueueTrack, TrackBase, TrackId } from "@/track/track.types";
 import type { IconProps } from "@phosphor-icons/react";
 
@@ -108,4 +108,9 @@ export interface CreatePlaylistPayload {
 
 export interface DeletePlaylistMutationProps {
     playlist: PlaylistBase;
+}
+
+export interface SetPinMutationProps {
+    playlist: SummaryPlaylist;
+    pinned: boolean;
 }
