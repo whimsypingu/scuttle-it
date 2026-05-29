@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
-import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
+import { usePins } from "@/store/hooks/usePlaylists";
+
+import { PlaylistContentView } from "@/features/library/subcomponents/PlaylistContent";
+import { PlaylistItem } from "@/playlist/PlaylistItem";
 
 import { HOME_CONTENTS } from "@/features/home/home.constants";
+import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
 import type { HomeContent, HomeTabProps } from "@/features/home/home.types";
-import type { SummaryPlaylist } from "@/playlist/playlist.types";
-import { PlaylistItem } from "@/playlist/PlaylistItem";
-import { usePins } from "@/store/hooks/usePlaylists";
-import { PlaylistContentView } from "../library/subcomponents/PlaylistContent";
 
 
 export const HomeTab = ({
@@ -45,9 +45,8 @@ export const HomeTab = ({
                     />
                 );
             case ("customPlaylist"):
-                ActiveHomeContentView = PlaylistContentView;
                 return (
-                    <ActiveHomeContentView
+                    <PlaylistContentView
                         summaryData={data}
                         onClose={() => setSelectedHomeContent(null)}
                     />
@@ -56,14 +55,7 @@ export const HomeTab = ({
                 console.error("Unimplemented ActiveHomeContentView");
                 return null;
         }
-
-        return (
-            <ActiveHomeContentView
-                data={data}
-                onClose={() => setSelectedHomeContent(null)}
-            />
-        );
-    }
+    };
 
     return (
         <>
@@ -117,11 +109,11 @@ export const HomeTab = ({
                                     ))}
                                 </div>
 
-                                {playlists.length >= 1 && (
+                                {/* PINNED PLAYLIST LIST */}
+                                {playlists.length >= 1 && ( //only display if there are any, possibly inculde more styling and a header for the section
                                     <div 
                                         className="flex flex-col gap-1"
                                     >
-                                        {/* PINNED PLAYLIST LIST */}
                                         {playlists.map((p) => (
                                             <PlaylistItem
                                                 key={p.id}
@@ -130,7 +122,7 @@ export const HomeTab = ({
                                                     setSelectedHomeContent({
                                                         type: "customPlaylist",
                                                         name: p.name,
-                                                        color: "#ffffff",
+                                                        color: "",
                                                         description: "",
                                                         data: p,
                                                     });
@@ -141,7 +133,7 @@ export const HomeTab = ({
                                     </div>
                                 )}
 
-                                {/* DEFAULT CONTENTS */}
+                                {/* DEFAULT CONTENTS CONT. */}
                                 <div className="grid grid-cols-2 gap-4">
                                     {HOME_CONTENTS
                                         .slice(2)
@@ -178,14 +170,3 @@ export const HomeTab = ({
         </>
     );
 };
-
-
-
-
-const MOCK_PLAYLIST_SUMMARY: SummaryPlaylist = {
-    id: "hello-world",
-    name: "mock playlist",
-    totalCount: 20,
-    totalDuration: 3000,
-    description: "mocking a playlist",
-}

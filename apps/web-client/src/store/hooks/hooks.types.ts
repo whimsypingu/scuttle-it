@@ -93,7 +93,6 @@ export interface SortmodeConfig { //corresponding phosphor icon for each Sortmod
 export interface SetLikeMutationProps {
     track: TrackBase;
     liked: boolean;
-    successMsg?: string;
 }
 
 
@@ -104,10 +103,6 @@ export interface CreatePlaylistPayload {
     playlistId: PlaylistId;
     name: string;
     description: string | null;
-}
-
-export interface DeletePlaylistMutationProps {
-    playlist: PlaylistBase;
 }
 
 export interface SetPinMutationProps {

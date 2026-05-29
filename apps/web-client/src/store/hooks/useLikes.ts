@@ -128,8 +128,7 @@ export const useLikesMutations = () => {
             return { rollbackLikes };
         },
         onError: (err, variables, context) => {
-            const msg = `Error`;
-            makeToast(msg);
+            makeToast("Error");
 
             //rollback all versions of the likes list
             if (context?.rollbackLikes) {
@@ -140,11 +139,9 @@ export const useLikesMutations = () => {
             console.log("Optimistic setting like/unlike failed, rolling back.");
         },
         onSuccess: (data, variables) => {
-            if (variables.successMsg) {
-                const { titleDisplay } = getTrackDisplayMetadata(variables.track);
-                makeToast(`${variables.successMsg}: `, titleDisplay);
-            }
-
+            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+            makeToast(variables.liked ? "Liked" : "Removed", titleDisplay);
+            
             // queryClient.invalidateQueries({ queryKey });
         },
     });

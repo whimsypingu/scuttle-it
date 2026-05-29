@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { makeToast } from "@/features/toast/Toast";
 
 import type { SummaryPlaylist } from "@/playlist/playlist.types";
-import type { CreatePlaylistPayload, DeletePlaylistMutationProps, SetPinMutationProps, Sortmode } from "@/store/hooks/hooks.types";
+import type { CreatePlaylistPayload, SetPinMutationProps, Sortmode } from "@/store/hooks/hooks.types";
 
 
 

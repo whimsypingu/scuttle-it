@@ -16,6 +16,7 @@ export interface SystemPlaylist extends PlaylistBase {
     component: React.FC<any>;
 }
 
+//need to have the same fields, but some can be blank (for now)
 export type HomeContent =
     | { 
         type: "systemPlaylist"; 
@@ -26,8 +27,8 @@ export type HomeContent =
     }
     | { 
         type: "customPlaylist"; 
-        color: string; 
-        name: string;
-        description: string; 
+        color: string;              //blank
+        name: string;               //blank
+        description: string;        //blank
         data: SummaryPlaylist;
     }

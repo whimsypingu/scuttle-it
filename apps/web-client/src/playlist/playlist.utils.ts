@@ -1,12 +1,12 @@
 // src/playlist/playlist.utils.ts
 import { useEditTarget } from '@/features/edit/EditProvider';
 import { useSetQueue } from '@/store/hooks/useQueue';
+import { usePinsMutations } from '@/store/hooks/usePlaylists';
 
 import { makeToast } from '@/features/toast/Toast';
 
 import type { ActiveEditTarget } from '@/features/edit/edit.types';
 import type { PlaylistActionProps } from '@/playlist/playlist.types';
-import { usePinsMutations } from '@/store/hooks/usePlaylists';
 
 
 export const usePlaylistActionHandler = () => {
