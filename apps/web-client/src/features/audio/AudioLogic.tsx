@@ -27,6 +27,12 @@ export const AudioLogic = () => {
         onEndedHandlerRef.current = () => {
             console.log(`%c[AudioLogic]%c Executing end logic for: ${currentTrack?.title}`, "color: #ff00ff;", "color: inherit;");
             
+            if (audioEngine.queueSwapped && currentTrack) {
+                audioEngine.queueSwapped = false;
+                audioEngine.playTrack({ trackId: currentTrack.id, forceRestart: true });
+                return;
+            }
+
             switch (settings.loopmode) {
                 case 0: // No loop
                     pop({ 

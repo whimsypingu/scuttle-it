@@ -9,6 +9,8 @@ class AudioEngine implements IAudioEngine  {
     private currentTrackId: string | null = null;
     private listenDuration = 0; //seconds, floating point value
     private previousTime = 0; //delta tracking helper variable
+
+    public queueSwapped = false; //flag for autoplaying queue swap behavior
     
     private constructor() { null }
 

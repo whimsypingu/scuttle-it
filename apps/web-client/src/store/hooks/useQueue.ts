@@ -263,15 +263,23 @@ export const useSetQueue = () => {
             return data as SetAllQueueResponse;
         },
         onSuccess: (data, variables) => {
-            //when tracks are able to be set (non-empty playlist and downloaded tracks) then modify the queue and audio.
-            if (data.setCount > 0) {
+            const oldQueue = queryClient.getQueryData<QueueTrack[]>(queryKey);
+            if (data.setCount > 0 && oldQueue && oldQueue.length > 0) {                
+                audioEngine.queueSwapped = true; //set an internal flag to force onEnded to behave differently: src/features/audio/AudioLogic.tsx
                 queryClient.setQueryData(queryKey, data.queue);
 
-                if (data.queue && data.queue.length > 0) {
-                    const firstTrack = data.queue[0];
-                    audioEngine.clear(); //EMERGENCY: occasionally shuffling/playing playlists does not start audio correctly. seems like iOS requires a tap event to unlock the audio element
-                    audioEngine.playTrack({ trackId: firstTrack.id, forceRestart: true }); //immediately start playing on success
-                }
+                audioEngine.seek(audioEngine.getDuration() - 0.1); //scrub to the end of the current track. this skirts the iOS blocking audio play on 
+
+            // //when tracks are able to be set (non-empty playlist and downloaded tracks) then modify the queue and audio.
+            // if (data.setCount > 0) {
+            //     queryClient.setQueryData(queryKey, data.queue);
+
+            //     if (data.queue && data.queue.length > 0) {
+            //         const firstTrack = data.queue[0];
+            //         //audioEngine.clear(); //EMERGENCY: occasionally shuffling/playing playlists does not start audio correctly. seems like iOS requires a tap event to unlock the audio element
+            //         // audioEngine.playTrack({ trackId: firstTrack.id, forceRestart: true }); //immediately start playing on success
+                    
+            //     }
 
                 makeToast(variables.sortmode !== 2 ? "Playing: " : "Shuffled: ", variables.playlist.name);
             } else if (data.skipCount > 0) {
