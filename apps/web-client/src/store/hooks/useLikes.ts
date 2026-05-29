@@ -140,7 +140,7 @@ export const useLikesMutations = () => {
         },
         onSuccess: (data, variables) => {
             const { titleDisplay } = getTrackDisplayMetadata(variables.track);
-            makeToast(variables.liked ? "Liked" : "Removed", titleDisplay);
+            makeToast(variables.liked ? "Liked: " : "Removed: ", titleDisplay);
             
             // queryClient.invalidateQueries({ queryKey });
         },
