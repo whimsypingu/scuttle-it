@@ -100,7 +100,7 @@ async def set_pin(
         raise DefaultCrashException
 
 
-@PlaylistRouter.get("/pinned")
+@PlaylistRouter.get("/pins")
 async def get_pinned_playlists_endpoint(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):

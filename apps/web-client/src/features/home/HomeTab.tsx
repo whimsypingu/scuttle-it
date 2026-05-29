@@ -9,6 +9,7 @@ import type { HomeContent, HomeTabProps } from "@/features/home/home.types";
 import type { SummaryPlaylist } from "@/playlist/playlist.types";
 import { PlaylistItem } from "@/playlist/PlaylistItem";
 import { usePins } from "@/store/hooks/usePlaylists";
+import { PlaylistContentView } from "../library/subcomponents/PlaylistContent";
 
 
 export const HomeTab = ({
@@ -17,7 +18,6 @@ export const HomeTab = ({
     const [selectedHomeContent, setSelectedHomeContent] = useState<HomeContent | null>(null);
 
     const { playlists } = usePins();
-    
 
     // Reset when the signal changes
     useEffect(() => {
@@ -38,7 +38,20 @@ export const HomeTab = ({
         switch (type) {
             case ("systemPlaylist"):
                 ActiveHomeContentView = data.component;
-                break;
+                return (
+                    <ActiveHomeContentView
+                        data={data}
+                        onClose={() => setSelectedHomeContent(null)}
+                    />
+                );
+            case ("customPlaylist"):
+                ActiveHomeContentView = PlaylistContentView;
+                return (
+                    <ActiveHomeContentView
+                        summaryData={data}
+                        onClose={() => setSelectedHomeContent(null)}
+                    />
+                );
             default:
                 console.error("Unimplemented ActiveHomeContentView");
                 return null;
@@ -113,7 +126,16 @@ export const HomeTab = ({
                                             <PlaylistItem
                                                 key={p.id}
                                                 playlist={p}
-                                                onSelect={(p) => {}}
+                                                onSelect={(p) => {
+                                                    setSelectedHomeContent({
+                                                        type: "customPlaylist",
+                                                        name: p.name,
+                                                        color: "#ffffff",
+                                                        description: "",
+                                                        data: p,
+                                                    });
+                                                }}
+                                                actions={["shufflePlay", "play", "unpin", "edit"]}
                                             />
                                         ))}
                                     </div>

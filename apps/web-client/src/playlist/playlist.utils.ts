@@ -26,6 +26,13 @@ export const usePlaylistActionHandler = () => {
                 });
                 break;
 
+            case "unpin": //unpin a playlist
+                setPin({
+                    playlist: props.playlist,
+                    pinned: false,
+                });
+                break;
+
             case "delete":
                 makeToast(props.action);
                 break;

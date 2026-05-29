@@ -1,4 +1,4 @@
-import { PenIcon, PlayIcon, PushPinIcon, ShuffleIcon, TrashIcon } from '@phosphor-icons/react';
+import { PenIcon, PlayIcon, PushPinIcon, PushPinSlashIcon, ShuffleIcon, TrashIcon } from '@phosphor-icons/react';
 import type { PlaylistAction, PlaylistActionConfig } from "@/playlist/playlist.types";
 
 
@@ -13,6 +13,10 @@ export const PLAYLIST_ACTION_CONFIG: Record<PlaylistAction, PlaylistActionConfig
     pin: { 
         icon: PushPinIcon, 
         color: "var(--color-brand)" 
+    },
+    unpin: {
+        icon: PushPinSlashIcon,
+        color: "var(--color-brand)"
     },
     delete: { 
         icon: TrashIcon, 

@@ -23,6 +23,7 @@ export interface PlaylistDetails extends PlaylistBase {
 //all available playlist actions with their required properties to execute the functions
 export type PlaylistActionProps = 
     | { action: "pin"; playlist: SummaryPlaylist }
+    | { action: "unpin"; playlist: SummaryPlaylist }
     | { action: "delete"; playlist: SummaryPlaylist }
     | { action: "play"; playlist: SummaryPlaylist }
     | { action: "shufflePlay"; playlist: SummaryPlaylist }

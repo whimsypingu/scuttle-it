@@ -1,4 +1,4 @@
-import type { PlaylistBase } from "@/playlist/playlist.types";
+import type { PlaylistBase, SummaryPlaylist } from "@/playlist/playlist.types";
 import type React from "react";
 
 
@@ -25,9 +25,9 @@ export type HomeContent =
         data: SystemPlaylist; 
     }
     | { 
-        color: string; 
         type: "customPlaylist"; 
+        color: string; 
         name: string;
         description: string; 
-        data: PlaylistBase;
+        data: SummaryPlaylist;
     }
