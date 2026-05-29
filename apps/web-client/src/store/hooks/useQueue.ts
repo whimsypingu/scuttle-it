@@ -265,23 +265,19 @@ export const useSetQueue = () => {
         onSuccess: (data, variables) => {
             const oldQueue = queryClient.getQueryData<QueueTrack[]>(queryKey);
             if (data.setCount > 0 && oldQueue && oldQueue.length > 0) {                
-                audioEngine.queueSwapped = true; //set an internal flag to force onEnded to behave differently: src/features/audio/AudioLogic.tsx
                 queryClient.setQueryData(queryKey, data.queue);
 
-                audioEngine.seek(audioEngine.getDuration() - 0.1); //scrub to the end of the current track. this skirts the iOS blocking audio play on 
+                //special handling for iOS breaking due to swipes not allowing audio event play/loading
+                if (!audioEngine.isPaused()) {
+                    audioEngine.setQueueFlag = true; //set an internal flag to force onEnded to behave differently: src/features/audio/AudioLogic.tsx
+                    audioEngine.seek(audioEngine.getDuration() - 0.1); //scrub to the end of the current track. this skirts the iOS blocking audio play on 
 
-            // //when tracks are able to be set (non-empty playlist and downloaded tracks) then modify the queue and audio.
-            // if (data.setCount > 0) {
-            //     queryClient.setQueryData(queryKey, data.queue);
+                    makeToast(variables.sortmode !== 2 ? "Playing: " : "Shuffled: ", variables.playlist.name);
+                } else {
+                    audioEngine.seek(0);
 
-            //     if (data.queue && data.queue.length > 0) {
-            //         const firstTrack = data.queue[0];
-            //         //audioEngine.clear(); //EMERGENCY: occasionally shuffling/playing playlists does not start audio correctly. seems like iOS requires a tap event to unlock the audio element
-            //         // audioEngine.playTrack({ trackId: firstTrack.id, forceRestart: true }); //immediately start playing on success
-                    
-            //     }
-
-                makeToast(variables.sortmode !== 2 ? "Playing: " : "Shuffled: ", variables.playlist.name);
+                    makeToast(variables.sortmode !== 2 ? "Queue: " : "Shuffled: ", variables.playlist.name); //require user interaction (tap) to start audio, for consistency across platforms
+                }
             } else if (data.skipCount > 0) {
                 makeToast("Queueing: ", variables.playlist.name); //no downloaded tracks available, but downloading is happening on skipCount tracks
             } else {
