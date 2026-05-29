@@ -190,10 +190,10 @@ class PlayQueueMixin:
         #select only the track internal_id, id, and download status, to perform splitting later since we need the not-downloaded tracks
         match playlist_id:
             case "likes":
-                SORT_MAP = {
-                    0: "position ASC",
-                    1: "liked_at DESC",
-                    2: "position ASC", #fallback to standard sorting, and shuffle manually (theoretically don't need a sort here)
+                SORT_CLAUSE_MAP = {
+                    0: "ORDER BY l.position ASC",
+                    1: "ORDER BY l.liked_at DESC",
+                    2: "", #ignore sort and shuffle manually
                 }
                 query = f'''
                     SELECT
@@ -203,14 +203,14 @@ class PlayQueueMixin:
                     FROM likes l
                     JOIN tracks t ON t.internal_id = l.track_internal_id
                     LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
-                    ORDER BY {SORT_MAP[sortmode]};
+                    {SORT_CLAUSE_MAP[sortmode]};
                 '''
                 params = ()
             case _:
-                SORT_MAP = {
-                    0: "position ASC",
-                    1: "added_at DESC",
-                    2: "position ASC", #fallback to standard sorting, and shuffle manually
+                SORT_CLAUSE_MAP = {
+                    0: "ORDER BY pt.position ASC",
+                    1: "ORDER BY pt.added_at DESC",
+                    2: "", #ignore sort and shuffle manually
                 }
                 query = f'''
                     SELECT
@@ -222,7 +222,7 @@ class PlayQueueMixin:
                     JOIN tracks t ON t.internal_id = pt.track_internal_id
                     LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
                     WHERE p.id = ?
-                    ORDER BY {SORT_MAP[sortmode]};
+                    {SORT_CLAUSE_MAP[sortmode]};
                 '''
                 params = (playlist_id,)
 
