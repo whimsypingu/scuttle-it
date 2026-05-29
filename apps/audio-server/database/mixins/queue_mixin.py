@@ -1,4 +1,5 @@
 import logging
+import random
 
 from database.mixins.mixin_utils import row_to_trackbase
 
@@ -192,7 +193,7 @@ class PlayQueueMixin:
                 SORT_MAP = {
                     0: "position ASC",
                     1: "liked_at DESC",
-                    2: "RANDOM()",
+                    2: "position ASC", #fallback to standard sorting, and shuffle manually (theoretically don't need a sort here)
                 }
                 query = f'''
                     SELECT
@@ -209,7 +210,7 @@ class PlayQueueMixin:
                 SORT_MAP = {
                     0: "position ASC",
                     1: "added_at DESC",
-                    2: "RANDOM()",
+                    2: "position ASC", #fallback to standard sorting, and shuffle manually
                 }
                 query = f'''
                     SELECT
@@ -230,13 +231,20 @@ class PlayQueueMixin:
                 cursor = await db.execute(query, params)
                 rows = await cursor.fetchall()
 
-                #calculate the split between tracks that are ready to go (and should be in the queue) vs the ones that need to be downloaded
+                #filter and split between tracks ready to go (and should be in queue) vs ones that require download
+                downloaded_rows = [row for row in rows if row["downloaded"]]
+                skipped = [row["id"] for row in rows if not row["downloaded"]]
+
+                #perform manual python based shuffling, random uses fisher yates natively and is O(n): https://softwareengineering.stackexchange.com/questions/215737/how-python-random-shuffle-works
+                if sortmode == 2:
+                    random.shuffle(downloaded_rows)
+                    random.shuffle(skipped)
+
+                #form the right data type to send to the queue
                 to_queue = [
                     (row["internal_id"], (idx + 1) * 100) 
-                    for idx, row in enumerate(rows) if row["downloaded"]
+                    for idx, row in enumerate(downloaded_rows)
                 ]
-                skipped = [row["id"] for row in rows if not row["downloaded"]] #tracks requiring download
-
                 if to_queue:
                     await db.execute("DELETE FROM play_queue;")
                     await db.executemany("INSERT INTO play_queue (track_internal_id, position) VALUES (?, ?);", to_queue)
