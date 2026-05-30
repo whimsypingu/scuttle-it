@@ -256,6 +256,45 @@ class PlayQueueMixin:
             logger.exception(f"Failed to set playlist {playlist_id} as the Play Queue")
             raise
 
+
+    async def shuffle_play_queue(self) -> bool:
+        """Shuffles all elements of the Play Queue except the first, if there is one"""
+        logger.info(f"Shuffling the Play Queue...")
+
+        try:
+            async with self.session() as db:
+                cursor = await db.execute('''
+                    SELECT track_internal_id, position
+                    FROM play_queue
+                    ORDER BY position ASC;
+                ''')
+                rows = await cursor.fetchall()
+
+                if len(rows) <= 1:
+                    logger.info(f"Play Queue has 1 or fewer items, skipping shuffle")
+                    return False
+                
+                current_track = rows[0]
+                shuffle_tracks = list(rows[1:]) #get a split of remaining queue tracks to shuffle
+
+                random.shuffle(shuffle_tracks)
+
+                #assign new positions to remainder of queue
+                to_queue = [
+                    (track["track_internal_id"], current_track["position"] + ((idx + 1) * 100))
+                    for idx, track in enumerate(shuffle_tracks)
+                ]
+
+                await db.execute("DELETE FROM play_queue WHERE position > ?;", (current_track["position"],))
+                await db.executemany("INSERT INTO play_queue (track_internal_id, position) VALUES (?, ?);", to_queue)
+
+                logger.info(f"Successfully shuffled {len(shuffle_tracks)} tracks.")
+                return True
+            
+        except Exception:
+            logger.exception(f"Failed to shuffle Play Queue")
+            raise
+
     
     async def clear_play_queue(self) -> bool:
         """Clears all elements of the Play Queue except the first, if there is one"""

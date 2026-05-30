@@ -27,6 +27,8 @@ class PushNextQueueResponse(ScuttleBase):
     queue: list[QueueTrack]
 class PopQueueResponse(ScuttleBase):
     queue: list[QueueTrack]
+class ShuffleQueueResponse(ScuttleBase):
+    queue: list[QueueTrack]
 class SetAllQueueResponse(ScuttleBase):
     set_count: int
     skip_count: int
