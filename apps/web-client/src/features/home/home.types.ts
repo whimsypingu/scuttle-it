@@ -1,4 +1,4 @@
-import type { PlaylistBase } from "@/playlist/playlist.types";
+import type { PlaylistBase, SummaryPlaylist } from "@/playlist/playlist.types";
 import type React from "react";
 
 
@@ -16,6 +16,7 @@ export interface SystemPlaylist extends PlaylistBase {
     component: React.FC<any>;
 }
 
+//need to have the same fields, but some can be blank (for now)
 export type HomeContent =
     | { 
         type: "systemPlaylist"; 
@@ -25,9 +26,9 @@ export type HomeContent =
         data: SystemPlaylist; 
     }
     | { 
-        color: string; 
         type: "customPlaylist"; 
-        name: string;
-        description: string; 
-        data: PlaylistBase;
+        color: string;              //blank
+        name: string;               //blank
+        description: string;        //blank
+        data: SummaryPlaylist;
     }

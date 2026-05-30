@@ -1,9 +1,13 @@
-import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
-import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
+import { usePins } from "@/store/hooks/usePlaylists";
+
+import { PlaylistContentView } from "@/features/library/subcomponents/PlaylistContent";
+import { PlaylistItem } from "@/playlist/PlaylistItem";
 
 import { HOME_CONTENTS } from "@/features/home/home.constants";
+import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
 import type { HomeContent, HomeTabProps } from "@/features/home/home.types";
 
@@ -12,6 +16,8 @@ export const HomeTab = ({
     tabResetSignal
 }: HomeTabProps) => {
     const [selectedHomeContent, setSelectedHomeContent] = useState<HomeContent | null>(null);
+
+    const { playlists } = usePins();
 
     // Reset when the signal changes
     useEffect(() => {
@@ -32,19 +38,24 @@ export const HomeTab = ({
         switch (type) {
             case ("systemPlaylist"):
                 ActiveHomeContentView = data.component;
-                break;
+                return (
+                    <ActiveHomeContentView
+                        data={data}
+                        onClose={() => setSelectedHomeContent(null)}
+                    />
+                );
+            case ("customPlaylist"):
+                return (
+                    <PlaylistContentView
+                        summaryData={data}
+                        onClose={() => setSelectedHomeContent(null)}
+                    />
+                );
             default:
                 console.error("Unimplemented ActiveHomeContentView");
                 return null;
         }
-
-        return (
-            <ActiveHomeContentView
-                data={data}
-                onClose={() => setSelectedHomeContent(null)}
-            />
-        );
-    }
+    };
 
     return (
         <>
@@ -71,26 +82,80 @@ export const HomeTab = ({
                         {/* CONTENT AREA */}
                         <div className="flex-1 overflow-y-auto no-scrollbar">
                             <div 
-                                className="grid grid-cols-2 gap-4"
+                                className="flex flex-col gap-4" 
                                 style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
                             >
-                                {HOME_CONTENTS.map((item, index) => (
+
+                                {/* DEFAULT CONTENTS */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    {HOME_CONTENTS
+                                        .slice(0, 2)
+                                        .map((item, index) => (
+                                            <div 
+                                                key={index} 
+                                                className="bg-card aspect-square rounded-md shadow-lg p-4 flex flex-col cursor-pointer active:scale-95 transition-transform"
+                                                onClick={() => setSelectedHomeContent(item)}
+                                            >
+                                                {/* Use the mock color as a gradient or a solid block */}
+                                                <div 
+                                                    className="w-full h-3/4 rounded mb-2 transition-opacity hover:opacity-80" 
+                                                    style={{ backgroundColor: item.color }}
+                                                />
+                                                <div className="flex flex-col overflow-hidden">
+                                                    <h3 className="text-sm font-bold truncate text-zinc-100">{item.name}</h3>
+                                                    <p className="text-[10px] text-zinc-400 line-clamp-1">{item.description}</p>
+                                                </div>
+                                            </div>
+                                    ))}
+                                </div>
+
+                                {/* PINNED PLAYLIST LIST */}
+                                {playlists.length >= 1 && ( //only display if there are any, possibly inculde more styling and a header for the section
                                     <div 
-                                        key={index} 
-                                        className="bg-card aspect-square rounded-md shadow-lg p-4 flex flex-col cursor-pointer active:scale-95 transition-transform"
-                                        onClick={() => setSelectedHomeContent(item)}
+                                        className="flex flex-col gap-1"
                                     >
-                                        {/* Use the mock color as a gradient or a solid block */}
-                                        <div 
-                                            className="w-full h-3/4 rounded mb-2 transition-opacity hover:opacity-80" 
-                                            style={{ backgroundColor: item.color }}
-                                        />
-                                        <div className="flex flex-col overflow-hidden">
-                                            <h3 className="text-sm font-bold truncate text-zinc-100">{item.name}</h3>
-                                            <p className="text-[10px] text-zinc-400 line-clamp-1">{item.description}</p>
-                                        </div>
+                                        {playlists.map((p) => (
+                                            <PlaylistItem
+                                                key={p.id}
+                                                playlist={p}
+                                                onSelect={(p) => {
+                                                    setSelectedHomeContent({
+                                                        type: "customPlaylist",
+                                                        name: p.name,
+                                                        color: "",
+                                                        description: "",
+                                                        data: p,
+                                                    });
+                                                }}
+                                                actions={["shufflePlay", "play", "unpin", "edit"]}
+                                            />
+                                        ))}
                                     </div>
-                                ))}
+                                )}
+
+                                {/* DEFAULT CONTENTS CONT. */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    {HOME_CONTENTS
+                                        .slice(2)
+                                        .map((item, index) => (
+                                            <div 
+                                                key={index} 
+                                                className="bg-card aspect-square rounded-md shadow-lg p-4 flex flex-col cursor-pointer active:scale-95 transition-transform"
+                                                onClick={() => setSelectedHomeContent(item)}
+                                            >
+                                                {/* Use the mock color as a gradient or a solid block */}
+                                                <div 
+                                                    className="w-full h-3/4 rounded mb-2 transition-opacity hover:opacity-80" 
+                                                    style={{ backgroundColor: item.color }}
+                                                />
+                                                <div className="flex flex-col overflow-hidden">
+                                                    <h3 className="text-sm font-bold truncate text-zinc-100">{item.name}</h3>
+                                                    <p className="text-[10px] text-zinc-400 line-clamp-1">{item.description}</p>
+                                                </div>
+                                            </div>
+                                    ))}
+                                </div>
+
                             </div>
                         </div>
                     </motion.div>

@@ -27,6 +27,13 @@ export const AudioLogic = () => {
         onEndedHandlerRef.current = () => {
             console.log(`%c[AudioLogic]%c Executing end logic for: ${currentTrack?.title}`, "color: #ff00ff;", "color: inherit;");
             
+            //check for an entire queue swap out, if it happened, then ignore pop and just set the audio to play the head of the queue when the previous audio naturally ends
+            if (audioEngine.setQueueFlag && currentTrack) {
+                audioEngine.setQueueFlag = false; //reset flag
+                audioEngine.playTrack({ trackId: currentTrack.id, forceRestart: true });
+                return; //exit early, do not pop or do any funny loop behavior
+            }
+
             switch (settings.loopmode) {
                 case 0: // No loop
                     pop({ 

@@ -1,4 +1,4 @@
-import type { PlaylistBase, PlaylistId } from "@/playlist/playlist.types";
+import type { PlaylistBase, PlaylistId, SummaryPlaylist } from "@/playlist/playlist.types";
 import type { QueueTrack, TrackBase, TrackId } from "@/track/track.types";
 import type { IconProps } from "@phosphor-icons/react";
 
@@ -77,7 +77,8 @@ export interface YTSearchMutationProps {
  */
 export type SortmodeProps = 
     | { sortmode: 0; desc: "Position descending" }
-    | { sortmode: 1; desc: "Date added descending" };
+    | { sortmode: 1; desc: "Date added descending" }
+    | { sortmode: 2; desc: "Shuffle" };
 export type Sortmode = SortmodeProps["sortmode"];
 
 export interface SortmodeConfig { //corresponding phosphor icon for each Sortmode
@@ -92,7 +93,6 @@ export interface SortmodeConfig { //corresponding phosphor icon for each Sortmod
 export interface SetLikeMutationProps {
     track: TrackBase;
     liked: boolean;
-    successMsg?: string;
 }
 
 
@@ -105,6 +105,7 @@ export interface CreatePlaylistPayload {
     description: string | null;
 }
 
-export interface DeletePlaylistMutationProps {
-    playlist: PlaylistBase;
+export interface SetPinMutationProps {
+    playlist: SummaryPlaylist;
+    pinned: boolean;
 }

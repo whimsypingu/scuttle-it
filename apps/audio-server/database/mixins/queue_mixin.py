@@ -1,4 +1,5 @@
 import logging
+import random
 
 from database.mixins.mixin_utils import row_to_trackbase
 
@@ -189,9 +190,10 @@ class PlayQueueMixin:
         #select only the track internal_id, id, and download status, to perform splitting later since we need the not-downloaded tracks
         match playlist_id:
             case "likes":
-                SORT_MAP = {
-                    0: "position ASC",
-                    1: "liked_at DESC",
+                SORT_CLAUSE_MAP = {
+                    0: "ORDER BY l.position ASC",
+                    1: "ORDER BY l.liked_at DESC",
+                    2: "", #ignore sort and shuffle manually
                 }
                 query = f'''
                     SELECT
@@ -201,13 +203,14 @@ class PlayQueueMixin:
                     FROM likes l
                     JOIN tracks t ON t.internal_id = l.track_internal_id
                     LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
-                    ORDER BY {SORT_MAP[sortmode]};
+                    {SORT_CLAUSE_MAP[sortmode]};
                 '''
                 params = ()
             case _:
-                SORT_MAP = {
-                    0: "position ASC",
-                    1: "added_at DESC",
+                SORT_CLAUSE_MAP = {
+                    0: "ORDER BY pt.position ASC",
+                    1: "ORDER BY pt.added_at DESC",
+                    2: "", #ignore sort and shuffle manually
                 }
                 query = f'''
                     SELECT
@@ -219,7 +222,7 @@ class PlayQueueMixin:
                     JOIN tracks t ON t.internal_id = pt.track_internal_id
                     LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
                     WHERE p.id = ?
-                    ORDER BY {SORT_MAP[sortmode]};
+                    {SORT_CLAUSE_MAP[sortmode]};
                 '''
                 params = (playlist_id,)
 
@@ -228,13 +231,20 @@ class PlayQueueMixin:
                 cursor = await db.execute(query, params)
                 rows = await cursor.fetchall()
 
-                #calculate the split between tracks that are ready to go (and should be in the queue) vs the ones that need to be downloaded
+                #filter and split between tracks ready to go (and should be in queue) vs ones that require download
+                downloaded_rows = [row for row in rows if row["downloaded"]]
+                skipped = [row["id"] for row in rows if not row["downloaded"]]
+
+                #perform manual python based shuffling, random uses fisher yates natively and is O(n): https://softwareengineering.stackexchange.com/questions/215737/how-python-random-shuffle-works
+                if sortmode == 2:
+                    random.shuffle(downloaded_rows)
+                    random.shuffle(skipped)
+
+                #form the right data type to send to the queue
                 to_queue = [
                     (row["internal_id"], (idx + 1) * 100) 
-                    for idx, row in enumerate(rows) if row["downloaded"]
+                    for idx, row in enumerate(downloaded_rows)
                 ]
-                skipped = [row["id"] for row in rows if not row["downloaded"]] #tracks requiring download
-
                 if to_queue:
                     await db.execute("DELETE FROM play_queue;")
                     await db.executemany("INSERT INTO play_queue (track_internal_id, position) VALUES (?, ?);", to_queue)
@@ -244,6 +254,45 @@ class PlayQueueMixin:
 
         except Exception:
             logger.exception(f"Failed to set playlist {playlist_id} as the Play Queue")
+            raise
+
+
+    async def shuffle_play_queue(self) -> bool:
+        """Shuffles all elements of the Play Queue except the first, if there is one"""
+        logger.info(f"Shuffling the Play Queue...")
+
+        try:
+            async with self.session() as db:
+                cursor = await db.execute('''
+                    SELECT track_internal_id, position
+                    FROM play_queue
+                    ORDER BY position ASC;
+                ''')
+                rows = await cursor.fetchall()
+
+                if len(rows) <= 1:
+                    logger.info(f"Play Queue has 1 or fewer items, skipping shuffle")
+                    return False
+                
+                current_track = rows[0]
+                shuffle_tracks = list(rows[1:]) #get a split of remaining queue tracks to shuffle
+
+                random.shuffle(shuffle_tracks)
+
+                #assign new positions to remainder of queue
+                to_queue = [
+                    (track["track_internal_id"], current_track["position"] + ((idx + 1) * 100))
+                    for idx, track in enumerate(shuffle_tracks)
+                ]
+
+                await db.execute("DELETE FROM play_queue WHERE position > ?;", (current_track["position"],))
+                await db.executemany("INSERT INTO play_queue (track_internal_id, position) VALUES (?, ?);", to_queue)
+
+                logger.info(f"Successfully shuffled {len(shuffle_tracks)} tracks.")
+                return True
+            
+        except Exception:
+            logger.exception(f"Failed to shuffle Play Queue")
             raise
 
     

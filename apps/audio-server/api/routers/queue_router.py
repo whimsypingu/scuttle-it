@@ -7,7 +7,7 @@ from database.database_manager import DatabaseManager
 from core.download.download_queue import DownloadQueue
 from core.models.jobs import DownloadJob
 
-from core.models.responses import PopQueueResponse, PushNextQueueResponse, PushQueueResponse, SetAllQueueResponse, SetFirstQueueResponse
+from core.models.responses import PopQueueResponse, PushNextQueueResponse, PushQueueResponse, SetAllQueueResponse, SetFirstQueueResponse, ShuffleQueueResponse
 
 QueueRouter = APIRouter(prefix="/queue", tags=["Queue"])
 
@@ -137,10 +137,26 @@ async def pop_play_queue(
         raise DefaultCrashException
     
 
+@QueueRouter.post("/shuffle", response_model=ShuffleQueueResponse)
+async def shuffle_play_queue(
+    db_manager: DatabaseManager = Depends(get_db_manager)
+):
+    try:
+        await db_manager.shuffle_play_queue()
+        updated_queue = await db_manager.get_play_queue()
+
+        return {
+            "queue": updated_queue
+        }
+    except Exception as e:
+        traceback.print_exc()
+        raise DefaultCrashException
+
+
 @QueueRouter.post("/set-all/playlist/{playlist_id}", response_model=SetAllQueueResponse)
 async def set_all_play_queue( 
     playlist_id: str = Path(..., min_length=1, description="Playlist ID"),
-    sortmode: int = Query(default=0, ge=0, le=1, description="0=position, 1=added_at"),
+    sortmode: int = Query(default=0, ge=0, le=2, description="0=position, 1=added_at, 2=shuffle"),
     db_manager: DatabaseManager = Depends(get_db_manager),
     dl_queue: DownloadQueue = Depends(get_dl_queue)
 ):

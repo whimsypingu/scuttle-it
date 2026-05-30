@@ -7,7 +7,7 @@ import { getTrackDisplayMetadata, trackBaseToQueueTrack } from "@/track/track.ut
 
 import type { QueueTrack } from "@/track/track.types";
 import type { PopMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetAllPlaylistMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
-import type { SetFirstQueueResponse, SetAllQueueResponse, PushQueueResponse, PushNextQueueResponse, PopQueueResponse } from "./hooks.responses";
+import type { SetFirstQueueResponse, SetAllQueueResponse, PushQueueResponse, PushNextQueueResponse, PopQueueResponse, ShuffleQueueResponse } from "./hooks.responses";
 
 
 export const useQueue = () => {
@@ -231,6 +231,26 @@ export const useQueue = () => {
         },
     });
 
+    // shuffle
+    const shuffleMutation = useMutation({
+        mutationFn: async () => {
+            const response = await fetch(`/queue/shuffle`, { method: "POST" });
+
+            if (!response.ok) throw new Error("Failed to shuffle queue");
+
+            const data = await response.json();
+            return data as ShuffleQueueResponse;
+        },
+        onError: (err, variables, context) => {
+            makeToast("Error");
+        },
+        onSuccess: (data, variables) => {
+            queryClient.setQueryData(queryKey, data.queue);
+
+            makeToast("", "Shuffled");
+        },
+    });
+
     return {
         queue: getQueue.data ?? [],
         refetch: getQueue.refetch,
@@ -241,6 +261,7 @@ export const useQueue = () => {
         push: pushMutation.mutate,
         pushNext: pushNextMutation.mutate,
         pop: popMutation.mutate,
+        shuffle: shuffleMutation.mutate,
         isPushing: pushMutation.isPending,
         isPopping: popMutation.isPending,
     };
@@ -263,16 +284,21 @@ export const useSetQueue = () => {
             return data as SetAllQueueResponse;
         },
         onSuccess: (data, variables) => {
-            //when tracks are able to be set (non-empty playlist and downloaded tracks) then modify the queue and audio.
-            if (data.setCount > 0) {
+            const oldQueue = queryClient.getQueryData<QueueTrack[]>(queryKey);
+            if (data.setCount > 0 && oldQueue && oldQueue.length > 0) {                
                 queryClient.setQueryData(queryKey, data.queue);
 
-                if (data.queue && data.queue.length > 0) {
-                    const firstTrack = data.queue[0];
-                    audioEngine.playTrack({ trackId: firstTrack.id, forceRestart: true }); //immediately start playing on success
-                }
+                //special handling for iOS breaking due to swipes not allowing audio event play/loading
+                if (!audioEngine.isPaused()) {
+                    audioEngine.setQueueFlag = true; //set an internal flag to force onEnded to behave differently: src/features/audio/AudioLogic.tsx
+                    audioEngine.seek(audioEngine.getDuration() - 0.1); //scrub to the end of the current track. this skirts the iOS blocking audio play on 
 
-                makeToast("Playing: ", variables.playlist.name);
+                    makeToast(variables.sortmode !== 2 ? "Playing: " : "Shuffled: ", variables.playlist.name);
+                } else {
+                    audioEngine.seek(0);
+
+                    makeToast(variables.sortmode !== 2 ? "Queue: " : "Shuffled: ", variables.playlist.name); //require user interaction (tap) to start audio, for consistency across platforms
+                }
             } else if (data.skipCount > 0) {
                 makeToast("Queueing: ", variables.playlist.name); //no downloaded tracks available, but downloading is happening on skipCount tracks
             } else {

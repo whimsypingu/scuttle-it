@@ -1,6 +1,7 @@
 // src/playlist/playlist.utils.ts
 import { useEditTarget } from '@/features/edit/EditProvider';
 import { useSetQueue } from '@/store/hooks/useQueue';
+import { usePinsMutations } from '@/store/hooks/usePlaylists';
 
 import { makeToast } from '@/features/toast/Toast';
 
@@ -11,6 +12,7 @@ import type { PlaylistActionProps } from '@/playlist/playlist.types';
 export const usePlaylistActionHandler = () => {
     //access the mutations from the tanstack query hook
     const { setPlaylist } = useSetQueue();
+    const { setPin } = usePinsMutations();
     const { setEditTarget } = useEditTarget();
 
     const handleAction = (props: PlaylistActionProps) => {
@@ -18,7 +20,17 @@ export const usePlaylistActionHandler = () => {
         
         switch (props.action) {
             case "pin": //pin a playlist
-                makeToast(props.action);
+                setPin({
+                    playlist: props.playlist,
+                    pinned: true,
+                });
+                break;
+
+            case "unpin": //unpin a playlist
+                setPin({
+                    playlist: props.playlist,
+                    pinned: false,
+                });
                 break;
 
             case "delete":
@@ -36,7 +48,10 @@ export const usePlaylistActionHandler = () => {
                 break;
 
             case "shufflePlay":
-                makeToast(props.action);
+                setPlaylist({
+                    playlist: props.playlist,
+                    sortmode: 2,
+                });
                 break;
 
             case "edit": //open a playlist editing popup

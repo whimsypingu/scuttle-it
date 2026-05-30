@@ -18,13 +18,33 @@ import { LOOPMODE_CONFIG } from "@/settings/settings.constants";
 
 //used inside the ExpandedViewControls major subcomponent
 const ExpandedViewButtons = () => {
-    const { queue, pop } = useQueue(); //get the latest queue from tanstack
+    const { queue, pop, shuffle } = useQueue(); //get the latest queue from tanstack
     const currentTrack = queue?.[0];
     const nextTrack = queue?.[1];
 
     const { isPaused } = useAudioPlayback();
 
     const { settings, setLoopmode } = useSettings();
+
+    const [isShuffling, setIsShuffling] = useState(false);
+    const handleShuffle = () => {
+        if (isShuffling) {
+            console.warn("[ExpandingViewControls] Shuffling on cooldown");
+            return;
+        }
+        if (queue.length <= 1) {
+            console.warn("[ExpandingViewControls] No tracks to shuffle");
+            return;
+        }
+        console.log(`[ExpandingViewControls] Shuffling queue`);
+        
+        setIsShuffling(true);
+        shuffle();
+
+        setTimeout(() => {
+            setIsShuffling(false);
+        }, 200);
+    }
 
     const handleRewind = () => {
         if (!currentTrack) {
@@ -78,8 +98,18 @@ const ExpandedViewButtons = () => {
             layout
             className={`relative flex flex-row items-center w-full`}
         >
-            <button className="p-2 flex-shrink-0">
-                <ShuffleIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
+            {/* SHUFFLE */}
+            <button 
+                className="p-2 mr-auto flex-shrink-0 transition-transform active:scale-95"
+                onClick={handleShuffle}
+                disabled={isShuffling}
+            >
+                <ShuffleIcon 
+                    size={PLAYER_CONFIG.iconSize} 
+                    weight="fill" 
+                    style={{ color: isShuffling ? "var(--color-brand)" : "inherit" }}
+                    className={ isShuffling ? "transition-none" : "transition-colors duration-300 ease-out" }
+                />
             </button>
             
             {/* mighty jank to reduce glitchy look when compact/uncompacting */}
@@ -117,6 +147,7 @@ const ExpandedViewButtons = () => {
                 </button>
             </motion.div>
 
+            {/* LOOP */}
             <button
                 className="p-2 ml-auto flex-shrink-0 transition-transform active:scale-95"
                 onClick={handleLoopmode}
