@@ -26,14 +26,24 @@ const ExpandedViewButtons = () => {
 
     const { settings, setLoopmode } = useSettings();
 
+    const [isShuffling, setIsShuffling] = useState(false);
     const handleShuffle = () => {
+        if (isShuffling) {
+            console.warn("[ExpandingViewControls] Shuffling on cooldown");
+            return;
+        }
         if (queue.length <= 1) {
             console.warn("[ExpandingViewControls] No tracks to shuffle");
             return;
         }
-        
         console.log(`[ExpandingViewControls] Shuffling queue`);
+        
+        setIsShuffling(true);
         shuffle();
+
+        setTimeout(() => {
+            setIsShuffling(false);
+        }, 400);
     }
 
     const handleRewind = () => {
@@ -92,8 +102,13 @@ const ExpandedViewButtons = () => {
             <button 
                 className="p-2 mr-auto flex-shrink-0 transition-transform active:scale-95"
                 onClick={handleShuffle}
+                disabled={isShuffling}
             >
-                <ShuffleIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
+                <ShuffleIcon 
+                    size={PLAYER_CONFIG.iconSize} 
+                    weight="fill" 
+                    style={{ color: isShuffling ? "var(--color-brand)" : "inherit" }}
+                />
             </button>
             
             {/* mighty jank to reduce glitchy look when compact/uncompacting */}
