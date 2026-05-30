@@ -43,7 +43,7 @@ const ExpandedViewButtons = () => {
 
         setTimeout(() => {
             setIsShuffling(false);
-        }, 400);
+        }, 200);
     }
 
     const handleRewind = () => {
@@ -108,6 +108,7 @@ const ExpandedViewButtons = () => {
                     size={PLAYER_CONFIG.iconSize} 
                     weight="fill" 
                     style={{ color: isShuffling ? "var(--color-brand)" : "inherit" }}
+                    className={ isShuffling ? "transition-none" : "transition-colors duration-300 ease-out" }
                 />
             </button>
             
