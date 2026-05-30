@@ -18,13 +18,23 @@ import { LOOPMODE_CONFIG } from "@/settings/settings.constants";
 
 //used inside the ExpandedViewControls major subcomponent
 const ExpandedViewButtons = () => {
-    const { queue, pop } = useQueue(); //get the latest queue from tanstack
+    const { queue, pop, shuffle } = useQueue(); //get the latest queue from tanstack
     const currentTrack = queue?.[0];
     const nextTrack = queue?.[1];
 
     const { isPaused } = useAudioPlayback();
 
     const { settings, setLoopmode } = useSettings();
+
+    const handleShuffle = () => {
+        if (queue.length <= 1) {
+            console.warn("[ExpandingViewControls] No tracks to shuffle");
+            return;
+        }
+        
+        console.log(`[ExpandingViewControls] Shuffling queue`);
+        shuffle();
+    }
 
     const handleRewind = () => {
         if (!currentTrack) {
@@ -78,7 +88,11 @@ const ExpandedViewButtons = () => {
             layout
             className={`relative flex flex-row items-center w-full`}
         >
-            <button className="p-2 flex-shrink-0">
+            {/* SHUFFLE */}
+            <button 
+                className="p-2 mr-auto flex-shrink-0 transition-transform active:scale-95"
+                onClick={handleShuffle}
+            >
                 <ShuffleIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
             </button>
             
@@ -117,6 +131,7 @@ const ExpandedViewButtons = () => {
                 </button>
             </motion.div>
 
+            {/* LOOP */}
             <button
                 className="p-2 ml-auto flex-shrink-0 transition-transform active:scale-95"
                 onClick={handleLoopmode}

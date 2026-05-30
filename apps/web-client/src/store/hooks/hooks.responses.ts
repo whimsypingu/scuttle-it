@@ -18,6 +18,9 @@ export interface PushNextQueueResponse {
 export interface PopQueueResponse {
     queue: QueueTrack[];
 }
+export interface ShuffleQueueResponse {
+    queue: QueueTrack[];
+}
 export interface SetAllQueueResponse {
     setCount: number;
     skipCount: number;

@@ -7,7 +7,7 @@ import { getTrackDisplayMetadata, trackBaseToQueueTrack } from "@/track/track.ut
 
 import type { QueueTrack } from "@/track/track.types";
 import type { PopMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetAllPlaylistMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
-import type { SetFirstQueueResponse, SetAllQueueResponse, PushQueueResponse, PushNextQueueResponse, PopQueueResponse } from "./hooks.responses";
+import type { SetFirstQueueResponse, SetAllQueueResponse, PushQueueResponse, PushNextQueueResponse, PopQueueResponse, ShuffleQueueResponse } from "./hooks.responses";
 
 
 export const useQueue = () => {
@@ -231,6 +231,26 @@ export const useQueue = () => {
         },
     });
 
+    // shuffle
+    const shuffleMutation = useMutation({
+        mutationFn: async () => {
+            const response = await fetch(`/queue/shuffle`, { method: "POST" });
+
+            if (!response.ok) throw new Error("Failed to shuffle queue");
+
+            const data = await response.json();
+            return data as ShuffleQueueResponse;
+        },
+        onError: (err, variables, context) => {
+            makeToast("Error");
+        },
+        onSuccess: (data, variables) => {
+            queryClient.setQueryData(queryKey, data.queue);
+
+            makeToast("", "Shuffled");
+        },
+    });
+
     return {
         queue: getQueue.data ?? [],
         refetch: getQueue.refetch,
@@ -241,6 +261,7 @@ export const useQueue = () => {
         push: pushMutation.mutate,
         pushNext: pushNextMutation.mutate,
         pop: popMutation.mutate,
+        shuffle: shuffleMutation.mutate,
         isPushing: pushMutation.isPending,
         isPopping: popMutation.isPending,
     };
