@@ -5,7 +5,6 @@ import { TrackItem } from '@/track/TrackItem';
 import type { PlaylistListProps } from '@/playlist/playlist.types';
 import type { TrackBase } from '@/track/track.types';
 import { Virtuoso } from 'react-virtuoso';
-import { useRef, useState } from 'react';
 
 
 export const PlaylistList = ({
@@ -75,63 +74,12 @@ export const PlaylistList = ({
         console.log("Selected track:", track.title);
     }
 
-    //native dnd
-    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
-    const timerRef = useRef<number | null>(null);
-    const scrollerRef = useRef<HTMLElement | null>(null);
-
-    const handlePointerDown = (e: React.PointerEvent, index: number) => {
-        timerRef.current = window.setTimeout(() => {
-            setDraggedIndex(index);
-            setHoveredIndex(index);
-
-            console.log("timer triggered and set drag and hover for index", index);
-
-            if (e.target && "releasePointerCapture" in e.target) {
-                (e.target as HTMLElement).releasePointerCapture(e.pointerId);
-            }
-        }, 400);
-    };
-
-    const handlePointerMove = (e: React.PointerEvent) => {
-        if (draggedIndex === null) return;
-
-        const elementUnderCursor = document.elementFromPoint(e.clientX, e.clientY);
-        const itemRow = elementUnderCursor?.closest("[data-item-index]");
-        console.log("move event");
-
-        if (itemRow) {
-            const targetIdx = parseInt(itemRow.getAttribute("data-item-index") || "", 10);
-            console.log(targetIdx);
-            if (!isNaN(targetIdx) && targetIdx !== hoveredIndex) {
-                setHoveredIndex(targetIdx);
-            }
-        }
-    };
-
-    const handlePointerUp = () => {
-        console.log("pointer up event");
-        if (timerRef.current) clearTimeout(timerRef.current);
-
-        if (draggedIndex !== null && hoveredIndex !== null && draggedIndex !== hoveredIndex) {
-            //
-            console.log("success?", draggedIndex, hoveredIndex);
-        }
-
-        setDraggedIndex(null);
-        setHoveredIndex(null);
-    };
-
     return (
         <motion.div
             key="virtualized-playlist-content"
             className="min-h-0 w-full h-full"
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
         >
-            <Virtuoso
+            <Virtuoso 
                 data={tracks}
                 overscan={10}
                 endReached={() => {
@@ -148,37 +96,25 @@ export const PlaylistList = ({
                     )
                 }}
                 computeItemKey={(index, track) => track.id} //https://virtuoso.dev/message-list/item-keys/ this helped
-                itemContent={(index, track) => {
-                    const isBeingDragged = index === draggedIndex;
-                    const isHoverTarget = index === hoveredIndex && draggedIndex !== null;
-
-                    return (
-                        <motion.div
-                            key={track.id}
-                            initial={{ opacity: 0 }}
-                            animate={{ 
-                                opacity: isBeingDragged ? 0.4 : 1,
-                                scale: isBeingDragged ? 0.98 : 1,
-                            }}
-                            exit={{ opacity: 0 }}
-                            transition={{
-                                duration: 0.3,
-                                delay: Math.min(index * 0.1, 0.1) //not perfect but it has a nice effect initially
-                            }}
-                            onPointerDown={(e) => handlePointerDown(e, index)}
-                            style={{
-                                pointerEvents: isBeingDragged ? "none" : "auto",
-                            }}
-                        >
-                            <TrackItem
-                                track={track}
-                                onSelect={handleTrackSelect}
-                                index={index}
-                                actions={actions}
-                            />  
-                        </motion.div>
-                    );
-                }}
+                itemContent={(index, track) => (
+                    <motion.div
+                        key={track.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{
+                            duration: 0.3,
+                            delay: Math.min(index * 0.1, 0.1) //not perfect but it has a nice effect initially
+                        }}
+                    >
+                        <TrackItem
+                            track={track}
+                            onSelect={handleTrackSelect}
+                            index={index}
+                            actions={actions}
+                        />  
+                    </motion.div>
+                )}
             />
         </motion.div>
     );
