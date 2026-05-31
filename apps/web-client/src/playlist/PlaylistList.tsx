@@ -123,7 +123,7 @@ export const PlaylistList = ({
                                 key={track.id}
                                 initial={{ opacity: 0 }}
                                 animate={{ 
-                                    opacity: 1,
+                                    opacity: track.id === activeTrack?.id ? 0.4 : 1,
                                 }}
                                 exit={{ opacity: 0 }}
                                 transition={{
@@ -146,12 +146,13 @@ export const PlaylistList = ({
             <DragOverlay>
                 {activeTrack ? (
                     <div style={{ 
-                        transform: 'scale(1.02)', // Optional: make it look slightly lifted
-                        boxShadow: '0px 10px 20px rgba(0,0,0,0.15)',
-                        cursor: 'grabbing'
+                        transform: "scale(1.03)", // Optional: make it look slightly lifted
+                        boxShadow: "0px 10px 20px rgba(0,0,0,0.15)",
+                        cursor: "grabbing",
+                        transition: "transform 0.1s ease",
                     }}>
                         {/* Render a pure visual copy of your track item here */}
-                        <TrackItem track={activeTrack} onSelect={() => {}} index={0} />
+                        <TrackItem track={activeTrack} onSelect={() => {}} index={-1} />
                     </div>
                 ) : null}
             </DragOverlay>
