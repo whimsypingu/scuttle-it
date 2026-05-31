@@ -5,6 +5,9 @@ import { TrackItem } from '@/track/TrackItem';
 import type { PlaylistListProps } from '@/playlist/playlist.types';
 import type { TrackBase } from '@/track/track.types';
 import { Virtuoso } from 'react-virtuoso';
+import { Draggable } from '@/components/function/draggable';
+import { DragDropProvider, DragOverlay } from '@dnd-kit/react';
+import { useState } from 'react';
 
 
 export const PlaylistList = ({
@@ -74,12 +77,29 @@ export const PlaylistList = ({
         console.log("Selected track:", track.title);
     }
 
+
+    const [activeTrack, setActiveTrack] = useState<any>(null);
+    function handleDragStart(event: any) {
+        const track = tracks.find(t => t?.id === event.operation.source.id);
+        if (track) {
+            setActiveTrack(track);
+        }
+    }
+    function handleDragEnd(event: any) {
+        const {operation, over} = event;
+        if (over && operation.source.id !== over.id) {
+            console.log("reorder");
+        }
+        setActiveTrack(null);
+    }
+
     return (
         <motion.div
             key="virtualized-playlist-content"
             className="min-h-0 w-full h-full"
         >
-            <Virtuoso 
+            <DragDropProvider onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+            <Virtuoso
                 data={tracks}
                 overscan={10}
                 endReached={() => {
@@ -96,26 +116,46 @@ export const PlaylistList = ({
                     )
                 }}
                 computeItemKey={(index, track) => track.id} //https://virtuoso.dev/message-list/item-keys/ this helped
-                itemContent={(index, track) => (
-                    <motion.div
-                        key={track.id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{
-                            duration: 0.3,
-                            delay: Math.min(index * 0.1, 0.1) //not perfect but it has a nice effect initially
-                        }}
-                    >
-                        <TrackItem
-                            track={track}
-                            onSelect={handleTrackSelect}
-                            index={index}
-                            actions={actions}
-                        />  
-                    </motion.div>
-                )}
+                itemContent={(index, track) => {
+                    return (
+                        <Draggable id={track.id}>
+                            <motion.div
+                                key={track.id}
+                                initial={{ opacity: 0 }}
+                                animate={{ 
+                                    opacity: 1,
+                                }}
+                                exit={{ opacity: 0 }}
+                                transition={{
+                                    duration: 0.3,
+                                    delay: Math.min(index * 0.1, 0.1) //not perfect but it has a nice effect initially
+                                }}
+                            >
+                                <TrackItem
+                                    track={track}
+                                    onSelect={handleTrackSelect}
+                                    index={index}
+                                    actions={actions}
+                                />  
+                            </motion.div>
+                        </Draggable>
+                    );
+                }}
             />
+
+            <DragOverlay>
+                {activeTrack ? (
+                    <div style={{ 
+                        transform: 'scale(1.02)', // Optional: make it look slightly lifted
+                        boxShadow: '0px 10px 20px rgba(0,0,0,0.15)',
+                        cursor: 'grabbing'
+                    }}>
+                        {/* Render a pure visual copy of your track item here */}
+                        <TrackItem track={activeTrack} onSelect={() => {}} index={0} />
+                    </div>
+                ) : null}
+            </DragOverlay>
+            </DragDropProvider>
         </motion.div>
     );
 };
