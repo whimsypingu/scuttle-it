@@ -1,13 +1,15 @@
-import { motion } from 'framer-motion';
+import { delay, motion } from 'framer-motion';
 
 import { TrackItem } from '@/track/TrackItem';
 
 import type { PlaylistListProps } from '@/playlist/playlist.types';
 import type { TrackBase } from '@/track/track.types';
 import { Virtuoso } from 'react-virtuoso';
-import { Draggable } from '@/components/function/draggable';
+import { DnDable, Draggable } from '@/components/function/draggable';
 import { DragDropProvider, DragOverlay } from '@dnd-kit/react';
+import { PointerSensor, PointerActivationConstraints, type DragStartEvent, type DragEndEvent } from '@dnd-kit/dom';
 import { useState } from 'react';
+import { Sortable } from '@/components/function/sortable';
 
 
 export const PlaylistList = ({
@@ -79,17 +81,20 @@ export const PlaylistList = ({
 
 
     const [activeTrack, setActiveTrack] = useState<any>(null);
-    function handleDragStart(event: any) {
-        const track = tracks.find(t => t?.id === event.operation.source.id);
+    function handleDragStart(event: DragStartEvent) {
+        console.log("dragstart");
+        const track = tracks.find(t => t?.id === event.operation.source?.id);
         if (track) {
+            console.log("selected");
             setActiveTrack(track);
         }
     }
-    function handleDragEnd(event: any) {
-        const {operation, over} = event;
-        if (over && operation.source.id !== over.id) {
+    function handleDragEnd(event: DragEndEvent) {
+        const {operation} = event;
+        if (operation.source?.id !== operation.target?.id) {
             console.log("reorder");
         }
+        console.log("dragend")
         setActiveTrack(null);
     }
 
@@ -98,7 +103,17 @@ export const PlaylistList = ({
             key="virtualized-playlist-content"
             className="min-h-0 w-full h-full"
         >
-            <DragDropProvider onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+            <DragDropProvider
+                sensors={(defaults) => [
+                    PointerSensor.configure({
+                        activationConstraints: [
+                            new PointerActivationConstraints.Delay({value: 400, tolerance: 5})
+                        ]
+                    }),
+                ]}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+            >
             <Virtuoso
                 data={tracks}
                 overscan={10}
@@ -118,12 +133,12 @@ export const PlaylistList = ({
                 computeItemKey={(index, track) => track.id} //https://virtuoso.dev/message-list/item-keys/ this helped
                 itemContent={(index, track) => {
                     return (
-                        <Draggable id={track.id}>
+                        <DnDable id={track.id}>
                             <motion.div
                                 key={track.id}
                                 initial={{ opacity: 0 }}
                                 animate={{ 
-                                    opacity: track.id === activeTrack?.id ? 0.4 : 1,
+                                    opacity: 1,
                                 }}
                                 exit={{ opacity: 0 }}
                                 transition={{
@@ -138,7 +153,7 @@ export const PlaylistList = ({
                                     actions={actions}
                                 />  
                             </motion.div>
-                        </Draggable>
+                        </DnDable>
                     );
                 }}
             />
