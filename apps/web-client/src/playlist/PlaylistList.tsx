@@ -1,4 +1,4 @@
-import { delay, motion } from 'framer-motion';
+import { delay, motion, setTarget } from 'framer-motion';
 
 import { TrackItem } from '@/track/TrackItem';
 
@@ -7,7 +7,7 @@ import type { TrackBase } from '@/track/track.types';
 import { Virtuoso } from 'react-virtuoso';
 import { DnDable, Draggable } from '@/components/function/draggable';
 import { DragDropProvider, DragOverlay } from '@dnd-kit/react';
-import { PointerSensor, PointerActivationConstraints, type DragStartEvent, type DragEndEvent } from '@dnd-kit/dom';
+import { PointerSensor, PointerActivationConstraints, type DragStartEvent, type DragEndEvent, type DragMoveEvent, type DragOverEvent, Droppable } from '@dnd-kit/dom';
 import { useState } from 'react';
 import { Sortable } from '@/components/function/sortable';
 
@@ -80,22 +80,53 @@ export const PlaylistList = ({
     }
 
 
-    const [activeTrack, setActiveTrack] = useState<any>(null);
+    const [sourceTrack, setSourceTrack] = useState<TrackBase | null>(null);
+    const [targetTrack, setTargetTrack] = useState<TrackBase | null>(null);
+    const [dropBelow, setDropBelow] = useState<boolean>(true);
     function handleDragStart(event: DragStartEvent) {
         console.log("dragstart");
-        const track = tracks.find(t => t?.id === event.operation.source?.id);
-        if (track) {
+        const src = tracks.find(t => t?.id === event.operation.source?.id);
+        if (src) {
             console.log("selected");
-            setActiveTrack(track);
+            setSourceTrack(src);
+            setDropBelow(true);
         }
     }
-    function handleDragEnd(event: DragEndEvent) {
+    function handleDragMove(event: DragMoveEvent) {
+        if (!sourceTrack) return;
+        console.log("dragmove");
         const {operation} = event;
-        if (operation.source?.id !== operation.target?.id) {
+
+        if (!operation.target) {
+            setTargetTrack(null);
+        }
+
+        const tgt = tracks.find(t => t.id === event.operation.target?.id);
+        if (tgt) {
+            setTargetTrack(tgt);
+        }
+
+        const rect = operation.target?.element?.getBoundingClientRect();
+        if (!rect) return;
+        const midpointY = rect.top + (rect?.height / 2);
+        const cursorY = operation.position.current.y;
+        console.log(midpointY, cursorY);
+        if (cursorY < midpointY) {
+            setDropBelow(false);
+            console.log("above");
+        } else {
+            setDropBelow(true);
+            console.log("below");
+        } 
+    }
+    function handleDragEnd(event: DragEndEvent) {
+        if (targetTrack) {
             console.log("reorder");
+            console.log(targetTrack.title, dropBelow);
         }
         console.log("dragend")
-        setActiveTrack(null);
+        setSourceTrack(null);
+        setTargetTrack(null);
     }
 
     return (
@@ -112,6 +143,7 @@ export const PlaylistList = ({
                     }),
                 ]}
                 onDragStart={handleDragStart}
+                onDragMove={handleDragMove}
                 onDragEnd={handleDragEnd}
             >
             <Virtuoso
@@ -123,7 +155,7 @@ export const PlaylistList = ({
                 components={{
                     Footer: () => (
                         <div 
-                            style={{ height: `${bottomSpacing}px` }} 
+                            style={{ height: `${bottomSpacing}px` }}
                             className="flex justify-center pt-4"
                         >
                             {isFetchingNextPage && <div className="animate-spin h-6 w-6 border-2 border-primary rounded-full border-t-transparent" />}
@@ -133,7 +165,7 @@ export const PlaylistList = ({
                 computeItemKey={(index, track) => track.id} //https://virtuoso.dev/message-list/item-keys/ this helped
                 itemContent={(index, track) => {
                     return (
-                        <DnDable id={track.id}>
+                        <DnDable id={track.id}> 
                             <motion.div
                                 key={track.id}
                                 initial={{ opacity: 0 }}
@@ -159,7 +191,7 @@ export const PlaylistList = ({
             />
 
             <DragOverlay>
-                {activeTrack ? (
+                {sourceTrack ? (
                     <div style={{ 
                         transform: "scale(1.03)", // Optional: make it look slightly lifted
                         boxShadow: "0px 10px 20px rgba(0,0,0,0.15)",
@@ -167,7 +199,7 @@ export const PlaylistList = ({
                         transition: "transform 0.1s ease",
                     }}>
                         {/* Render a pure visual copy of your track item here */}
-                        <TrackItem track={activeTrack} onSelect={() => {}} index={-1} />
+                        <TrackItem track={sourceTrack} onSelect={() => {}} index={-1} />
                     </div>
                 ) : null}
             </DragOverlay>
