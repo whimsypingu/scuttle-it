@@ -45,6 +45,8 @@ class DatabaseManager(
 
         self.data_dir: Path = settings.DATA_DIR
 
+        self.NEW_POSITION_GAP = 100.0
+
         for key, value in overrides.items():
             if hasattr(self, key):
                 setattr(self, key, value)

@@ -17,11 +17,11 @@ class MaintenanceMixin:
                 await db.execute("DELETE FROM play_queue;") #clear contents of play queue
 
                 #insert into the play queue with normalized positions, this assigns a new play_queue.queue_id
-                await db.execute('''
+                await db.execute(f'''
                     INSERT INTO play_queue (track_internal_id, position, added_at)
                     SELECT
                         track_internal_id,
-                        ROW_NUMBER() OVER (ORDER BY position) * 100,
+                        ROW_NUMBER() OVER (ORDER BY position) * {self.NEW_POSITION_GAP},
                         added_at
                     FROM temp_play_queue;
                 ''')

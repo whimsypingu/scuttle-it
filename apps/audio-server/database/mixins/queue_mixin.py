@@ -28,7 +28,7 @@ class PlayQueueMixin:
                     RETURNING position;
                 ''')
                 row = await cursor.fetchone() #returns None if empty
-                first_position = row[0] if row is not None else 100.0
+                first_position = row[0] if row is not None else self.NEW_POSITION_GAP
 
                 #insert
                 await db.execute('''
@@ -49,8 +49,8 @@ class PlayQueueMixin:
     async def reorder_queue(self, queue_id, target_position: float) -> bool:
         """
         Intelligent self-healing reordering with three-zone logic:
-        1. < min: Min - 100
-        2. >= max: Max + 100
+        1. < min: Min - self.NEW_POSITION_GAP
+        2. >= max: Max + self.NEW_POSITION_GAP
         3. between: midpoint of nearest previous and next position
         """
         """Universal reordering: moves track to a new position. can be used for a loop all move to end"""
@@ -71,13 +71,13 @@ class PlayQueueMixin:
                 min_pos, max_pos, prev_pos, next_pos = tuple(row) #extract positions within queue
 
                 if min_pos is None: #empty queue (not including current track) edge case
-                    final_position = 100.0
+                    final_position = self.NEW_POSITION_GAP
 
                 if target_position < min_pos: #target position becomes first (current track)
-                    final_position = min_pos - 100.0
+                    final_position = min_pos - self.NEW_POSITION_GAP
                 
                 elif target_position >= max_pos: #target position is last
-                    final_position = max_pos + 100.0
+                    final_position = max_pos + self.NEW_POSITION_GAP
 
                 else: #gap found, put it in the best possible spot numerically
                     p = prev_pos if prev_pos is not None else min_pos
@@ -108,7 +108,7 @@ class PlayQueueMixin:
                 row = await cursor.fetchone()
                 current_max = row[0]
 
-                new_position = current_max + 100.0
+                new_position = current_max + self.NEW_POSITION_GAP
                 
                 #insert
                 await db.execute('''
@@ -141,9 +141,9 @@ class PlayQueueMixin:
                 rows = await cursor.fetchall()
 
                 if not rows:                                                                #empty queue, set to first
-                    new_position = 100.0
+                    new_position = self.NEW_POSITION_GAP
                 elif len(rows) == 1:                                                        #only one item, set to next
-                    new_position = rows[0]["position"] + 100.0
+                    new_position = rows[0]["position"] + self.NEW_POSITION_GAP
                 else:                                                                       #insert in second position
                     new_position = (rows[0]["position"] + rows[1]["position"]) / 2.0 
                 
@@ -242,7 +242,7 @@ class PlayQueueMixin:
 
                 #form the right data type to send to the queue
                 to_queue = [
-                    (row["internal_id"], (idx + 1) * 100) 
+                    (row["internal_id"], (idx + 1) * self.NEW_POSITION_GAP) 
                     for idx, row in enumerate(downloaded_rows)
                 ]
                 if to_queue:
@@ -281,7 +281,7 @@ class PlayQueueMixin:
 
                 #assign new positions to remainder of queue
                 to_queue = [
-                    (track["track_internal_id"], current_track["position"] + ((idx + 1) * 100))
+                    (track["track_internal_id"], current_track["position"] + ((idx + 1) * self.NEW_POSITION_GAP))
                     for idx, track in enumerate(shuffle_tracks)
                 ]
 

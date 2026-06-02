@@ -222,9 +222,9 @@ class PlaylistMixin:
                 #determine the new_position of the source track
                 if len(rows) == 1: #edge case literally where the track gets shifted to an edge
                     if payload.below:
-                        new_position = rows[0]["position"] + 100.0
+                        new_position = rows[0]["position"] + self.NEW_POSITION_GAP
                     else:
-                        new_position = rows[0]["position"] - 100.0
+                        new_position = rows[0]["position"] - self.NEW_POSITION_GAP
                 else:
                     new_position = (rows[0]["position"] + rows[1]["position"]) / 2.0
 
