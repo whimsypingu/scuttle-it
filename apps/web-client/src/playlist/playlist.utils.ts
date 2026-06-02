@@ -7,6 +7,8 @@ import { makeToast } from '@/features/toast/Toast';
 
 import type { ActiveEditTarget } from '@/features/edit/edit.types';
 import type { PlaylistActionProps } from '@/playlist/playlist.types';
+import type { Sortmode } from '@/store/hooks/hooks.types';
+import { REORDER_BLACKLIST } from './playlist.constants';
 
 
 export const usePlaylistActionHandler = () => {
@@ -66,3 +68,14 @@ export const usePlaylistActionHandler = () => {
 
     return handleAction;
 };
+
+
+export const isPlaylistReorderable = (playlistId: string | undefined, sortmode: Sortmode | undefined): boolean => {
+    if (!playlistId) return false;
+
+    if (sortmode !== 0) return false;
+
+    if (REORDER_BLACKLIST.includes(playlistId as any)) return false;
+
+    return true;
+}

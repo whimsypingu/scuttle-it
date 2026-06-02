@@ -52,6 +52,7 @@ export const useLikesContent = (limit: number = 30) => {
 
     return {
         tracks,
+        playlistId: "likes",
         sortmode,
         setSortmode,
         totalCount: data?.pages[0]?.totalCount ?? 0,

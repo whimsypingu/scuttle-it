@@ -8,8 +8,10 @@ import { Virtuoso } from 'react-virtuoso';
 import { DnDable, Draggable } from '@/components/function/draggable';
 import { DragDropProvider, DragOverlay } from '@dnd-kit/react';
 import { PointerSensor, PointerActivationConstraints, type DragStartEvent, type DragEndEvent, type DragMoveEvent, type DragOverEvent, Droppable } from '@dnd-kit/dom';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Sortable } from '@/components/function/sortable';
+import { usePlaylistsMutations } from '@/store/hooks/usePlaylists';
+import { isPlaylistReorderable } from './playlist.utils';
 
 
 export const PlaylistList = ({
@@ -21,10 +23,12 @@ export const PlaylistList = ({
 }: PlaylistListProps) => {
     const {
         tracks,
+        playlistId,
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
         isLoading,
+        sortmode,
     } = scrollContext;
 
     //loading state
@@ -80,21 +84,22 @@ export const PlaylistList = ({
     }
 
 
+    const allowReorder = isPlaylistReorderable(playlistId, sortmode);
     const [sourceTrack, setSourceTrack] = useState<TrackBase | null>(null);
     const [targetTrack, setTargetTrack] = useState<TrackBase | null>(null);
     const [dropBelow, setDropBelow] = useState<boolean>(true);
+
+    const { reorderPlaylist } = usePlaylistsMutations();
     function handleDragStart(event: DragStartEvent) {
-        console.log("dragstart");
+        if (!allowReorder) return;
         const src = tracks.find(t => t?.id === event.operation.source?.id);
         if (src) {
-            console.log("selected");
             setSourceTrack(src);
             setDropBelow(true);
         }
     }
     function handleDragMove(event: DragMoveEvent) {
-        if (!sourceTrack) return;
-        console.log("dragmove");
+        if (!allowReorder || !sourceTrack) return;
         const {operation} = event;
 
         if (!operation.target) {
@@ -108,23 +113,32 @@ export const PlaylistList = ({
 
         const rect = operation.target?.element?.getBoundingClientRect();
         if (!rect) return;
+
         const midpointY = rect.top + (rect?.height / 2);
         const cursorY = operation.position.current.y;
-        console.log(midpointY, cursorY);
+
+        // console.log(midpointY, cursorY);
         if (cursorY < midpointY) {
             setDropBelow(false);
-            console.log("above");
+            // console.log("above");
         } else {
             setDropBelow(true);
-            console.log("below");
+            // console.log("below");
         } 
     }
     function handleDragEnd(event: DragEndEvent) {
-        if (targetTrack) {
+        if (!allowReorder) return;
+        if (sourceTrack && targetTrack) {
+
             console.log("reorder");
             console.log(targetTrack.title, dropBelow);
+            reorderPlaylist({
+                playlistId,
+                sourceId: sourceTrack.id,
+                targetId: targetTrack.id,
+                below: dropBelow,
+            });
         }
-        console.log("dragend")
         setSourceTrack(null);
         setTargetTrack(null);
     }
@@ -164,26 +178,43 @@ export const PlaylistList = ({
                 }}
                 computeItemKey={(index, track) => track.id} //https://virtuoso.dev/message-list/item-keys/ this helped
                 itemContent={(index, track) => {
+                    const isCurrentTarget = allowReorder && targetTrack?.id === track.id;
+
+                    const borderStyle: React.CSSProperties = {
+                        marginTop: index === 0 ? "0px" : "-3px", //pull elements up by border size to share the borders with neighbors and prevent jumping lines
+                        borderTop: isCurrentTarget && !dropBelow ? "3px solid var(--color-brand)" : "3px solid transparent",
+                        borderBottom: isCurrentTarget && dropBelow ? "3px solid var(--color-brand)" : "3px solid transparent",
+                        boxSizing: "border-box",
+                        // position: "relative",
+                        // zIndex: isCurrentTarget ? 10 : 1,
+                        // boxShadow: isCurrentTarget
+                        //     ? !dropBelow
+                        //         ? "0 -3px 0 0 #3b82f6"
+                        //         : "0 3px 0 0 #3b82f6"
+                        //     : "none",
+                    }
+                    
                     return (
                         <DnDable id={track.id}> 
                             <motion.div
                                 key={track.id}
                                 initial={{ opacity: 0 }}
-                                animate={{ 
-                                    opacity: 1,
-                                }}
+                                animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
                                 transition={{
                                     duration: 0.3,
                                     delay: Math.min(index * 0.1, 0.1) //not perfect but it has a nice effect initially
                                 }}
+                                style={borderStyle}
                             >
-                                <TrackItem
-                                    track={track}
-                                    onSelect={handleTrackSelect}
-                                    index={index}
-                                    actions={actions}
-                                />  
+                                <div style={{opacity: allowReorder && sourceTrack?.id === track.id ? 0.2 : 1, transition: "opacity 0.15s ease-out"}}>
+                                    <TrackItem
+                                        track={track}
+                                        onSelect={handleTrackSelect}
+                                        index={index}
+                                        actions={actions}
+                                    />
+                                </div>
                             </motion.div>
                         </DnDable>
                     );

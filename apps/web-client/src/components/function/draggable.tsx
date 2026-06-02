@@ -28,18 +28,24 @@ export function DnDable({id, children}: {id: string; children?: React.ReactNode}
         dropRef(element);
     };
 
-    const style: React.CSSProperties = {
-        // We leave transform out here because our DragOverlay handles the moving visual!
-        opacity: isDragging ? 0.2 : 1, 
+    // const style: React.CSSProperties = {
+    //     // We leave transform out here because our DragOverlay handles the moving visual!
+    //     opacity: isDragging ? 0.2 : 1, 
         
-        // Give the user a clear indicator of which row they are hovering over
-        border: isDropTarget ? '2px dashed #3b82f6' : '2px solid transparent',
-        boxSizing: 'border-box',
-        transition: 'border-color 0.1s ease',
-    };
+    //     // Give the user a clear indicator of which row they are hovering over
+    //     border: isDropTarget ? '2px dashed #3b82f6' : '2px solid transparent',
+    //     boxSizing: 'border-box',
+    //     transition: 'border-color 0.1s ease',
+    // };
 
     return (
-        <div ref={combinedRef} style={style}>
+        // <div 
+        //     ref={combinedRef}
+        //     style={{
+        //         opacity: isDragging ? 0.2 : 1,
+        //     }}
+        // >
+        <div ref={combinedRef}>
             {children}
         </div>
     )

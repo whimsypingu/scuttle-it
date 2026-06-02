@@ -1,10 +1,11 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteData } from "@tanstack/react-query"
 import { useMemo, useState } from "react";
 
 import { makeToast } from "@/features/toast/Toast";
 
 import type { SummaryPlaylist } from "@/playlist/playlist.types";
-import type { CreatePlaylistPayload, SetPinMutationProps, Sortmode } from "@/store/hooks/hooks.types";
+import type { CreatePlaylistPayload, ReorderPlaylistPayload, SetPinMutationProps, Sortmode } from "@/store/hooks/hooks.types";
+import type { PlaylistTrack, TrackBase } from "@/track/track.types";
 
 
 
@@ -139,7 +140,8 @@ export const usePinsMutations = () => {
 export const usePlaylistContent = (playlistId: string, limit: number = 30) => {
     const [sortmode, setSortmode] = useState<Sortmode>(0);
 
-    const queryKey = ["tracks", "playlist", playlistId, sortmode];
+    const queryClient = useQueryClient(); //modify the infinite cache
+    const queryKey = ["tracks", "playlists", playlistId, sortmode];
 
     //fetch playlist
     const {
@@ -174,6 +176,7 @@ export const usePlaylistContent = (playlistId: string, limit: number = 30) => {
 
     return {
         tracks,
+        playlistId,
         sortmode,
         setSortmode,
         totalCount: data?.pages[0]?.totalCount ?? 0,
@@ -244,7 +247,105 @@ export const usePlaylistsMutations = () => {
         },
     });
 
+    const reorderPlaylistMutation = useMutation({
+        mutationFn: async (payload: ReorderPlaylistPayload) => {
+            const response = await fetch(`/playlists/reorder`, { 
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) throw new Error(`Failed to reorder`);
+
+            const data = await response.json();
+            return data;
+        },
+        onMutate: async (variables) => {
+            const playlistKey = ["tracks", "playlists", variables.playlistId, 0];
+            const rollbackPlaylist = queryClient.getQueryData(playlistKey);
+
+            queryClient.setQueryData<InfiniteData<any>>(playlistKey, (old: any) => {
+                if (!old?.pages) return old;
+
+                // POSITION CHECKING GUARD
+                // Case A: Dropping an item onto itself is a complete no-op
+                if (variables.sourceId === variables.targetId) return old;
+
+                // Find the absolute positions across the infinite layout pages
+                let sourcePageIndex = -1;
+                let sourceTrackIndex = -1;
+                let targetPageIndex = -1;
+                let targetTrackIndex = -1;
+
+                let sourceTrack: TrackBase | null = null;
+
+                old.pages.forEach((page: any, pIdx: number) => {
+                    page.results.forEach((track: TrackBase, tIdx: number) => {
+                        if (track.id === variables.sourceId) {
+                            sourcePageIndex = pIdx;
+                            sourceTrackIndex = tIdx;
+                            sourceTrack = track;
+                        }
+                        if (track.id === variables.targetId) {
+                            targetPageIndex = pIdx;
+                            targetTrackIndex = tIdx;
+                        }
+                    });
+                });
+
+                // SAFETY EXISTENCE GUARD
+                if (sourcePageIndex === -1 || targetPageIndex === -1) return old;
+
+                // Case B & C: Edge case of redundant non-movements within the same page
+                if (sourcePageIndex === targetPageIndex) {
+                    if (variables.below && targetTrackIndex === sourceTrackIndex - 1) return old;
+                    if (!variables.below && targetTrackIndex === sourceTrackIndex + 1) return old;
+                } 
+
+                // RECONSTRUCT DATA IN ONE PASS
+                const finalPages = old.pages.map((page: any, pIdx: number) => {
+                    const isSourcePage = pIdx === sourcePageIndex;
+                    const isTargetPage = pIdx === targetPageIndex;
+
+                    if (!isSourcePage && !isTargetPage) return page; //uninvolved page, return instantly
+
+                    let nextResults = [...page.results];
+
+                    if (isSourcePage) {
+                        nextResults = nextResults.filter((t: TrackBase) => t.id !== variables.sourceId);
+                    }
+
+                    if (isTargetPage) {
+                        const freshTargetIdx = nextResults.findIndex((t: TrackBase) => t.id === variables.targetId);
+                        const insertionIndex = variables.below ? freshTargetIdx + 1 : freshTargetIdx;
+
+                        nextResults.splice(insertionIndex, 0, sourceTrack);
+                    }
+
+                    return {
+                        ...page,
+                        results: nextResults,
+                    };
+                });
+
+                return {
+                    ...old,
+                    pages: finalPages,
+                };
+            });
+
+            return { rollbackPlaylist };
+        },
+        onError: (err, variables, context) => {
+            makeToast("Error");
+        },
+    });
+
+
     return {
         createPlaylist: createPlaylistMutation.mutate,
+        reorderPlaylist: reorderPlaylistMutation.mutate,
     };
 };

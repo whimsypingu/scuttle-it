@@ -46,6 +46,7 @@ export interface PlaylistItemProps {
 //things required to make an infinitely scrolling playlist displayable
 export interface InfiniteScrollContext {
     tracks: TrackBase[];
+    playlistId: PlaylistId;
     fetchNextPage: () => void;
     hasNextPage: boolean;
     isFetchingNextPage: boolean;
