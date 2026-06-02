@@ -154,10 +154,9 @@ export const TrackItem = ({
                 onDragEnd={handleDragEnd}
                 onTap={handleTap}
 
-				whileTap={!isDragging ? { scale: 0.98 } : {}}
 				transition={{ type: "spring", stiffness: 400, damping: 30 }}
 			
-				className="flex flex-row items-center gap-4 py-2 px-3 bg-background rounded-lg active:cursor-grabbing relative z-10 shadow-xl"
+				className="flex flex-row items-center gap-4 py-2 px-3 bg-background rounded-lg active:cursor-grabbing relative z-10 shadow-xl active:scale-[0.98] transition-transform duration-100 ease-out"
 			>
 				<div className={`
 					w-12 h-12 
