@@ -3,7 +3,7 @@ import {useDraggable, useDroppable} from '@dnd-kit/react';
 import type React from 'react';
 
 
-export function DnDable({id, allow, children}: {id: string; allow: boolean; children?: React.ReactNode}) {
+export function DnDable({id, allow, children}: {id: string | number; allow: boolean; children?: React.ReactNode}) {
     const { ref: dragRef } = useDraggable({ id, disabled: !allow });
     const { ref: dropRef } = useDroppable({ id, disabled: !allow });
 

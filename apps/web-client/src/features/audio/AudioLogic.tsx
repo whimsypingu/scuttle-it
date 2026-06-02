@@ -48,8 +48,7 @@ export const AudioLogic = () => {
                     break;
                 case 1: // Loop all
                     if (queue.length > 1 && nextTrack && lastTrack) {
-                        const newTargetPosition = lastTrack.position + 1;
-                        reorder({ queueTrack: currentTrack, targetPosition: newTargetPosition }); //replace with reorder to end
+                        reorder({ sourceQueueId: currentTrack.queueId, targetQueueId: lastTrack.queueId, below: true }); //replace with reorder to end
                         audioEngine.playTrack({ trackId: nextTrack.id, forceRestart: true }) //play
                     } else {
                         audioEngine.playTrack({ trackId: currentTrack.id, forceRestart: true }) //play
