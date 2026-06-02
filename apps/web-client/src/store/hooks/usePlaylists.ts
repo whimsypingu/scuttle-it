@@ -140,7 +140,6 @@ export const usePinsMutations = () => {
 export const usePlaylistContent = (playlistId: string, limit: number = 30) => {
     const [sortmode, setSortmode] = useState<Sortmode>(0);
 
-    const queryClient = useQueryClient(); //modify the infinite cache
     const queryKey = ["tracks", "playlists", playlistId, sortmode];
 
     //fetch playlist
@@ -196,7 +195,7 @@ export const usePlaylistContent = (playlistId: string, limit: number = 30) => {
  * Performs mutations of playlists
  */
 export const usePlaylistsMutations = () => {
-    const queryClient = useQueryClient();
+    const queryClient = useQueryClient(); //modify the infinite cache
     const queryKey = ["playlists"];
 
     //create a playlist
@@ -345,6 +344,12 @@ export const usePlaylistsMutations = () => {
         },
         onError: (err, variables, context) => {
             makeToast("Error");
+ 
+            const playlistKey = variables.playlistId === "likes" ? ["tracks", "likes", 0] : ["tracks", "playlists", variables.playlistId, 0];
+            if (context?.rollbackPlaylist) {
+                queryClient.setQueryData(playlistKey, context.rollbackPlaylist);
+            }
+            console.log("Optimistic playlist creation, rolling back.");
         },
     });
 
