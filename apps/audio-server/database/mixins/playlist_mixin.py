@@ -165,6 +165,7 @@ class PlaylistMixin:
         """Reorder a track within the specified Playlist"""
         logger.info(f"Reordering track_id: {payload.source_id} within playlist_id: {playlist_id}...")
 
+        #trick to get the (up to) two tracks that surround the new position of the source track after reordering (includes source track)
         operator = ">=" if payload.below else "<="
         ordering = "ASC" if payload.below else "DESC"
 
@@ -212,10 +213,6 @@ class PlaylistMixin:
                 cursor = await db.execute(query, params)
                 rows = await cursor.fetchall()
 
-                logger.info(f"payload: {payload} row_count: {len(rows)}")
-                for r in rows:
-                    logger.info(f"id: {r['id']} position: {r['position']}")
-
                 if not rows or len(rows) > 2: #handle edge case of nothing or too much getting found somehow
                     return False
                 
@@ -231,9 +228,7 @@ class PlaylistMixin:
                 else:
                     new_position = (rows[0]["position"] + rows[1]["position"]) / 2.0
 
-                logger.info(f"new_position: {new_position}")
-
-                #re-assign position value of the source track
+                #re-assign position value of the source track, handling likes separately
                 match playlist_id:
                     case "likes":
                         update_query = f'''
