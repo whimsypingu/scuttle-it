@@ -9,6 +9,12 @@ class IncrementListenDurationPayload(ScuttleBase):
     listen_duration: float
 
 
+class ReorderQueuePayload(ScuttleBase):
+    source_queue_id: int
+    target_queue_id: int
+    below: bool
+
+
 #see: apps/web-client/src/store/hooks/hooks.types.ts
 class EditArtistPayload(ScuttleBase):
     id: str | None = None #optional external source ID to identify which artist to edit

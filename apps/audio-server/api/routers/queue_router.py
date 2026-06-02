@@ -1,6 +1,6 @@
 import traceback
 
-from fastapi import APIRouter, Depends, Path, Query, HTTPException
+from fastapi import APIRouter, Body, Depends, Path, Query, HTTPException
 
 from api.dependencies import get_db_manager, get_dl_queue
 from database.database_manager import DatabaseManager
@@ -8,6 +8,7 @@ from core.download.download_queue import DownloadQueue
 from core.models.jobs import DownloadJob
 
 from core.models.responses import PopQueueResponse, PushNextQueueResponse, PushQueueResponse, SetAllQueueResponse, SetFirstQueueResponse, ShuffleQueueResponse
+from core.models.payloads import ReorderQueuePayload
 
 QueueRouter = APIRouter(prefix="/queue", tags=["Queue"])
 
@@ -46,14 +47,13 @@ async def set_first_play_queue(
         raise DefaultCrashException
 
 
-@QueueRouter.post("/reorder")
+@QueueRouter.patch("/reorder")
 async def reorder_queue(
-    queue_id: int = Query(..., description="Unique instance ID of the queued track to reorder"),
-    target_position: float = Query(..., description="Target position float"),
+    payload: ReorderQueuePayload = Body(...), #automatically parse JSON body into pydantic model
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        await db_manager.reorder_queue(queue_id, target_position) #status after attempting reorder
+        await db_manager.reorder_queue(payload) #status after attempting reorder
         updated_queue = await db_manager.get_play_queue() #get the updated queue
 
         return {
