@@ -110,7 +110,7 @@ export interface SetPinMutationProps {
     pinned: boolean;
 }
 
-export interface ReorderPlaylistPayload {
+export interface ReorderPlaylistMutationProps {
     playlistId: PlaylistId;
     sourceId: string;
     targetId: string;

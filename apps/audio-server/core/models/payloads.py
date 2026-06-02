@@ -37,3 +37,8 @@ class EditPlaylistPayload(ScuttleBase):
     id: str | None = None #optional external source ID to identify which artist to edit
     name: str | None = None
     description: str | None = None
+
+class ReorderPlaylistPayload(ScuttleBase):
+    source_id: str
+    target_id: str
+    below: bool

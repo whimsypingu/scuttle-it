@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import { makeToast } from "@/features/toast/Toast";
 
 import type { SummaryPlaylist } from "@/playlist/playlist.types";
-import type { CreatePlaylistPayload, ReorderPlaylistPayload, SetPinMutationProps, Sortmode } from "@/store/hooks/hooks.types";
-import type { PlaylistTrack, TrackBase } from "@/track/track.types";
+import type { CreatePlaylistPayload, ReorderPlaylistMutationProps, SetPinMutationProps, Sortmode } from "@/store/hooks/hooks.types";
+import type { TrackBase } from "@/track/track.types";
 
 
 
@@ -248,13 +248,18 @@ export const usePlaylistsMutations = () => {
     });
 
     const reorderPlaylistMutation = useMutation({
-        mutationFn: async (payload: ReorderPlaylistPayload) => {
-            const response = await fetch(`/playlists/reorder`, { 
+        mutationFn: async ({ playlistId, sourceId, targetId, below }: ReorderPlaylistMutationProps) => {
+            
+            const response = await fetch(`/playlists/reorder/${playlistId}`, { 
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(payload),
+                body: JSON.stringify({
+                    sourceId,
+                    targetId,
+                    below,
+                }),
             });
 
             if (!response.ok) throw new Error(`Failed to reorder`);

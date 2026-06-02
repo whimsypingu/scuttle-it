@@ -3,7 +3,7 @@ import logging
 from database.mixins.mixin_utils import row_to_summary_playlist
 
 from core.models.playlist import SummaryPlaylist
-from core.models.payloads import CreatePlaylistPayload
+from core.models.payloads import CreatePlaylistPayload, ReorderPlaylistPayload
 
 logger = logging.getLogger(__name__)
 
@@ -159,3 +159,65 @@ class PlaylistMixin:
         except Exception:
             logger.exception("Failed to retrieve Pinned Playlists")
             raise
+
+
+    async def reorder_playlist(self, playlist_id: str, payload: ReorderPlaylistPayload) -> bool:
+        """Reorder a track within the specified Playlist"""
+
+        operator = ">=" if payload.below else "<="
+        ordering = "ASC" if payload.below else "DESC"
+        query = f'''
+            SELECT t.id, pt.position
+            FROM playlist_tracks pt
+            JOIN playlists p ON p.internal_id = pt.playlist_internal_id
+            JOIN tracks t ON t.internal_id = pt.track_internal_id
+            WHERE p.id = ?
+                AND pt.position {operator} (
+                    SELECT inner_pt.position
+                    FROM playlist_tracks inner_pt
+                    JOIN tracks inner_t ON inner_t.internal_id = inner_pt.track_internal_id
+                    WHERE inner_pt.playlist_internal_id = p.internal_id AND inner_t.id = ?
+                )
+            ORDER BY pt.position {ordering}
+            LIMIT 2;
+        '''
+
+        try:
+            async with self.session() as db:
+                cursor = await db.execute(query, (playlist_id, payload.target_id))
+                rows = await cursor.fetchall()
+
+                logger.info(f"payload: {payload}")
+                logger.info(f"row count: {len(rows)}, rows: {rows}")
+                for row in rows:
+                    logger.info(f"row: {row["id"]}, position: {row["position"]}")
+
+                if not rows:
+                    return False
+                
+                if payload.source_id in [row["id"] for row in rows]:
+                    return False
+                
+                if len(rows) == 1:
+                    if payload.below:
+                        new_position = rows[0]["position"] + 100.0
+                    else:
+                        new_position = rows[0]["position"] - 100.0
+                else:
+                    new_position = (rows[0]["position"] + rows[1]["position"]) / 2.0
+
+                logger.info(f"new_position: {new_position}")
+                    
+                await db.execute('''
+                    UPDATE playlist_tracks
+                    SET position = ?
+                    WHERE playlist_internal_id = (SELECT internal_id FROM playlists WHERE id = ?)
+                        AND track_internal_id = (SELECT internal_id FROM tracks WHERE id = ?);
+                ''', (new_position, playlist_id, payload.source_id))
+                return True
+        except Exception:
+            logger.exception("Failed to retrieve Pinned Playlists")
+            raise
+
+
+

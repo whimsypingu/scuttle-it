@@ -4,7 +4,7 @@ from fastapi import APIRouter, Body, Depends, Path, HTTPException, Query
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
 
-from core.models.payloads import CreatePlaylistPayload, EditPlaylistPayload
+from core.models.payloads import CreatePlaylistPayload, EditPlaylistPayload, ReorderPlaylistPayload
 
 PlaylistRouter = APIRouter(prefix="/playlists", tags=["Playlists"])
 
@@ -109,6 +109,22 @@ async def get_pinned_playlists_endpoint(
         return {
             "success": True,
             "playlists": results,
+        }
+    except Exception as e:
+        traceback.print_exc()
+        raise DefaultCrashException
+
+
+@PlaylistRouter.patch("/reorder/{playlist_id}")
+async def reorder_playlist_endpoint(
+    playlist_id: str = Path(..., min_length=1, description="Playlist ID"),
+    payload: ReorderPlaylistPayload = Body(...), #automatically parse JSON body into pydantic model
+    db_manager: DatabaseManager = Depends(get_db_manager)
+):
+    try: 
+        await db_manager.reorder_playlist(playlist_id, payload)
+        return {
+            "success": True,
         }
     except Exception as e:
         traceback.print_exc()
