@@ -6,7 +6,7 @@ import { getTrackDisplayMetadata, trackBaseToPlaylistTrack } from '@/track/track
 
 import type { InfiniteData } from '@tanstack/react-query';
 import type { PlaylistTrack } from '@/track/track.types';
-import type { SetLikeMutationProps, Sortmode } from '@/store/hooks/hooks.types';
+import type { ReorderPlaylistPayload, SetLikeMutationProps, Sortmode } from '@/store/hooks/hooks.types';
 
 
 /**

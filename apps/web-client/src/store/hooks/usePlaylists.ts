@@ -263,7 +263,7 @@ export const usePlaylistsMutations = () => {
             return data;
         },
         onMutate: async (variables) => {
-            const playlistKey = ["tracks", "playlists", variables.playlistId, 0];
+            const playlistKey = variables.playlistId === "likes" ? ["tracks", "likes", 0] : ["tracks", "playlists", variables.playlistId, 0];
             const rollbackPlaylist = queryClient.getQueryData(playlistKey);
 
             queryClient.setQueryData<InfiniteData<any>>(playlistKey, (old: any) => {
