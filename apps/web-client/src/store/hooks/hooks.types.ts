@@ -1,5 +1,5 @@
 import type { PlaylistBase, PlaylistId, SummaryPlaylist } from "@/playlist/playlist.types";
-import type { QueueTrack, TrackBase, TrackId } from "@/track/track.types";
+import type { QueueId, QueueTrack, TrackBase, TrackId } from "@/track/track.types";
 import type { IconProps } from "@phosphor-icons/react";
 
 
@@ -42,9 +42,9 @@ export interface SetFirstMutationProps {
     track: TrackBase;
 }
 export interface ReorderMutationProps {
-    queueTrack: QueueTrack;
-    targetPosition: number;
-    successMsg?: string;
+    sourceQueueId: QueueId;
+    targetQueueId: QueueId;
+    below: boolean;
 }
 export interface PushMutationProps {
     track: TrackBase;
@@ -112,7 +112,7 @@ export interface SetPinMutationProps {
 
 export interface ReorderPlaylistMutationProps {
     playlistId: PlaylistId;
-    sourceId: string;
-    targetId: string;
+    sourceId: TrackId;
+    targetId: TrackId;
     below: boolean;
 }

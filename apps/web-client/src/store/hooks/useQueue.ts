@@ -75,29 +75,56 @@ export const useQueue = () => {
         },
     });
 
+    //reorder queue tracks
     const reorderMutation = useMutation({
-        mutationFn: async ({ queueTrack, targetPosition }: ReorderMutationProps) => {
-            const response = await fetch(`/queue/reorder?queue_id=${queueTrack.queueId}&target_position=${targetPosition}`, { method: "POST" });
+        mutationFn: async ({ sourceQueueId, targetQueueId, below }: ReorderMutationProps) => {
+            const response = await fetch(`/queue/reorder`, { 
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    sourceQueueId,
+                    targetQueueId,
+                    below,
+                }),
+            });
 
             if (!response.ok) throw new Error("Failed to reorder within queue");
 
             const data = await response.json();
             return data;
         },
-        onMutate: async ({ queueTrack, targetPosition }) => {
+        onMutate: async (variables) => {
             await queryClient.cancelQueries({ queryKey });
             const rollbackQueue = queryClient.getQueryData(queryKey);
 
             queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
                 if (!old) return []; //handle undefined, then replace position of the track and try saving the newly sorted queue
-                return old
-                    .map(t => t.queueId === queueTrack.queueId ? { ...t, position: targetPosition } : t)
-                    .sort((a, b) => a.position - b.position);
+
+                // POSITION CHECKING GUARD
+                if (variables.sourceQueueId === variables.targetQueueId) return old;
+
+                const sourceIdx = old.findIndex(t => t.queueId === variables.sourceQueueId);
+                const targetIdx = old.findIndex(t => t.queueId === variables.targetQueueId);
+
+                if (variables.below && targetIdx === sourceIdx - 1) return old;
+                if (!variables.below && targetIdx === sourceIdx + 1) return old;
+
+                //modification
+                const cleanList = [...old]
+                const [moved] = cleanList.splice(sourceIdx, 1);
+
+                const freshTargetIdx = cleanList.findIndex(t => t.queueId === variables.targetQueueId);
+                const insertionIndex = variables.below ? freshTargetIdx + 1 : freshTargetIdx;
+
+                cleanList.splice(insertionIndex, 0, moved);
+                return cleanList
             });
 
             return { rollbackQueue };
         },
-        onError: (err, queueTrack, context) => {
+        onError: (err, variables, context) => {
             if (context?.rollbackQueue) {
                 queryClient.setQueryData(queryKey, context.rollbackQueue);
             }
