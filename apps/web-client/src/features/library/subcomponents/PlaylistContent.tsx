@@ -1,13 +1,14 @@
 import { motion } from 'framer-motion';
 import { XIcon } from '@phosphor-icons/react';
 
+import { usePlaylistContent } from '@/store/hooks/usePlaylists';
+
 import { PlaylistList } from '@/playlist/PlaylistList';
 import { PlaylistInfo } from '@/playlist/PlaylistInfo';
 
 import { BOTTOM_SHELF } from '@/features/player/player.constants';
 
 import type { SummaryPlaylist } from '@/playlist/playlist.types';
-import { usePlaylistContent } from '@/store/hooks/usePlaylists';
 
 
 interface PlaylistContentViewProps {

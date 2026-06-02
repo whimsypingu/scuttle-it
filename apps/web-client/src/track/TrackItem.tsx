@@ -6,7 +6,6 @@ import { MusicNoteIcon, ShoppingBagIcon } from '@phosphor-icons/react';
 
 import { getTrackDisplayMetadata, useTrackActionHandler } from '@/track/track.utils';
 import { formatTime } from '@/features/audio/audio.utils';
-import { audioEngine } from '@/features/audio/audioEngine';
 
 import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/track/track.constants';
 

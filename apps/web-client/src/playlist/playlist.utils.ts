@@ -70,6 +70,7 @@ export const usePlaylistActionHandler = () => {
 };
 
 
+//helper to determine if a playlist can be reordered
 export const isPlaylistReorderable = (playlistId: string | undefined, sortmode: Sortmode | undefined): boolean => {
     if (!playlistId) return false;
 

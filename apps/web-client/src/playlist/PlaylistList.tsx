@@ -1,17 +1,19 @@
-import { delay, motion, setTarget } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Virtuoso } from 'react-virtuoso';
+import { DragDropProvider, DragOverlay } from '@dnd-kit/react';
+import { PointerSensor, PointerActivationConstraints } from '@dnd-kit/dom';
+
+import { usePlaylistsMutations } from '@/store/hooks/usePlaylists';
 
 import { TrackItem } from '@/track/TrackItem';
+import { DnDable } from '@/components/function/dndable';
 
+import { isPlaylistReorderable } from '@/playlist/playlist.utils';
+
+import type { DragStartEvent, DragMoveEvent, DragEndEvent } from '@dnd-kit/dom';
 import type { PlaylistListProps } from '@/playlist/playlist.types';
 import type { TrackBase } from '@/track/track.types';
-import { Virtuoso } from 'react-virtuoso';
-import { DnDable, Draggable } from '@/components/function/draggable';
-import { DragDropProvider, DragOverlay } from '@dnd-kit/react';
-import { PointerSensor, PointerActivationConstraints, type DragStartEvent, type DragEndEvent, type DragMoveEvent, type DragOverEvent, Droppable } from '@dnd-kit/dom';
-import React, { useState } from 'react';
-import { Sortable } from '@/components/function/sortable';
-import { usePlaylistsMutations } from '@/store/hooks/usePlaylists';
-import { isPlaylistReorderable } from './playlist.utils';
 
 
 export const PlaylistList = ({
@@ -83,16 +85,20 @@ export const PlaylistList = ({
         console.log("Selected track:", track.title);
     }
 
+    //reordering logic
+    const allowReorder = isPlaylistReorderable(playlistId, sortmode); //prevent reordering
 
-    const allowReorder = isPlaylistReorderable(playlistId, sortmode);
-    const [sourceTrack, setSourceTrack] = useState<TrackBase | null>(null);
+    const [sourceTrack, setSourceTrack] = useState<TrackBase | null>(null); //reorder state variables
     const [targetTrack, setTargetTrack] = useState<TrackBase | null>(null);
-    const [dropBelow, setDropBelow] = useState<boolean>(true);
+    const [dropBelow, setDropBelow] = useState<boolean>(true); //whether to drop below the target element or not
 
     const { reorderPlaylist } = usePlaylistsMutations();
+
+    //dnd-kit dragdropprovider uses these
     function handleDragStart(event: DragStartEvent) {
         if (!allowReorder) return;
-        const src = tracks.find(t => t?.id === event.operation.source?.id);
+
+        const src = tracks.find(t => t?.id === event.operation.source?.id); //find and set the dragged track
         if (src) {
             setSourceTrack(src);
             setDropBelow(true);
@@ -100,24 +106,23 @@ export const PlaylistList = ({
     }
     function handleDragMove(event: DragMoveEvent) {
         if (!allowReorder || !sourceTrack) return;
-        const {operation} = event;
 
-        if (!operation.target) {
+        if (!event.operation.target) {
             setTargetTrack(null);
         }
 
-        const tgt = tracks.find(t => t.id === event.operation.target?.id);
+        const tgt = tracks.find(t => t.id === event.operation.target?.id); //find the track being dragged on top of
         if (tgt) {
             setTargetTrack(tgt);
         }
 
-        const rect = operation.target?.element?.getBoundingClientRect();
-        if (!rect) return;
+        //handle the intermediate cutoff for whether to send below or not
+        const rect = event.operation.target?.element?.getBoundingClientRect();
+        if (!rect) return; //possibly unhandled failure case
 
         const midpointY = rect.top + (rect?.height / 2);
-        const cursorY = operation.position.current.y;
+        const cursorY = event.operation.position.current.y;
 
-        // console.log(midpointY, cursorY);
         if (cursorY < midpointY) {
             setDropBelow(false);
             // console.log("above");
@@ -128,10 +133,9 @@ export const PlaylistList = ({
     }
     function handleDragEnd(event: DragEndEvent) {
         if (!allowReorder) return;
-        if (sourceTrack && targetTrack) {
 
-            console.log("reorder");
-            console.log(targetTrack.title, dropBelow);
+        if (sourceTrack && targetTrack) {
+            // console.log(targetTrack.title, dropBelow);
             reorderPlaylist({
                 playlistId,
                 sourceId: sourceTrack.id,
@@ -139,7 +143,7 @@ export const PlaylistList = ({
                 below: dropBelow,
             });
         }
-        setSourceTrack(null);
+        setSourceTrack(null); //clear state variables
         setTargetTrack(null);
     }
 
@@ -180,22 +184,22 @@ export const PlaylistList = ({
                 itemContent={(index, track) => {
                     const isCurrentTarget = allowReorder && targetTrack?.id === track.id;
 
+                    //apply this to the outer div
                     const borderStyle: React.CSSProperties = {
                         marginTop: index === 0 ? "0px" : "-3px", //pull elements up by border size to share the borders with neighbors and prevent jumping lines
                         borderTop: isCurrentTarget && !dropBelow ? "3px solid var(--color-brand)" : "3px solid transparent",
                         borderBottom: isCurrentTarget && dropBelow ? "3px solid var(--color-brand)" : "3px solid transparent",
                         boxSizing: "border-box",
-                        // position: "relative",
-                        // zIndex: isCurrentTarget ? 10 : 1,
-                        // boxShadow: isCurrentTarget
-                        //     ? !dropBelow
-                        //         ? "0 -3px 0 0 #3b82f6"
-                        //         : "0 3px 0 0 #3b82f6"
-                        //     : "none",
-                    }
+                    };
+
+                    //apply this to the inner div so opacity doesn't affect the border
+                    const opacityStyle: React.CSSProperties = {
+                        opacity: allowReorder && sourceTrack?.id === track.id ? 0.2 : 1,
+                        transition: "opacity 0.15s ease-out",
+                    };
                     
                     return (
-                        <DnDable id={track.id}> 
+                        <DnDable id={track.id} allow={allowReorder}>
                             <motion.div
                                 key={track.id}
                                 initial={{ opacity: 0 }}
@@ -207,7 +211,7 @@ export const PlaylistList = ({
                                 }}
                                 style={borderStyle}
                             >
-                                <div style={{opacity: allowReorder && sourceTrack?.id === track.id ? 0.2 : 1, transition: "opacity 0.15s ease-out"}}>
+                                <div style={opacityStyle}>
                                     <TrackItem
                                         track={track}
                                         onSelect={handleTrackSelect}
@@ -224,12 +228,12 @@ export const PlaylistList = ({
             <DragOverlay>
                 {sourceTrack ? (
                     <div style={{ 
-                        transform: "scale(1.03)", // Optional: make it look slightly lifted
+                        transform: "scale(1.03)", // larger makes it look lifted?
                         boxShadow: "0px 10px 20px rgba(0,0,0,0.15)",
                         cursor: "grabbing",
                         transition: "transform 0.1s ease",
                     }}>
-                        {/* Render a pure visual copy of your track item here */}
+                        {/* PURE VISUAL COPY */}
                         <TrackItem track={sourceTrack} onSelect={() => {}} index={-1} />
                     </div>
                 ) : null}
