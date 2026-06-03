@@ -88,10 +88,9 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
         queryFn: async () => {
             console.log("useEditPlaylist triggered");
 
-            const response = await fetch(`/retrieve/playlist/${playlist.id}`, { method: "GET" });
-            if (!response.ok) throw new Error("Failed to fetch playlist details");
-            
-            const data = await response.json();
+            const data = await apiRequest(`/retrieve/playlist/${playlist.id}`, {
+                method: "GET",
+            });
             return data as PlaylistDetails;
         },
         staleTime: 1000 * 60 * 5, //five minute cd for refetch if necessary
@@ -100,20 +99,15 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
     const editPlaylistMutation = useMutation({
         mutationFn: async (payload: EditPlaylistPayload) => {
             //see: apps/audio-server/api/routers/edit_router.py
-            const response = await fetch(`/playlists/edit/${playlist.id}`, {
+            return await apiRequest(`/playlists/edit/${playlist.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(payload),
             });
-
-            if (!response.ok) throw new Error("Failed to edit playlist");
-
-            const data = await response.json();
-            return data;
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
             //refetch all data that could possibly have the edited playlist
             queryClient.invalidateQueries({ queryKey: ["details", "playlists", playlist.id] }); //invalidate the edit-showable playlist data 
             queryClient.invalidateQueries({ queryKey: ["playlists"] }); //invalidate the counts of playlists 
@@ -130,16 +124,11 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
     const queryKey = ["playlists"];
     const deletePlaylistMutation = useMutation({
         mutationFn: async() => {
-            const response = await fetch(`/playlists/${playlist.id}`, {
+            return await apiRequest(`/playlists/${playlist.id}`, {
                 method: "DELETE",
             });
-
-            if (!response.ok) throw new Error("Failed to delete playlist");
-
-            const data = await response.json();
-            return data;
         },
-        onMutate: async() => {
+        onMutate: async(variables) => {
             await queryClient.cancelQueries({ queryKey });
             const rollbackPlaylists = queryClient.getQueryData<SummaryPlaylist[]>(queryKey);
 
@@ -149,7 +138,7 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
 
             return { rollbackPlaylists };
         },
-        onError: (err, data, context) => {
+        onError: (err, variables, context) => {
             makeToast("", "Error");
 
             if (context?.rollbackPlaylists) {
@@ -157,7 +146,7 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
             }
             console.log("Optimistic playlist deletion failed, rolling back.");
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
             makeToast("Deleted: ", playlist.name);
 
             queryClient.invalidateQueries({ queryKey });
