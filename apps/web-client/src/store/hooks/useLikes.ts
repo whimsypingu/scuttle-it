@@ -30,9 +30,9 @@ export const useLikesContent = (limit: number = 30) => {
         queryKey,
         initialPageParam: 0,
         queryFn: async ({ pageParam }) => {
-            console.log("useLikesContent triggered");
-
-            const response = await fetch(`/retrieve/likes?offset=${pageParam}&limit=${limit}&sortmode=${sortmode}`, { method: "GET" });
+            const response = await fetch(`/retrieve/likes?offset=${pageParam}&limit=${limit}&sortmode=${sortmode}`, {
+                method: "GET",
+            });
             if (!response.ok) throw new Error("Failed to fetch likes");
 
             const data = await response.json();
@@ -77,12 +77,12 @@ export const useLikesMutations = () => {
     //set a track to liked or unliked state
     const setLikeMutation = useMutation({
         mutationFn: async ({ track, liked }: SetLikeMutationProps) => {
-            const response = await fetch(`/like/set?track_id=${track.id}&liked=${liked}`, { method: "POST" });
-
+            const response = await fetch(`/like/set?track_id=${track.id}&liked=${liked}`, {
+                method: "POST",
+            });
             if (!response.ok) throw new Error(`Failed to ${liked ? "like" : "unlike"}`);
 
-            const data = await response.json();
-            return data;
+            return null;
         },
         onMutate: async (variables) => {
             await queryClient.cancelQueries({ queryKey: rootKey });

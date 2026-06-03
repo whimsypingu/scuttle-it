@@ -21,9 +21,9 @@ export const usePlaylists = () => {
     const getPlaylists = useQuery({
         queryKey,
         queryFn: async () => {
-            console.log("usePlaylists triggered");
-
-            const response = await fetch(`/playlists`, { method: "GET" });
+            const response = await fetch(`/playlists`, {
+                method: "GET",
+            });
             if (!response.ok) throw new Error("Failed to fetch playlists");
             
             const data = await response.json();
@@ -54,9 +54,9 @@ export const usePins = () => {
     const getPlaylists = useQuery({
         queryKey,
         queryFn: async () => {
-            console.log("usePinnedPlaylists triggered");
-
-            const response = await fetch(`/playlists/pins`, { method: "GET" });
+            const response = await fetch(`/playlists/pins`, {
+                method: "GET",
+            });
             if (!response.ok) throw new Error("Failed to fetch pinned playlists");
             
             const data = await response.json();
@@ -87,12 +87,12 @@ export const usePinsMutations = () => {
     //set a track to liked or unliked state
     const setPinMutation = useMutation({
         mutationFn: async ({ playlist, pinned }: SetPinMutationProps) => {
-            const response = await fetch(`/playlists/pin/set?playlist_id=${playlist.id}&pinned=${pinned}`, { method: "POST" });
-
+            const response = await fetch(`/playlists/pin/set?playlist_id=${playlist.id}&pinned=${pinned}`, {
+                method: "POST",
+            });
             if (!response.ok) throw new Error(`Failed to ${pinned ? "pin" : "unpin"}`);
 
-            const data = await response.json();
-            return data;
+            return null;
         },
         onMutate: async (variables) => {
             await queryClient.cancelQueries({ queryKey: rootKey });
@@ -153,9 +153,9 @@ export const usePlaylistContent = (playlistId: string, limit: number = 30) => {
         queryKey,
         initialPageParam: 0,
         queryFn: async ({ pageParam }) => {
-            console.log("usePlaylistContent triggered");
-
-            const response = await fetch(`/retrieve/playlist/${playlistId}?offset=${pageParam}&limit=${limit}&sortmode=${sortmode}`, { method: "GET" });
+            const response = await fetch(`/retrieve/playlist/${playlistId}?offset=${pageParam}&limit=${limit}&sortmode=${sortmode}`, {
+                method: "GET",
+            });
             if (!response.ok) throw new Error("Failed to fetch playlist content");
 
             const data = await response.json();
@@ -208,11 +208,9 @@ export const usePlaylistsMutations = () => {
                 },
                 body: JSON.stringify(payload),
             });
-
             if (!response.ok) throw new Error("Failed to create new playlist");
 
-            const data = await response.json();
-            return data;
+            return null;
         },
         onMutate: async(payload) => {
             await queryClient.cancelQueries({ queryKey });
@@ -248,7 +246,6 @@ export const usePlaylistsMutations = () => {
 
     const reorderPlaylistMutation = useMutation({
         mutationFn: async ({ playlistId, sourceId, targetId, below }: ReorderPlaylistMutationProps) => {
-            
             const response = await fetch(`/playlists/reorder/${playlistId}`, { 
                 method: "PATCH",
                 headers: {
@@ -260,11 +257,9 @@ export const usePlaylistsMutations = () => {
                     below,
                 }),
             });
-
             if (!response.ok) throw new Error(`Failed to reorder`);
 
-            const data = await response.json();
-            return data;
+            return null;
         },
         onMutate: async (variables) => {
             const playlistKey = variables.playlistId === "likes" ? ["tracks", "likes", 0] : ["tracks", "playlists", variables.playlistId, 0];
