@@ -3,7 +3,7 @@ import { Virtuoso } from 'react-virtuoso';
 import { DragDropProvider, DragOverlay } from '@dnd-kit/react';
 import { PointerSensor, PointerActivationConstraints } from '@dnd-kit/dom';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import { useQueue } from '@/store/hooks/useQueue';
 import { useSettings } from '@/store/hooks/useSettings';
@@ -132,6 +132,7 @@ export const QueueList = () => {
                     <Virtuoso 
                         data={currentQueue}
                         overscan={10}
+                        computeItemKey={(index, track) => track.queueId} //https://virtuoso.dev/message-list/item-keys/ does this do anything
                         itemContent={(index, track) => {
                             const isCurrentSource = sourceTrack?.queueId === track.queueId;
                             const isCurrentTarget = targetTrack?.queueId === track.queueId;
@@ -170,7 +171,8 @@ export const QueueList = () => {
                         }}
                     />
 
-                    <DragOverlay>
+                    {/* must be null animation to prevent weird rising bottom glitch */}
+                    <DragOverlay dropAnimation={null}> 
                         {sourceTrack ? (
                             <div style={{ 
                                 transform: "scale(1.03)", // larger makes it look lifted?
