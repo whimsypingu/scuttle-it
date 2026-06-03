@@ -5,6 +5,7 @@ import { makeToast } from "@/features/toast/Toast";
 import type { EditPlaylistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
 import type { TrackBase, TrackDetails } from "@/track/track.types";
 import type { PlaylistDetails, SummaryPlaylist } from "@/playlist/playlist.types";
+import { apiRequest } from "./hooks.utils";
 
 
 export const useEditTrack = (track: TrackBase) => {
@@ -15,10 +16,9 @@ export const useEditTrack = (track: TrackBase) => {
         queryFn: async () => {
             console.log("useEditTrack triggered");
 
-            const response = await fetch(`/retrieve/track/${track.id}`, { method: "GET" });
-            if (!response.ok) throw new Error("Failed to fetch track details");
-            
-            const data = await response.json();
+            const data = await apiRequest(`/retrieve/track/${track.id}`, { 
+                method: "GET",
+            });
             return data as TrackDetails;
         },
         staleTime: 1000 * 60 * 5, //five minute cd for refetch if necessary
@@ -27,20 +27,15 @@ export const useEditTrack = (track: TrackBase) => {
     const editTrackMutation = useMutation({
         mutationFn: async (payload: EditTrackPayload) => {
             //see: apps/audio-server/api/routers/edit_router.py
-            const response = await fetch(`/tracks/edit/${track.id}`, {
+            return await apiRequest(`/tracks/edit/${track.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(payload),
             });
-
-            if (!response.ok) throw new Error("Failed to edit track");
-
-            const data = await response.json();
-            return data;
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
             //refetch all data that could possibly have the edited track. consider a better bounded approach to this
             queryClient.invalidateQueries({ queryKey: ["tracks"] }); 
             queryClient.invalidateQueries({ queryKey: ["details", "tracks", track.id] }); //invalidate the edit-showable track data 
@@ -57,21 +52,16 @@ export const useEditTrack = (track: TrackBase) => {
     const deleteQueryKey = ["tracks"];
     const deleteTrackMutation = useMutation({
         mutationFn: async () => {
-            const response = await fetch(`/tracks/${track.id}`, {
+            return await apiRequest(`/tracks/${track.id}`, {
                 method: "DELETE",
             });
-
-            if (!response.ok) throw new Error("Failed to delete playlist");
-
-            const data = await response.json();
-            return data;
         },
-        onError: (err, data, context) => {
+        onError: (err) => {
             makeToast("", "Error");
 
             console.log("Track deletion failed.");
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
             makeToast("Deleted: ", `${track.titleDisplay ?? track.title}`);
 
             queryClient.invalidateQueries({ queryKey: deleteQueryKey });
