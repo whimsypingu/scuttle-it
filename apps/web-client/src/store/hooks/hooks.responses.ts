@@ -7,6 +7,9 @@ export interface SetFirstQueueResponse {
     downloadRequired: boolean;
     queue: QueueTrack[];
 }
+export interface ReorderQueueResponse {
+    queue: QueueTrack[];
+}
 export interface PushQueueResponse {
     downloadRequired: boolean;
     queue: QueueTrack[];

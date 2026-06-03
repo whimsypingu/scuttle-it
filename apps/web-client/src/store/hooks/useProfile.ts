@@ -12,10 +12,8 @@ export const useStats = () => {
     const { data: stats = DEFAULT_STATS, isLoading, error } = useQuery<UserStats>({
         queryKey,
         queryFn: async () => {
-            console.log("useStats triggered");
-
             const response = await fetch(`/stats/get`, { 
-                method: "GET" 
+                method: "GET",
             });
             if (!response.ok) throw new Error("Failed to fetch stats");
             
