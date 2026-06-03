@@ -125,17 +125,14 @@ export const PlaylistList = ({
 
         if (cursorY < midpointY) {
             setDropBelow(false);
-            // console.log("above");
         } else {
             setDropBelow(true);
-            // console.log("below");
         } 
     }
     function handleDragEnd(event: DragEndEvent) {
         if (!allowReorder) return;
 
         if (sourceTrack && targetTrack) {
-            // console.log(targetTrack.title, dropBelow);
             reorderPlaylist({
                 playlistId,
                 sourceId: sourceTrack.id,
@@ -164,80 +161,80 @@ export const PlaylistList = ({
                 onDragMove={handleDragMove}
                 onDragEnd={handleDragEnd}
             >
-            <Virtuoso
-                data={tracks}
-                overscan={10}
-                endReached={() => {
-                    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-                }}
-                components={{
-                    Footer: () => (
-                        <div 
-                            style={{ height: `${bottomSpacing}px` }}
-                            className="flex justify-center pt-4"
-                        >
-                            {isFetchingNextPage && <div className="animate-spin h-6 w-6 border-2 border-primary rounded-full border-t-transparent" />}
-                        </div>
-                    )
-                }}
-                computeItemKey={(index, track) => track.id} //https://virtuoso.dev/message-list/item-keys/ this helped
-                itemContent={(index, track) => {
-                    const isCurrentTarget = allowReorder && targetTrack?.id === track.id;
-
-                    //apply this to the outer div
-                    const borderStyle: React.CSSProperties = {
-                        marginTop: index === 0 ? "0px" : "-3px", //pull elements up by border size to share the borders with neighbors and prevent jumping lines
-                        borderTop: isCurrentTarget && !dropBelow ? "3px solid var(--color-brand)" : "3px solid transparent",
-                        borderBottom: isCurrentTarget && dropBelow ? "3px solid var(--color-brand)" : "3px solid transparent",
-                        boxSizing: "border-box",
-                    };
-
-                    //apply this to the inner div so opacity doesn't affect the border
-                    const opacityStyle: React.CSSProperties = {
-                        opacity: allowReorder && sourceTrack?.id === track.id ? 0.2 : 1,
-                        transition: "opacity 0.15s ease-out",
-                    };
-                    
-                    return (
-                        <DnDable id={track.id} allow={allowReorder}>
-                            <motion.div
-                                key={track.id}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{
-                                    duration: 0.3,
-                                    delay: Math.min(index * 0.1, 0.1) //not perfect but it has a nice effect initially
-                                }}
-                                style={borderStyle}
+                <Virtuoso
+                    data={tracks}
+                    overscan={10}
+                    endReached={() => {
+                        if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+                    }}
+                    components={{
+                        Footer: () => (
+                            <div 
+                                style={{ height: `${bottomSpacing}px` }}
+                                className="flex justify-center pt-4"
                             >
-                                <div style={opacityStyle}>
-                                    <TrackItem
-                                        track={track}
-                                        onSelect={handleTrackSelect}
-                                        index={index}
-                                        actions={actions}
-                                    />
-                                </div>
-                            </motion.div>
-                        </DnDable>
-                    );
-                }}
-            />
+                                {isFetchingNextPage && <div className="animate-spin h-6 w-6 border-2 border-primary rounded-full border-t-transparent" />}
+                            </div>
+                        )
+                    }}
+                    computeItemKey={(index, track) => track.id} //https://virtuoso.dev/message-list/item-keys/ this helped
+                    itemContent={(index, track) => {
+                        const isCurrentTarget = allowReorder && targetTrack?.id === track.id;
 
-            <DragOverlay>
-                {sourceTrack ? (
-                    <div style={{ 
-                        transform: "scale(1.03)", // larger makes it look lifted?
-                        boxShadow: "0px 10px 20px rgba(0,0,0,0.15)",
-                        cursor: "grabbing",
-                        transition: "transform 0.1s ease",
-                    }}>
-                        {/* PURE VISUAL COPY */}
-                        <TrackItem track={sourceTrack} onSelect={() => {}} index={-1} />
-                    </div>
-                ) : null}
-            </DragOverlay>
+                        //apply this to the outer div
+                        const borderStyle: React.CSSProperties = {
+                            marginTop: index === 0 ? "0px" : "-3px", //pull elements up by border size to share the borders with neighbors and prevent jumping lines
+                            borderTop: isCurrentTarget && !dropBelow ? "3px solid var(--color-brand)" : "3px solid transparent",
+                            borderBottom: isCurrentTarget && dropBelow ? "3px solid var(--color-brand)" : "3px solid transparent",
+                            boxSizing: "border-box",
+                        };
+
+                        //apply this to the inner div so opacity doesn't affect the border
+                        const opacityStyle: React.CSSProperties = {
+                            opacity: allowReorder && sourceTrack?.id === track.id ? 0.2 : 1,
+                            transition: "opacity 0.15s ease-out",
+                        };
+                        
+                        return (
+                            <DnDable id={track.id} allow={allowReorder}>
+                                <motion.div
+                                    key={track.id}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{
+                                        duration: 0.3,
+                                        delay: Math.min(index * 0.1, 0.1) //not perfect but it has a nice effect initially
+                                    }}
+                                    style={borderStyle}
+                                >
+                                    <div style={opacityStyle}>
+                                        <TrackItem
+                                            track={track}
+                                            onSelect={handleTrackSelect}
+                                            index={index}
+                                            actions={actions}
+                                        />
+                                    </div>
+                                </motion.div>
+                            </DnDable>
+                        );
+                    }}
+                />
+
+                <DragOverlay>
+                    {sourceTrack ? (
+                        <div style={{ 
+                            transform: "scale(1.03)", // larger makes it look lifted?
+                            boxShadow: "0px 10px 20px rgba(0,0,0,0.15)",
+                            cursor: "grabbing",
+                            transition: "transform 0.1s ease",
+                        }}>
+                            {/* PURE VISUAL COPY */}
+                            <TrackItem track={sourceTrack} onSelect={() => {}} index={-1} />
+                        </div>
+                    ) : null}
+                </DragOverlay>
             </DragDropProvider>
         </motion.div>
     );

@@ -8,11 +8,11 @@ import { useState } from 'react';
 import { useQueue } from '@/store/hooks/useQueue';
 import { useSettings } from '@/store/hooks/useSettings';
 
+import { DnDable } from '@/components/function/dndable';
 import { TrackItem } from '@/track/TrackItem';
 
 import type { QueueTrack, TrackBase } from '@/track/track.types';
 import type { DragStartEvent, DragMoveEvent, DragEndEvent } from '@dnd-kit/dom';
-import { DnDable } from '@/components/function/dndable';
 
 
 export const QueueList = () => {
@@ -56,8 +56,7 @@ export const QueueList = () => {
         console.log("Selected track:", track.title);
     }
 
-
-    //reordering logic, from apps/web-client/src/playlist/PlaylistList.tsx
+    //reordering logic, from apps/web-client/src/playlist/PlaylistList.tsx, except using .queueId field instead of .id for playlists
     const [sourceTrack, setSourceTrack] = useState<QueueTrack | null>(null); //reorder state variables
     const [targetTrack, setTargetTrack] = useState<QueueTrack | null>(null);
     const [dropBelow, setDropBelow] = useState<boolean>(true); //whether to drop below the target element or not
@@ -92,15 +91,12 @@ export const QueueList = () => {
 
         if (cursorY < midpointY) {
             setDropBelow(false);
-            // console.log("above");
         } else {
             setDropBelow(true);
-            // console.log("below");
         } 
     }
     function handleDragEnd(event: DragEndEvent) {
         if (sourceTrack && targetTrack) {
-            // console.log(targetTrack.title, dropBelow);
             reorder({
                 sourceQueueId: sourceTrack.queueId,
                 targetQueueId: targetTrack.queueId,

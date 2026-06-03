@@ -1,10 +1,10 @@
 import { useQueue } from "@/store/hooks/useQueue";
 import { useSettings } from "@/store/hooks/useSettings";
 import { useEffect, useRef } from "react";
+import { useAudioPlayback, useBackupSync, usePrefetchSync } from "@/features/audio/useAudioEngine";
 
-import { audioEngine } from "./audioEngine";
+import { audioEngine } from "@/features/audio/audioEngine";
 import { getTrackDisplayMetadata } from "@/track/track.utils";
-import { useAudioPlayback, useBackupSync, usePrefetchSync } from "./useAudioEngine";
 
 export const AudioLogic = () => {
     useBackupSync(); //syncs to server backed queue a few seconds before a track ends to ensure data integrity. in the future we could add a flag for this
