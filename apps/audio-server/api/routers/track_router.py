@@ -1,6 +1,6 @@
 import traceback
 
-from fastapi import APIRouter, Body, Depends, Path, HTTPException
+from fastapi import APIRouter, Body, Depends, Path, HTTPException, Response, status
 from api.dependencies import get_db_manager, get_stats_manager
 from database.database_manager import DatabaseManager
 from core.stats.stats_manager import StatsManager
@@ -24,11 +24,9 @@ async def edit_track_endpoint(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.edit_track(track_id, payload) #status after attempting push
+        await db_manager.edit_track(track_id, payload) #status after attempting push
 
-        return {
-            "success": success,
-        }
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException
@@ -51,9 +49,7 @@ async def delete_track_endpoint(
         except Exception as e:
             pass
 
-        return {
-            "success": success,
-        }
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException

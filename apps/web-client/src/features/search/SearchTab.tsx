@@ -43,6 +43,7 @@ export const SearchTab = ({
     const { results, isLoading, isError, triggerYoutubeSearch } = useSearch(debouncedQuery);
     const dummySearchScrollContext: InfiniteScrollContext = ({ //EMERGENCY: consider adding backend support for paginated/virtualized scroll
         tracks: results,
+        playlistId: "search-playlist-id-temp",
         fetchNextPage: () => {},
         hasNextPage: false,
         isFetchingNextPage: false,

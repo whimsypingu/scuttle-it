@@ -11,13 +11,11 @@ export const useDownloadJobs = () => {
     const { data, refetch, isLoading, error } = useQuery({
         queryKey,
         queryFn: async () => {
-            console.log("useJobs triggered");
-
             const response = await fetch(`/jobs/downloads`, { 
                 method: "GET" 
             });
-            if (!response.ok) throw new Error("Failed to fetch jobs");
-            
+            if (!response.ok) throw new Error("Failed to get download jobs");
+
             const data = await response.json();
             return data.jobs as DownloadJob[];
         },

@@ -38,6 +38,7 @@ export const useDownloadsContent = (limit: number = 30) => {
     
     return {
         tracks,
+        playlistId: "downloads",
         totalCount: data?.pages[0]?.totalCount ?? 0,
         totalDuration: data?.pages[0]?.totalDuration ?? 0,
         fetchNextPage,

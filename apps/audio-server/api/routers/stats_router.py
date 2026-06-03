@@ -31,9 +31,7 @@ async def increment_listen_duration(
             payload.track_id,
             payload.timestamp,
         )
-        return {
-            "success": True,
-        }
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException

@@ -1,10 +1,10 @@
 import { useQueue } from "@/store/hooks/useQueue";
 import { useSettings } from "@/store/hooks/useSettings";
 import { useEffect, useRef } from "react";
+import { useAudioPlayback, useBackupSync, usePrefetchSync } from "@/features/audio/useAudioEngine";
 
-import { audioEngine } from "./audioEngine";
+import { audioEngine } from "@/features/audio/audioEngine";
 import { getTrackDisplayMetadata } from "@/track/track.utils";
-import { useAudioPlayback, useBackupSync, usePrefetchSync } from "./useAudioEngine";
 
 export const AudioLogic = () => {
     useBackupSync(); //syncs to server backed queue a few seconds before a track ends to ensure data integrity. in the future we could add a flag for this
@@ -48,8 +48,7 @@ export const AudioLogic = () => {
                     break;
                 case 1: // Loop all
                     if (queue.length > 1 && nextTrack && lastTrack) {
-                        const newTargetPosition = lastTrack.position + 1;
-                        reorder({ queueTrack: currentTrack, targetPosition: newTargetPosition }); //replace with reorder to end
+                        reorder({ sourceQueueId: currentTrack.queueId, targetQueueId: lastTrack.queueId, below: true }); //replace with reorder to end
                         audioEngine.playTrack({ trackId: nextTrack.id, forceRestart: true }) //play
                     } else {
                         audioEngine.playTrack({ trackId: currentTrack.id, forceRestart: true }) //play

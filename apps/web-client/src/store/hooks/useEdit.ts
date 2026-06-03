@@ -13,11 +13,11 @@ export const useEditTrack = (track: TrackBase) => {
     const getTrackDetails = useQuery({
         queryKey: ["details", "tracks", track.id],
         queryFn: async () => {
-            console.log("useEditTrack triggered");
-
-            const response = await fetch(`/retrieve/track/${track.id}`, { method: "GET" });
+            const response = await fetch(`/retrieve/track/${track.id}`, { 
+                method: "GET",
+            });
             if (!response.ok) throw new Error("Failed to fetch track details");
-            
+
             const data = await response.json();
             return data as TrackDetails;
         },
@@ -34,13 +34,11 @@ export const useEditTrack = (track: TrackBase) => {
                 },
                 body: JSON.stringify(payload),
             });
-
             if (!response.ok) throw new Error("Failed to edit track");
 
-            const data = await response.json();
-            return data;
+            return null;
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
             //refetch all data that could possibly have the edited track. consider a better bounded approach to this
             queryClient.invalidateQueries({ queryKey: ["tracks"] }); 
             queryClient.invalidateQueries({ queryKey: ["details", "tracks", track.id] }); //invalidate the edit-showable track data 
@@ -60,18 +58,16 @@ export const useEditTrack = (track: TrackBase) => {
             const response = await fetch(`/tracks/${track.id}`, {
                 method: "DELETE",
             });
+            if (!response.ok) throw new Error("Failed to delete track");
 
-            if (!response.ok) throw new Error("Failed to delete playlist");
-
-            const data = await response.json();
-            return data;
+            return null;
         },
-        onError: (err, data, context) => {
+        onError: (err) => {
             makeToast("", "Error");
 
             console.log("Track deletion failed.");
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
             makeToast("Deleted: ", `${track.titleDisplay ?? track.title}`);
 
             queryClient.invalidateQueries({ queryKey: deleteQueryKey });
@@ -96,11 +92,11 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
     const getPlaylistDetails = useQuery({
         queryKey: ["details", "playlists", playlist.id],
         queryFn: async () => {
-            console.log("useEditPlaylist triggered");
+            const response = await fetch(`/retrieve/playlist/${playlist.id}`, {
+                method: "GET",
+            });
+            if (!response.ok) throw new Error("Failed to get playlist details");
 
-            const response = await fetch(`/retrieve/playlist/${playlist.id}`, { method: "GET" });
-            if (!response.ok) throw new Error("Failed to fetch playlist details");
-            
             const data = await response.json();
             return data as PlaylistDetails;
         },
@@ -117,13 +113,11 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
                 },
                 body: JSON.stringify(payload),
             });
-
             if (!response.ok) throw new Error("Failed to edit playlist");
 
-            const data = await response.json();
-            return data;
+            return null;
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
             //refetch all data that could possibly have the edited playlist
             queryClient.invalidateQueries({ queryKey: ["details", "playlists", playlist.id] }); //invalidate the edit-showable playlist data 
             queryClient.invalidateQueries({ queryKey: ["playlists"] }); //invalidate the counts of playlists 
@@ -143,13 +137,11 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
             const response = await fetch(`/playlists/${playlist.id}`, {
                 method: "DELETE",
             });
-
             if (!response.ok) throw new Error("Failed to delete playlist");
 
-            const data = await response.json();
-            return data;
+            return null;
         },
-        onMutate: async() => {
+        onMutate: async(variables) => {
             await queryClient.cancelQueries({ queryKey });
             const rollbackPlaylists = queryClient.getQueryData<SummaryPlaylist[]>(queryKey);
 
@@ -159,7 +151,7 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
 
             return { rollbackPlaylists };
         },
-        onError: (err, data, context) => {
+        onError: (err, variables, context) => {
             makeToast("", "Error");
 
             if (context?.rollbackPlaylists) {
@@ -167,7 +159,7 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
             }
             console.log("Optimistic playlist deletion failed, rolling back.");
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
             makeToast("Deleted: ", playlist.name);
 
             queryClient.invalidateQueries({ queryKey });

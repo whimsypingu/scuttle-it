@@ -6,7 +6,6 @@ import { MusicNoteIcon, ShoppingBagIcon } from '@phosphor-icons/react';
 
 import { getTrackDisplayMetadata, useTrackActionHandler } from '@/track/track.utils';
 import { formatTime } from '@/features/audio/audio.utils';
-import { audioEngine } from '@/features/audio/audioEngine';
 
 import { TRACK_ACTION_CONFIG, SMALL_SWIPE_THRESHOLD_PX, LARGE_SWIPE_THRESHOLD_PX, ICON_SIZE_PX } from '@/track/track.constants';
 
@@ -155,10 +154,9 @@ export const TrackItem = ({
                 onDragEnd={handleDragEnd}
                 onTap={handleTap}
 
-				whileTap={!isDragging ? { scale: 0.98 } : {}}
 				transition={{ type: "spring", stiffness: 400, damping: 30 }}
 			
-				className="flex flex-row items-center gap-4 py-2 px-3 bg-background rounded-lg active:cursor-grabbing relative z-10 shadow-xl"
+				className="flex flex-row items-center gap-4 py-2 px-3 bg-background rounded-lg active:cursor-grabbing relative z-10 shadow-xl active:scale-[0.98] transition-transform duration-100 ease-out"
 			>
 				<div className={`
 					w-12 h-12 

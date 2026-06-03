@@ -16,20 +16,18 @@ class StatsResponse(ScuttleBase):
     total_storage_used: int
 
 
-class SetFirstQueueResponse(ScuttleBase):
+class QueueResponse(ScuttleBase):
+    queue: list[QueueTrack]
+class SetFirstQueueResponse(QueueResponse):
     download_required: bool
-    queue: list[QueueTrack]
-class PushQueueResponse(ScuttleBase):
+class PushQueueResponse(QueueResponse):
     download_required: bool
-    queue: list[QueueTrack]
-class PushNextQueueResponse(ScuttleBase):
+class PushNextQueueResponse(QueueResponse):
     download_required: bool
-    queue: list[QueueTrack]
-class PopQueueResponse(ScuttleBase):
-    queue: list[QueueTrack]
-class ShuffleQueueResponse(ScuttleBase):
-    queue: list[QueueTrack]
-class SetAllQueueResponse(ScuttleBase):
+class PopQueueResponse(QueueResponse):
+    pass
+class ShuffleQueueResponse(QueueResponse):
+    pass
+class SetAllQueueResponse(QueueResponse):
     set_count: int
     skip_count: int
-    queue: list[QueueTrack]

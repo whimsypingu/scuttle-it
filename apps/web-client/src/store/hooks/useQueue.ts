@@ -7,7 +7,7 @@ import { getTrackDisplayMetadata, trackBaseToQueueTrack } from "@/track/track.ut
 
 import type { QueueTrack } from "@/track/track.types";
 import type { PopMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetAllPlaylistMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
-import type { SetFirstQueueResponse, SetAllQueueResponse, PushQueueResponse, PushNextQueueResponse, PopQueueResponse, ShuffleQueueResponse } from "./hooks.responses";
+import type { SetFirstQueueResponse, SetAllQueueResponse, PushQueueResponse, PushNextQueueResponse, PopQueueResponse, ShuffleQueueResponse, ReorderQueueResponse } from "./hooks.responses";
 
 
 export const useQueue = () => {
@@ -18,9 +18,9 @@ export const useQueue = () => {
     const getQueue = useQuery({
         queryKey,
         queryFn: async () => {
-            console.log("useQueue triggered");
-
-            const response = await fetch(`/queue/get`, { method: "GET" });
+            const response = await fetch(`/queue/get`, {
+                method: "GET",
+            });
             if (!response.ok) throw new Error("Failed to fetch queue");
             
             const data = await response.json();
@@ -32,8 +32,9 @@ export const useQueue = () => {
     //set the first track in the queue
     const setFirstMutation = useMutation({
         mutationFn: async ({ track }: SetFirstMutationProps) => {
-            const response = await fetch(`/queue/set-first?track_id=${track.id}`, { method: "POST" });
-
+            const response = await fetch(`/queue/set-first?track_id=${track.id}`, {
+                method: "POST",
+            });
             if (!response.ok) throw new Error("Failed to set first entry in queue");
 
             const data = await response.json();
@@ -75,29 +76,55 @@ export const useQueue = () => {
         },
     });
 
+    //reorder queue tracks
     const reorderMutation = useMutation({
-        mutationFn: async ({ queueTrack, targetPosition }: ReorderMutationProps) => {
-            const response = await fetch(`/queue/reorder?queue_id=${queueTrack.queueId}&target_position=${targetPosition}`, { method: "POST" });
-
+        mutationFn: async ({ sourceQueueId, targetQueueId, below }: ReorderMutationProps) => {
+            const response = await fetch(`/queue/reorder`, { 
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    sourceQueueId,
+                    targetQueueId,
+                    below,
+                }),
+            });
             if (!response.ok) throw new Error("Failed to reorder within queue");
 
             const data = await response.json();
-            return data;
+            return data as ReorderQueueResponse;
         },
-        onMutate: async ({ queueTrack, targetPosition }) => {
+        onMutate: async (variables) => {
             await queryClient.cancelQueries({ queryKey });
             const rollbackQueue = queryClient.getQueryData(queryKey);
 
             queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
                 if (!old) return []; //handle undefined, then replace position of the track and try saving the newly sorted queue
-                return old
-                    .map(t => t.queueId === queueTrack.queueId ? { ...t, position: targetPosition } : t)
-                    .sort((a, b) => a.position - b.position);
+
+                // POSITION CHECKING GUARD
+                if (variables.sourceQueueId === variables.targetQueueId) return old;
+
+                const sourceIdx = old.findIndex(t => t.queueId === variables.sourceQueueId);
+                const targetIdx = old.findIndex(t => t.queueId === variables.targetQueueId);
+
+                if (variables.below && targetIdx === sourceIdx - 1) return old;
+                if (!variables.below && targetIdx === sourceIdx + 1) return old;
+
+                //modification
+                const cleanList = [...old]
+                const [moved] = cleanList.splice(sourceIdx, 1);
+
+                const freshTargetIdx = cleanList.findIndex(t => t.queueId === variables.targetQueueId);
+                const insertionIndex = variables.below ? freshTargetIdx + 1 : freshTargetIdx;
+
+                cleanList.splice(insertionIndex, 0, moved);
+                return cleanList
             });
 
             return { rollbackQueue };
         },
-        onError: (err, queueTrack, context) => {
+        onError: (err, variables, context) => {
             if (context?.rollbackQueue) {
                 queryClient.setQueryData(queryKey, context.rollbackQueue);
             }
@@ -111,8 +138,9 @@ export const useQueue = () => {
     //push a track to the end of the queue
     const pushMutation = useMutation({
         mutationFn: async ({ track }: PushMutationProps) => {
-            const response = await fetch(`/queue/push?track_id=${track.id}`, { method: "POST" });
-
+            const response = await fetch(`/queue/push?track_id=${track.id}`, {
+                method: "POST",
+            });
             if (!response.ok) throw new Error("Failed to push to queue");
 
             const data = await response.json();
@@ -154,8 +182,9 @@ export const useQueue = () => {
     //push a track to the front of the queue
     const pushNextMutation = useMutation({
         mutationFn: async ({ track }: PushNextMutationProps) => {
-            const response = await fetch(`/queue/push-next?track_id=${track.id}`, { method: "POST" });
-
+            const response = await fetch(`/queue/push-next?track_id=${track.id}`, {
+                method: "POST",
+            });
             if (!response.ok) throw new Error("Failed to push to queue");
 
             const data = await response.json();
@@ -198,8 +227,9 @@ export const useQueue = () => {
     // remove a track from the queue
     const popMutation = useMutation({
         mutationFn: async ({ queueTrack }: PopMutationProps) => {
-            const response = await fetch(`/queue/pop?queue_id=${queueTrack.queueId}`, { method: "POST" });
-
+            const response = await fetch(`/queue/pop?queue_id=${queueTrack.queueId}`, {
+                method: "POST",
+            });
             if (!response.ok) throw new Error("Failed to pop from queue");
 
             const data = await response.json();
@@ -234,8 +264,9 @@ export const useQueue = () => {
     // shuffle
     const shuffleMutation = useMutation({
         mutationFn: async () => {
-            const response = await fetch(`/queue/shuffle`, { method: "POST" });
-
+            const response = await fetch(`/queue/shuffle`, {
+                method: "POST",
+            });
             if (!response.ok) throw new Error("Failed to shuffle queue");
 
             const data = await response.json();
@@ -276,8 +307,9 @@ export const useSetQueue = () => {
     const setAllPlaylistMutation = useMutation({
         mutationFn: async ({ playlist, sortmode }: SetAllPlaylistMutationProps) => {
             const query = sortmode !== undefined ? `?sortmode=${sortmode}` : "";
-            const response = await fetch(`/queue/set-all/playlist/${playlist.id}${query}`, { method: "POST" });
-
+            const response = await fetch(`/queue/set-all/playlist/${playlist.id}${query}`, {
+                method: "POST",
+            });
             if (!response.ok) throw new Error("Failed to set queue");
 
             const data = await response.json();
@@ -313,8 +345,9 @@ export const useSetQueue = () => {
     // clear the remaining queue
     const clearMutation = useMutation({
         mutationFn: async () => {
-            const response = await fetch(`/queue/clear`, { method: "POST" });
-
+            const response = await fetch(`/queue/clear`, {
+                method: "POST",
+            });
             if (!response.ok) throw new Error("Failed to clear queue");
 
             const data = await response.json();

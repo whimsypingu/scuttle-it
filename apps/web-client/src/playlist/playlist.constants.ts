@@ -41,3 +41,5 @@ export const PLAYLIST_CONFIG = {
     iconSize: 20,
     dropdownIconSize: 16,
 };
+
+export const REORDER_BLACKLIST = ["downloads", "recents"] as const;

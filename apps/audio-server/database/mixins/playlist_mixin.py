@@ -3,7 +3,7 @@ import logging
 from database.mixins.mixin_utils import row_to_summary_playlist
 
 from core.models.playlist import SummaryPlaylist
-from core.models.payloads import CreatePlaylistPayload
+from core.models.payloads import CreatePlaylistPayload, ReorderPlaylistPayload
 
 logger = logging.getLogger(__name__)
 
@@ -159,3 +159,99 @@ class PlaylistMixin:
         except Exception:
             logger.exception("Failed to retrieve Pinned Playlists")
             raise
+
+
+    async def reorder_playlist(self, playlist_id: str, payload: ReorderPlaylistPayload) -> bool:
+        """Reorder a track within the specified Playlist"""
+        logger.info(f"Reordering track_id: {payload.source_id} within playlist_id: {playlist_id}...")
+
+        #trick to get the (up to) two tracks that surround the new position of the source track after reordering (includes source track)
+        operator = ">=" if payload.below else "<="
+        ordering = "ASC" if payload.below else "DESC"
+
+        match playlist_id:
+            case "likes":
+                logger.info(f"likes query reorder trigger")
+                query = f'''
+                    SELECT
+                        t.id,
+                        l.position
+                    FROM likes l
+                    JOIN tracks t ON t.internal_id = l.track_internal_id
+                    WHERE l.position {operator} (
+                        SELECT inner_l.position
+                        FROM likes inner_l
+                        JOIN tracks inner_t ON inner_t.internal_id = inner_l.track_internal_id
+                        WHERE inner_t.id = ?
+                    )
+                    ORDER BY l.position {ordering}
+                    LIMIT 2;
+                '''
+                params = (payload.target_id,)
+            case _:
+                query = f'''
+                    SELECT 
+                        t.id, 
+                        pt.position
+                    FROM playlist_tracks pt
+                    JOIN playlists p ON p.internal_id = pt.playlist_internal_id
+                    JOIN tracks t ON t.internal_id = pt.track_internal_id
+                    WHERE p.id = ?
+                        AND pt.position {operator} (
+                            SELECT inner_pt.position
+                            FROM playlist_tracks inner_pt
+                            JOIN tracks inner_t ON inner_t.internal_id = inner_pt.track_internal_id
+                            WHERE inner_pt.playlist_internal_id = p.internal_id AND inner_t.id = ?
+                        )
+                    ORDER BY pt.position {ordering}
+                    LIMIT 2;
+                '''
+                params = (playlist_id, payload.target_id)
+
+        try:
+            async with self.session() as db:
+                cursor = await db.execute(query, params)
+                rows = await cursor.fetchall()
+
+                if not rows or len(rows) > 2: #handle edge case of nothing or too much getting found somehow
+                    return False
+                
+                if payload.source_id in [row["id"] for row in rows]: #handle edge case where track is not being moved actually so don't do anything
+                    return False
+                
+                #determine the new_position of the source track
+                if len(rows) == 1: #edge case literally where the track gets shifted to an edge
+                    if payload.below:
+                        new_position = rows[0]["position"] + self.NEW_POSITION_GAP
+                    else:
+                        new_position = rows[0]["position"] - self.NEW_POSITION_GAP
+                else:
+                    new_position = (rows[0]["position"] + rows[1]["position"]) / 2.0
+
+                #re-assign position value of the source track, handling likes separately
+                match playlist_id:
+                    case "likes":
+                        update_query = f'''
+                            UPDATE likes
+                            SET position = ?
+                            WHERE track_internal_id = (SELECT internal_id FROM tracks WHERE id = ?);
+                        '''
+                        update_params = (new_position, payload.source_id)
+                    case _:
+                        update_query = f'''
+                            UPDATE playlist_tracks
+                            SET position = ?
+                            WHERE playlist_internal_id = (SELECT internal_id FROM playlists WHERE id = ?)
+                                AND track_internal_id = (SELECT internal_id FROM tracks WHERE id = ?);
+                        '''
+                        update_params = (new_position, playlist_id, payload.source_id)
+
+                await db.execute(update_query, update_params)
+
+                return True
+        except Exception:
+            logger.exception("Failed to reorder Playlist")
+            raise
+
+
+

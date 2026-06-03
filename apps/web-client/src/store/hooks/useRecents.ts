@@ -15,8 +15,6 @@ export const useRecentsContent = (limit: number = 30) => {
         queryKey,
         initialPageParam: 0,
         queryFn: async ({ pageParam }) => {
-            console.log("useRecents triggered");
-
             const response = await fetch(`/retrieve/recently-played?offset=${pageParam}&limit=${limit}`, { 
                 method: "GET" 
             });
@@ -39,6 +37,7 @@ export const useRecentsContent = (limit: number = 30) => {
     
     return {
         tracks,
+        playlistId: "recents",
         totalCount: data?.pages[0]?.totalCount ?? 0,
         totalDuration: data?.pages[0]?.totalDuration ?? 0,
         fetchNextPage,
