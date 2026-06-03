@@ -5,7 +5,6 @@ import { makeToast } from "@/features/toast/Toast";
 import type { EditPlaylistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
 import type { TrackBase, TrackDetails } from "@/track/track.types";
 import type { PlaylistDetails, SummaryPlaylist } from "@/playlist/playlist.types";
-import { apiRequest } from "./hooks.utils";
 
 
 export const useEditTrack = (track: TrackBase) => {
@@ -14,11 +13,12 @@ export const useEditTrack = (track: TrackBase) => {
     const getTrackDetails = useQuery({
         queryKey: ["details", "tracks", track.id],
         queryFn: async () => {
-            console.log("useEditTrack triggered");
-
-            const data = await apiRequest(`/retrieve/track/${track.id}`, { 
+            const response = await fetch(`/retrieve/track/${track.id}`, { 
                 method: "GET",
             });
+            if (!response.ok) throw new Error("Failed to fetch track details");
+
+            const data = await response.json();
             return data as TrackDetails;
         },
         staleTime: 1000 * 60 * 5, //five minute cd for refetch if necessary
@@ -27,13 +27,16 @@ export const useEditTrack = (track: TrackBase) => {
     const editTrackMutation = useMutation({
         mutationFn: async (payload: EditTrackPayload) => {
             //see: apps/audio-server/api/routers/edit_router.py
-            return await apiRequest(`/tracks/edit/${track.id}`, {
+            const response = await fetch(`/tracks/edit/${track.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(payload),
             });
+            if (!response.ok) throw new Error("Failed to edit track");
+
+            return null;
         },
         onSuccess: () => {
             //refetch all data that could possibly have the edited track. consider a better bounded approach to this
@@ -52,9 +55,12 @@ export const useEditTrack = (track: TrackBase) => {
     const deleteQueryKey = ["tracks"];
     const deleteTrackMutation = useMutation({
         mutationFn: async () => {
-            return await apiRequest(`/tracks/${track.id}`, {
+            const response = await fetch(`/tracks/${track.id}`, {
                 method: "DELETE",
             });
+            if (!response.ok) throw new Error("Failed to delete track");
+
+            return null;
         },
         onError: (err) => {
             makeToast("", "Error");
@@ -86,11 +92,12 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
     const getPlaylistDetails = useQuery({
         queryKey: ["details", "playlists", playlist.id],
         queryFn: async () => {
-            console.log("useEditPlaylist triggered");
-
-            const data = await apiRequest(`/retrieve/playlist/${playlist.id}`, {
+            const response = await fetch(`/retrieve/playlist/${playlist.id}`, {
                 method: "GET",
             });
+            if (!response.ok) throw new Error("Failed to get playlist details");
+
+            const data = await response.json();
             return data as PlaylistDetails;
         },
         staleTime: 1000 * 60 * 5, //five minute cd for refetch if necessary
@@ -99,13 +106,16 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
     const editPlaylistMutation = useMutation({
         mutationFn: async (payload: EditPlaylistPayload) => {
             //see: apps/audio-server/api/routers/edit_router.py
-            return await apiRequest(`/playlists/edit/${playlist.id}`, {
+            const response = await fetch(`/playlists/edit/${playlist.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(payload),
             });
+            if (!response.ok) throw new Error("Failed to edit playlist");
+
+            return null;
         },
         onSuccess: () => {
             //refetch all data that could possibly have the edited playlist
@@ -124,9 +134,12 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
     const queryKey = ["playlists"];
     const deletePlaylistMutation = useMutation({
         mutationFn: async() => {
-            return await apiRequest(`/playlists/${playlist.id}`, {
+            const response = await fetch(`/playlists/${playlist.id}`, {
                 method: "DELETE",
             });
+            if (!response.ok) throw new Error("Failed to delete playlist");
+
+            return null;
         },
         onMutate: async(variables) => {
             await queryClient.cancelQueries({ queryKey });
