@@ -20,7 +20,6 @@ async def get_settings(
     try:
         updated_settings = await db_manager.get_settings()
         return {
-            "success": True,
             "settings": updated_settings
         }
     except Exception as e:
@@ -34,11 +33,10 @@ async def set_loopmode(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.set_loopmode(loopmode) #set the loopmode
+        await db_manager.set_loopmode(loopmode) #set the loopmode
         updated_settings = await db_manager.get_settings() #get the updated loopmode
 
         return {
-            "success": success,
             "settings": updated_settings
         }
     except Exception as e:

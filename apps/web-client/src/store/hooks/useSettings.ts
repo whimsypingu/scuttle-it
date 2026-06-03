@@ -13,8 +13,6 @@ export const useSettings = () => {
     const { data: settings = DEFAULT_SETTINGS, isLoading, error } = useQuery({
         queryKey,
         queryFn: async () => {
-            console.log("useSettings triggered");
-
             const response = await fetch(`/settings/get`, { method: "GET" });
             if (!response.ok) throw new Error("Failed to fetch settings");
             

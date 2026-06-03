@@ -1,6 +1,6 @@
 import traceback
 
-from fastapi import APIRouter, Body, Depends, Path, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, Path, HTTPException, Query, Response, status
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
 
@@ -21,11 +21,9 @@ async def create_playlist_endpoint(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.create_playlist(payload)
+        await db_manager.create_playlist(payload)
 
-        return {
-            "success": success,
-        }
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException
@@ -38,11 +36,9 @@ async def edit_playlist_endpoint(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.edit_playlist(playlist_id, payload) #status after attempting push
+        await db_manager.edit_playlist(playlist_id, payload) #status after attempting push
 
-        return {
-            "success": success,
-        }
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException
@@ -54,11 +50,9 @@ async def delete_playlist_endpoint(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        success = await db_manager.delete_playlist(playlist_id)
+        await db_manager.delete_playlist(playlist_id)
 
-        return {
-            "success": success,
-        }
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException
@@ -71,7 +65,6 @@ async def get_playlists_endpoint(
     try: 
         results = await db_manager.get_playlists()
         return {
-            "success": True,
             "playlists": results
         }
     except Exception as e:
@@ -88,13 +81,11 @@ async def set_pin(
     try:
         #explicitly choose the action to have toggle behavior
         if pinned:
-            success = await db_manager.pin(playlist_id)
+            await db_manager.pin(playlist_id)
         else:
-            success = await db_manager.unpin(playlist_id)
+            await db_manager.unpin(playlist_id)
 
-        return {
-            "success": success,
-        }
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException
@@ -107,7 +98,6 @@ async def get_pinned_playlists_endpoint(
     try:
         results = await db_manager.get_pinned_playlists()
         return {
-            "success": True,
             "playlists": results,
         }
     except Exception as e:
@@ -123,9 +113,7 @@ async def reorder_playlist_endpoint(
 ):
     try: 
         await db_manager.reorder_playlist(playlist_id, payload)
-        return {
-            "success": True,
-        }
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException

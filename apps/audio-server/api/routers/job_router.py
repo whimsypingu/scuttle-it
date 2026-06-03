@@ -14,7 +14,6 @@ async def search_and_download_jobs_endpoint(
     try:
         jobs = await dl_queue.get_all_jobs()
         return {
-            "success": True,
             "jobs": jobs
         }
     

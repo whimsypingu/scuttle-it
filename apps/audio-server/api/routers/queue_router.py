@@ -7,7 +7,7 @@ from database.database_manager import DatabaseManager
 from core.download.download_queue import DownloadQueue
 from core.models.jobs import DownloadJob
 
-from core.models.responses import PopQueueResponse, PushNextQueueResponse, PushQueueResponse, SetAllQueueResponse, SetFirstQueueResponse, ShuffleQueueResponse
+from core.models.responses import PopQueueResponse, PushNextQueueResponse, PushQueueResponse, QueueResponse, SetAllQueueResponse, SetFirstQueueResponse, ShuffleQueueResponse
 from core.models.payloads import ReorderQueuePayload
 
 QueueRouter = APIRouter(prefix="/queue", tags=["Queue"])
@@ -181,7 +181,7 @@ async def set_all_play_queue(
         raise DefaultCrashException
     
 
-@QueueRouter.post("/clear")
+@QueueRouter.post("/clear", response_model=QueueResponse)
 async def clear_play_queue_endpoint(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
@@ -197,7 +197,7 @@ async def clear_play_queue_endpoint(
         raise DefaultCrashException
 
 
-@QueueRouter.get("/get")
+@QueueRouter.get("/get", response_model=QueueResponse)
 async def get_play_queue(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):

@@ -1,6 +1,6 @@
 import traceback
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, Response, status
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
 
@@ -22,13 +22,11 @@ async def set_like(
     try:
         #explicitly choose the action to have toggle behavior
         if liked:
-            success = await db_manager.like(track_id)
+            await db_manager.like(track_id)
         else:
-            success = await db_manager.unlike(track_id)
+            await db_manager.unlike(track_id)
 
-        return {
-            "success": success,
-        }
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException
