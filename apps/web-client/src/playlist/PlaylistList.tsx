@@ -225,7 +225,7 @@ export const PlaylistList = ({
                 <DragOverlay dropAnimation={null}>
                     {sourceTrack ? (
                         <div style={{ 
-                            transform: "scale(1.03)", // larger makes it look lifted?
+                            transform: "scale(0.6)", // larger makes it look lifted?
                             boxShadow: "0px 10px 20px rgba(0,0,0,0.15)",
                             cursor: "grabbing",
                             transition: "transform 0.1s ease",
