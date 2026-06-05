@@ -30,7 +30,9 @@ export interface EditPlaylistPayload {
     description?: string | null;
 }
 
-
+export interface EditProfilePayload {
+    username: string;
+}
 
 
 /**

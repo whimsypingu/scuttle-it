@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { makeToast } from "@/features/toast/Toast";
 
-import type { EditPlaylistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
+import type { EditPlaylistPayload, EditProfilePayload, EditTrackPayload } from "@/store/hooks/hooks.types";
 import type { TrackBase, TrackDetails } from "@/track/track.types";
 import type { PlaylistDetails, SummaryPlaylist } from "@/playlist/playlist.types";
 
@@ -174,4 +174,37 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
         editPlaylist: editPlaylistMutation.mutate,
         deletePlaylist: deletePlaylistMutation.mutate,
    };
+}
+
+
+export const useEditProfile = () => {
+    const queryClient = useQueryClient();
+
+    const editProfileMutation = useMutation({
+        mutationFn: async (payload: EditProfilePayload) => {
+            const response = await fetch(`/stats/edit`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
+            if (!response.ok) throw new Error("Failed to edit profile");
+
+            return null;
+        },
+        onSuccess: () => {
+            //refetch all data that could possibly have the edited playlist
+            queryClient.invalidateQueries({ queryKey: ["profile", "stats"] }); //invalidate the user profile details
+
+            makeToast("", "Saved");
+        },
+        onError: (err) => {
+            console.error("Edit profile failed.");
+        }
+    });
+
+    return {
+        editProfile: editProfileMutation.mutate,
+    };
 }
