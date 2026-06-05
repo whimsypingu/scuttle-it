@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react";
-
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { HoldToDeleteButton } from "@/components/ui/hold-delete";
-
-import { MIN_BUTTON_WIDTH, SOURCE_ICON_SIZE } from "@/features/edit/edit.constants";
-import type { UserStats } from "@/features/profile/profile.types";
-import { Input } from "@/components/ui/input";
-import type { EditProfilePayload } from "@/store/hooks/hooks.types";
+import { useState } from "react";
 import { useEditProfile } from "@/store/hooks/useEdit";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
 import { convertDate, convertRelativeDate } from "@/features/profile/profile.utils";
+
+import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
+
+import type { UserStats } from "@/features/profile/profile.types";
+import type { EditProfilePayload } from "@/store/hooks/hooks.types";
 
 
 interface EditProfileFormProps {

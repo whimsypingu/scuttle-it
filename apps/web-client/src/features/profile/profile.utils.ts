@@ -14,6 +14,7 @@ export const convertDate = (s: number, options: ConvertDateOptions = {}): string
     }).format(date); // May 2025 or something of that format
 }
 
+//formatted string of how long it has been since some date
 export const convertRelativeDate = (s: number): string => {
     if (!s || isNaN(s)) return "--";
 
