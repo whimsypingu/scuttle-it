@@ -25,7 +25,7 @@ export const useStats = () => {
     });
 
     return {
-        stats: stats ?? DEFAULT_STATS,
+        stats: DEFAULT_STATS, //stats ?? DEFAULT_STATS,
         isLoading,
         error,
     };

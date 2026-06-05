@@ -6,7 +6,7 @@ import { MusicNotesIcon, ClockIcon, HardDrivesIcon } from "@phosphor-icons/react
 import { useStats } from "@/store/hooks/useProfile";
 
 import { CountUp } from "@/components/ui/countup";
-import { convertDuration, convertStorage } from "@/features/profile/profile.utils";
+import { convertDate, convertDuration, convertStorage } from "@/features/profile/profile.utils";
 
 import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
@@ -50,8 +50,8 @@ export const ProfileTab = ({
                         </div> 
 
                         <div className="flex-1 flex flex-col gap-1">
-                            <h1 className="text-2xl">whimsypingu</h1>
-                            <p className="text-zinc-400 text-sm">Scuttling since 2026</p>
+                            <h1 className="text-2xl">{stats.username}</h1>
+                            <p className="text-zinc-400 text-sm">scuttling since {convertDate(stats.startDate)}</p>
                         </div>
                     </section>
 
