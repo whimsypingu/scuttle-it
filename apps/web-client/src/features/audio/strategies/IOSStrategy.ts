@@ -150,7 +150,9 @@ export class IOSStrategy implements AudioStrategy {
 
         // REBUILD part
         try {
-            this.audioCtx = new AudioContext();
+            this.audioCtx = new AudioContext({
+                "latencyHint": "playback",
+            });
             this.dest = this.audioCtx.createMediaStreamDestination(); //create a 'sink' node where internal audio gets piped
             this.audioEl.srcObject = this.dest.stream; //atttach the stream to the persistent outward facing audioEl to allow lockscreen play
 
