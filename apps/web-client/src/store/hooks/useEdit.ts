@@ -194,8 +194,7 @@ export const useEditProfile = () => {
             return null;
         },
         onSuccess: () => {
-            //refetch all data that could possibly have the edited playlist
-            queryClient.invalidateQueries({ queryKey: ["profile", "stats"] }); //invalidate the user profile details
+            queryClient.invalidateQueries({ queryKey: ["profile", "stats"] }); //invalidate the user profile details for a refetch
 
             makeToast("", "Saved");
         },

@@ -9,6 +9,7 @@ import type { UserStats } from "@/features/profile/profile.types";
 import { Input } from "@/components/ui/input";
 import type { EditProfilePayload } from "@/store/hooks/hooks.types";
 import { useEditProfile } from "@/store/hooks/useEdit";
+import { convertDate } from "@/features/profile/profile.utils";
 
 
 interface EditProfileFormProps {
@@ -39,7 +40,7 @@ export const EditProfileForm = ({
             <div className="h-full custom-scrollbar overflow-y-auto flex flex-col gap-4">
                 {/* Username Section */}
                 <div className="flex flex-row gap-3 items-center">
-                    <label className="text-sm font-medium text-muted-foreground">
+                    <label className="text-sm font-medium text-muted-foreground w-18 shrink-0">
                         Username
                     </label>
                     <Input
@@ -48,6 +49,16 @@ export const EditProfileForm = ({
                         placeholder={stats.username}
                         className="text-md"
                     />
+                </div>
+
+                {/* Created Date Section */}
+                <div className="flex flex-row gap-3 items-center">
+                    <label className="text-sm font-medium text-muted-foreground w-18 shrink-0">
+                        Joined
+                    </label>
+                    <span className="text-md font-normal text-foreground px-3 select-all">
+                        {convertDate(stats.createdAt)}
+                    </span>
                 </div>
             </div>
 
