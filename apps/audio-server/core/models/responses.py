@@ -11,6 +11,9 @@ class RetrievalResponse(ScuttleBase):
     results: list[TrackBase]
 
 class StatsResponse(ScuttleBase):
+    username: str
+    created_at: int
+
     total_track_count: int
     total_listened_duration: int
     total_storage_used: int

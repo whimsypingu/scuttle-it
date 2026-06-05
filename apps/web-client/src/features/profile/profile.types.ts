@@ -7,7 +7,7 @@ export interface ProfileTabProps {
  */
 export interface UserStats {
     username: string;
-    startDate: number; //epoch seconds
+    createdAt: number; //epoch seconds
 
     totalTrackCount: number;
     totalListenedDuration: number;

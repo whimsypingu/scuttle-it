@@ -6,7 +6,7 @@ import type { UserStats } from "./profile.types";
  */
 export const DEFAULT_STATS: UserStats = {
     username: "whimsypingu",
-    startDate: 0,
+    createdAt: 0,
 
     totalTrackCount: 0,
     totalListenedDuration: 0,

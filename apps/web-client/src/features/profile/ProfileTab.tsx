@@ -51,7 +51,7 @@ export const ProfileTab = ({
 
                         <div className="flex-1 flex flex-col gap-1">
                             <h1 className="text-2xl">{stats.username}</h1>
-                            <p className="text-zinc-400 text-sm">scuttling since {convertDate(stats.startDate)}</p>
+                            <p className="text-zinc-400 text-sm">scuttling since {convertDate(stats.createdAt)}</p>
                         </div>
                     </section>
 
