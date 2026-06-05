@@ -21,4 +21,8 @@ export const EDIT_CONFIG: Record<EditableType, EditPopupMetadata> = {
         title: "Clear Queue?",
         description: "",
     },
+    editProfile: {
+        title: "Profile",
+        description: "",
+    },
 };

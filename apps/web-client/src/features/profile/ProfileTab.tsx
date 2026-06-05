@@ -11,6 +11,8 @@ import { convertDate, convertDuration, convertStorage } from "@/features/profile
 import { BOTTOM_SHELF, NAV_CONFIG } from "@/features/player/player.constants";
 
 import type { ProfileTabProps } from "@/features/profile/profile.types";
+import { useEditTarget } from "../edit/EditProvider";
+import type { ActiveEditTarget } from "../edit/edit.types";
 
 
 export const ProfileTab = ({
@@ -31,6 +33,16 @@ export const ProfileTab = ({
         { label: "Audio Storage", value: storageStr, suffix: storageSuffix, Icon: HardDrivesIcon },
     ];
 
+    // prep the 'edit profile' form popup function
+    const { setEditTarget } = useEditTarget();
+    const openEditProfileForm = () => {
+        const editProfileTarget: ActiveEditTarget = {
+            type: "editProfile", 
+            data: stats,
+        };
+        setEditTarget(editProfileTarget);
+    }
+
     return (
         <>
         <motion.div 
@@ -44,7 +56,10 @@ export const ProfileTab = ({
                     style={{ marginBottom: `${BOTTOM_SHELF.totalHeight}px` }}
                 >
                     {/* HEADER */}
-                    <section className="flex items-center gap-6">
+                    <section 
+                        className="flex items-center gap-6"
+                        onClick={openEditProfileForm}    
+                    >
                         <div className="w-20 h-20 rounded-full bg-zinc-800 flex items-center justify-center">
                             <User size={40} />
                         </div> 
