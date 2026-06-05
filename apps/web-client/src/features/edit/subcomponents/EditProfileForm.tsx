@@ -9,7 +9,7 @@ import type { UserStats } from "@/features/profile/profile.types";
 import { Input } from "@/components/ui/input";
 import type { EditProfilePayload } from "@/store/hooks/hooks.types";
 import { useEditProfile } from "@/store/hooks/useEdit";
-import { convertDate, convertFullDateWithRelative } from "@/features/profile/profile.utils";
+import { convertDate, convertRelativeDate } from "@/features/profile/profile.utils";
 
 
 interface EditProfileFormProps {
@@ -56,9 +56,15 @@ export const EditProfileForm = ({
                     <label className="text-sm font-medium text-muted-foreground w-18 shrink-0">
                         Scuttled
                     </label>
-                    <span className="text-md font-normal text-foreground px-3 select-all">
-                        {convertFullDateWithRelative(stats.createdAt)}
-                    </span>
+                    <div className="flex flex-row items-baseline gap-3 select-all px-3">
+                        <span className="text-md font-normal text-foreground">
+                            {convertDate(stats.createdAt, { includeDay: true })}
+                        </span>
+                        
+                        <span className="text-sm font-normal text-muted-foreground">
+                            ({convertRelativeDate(stats.createdAt)})
+                        </span>
+                    </div>
                 </div>
             </div>
 
