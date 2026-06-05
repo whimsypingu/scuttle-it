@@ -94,8 +94,12 @@ class StatsMixin:
 
         query = """
             SELECT
+                s.username,
+                s.created_at,
                 (SELECT COUNT(*) FROM downloads) AS total_track_count,
-                (SELECT COALESCE(SUM(listened_duration), 0) FROM tracks) AS total_listened_duration;
+                (SELECT COALESCE(SUM(listened_duration), 0) FROM tracks) AS total_listened_duration
+            FROM settings s
+            WHERE s.id = 1;
         """
 
         try:

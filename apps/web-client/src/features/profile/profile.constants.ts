@@ -5,9 +5,10 @@ import type { UserStats } from "./profile.types";
  * Used for fallbacks and initial state management.
  */
 export const DEFAULT_STATS: UserStats = {
+    username: "whimsypingu",
+    createdAt: 0,
+
     totalTrackCount: 0,
     totalListenedDuration: 0,
     totalStorageUsed: 0,
-    // Add future defaults here:
-    // totalAudioStorage: 0
 };

@@ -1,12 +1,12 @@
 import traceback
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
 from api.dependencies import get_db_manager, get_stats_manager
 from core.stats.stats_manager import StatsManager
 from database.database_manager import DatabaseManager
 
 from core.models.responses import StatsResponse
-from core.models.payloads import IncrementListenDurationPayload
+from core.models.payloads import IncrementListenDurationPayload, EditProfilePayload
 
 StatsRouter = APIRouter(prefix="/stats", tags=["Stats"])
 
@@ -50,6 +50,19 @@ async def get_stats_endpoint(
             **stats,
             "total_storage_used": total_storage_used
         }
+    except Exception as e:
+        traceback.print_exc()
+        raise DefaultCrashException
+
+
+@StatsRouter.patch("/edit")
+async def edit_profile_endpoint(
+    payload: EditProfilePayload = Body(...),
+    db_manager: DatabaseManager = Depends(get_db_manager),
+):
+    try:
+        await db_manager.set_username(payload.username)
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException

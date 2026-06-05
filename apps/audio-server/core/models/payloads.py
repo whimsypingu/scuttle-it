@@ -48,3 +48,7 @@ class ReorderPlaylistPayload(ScuttleBase):
     source_id: str
     target_id: str
     below: bool
+
+
+class EditProfilePayload(ScuttleBase):
+    username: str
