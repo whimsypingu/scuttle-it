@@ -9,7 +9,7 @@ import type { UserStats } from "@/features/profile/profile.types";
 import { Input } from "@/components/ui/input";
 import type { EditProfilePayload } from "@/store/hooks/hooks.types";
 import { useEditProfile } from "@/store/hooks/useEdit";
-import { convertDate } from "@/features/profile/profile.utils";
+import { convertDate, convertFullDateWithRelative } from "@/features/profile/profile.utils";
 
 
 interface EditProfileFormProps {
@@ -54,10 +54,10 @@ export const EditProfileForm = ({
                 {/* Created Date Section */}
                 <div className="flex flex-row gap-3 items-center">
                     <label className="text-sm font-medium text-muted-foreground w-18 shrink-0">
-                        Joined
+                        Scuttled
                     </label>
                     <span className="text-md font-normal text-foreground px-3 select-all">
-                        {convertDate(stats.createdAt)}
+                        {convertFullDateWithRelative(stats.createdAt)}
                     </span>
                 </div>
             </div>
