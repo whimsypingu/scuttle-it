@@ -41,3 +41,22 @@ class SettingsMixin:
         except Exception:
             logger.exception("Failed to retrieve Settings")
             raise
+
+    
+    async def set_username(self, username) -> bool:
+        """Set the username"""
+        logger.info(f"Setting username to {username}")
+
+        if (len(username) <= 0):
+            return False
+        
+        try:
+            async with self.session() as db:
+                await db.execute("UPDATE settings SET username = ? WHERE id = 1;", (username,))
+
+                logger.info(f"Successfully set username to {username}")
+                return True
+            
+        except Exception:
+            logger.exception(f"Failed to set username to {username}")
+            raise
