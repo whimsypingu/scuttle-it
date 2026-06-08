@@ -44,8 +44,8 @@ class SpotifyAdapter:
         return link_type, potential_id
 
 
-    async def _resolve_track(self, id) -> str:
-        """Internally handle converting a track url to a query "track - artists" like this"""
+    async def _resolve_track(self, id) -> tuple[str, str]:
+        """Internally handle converting a track url to a query ("track", "artists") like this"""
         embed_url = f"https://open.spotify.com/embed/track/{id}"
 
         async with httpx.AsyncClient(headers=self._headers, timeout=self._timeout) as client:
@@ -56,7 +56,7 @@ class SpotifyAdapter:
                 #try catch block will catch any errors
                 title = m.group(1)
                 artists = ", ".join([a.get("name") for a in json.loads(m.group(2))])
-                return self._clean(f"{title} - {artists}")
+                return (self._clean(title), self._clean(artists))
             except Exception as e:
                 raise TrackResolutionError(f"Failed to resolve track metadata from Spotify") from e
         
@@ -107,7 +107,6 @@ class SpotifyAdapter:
                         queries.append(
                             (self._clean(title), self._clean(artist))
                         )
-                        #queries.append(self._clean(f"{title.strip()} - {artist.strip()}"))
 
                 if name is None: #for whatever reason if somehow a playlist name is not extracted raise an error
                     raise AttributeError()
@@ -126,9 +125,14 @@ class SpotifyAdapter:
         
         if link_type == "track":
             try:
-                query = await self._resolve_track(extracted_id)
+                q = await self._resolve_track(extracted_id)
 
-                job = DownloadJob(query=query, priority=True)
+                job = DownloadJob(
+                    query=f"{q[0]} - {q[1]}",
+                    priority=True,
+                    title_display=q[0],
+                    artist_display=q[1],
+                )
                 return [job], None
             except TrackResolutionError as e:
                 logger.error(e)
@@ -149,7 +153,7 @@ class SpotifyAdapter:
                             artist_display=q[1],
                         )
                     )
-                    
+
                 payload = CreatePlaylistPayload(
                     playlist_id=extracted_id,
                     name=name,
