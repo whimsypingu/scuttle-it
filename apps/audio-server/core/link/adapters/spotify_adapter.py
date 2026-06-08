@@ -27,7 +27,12 @@ class SpotifyAdapter:
 
 
     def _clean(self, text):
-        return text.replace("\xa0", " ").strip()
+        text = text.replace("\xa0", " ") #non-breaking spaces
+        try:
+            text = text.encode("utf-8").decode("unicode_escape") #resolve characters like \\u0026 to & etc
+        except Exception:
+            pass
+        return text.strip()
 
     def extract_id(self, parsed_url: str) -> tuple[str | None, str | None]:
         """Attempts to find the Spotify id from a parsed url. Returns link_type as a string of 'playlist' or 'track', and extracted_id."""
