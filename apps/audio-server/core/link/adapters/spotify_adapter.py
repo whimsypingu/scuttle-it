@@ -27,7 +27,7 @@ class SpotifyAdapter:
 
 
     def _clean(self, text):
-        return text.replace("\xa0", " ")
+        return text.replace("\xa0", " ").strip()
 
     def extract_id(self, parsed_url: str) -> tuple[str | None, str | None]:
         """Attempts to find the Spotify id from a parsed url. Returns link_type as a string of 'playlist' or 'track', and extracted_id."""
@@ -61,7 +61,7 @@ class SpotifyAdapter:
                 raise TrackResolutionError(f"Failed to resolve track metadata from Spotify") from e
         
 
-    async def _resolve_playlist(self, id) -> tuple[str, str, list[str]]:
+    async def _resolve_playlist(self, id) -> tuple[str, str, list[tuple[str, str]]]:
         """Extracts the tracks and metadata of a Spotify playlist via an embed proxy layout.
 
         This method scrapes the raw underlying HTML response from a proxy shell, parses out 
@@ -75,7 +75,7 @@ class SpotifyAdapter:
             A tuple containing:
                 - str: The sanitized name of the playlist.
                 - str: The sanitized creator or description metadata block.
-                - list[str]: A list of cleanly formatted "Track Title - Artist Name" strings
+                - list[tuple[str, str]]: A list of cleanly formatted "Track Title - Artist Name" strings
                   representing every discovered item inside the playlist.
 
         Raises:
@@ -101,10 +101,13 @@ class SpotifyAdapter:
 
                 for i, (title, artist) in enumerate(m):
                     if i == 0:
-                        name = self._clean(title.strip())
-                        description = self._clean(artist.strip()) #spotify embed links don't contain the actual description, so we will just use the user instead
+                        name = self._clean(title)
+                        description = self._clean(artist) #spotify embed links don't contain the actual description, so we will just use the user instead
                     else:
-                        queries.append(self._clean(f"{title.strip()} - {artist.strip()}"))
+                        queries.append(
+                            (self._clean(title), self._clean(artist))
+                        )
+                        #queries.append(self._clean(f"{title.strip()} - {artist.strip()}"))
 
                 if name is None: #for whatever reason if somehow a playlist name is not extracted raise an error
                     raise AttributeError()
@@ -135,10 +138,18 @@ class SpotifyAdapter:
             try:
                 name, description, queries = await self._resolve_playlist(extracted_id)
 
-                jobs = [
-                    DownloadJob(query=q, priority=False, playlist_ids=[extracted_id])
-                    for q in queries
-                ]
+                jobs = []
+                for q in queries:
+                    jobs.append(
+                        DownloadJob(
+                            query=f"{q[0]} - {q[1]}",
+                            priority=False,
+                            playlist_ids=[extracted_id],
+                            title_display=q[0],
+                            artist_display=q[1],
+                        )
+                    )
+                    
                 payload = CreatePlaylistPayload(
                     playlist_id=extracted_id,
                     name=name,

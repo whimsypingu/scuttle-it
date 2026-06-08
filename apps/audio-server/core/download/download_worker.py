@@ -113,14 +113,21 @@ class DownloadWorker:
                 await self.db_manager.register_track(download_result)
                 await self.db_manager.register_download(download_result.id)
 
+                estimated_title_display = job.title_display if job.title_display else download_result.display
+                if job.artist_display:
+                    artist_payload = [EditArtistPayload(name_display=job.artist_display)]
+                else:
+                    artist_payload = [
+                        EditArtistPayload(name_display=artist.display)
+                        for artist in download_result.artists
+                    ]
+
                 await self.db_manager.edit_track(
                     download_result.id, 
                     EditTrackPayload(
-                        title_display=download_result.display,
+                        title_display=estimated_title_display,
                         duration=clean_duration,
-                        artists=[EditArtistPayload(
-                            name_display=artist.display
-                        ) for artist in download_result.artists],
+                        artists=artist_payload,
                         playlist_ids=job.playlist_ids,
                     )
                 )
