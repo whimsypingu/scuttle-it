@@ -29,7 +29,7 @@ class SpotifyAdapter:
     def _clean(self, text):
         text = text.replace("\xa0", " ") #non-breaking spaces
         try:
-            text = text.encode("utf-8").decode("unicode_escape") #resolve characters like \\u0026 to & etc
+            text = json.loads(f'"{text}"') #resolve characters like \\u0026 to & etc
         except Exception:
             pass
         return text.strip()
