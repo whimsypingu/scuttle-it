@@ -14,7 +14,7 @@ from database.database_manager import DatabaseManager
 from sync.pokes import WSPokeFactory
 from sync.websocket_manager import WebsocketManager
 
-from core.download.exceptions import DownloadWorkerJobExpanded
+from core.download.exceptions import DownloadWorkerJobExpanded, DownloadWorkerJobError
 from core.youtube.exceptions import YtdlpDownloadError, YtdlpTimeoutError
 
 logger = logging.getLogger(__name__)
@@ -74,10 +74,27 @@ class DownloadWorker:
                             await self.dl_queue.add(j)
                         raise DownloadWorkerJobExpanded() #exit job handling here with a successful custom exception
 
+                    #processing a single search query happens here
                     search_results = await self.yt_client.search_by_query(q=job.query, limit=job.query_limit)
-                    for search_result in search_results:
-                        await self.db_manager.register_track(search_result)
+
+                    if len(search_results) <= 0:
+                        raise DownloadWorkerJobError() #exit job with failure
+                        
                     search_id = search_results[0].id
+
+                    if job.target_duration is None:
+                        for sr in search_results:
+                            await self.db_manager.register_track(sr)
+
+                    else: #special attempt to get a result close to the target duration if specified
+                        smallest_delta = float("inf")
+                        for sr in search_results:
+                            await self.db_manager.register_track(sr)
+
+                            current_delta = abs(sr.duration - job.target_duration)
+                            if current_delta < smallest_delta:
+                                smallest_delta = current_delta
+                                search_id = sr.id
                 else:
                     search_id = job.track_id
 
@@ -113,14 +130,21 @@ class DownloadWorker:
                 await self.db_manager.register_track(download_result)
                 await self.db_manager.register_download(download_result.id)
 
+                estimated_title_display = job.title_display if job.title_display else download_result.display
+                if job.artist_display:
+                    artist_payload = [EditArtistPayload(name_display=job.artist_display)]
+                else:
+                    artist_payload = [
+                        EditArtistPayload(name_display=artist.display)
+                        for artist in download_result.artists
+                    ]
+
                 await self.db_manager.edit_track(
                     download_result.id, 
                     EditTrackPayload(
-                        title_display=download_result.display,
+                        title_display=estimated_title_display,
                         duration=clean_duration,
-                        artists=[EditArtistPayload(
-                            name_display=artist.display
-                        ) for artist in download_result.artists],
+                        artists=artist_payload,
                         playlist_ids=job.playlist_ids,
                     )
                 )

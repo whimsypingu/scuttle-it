@@ -22,12 +22,17 @@ class SpotifyAdapter:
         self._timeout = 15.0
 
         self._id_pattern = re.compile(r'^[a-zA-Z0-9]{22}$') #https://community.spotify.com/t5/Spotify-for-Developers/API-What-defines-a-valid-Spotify-ID/td-p/5069603 nobody replied?
-        self._track_pattern = re.compile(r'"title":"([^"]+)".*?"artists":\s*(\[.*?\])', re.DOTALL)
-        self._playlist_pattern = re.compile(r'"title":"([^"]+)".*?"subtitle":"([^"]+)"', re.DOTALL)
+        self._track_pattern = re.compile(r'"title":"([^"]+)".*?"artists":\s*(\[.*?\]).*?"duration":(\d+)', re.DOTALL)
+        self._playlist_pattern = re.compile(r'"title":"([^"]+)".*?"subtitle":"([^"]+)".*?"duration":(\d+)', re.DOTALL)
 
 
     def _clean(self, text):
-        return text.replace("\xa0", " ")
+        text = text.replace("\xa0", " ") #non-breaking spaces
+        try:
+            text = json.loads(f'"{text}"') #resolve characters like \\u0026 to & etc
+        except Exception:
+            pass
+        return text.strip()
 
     def extract_id(self, parsed_url: str) -> tuple[str | None, str | None]:
         """Attempts to find the Spotify id from a parsed url. Returns link_type as a string of 'playlist' or 'track', and extracted_id."""
@@ -44,8 +49,8 @@ class SpotifyAdapter:
         return link_type, potential_id
 
 
-    async def _resolve_track(self, id) -> str:
-        """Internally handle converting a track url to a query "track - artists" like this"""
+    async def _resolve_track(self, id) -> tuple[str, str, int]:
+        """Internally handle converting a track url to a query ("track", "artists", duration in seconds) like this"""
         embed_url = f"https://open.spotify.com/embed/track/{id}"
 
         async with httpx.AsyncClient(headers=self._headers, timeout=self._timeout) as client:
@@ -56,12 +61,13 @@ class SpotifyAdapter:
                 #try catch block will catch any errors
                 title = m.group(1)
                 artists = ", ".join([a.get("name") for a in json.loads(m.group(2))])
-                return self._clean(f"{title} - {artists}")
+                target_duration = round(int(m.group(3)) / 1000) if m.group(3).isdigit() else None
+                return (self._clean(title), self._clean(artists), target_duration)
             except Exception as e:
                 raise TrackResolutionError(f"Failed to resolve track metadata from Spotify") from e
         
 
-    async def _resolve_playlist(self, id) -> tuple[str, str, list[str]]:
+    async def _resolve_playlist(self, id) -> tuple[str, str, list[tuple[str, str, int]]]:
         """Extracts the tracks and metadata of a Spotify playlist via an embed proxy layout.
 
         This method scrapes the raw underlying HTML response from a proxy shell, parses out 
@@ -75,7 +81,7 @@ class SpotifyAdapter:
             A tuple containing:
                 - str: The sanitized name of the playlist.
                 - str: The sanitized creator or description metadata block.
-                - list[str]: A list of cleanly formatted "Track Title - Artist Name" strings
+                - list[tuple[str, str, int]]: A list of tuples that have title, artist, and duration in seconds.
                   representing every discovered item inside the playlist.
 
         Raises:
@@ -99,12 +105,15 @@ class SpotifyAdapter:
                 name = None
                 description = None
 
-                for i, (title, artist) in enumerate(m):
+                for i, (title, artist, duration) in enumerate(m):
                     if i == 0:
-                        name = self._clean(title.strip())
-                        description = self._clean(artist.strip()) #spotify embed links don't contain the actual description, so we will just use the user instead
+                        name = self._clean(title)
+                        description = self._clean(artist) #spotify embed links don't contain the actual description, so we will just use the user instead
                     else:
-                        queries.append(self._clean(f"{title.strip()} - {artist.strip()}"))
+                        target_duration = round(int(duration) / 1000) if duration.isdigit() else None
+                        queries.append(
+                            (self._clean(title), self._clean(artist), target_duration)
+                        )
 
                 if name is None: #for whatever reason if somehow a playlist name is not extracted raise an error
                     raise AttributeError()
@@ -123,9 +132,15 @@ class SpotifyAdapter:
         
         if link_type == "track":
             try:
-                query = await self._resolve_track(extracted_id)
+                q = await self._resolve_track(extracted_id)
 
-                job = DownloadJob(query=query, priority=True)
+                job = DownloadJob(
+                    query=f"{q[0]} - {q[1]}",
+                    target_duration=q[2],
+                    priority=True,
+                    title_display=q[0],
+                    artist_display=q[1],
+                )
                 return [job], None
             except TrackResolutionError as e:
                 logger.error(e)
@@ -135,10 +150,19 @@ class SpotifyAdapter:
             try:
                 name, description, queries = await self._resolve_playlist(extracted_id)
 
-                jobs = [
-                    DownloadJob(query=q, priority=False, playlist_ids=[extracted_id])
-                    for q in queries
-                ]
+                jobs = []
+                for q in queries:
+                    jobs.append(
+                        DownloadJob(
+                            query=f"{q[0]} - {q[1]}",
+                            target_duration=q[2],
+                            priority=False,
+                            playlist_ids=[extracted_id],
+                            title_display=q[0],
+                            artist_display=q[1],
+                        )
+                    )
+
                 payload = CreatePlaylistPayload(
                     playlist_id=extracted_id,
                     name=name,
