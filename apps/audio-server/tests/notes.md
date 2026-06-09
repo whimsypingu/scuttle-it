@@ -13,3 +13,5 @@ For specific files:
 ```bash
 python -m pytest apps/audio-server/tests/TEST_FILE_NAME.py
 ```
+
+Files that start with `test_` are marked for testing via pytest. Other files that start with `benchmark_` are meant for identifying weaknesses and diagnosing them.
