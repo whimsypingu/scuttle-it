@@ -5,8 +5,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Spinner } from "@/components/ui/spinner";
 import { JobItem } from "@/job/JobItem";
 
-import type { DownloadJob } from "@/job/job.types";
-
 
 export const SearchStatusIndicator = () => {
 

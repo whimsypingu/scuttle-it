@@ -20,6 +20,7 @@ export const useDownloadJobs = () => {
             return data.jobs as DownloadJob[];
         },
         staleTime: 1000 * 60 * 5, 
+        refetchOnMount: "always", //force refetch whenever this hook mounts, backend updates immediately to get the most up-to-date data
     });
 
     //prevent re-calculations for these bools

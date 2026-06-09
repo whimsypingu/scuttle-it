@@ -14,7 +14,7 @@ from database.database_manager import DatabaseManager
 from sync.pokes import WSPokeFactory
 from sync.websocket_manager import WebsocketManager
 
-from core.download.exceptions import DownloadWorkerJobExpanded, DownloadWorkerJobFailed
+from core.download.exceptions import DownloadWorkerJobExpanded, DownloadWorkerJobError
 from core.youtube.exceptions import YtdlpDownloadError, YtdlpTimeoutError
 
 logger = logging.getLogger(__name__)
@@ -78,7 +78,7 @@ class DownloadWorker:
                     search_results = await self.yt_client.search_by_query(q=job.query, limit=job.query_limit)
 
                     if len(search_results) <= 0:
-                        raise DownloadWorkerJobFailed() #exit job with failure
+                        raise DownloadWorkerJobError() #exit job with failure
                         
                     search_id = search_results[0].id
 
