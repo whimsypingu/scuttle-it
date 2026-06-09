@@ -97,15 +97,19 @@ export const EditTrackForm = ({
         return (
             <div className="flex flex-col px-1">
                 <div className="flex flex-row items-center gap-2 px-1 py-1">
-                    <NotchesIcon size={SOURCE_ICON_SIZE} />
-                    <label className="text-xs font-medium text-muted-foreground">
+                    <div className="shrink-0">
+                        <NotchesIcon size={SOURCE_ICON_SIZE} />
+                    </div>
+                    <label className="flex-1 text-xs font-medium text-muted-foreground">
                         {title}
                     </label>
                 </div>
 
                 <div className="flex flex-row items-center gap-2 px-1 py-1">
-                    <NotchesIcon size={SOURCE_ICON_SIZE} />
-                    <label className="text-xs font-medium text-muted-foreground">
+                    <div className="shrink-0">
+                        <NotchesIcon size={SOURCE_ICON_SIZE} />
+                    </div>
+                    <label className="flex-1 text-xs font-medium text-muted-foreground">
                         {artists}
                     </label>
                 </div>
@@ -116,8 +120,10 @@ export const EditTrackForm = ({
                     rel="noopener noreferrer nofollow" //security, privacy, and seo
                 >
                     <div className="flex flex-row items-center gap-2 px-1 py-1 active:scale-[0.98]">
-                        <LinkIcon size={SOURCE_ICON_SIZE} />
-                        <label className="text-xs font-medium underline underline-offset-4 text-muted-foreground">
+                        <div className="shrink-0">
+                            <LinkIcon size={SOURCE_ICON_SIZE} />
+                        </div>
+                        <label className="flex-1 text-xs font-medium underline underline-offset-4 text-muted-foreground">
                             {link}
                         </label>
                     </div>
