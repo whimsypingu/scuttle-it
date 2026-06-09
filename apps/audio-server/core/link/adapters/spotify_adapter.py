@@ -22,7 +22,7 @@ class SpotifyAdapter:
         self._timeout = 15.0
 
         self._id_pattern = re.compile(r'^[a-zA-Z0-9]{22}$') #https://community.spotify.com/t5/Spotify-for-Developers/API-What-defines-a-valid-Spotify-ID/td-p/5069603 nobody replied?
-        self._track_pattern = re.compile(r'"title":"([^"]+)".*?"artists":\s*(\[.*?\])', re.DOTALL)
+        self._track_pattern = re.compile(r'"title":"([^"]+)".*?"artists":\s*(\[.*?\]).*?"duration":(\d+)', re.DOTALL)
         self._playlist_pattern = re.compile(r'"title":"([^"]+)".*?"subtitle":"([^"]+)".*?"duration":(\d+)', re.DOTALL)
 
 
@@ -49,8 +49,8 @@ class SpotifyAdapter:
         return link_type, potential_id
 
 
-    async def _resolve_track(self, id) -> tuple[str, str]:
-        """Internally handle converting a track url to a query ("track", "artists") like this"""
+    async def _resolve_track(self, id) -> tuple[str, str, int]:
+        """Internally handle converting a track url to a query ("track", "artists", duration in seconds) like this"""
         embed_url = f"https://open.spotify.com/embed/track/{id}"
 
         async with httpx.AsyncClient(headers=self._headers, timeout=self._timeout) as client:
@@ -61,7 +61,8 @@ class SpotifyAdapter:
                 #try catch block will catch any errors
                 title = m.group(1)
                 artists = ", ".join([a.get("name") for a in json.loads(m.group(2))])
-                return (self._clean(title), self._clean(artists))
+                target_duration = round(int(m.group(3)) / 1000) if m.group(3).isdigit() else None
+                return (self._clean(title), self._clean(artists), target_duration)
             except Exception as e:
                 raise TrackResolutionError(f"Failed to resolve track metadata from Spotify") from e
         
@@ -135,6 +136,7 @@ class SpotifyAdapter:
 
                 job = DownloadJob(
                     query=f"{q[0]} - {q[1]}",
+                    target_duration=q[2],
                     priority=True,
                     title_display=q[0],
                     artist_display=q[1],
