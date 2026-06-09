@@ -33,22 +33,30 @@ def run_benchmark():
             ext = random.choice([".mp3", ".m4a", ".flac"])
             (data_dir / f"{yt_id}{ext}").touch()
             
-        # Select an ID from near the end of the collection to test a realistic search
-        target_id = all_ids[-50] 
+        sample_size = 100
+        random_test_ids = random.sample(all_ids, sample_size)
         
-        print(f"Target sample ID chosen for testing: '{target_id}'")
-        print("\n--- Running Benchmark (1,000 iterations) ---")
+        print(f"Selected {sample_size} random IDs to stress-test filesystem variance.")
+        print("\n--- Running Randomized Benchmark (1,000 iterations per ID) ---")
         
-        # Time how long it takes to run your exact function 1,000 times
-        execution_time = timeit.timeit(
-            stmt=lambda: original_resolve_track_path(target_id, data_dir),
-            number=1000
-        )
+        total_execution_time = 0.0
         
-        avg_time_ms = (execution_time / 1000) * 1000
+        # Loop through each random ID and track cumulative execution times
+        for test_id in random_test_ids:
+            execution_time = timeit.timeit(
+                stmt=lambda: original_resolve_track_path(test_id, data_dir),
+                number=1000
+            )
+            total_execution_time += execution_time
+            
+        # Calculate overall averages
+        total_lookups = sample_size * 1000
+        avg_time_ms = (total_execution_time / total_lookups) * 1000
         
-        print(f"Total time for 1,000 lookups: {execution_time:.5f} seconds")
-        print(f"Average time per single lookup: {avg_time_ms:.5f} milliseconds")
+        print(f"Total lookups executed: {total_lookups:,}")
+        print(f"Total time across all tests: {total_execution_time:.5f} seconds")
+        print(f"True average time per single lookup: {avg_time_ms:.5f} milliseconds")
 
+        
 if __name__ == "__main__":
     run_benchmark()
