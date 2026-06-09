@@ -39,11 +39,8 @@ class DatabaseManager(
         self,
         **overrides
     ):
-        self.db_dir: Path = settings.DATABASE_DIR
-        self.db_path: Path = settings.DATABASE_DIR / "scuttle.db"
-        self.sql_dir: Path = settings.DATABASE_DIR / "sql"
-
-        self.data_dir: Path = settings.DATA_DIR
+        self.db_path: Path = settings.DATA_DIR / "scuttle.db"
+        self.sql_dir: Path = settings.SQL_DIR
 
         self.NEW_POSITION_GAP = 100.0
 
