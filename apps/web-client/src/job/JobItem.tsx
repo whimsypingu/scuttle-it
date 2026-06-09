@@ -35,19 +35,19 @@ export const JobItem = ({
             className="w-full flex items-center gap-2 p-2"
         >
             <div 
-                className="flex-shrink-0 p-2"
+                className="flex-shrink-0 p-1"
                 style={{ color }}
             >
                 <IconComponent size={14} weight="fill" />
             </div>
 
             {/* JOB DETAILS */}
-            <div className="flex-1 min-w-0 flex flex-col justify-center">
-                <span className="text-xs font-medium text-white/90">
+            <div className="flex-1 min-w-0 flex flex-col justify-center overflow-hidden">
+                <span className="text-xs font-medium text-white/90 break-words block">
                     {displayText}
                 </span>
 
-                <span className="text-[10px] text-white/20 pt-[2px]">
+                <span className="text-[10px] text-white/20 pt-[2px] truncate block">
                     Started: {getTimeAgo(job.createdAt)}
                 </span>
             </div>
