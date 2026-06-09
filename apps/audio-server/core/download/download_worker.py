@@ -14,7 +14,7 @@ from database.database_manager import DatabaseManager
 from sync.pokes import WSPokeFactory
 from sync.websocket_manager import WebsocketManager
 
-from core.download.exceptions import DownloadWorkerJobExpanded
+from core.download.exceptions import DownloadWorkerJobExpanded, DownloadWorkerJobFailed
 from core.youtube.exceptions import YtdlpDownloadError, YtdlpTimeoutError
 
 logger = logging.getLogger(__name__)
@@ -74,10 +74,27 @@ class DownloadWorker:
                             await self.dl_queue.add(j)
                         raise DownloadWorkerJobExpanded() #exit job handling here with a successful custom exception
 
+                    #processing a single search query happens here
                     search_results = await self.yt_client.search_by_query(q=job.query, limit=job.query_limit)
-                    for search_result in search_results:
-                        await self.db_manager.register_track(search_result)
+
+                    if len(search_results) <= 0:
+                        raise DownloadWorkerJobFailed() #exit job with failure
+                        
                     search_id = search_results[0].id
+
+                    if job.target_duration is None:
+                        for sr in search_results:
+                            await self.db_manager.register_track(sr)
+
+                    else: #special attempt to get a result close to the target duration if specified
+                        smallest_delta = float("inf")
+                        for sr in search_results:
+                            await self.db_manager.register_track(sr)
+
+                            current_delta = abs(sr.duration - job.target_duration)
+                            if current_delta < smallest_delta:
+                                smallest_delta = current_delta
+                                search_id = sr.id
                 else:
                     search_id = job.track_id
 

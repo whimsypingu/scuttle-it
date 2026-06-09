@@ -25,7 +25,8 @@ class DownloadJob(JobBase):
     track_id: str | None = None
     query: str | None = None
     
-    query_limit: int = Field(default=3, ge=1, le=10)
+    query_limit: int = Field(default=3, ge=1, le=10) #number of results to retrieve per query for analysis
+    target_duration: int | None = None #target duration for smart filtering query results if applicable
     
     to_queue: bool = True #do we put this in the queue after download
     priority: bool = False #is it important or not for queue priority, if to_queue is true

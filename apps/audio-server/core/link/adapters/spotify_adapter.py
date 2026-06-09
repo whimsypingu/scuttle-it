@@ -23,7 +23,7 @@ class SpotifyAdapter:
 
         self._id_pattern = re.compile(r'^[a-zA-Z0-9]{22}$') #https://community.spotify.com/t5/Spotify-for-Developers/API-What-defines-a-valid-Spotify-ID/td-p/5069603 nobody replied?
         self._track_pattern = re.compile(r'"title":"([^"]+)".*?"artists":\s*(\[.*?\])', re.DOTALL)
-        self._playlist_pattern = re.compile(r'"title":"([^"]+)".*?"subtitle":"([^"]+)"', re.DOTALL)
+        self._playlist_pattern = re.compile(r'"title":"([^"]+)".*?"subtitle":"([^"]+)".*?"duration":(\d+)', re.DOTALL)
 
 
     def _clean(self, text):
@@ -66,7 +66,7 @@ class SpotifyAdapter:
                 raise TrackResolutionError(f"Failed to resolve track metadata from Spotify") from e
         
 
-    async def _resolve_playlist(self, id) -> tuple[str, str, list[tuple[str, str]]]:
+    async def _resolve_playlist(self, id) -> tuple[str, str, list[tuple[str, str, int]]]:
         """Extracts the tracks and metadata of a Spotify playlist via an embed proxy layout.
 
         This method scrapes the raw underlying HTML response from a proxy shell, parses out 
@@ -80,7 +80,7 @@ class SpotifyAdapter:
             A tuple containing:
                 - str: The sanitized name of the playlist.
                 - str: The sanitized creator or description metadata block.
-                - list[tuple[str, str]]: A list of cleanly formatted "Track Title - Artist Name" strings
+                - list[tuple[str, str, int]]: A list of tuples that have title, artist, and duration in seconds.
                   representing every discovered item inside the playlist.
 
         Raises:
@@ -104,13 +104,14 @@ class SpotifyAdapter:
                 name = None
                 description = None
 
-                for i, (title, artist) in enumerate(m):
+                for i, (title, artist, duration) in enumerate(m):
                     if i == 0:
                         name = self._clean(title)
                         description = self._clean(artist) #spotify embed links don't contain the actual description, so we will just use the user instead
                     else:
+                        target_duration = round(int(duration) / 1000) if duration.isdigit() else None
                         queries.append(
-                            (self._clean(title), self._clean(artist))
+                            (self._clean(title), self._clean(artist), target_duration)
                         )
 
                 if name is None: #for whatever reason if somehow a playlist name is not extracted raise an error
@@ -152,6 +153,7 @@ class SpotifyAdapter:
                     jobs.append(
                         DownloadJob(
                             query=f"{q[0]} - {q[1]}",
+                            target_duration=q[2],
                             priority=False,
                             playlist_ids=[extracted_id],
                             title_display=q[0],
