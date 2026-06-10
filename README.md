@@ -1,7 +1,16 @@
 ![Scuttle banner](./docs/assets/readme_banner_black_background.png)
 ---
 
-Scuttle is an audio archival tool for managing and playing your personal audio collection. Self-host your audio library from your laptop and stream to any device with a browser. For installation see [Quick Start](#quick-start).
+Scuttle is an audio archival tool for managing and playing your personal audio collection. Self-host your audio library from your laptop and stream to any device with a browser. 
+
+* [Features](#features)
+* [Installation](#installation)
+    * [Requirements](#requirements)
+    * [Dependencies](#important-external-dependency-disclaimer)
+* [Documentation](#documentation)
+    * [Project Structure](#project-structure)
+    * [Roadmap](#roadmap)
+    * [Known Issues](#known-issues)
 
 ---
 
@@ -111,7 +120,7 @@ Single track links are treated like regular searches and are pushed to the front
 
 ---
 
-# Quick Start
+# Installation
 
 1. Go to Scuttle's [Latest Releases](https://github.com/whimsypingu/scuttle-it/releases/latest) page.
 
