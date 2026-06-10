@@ -27,17 +27,26 @@ Scuttle is an audio archival tool for managing and playing your personal audio c
 ### Completely free
 The only cost is electricity for self-hosting, and the resources for your computer to handle serving audio files.
 
-### Safe downloading
-Downloading is currently based on [yt-dlp](https://github.com/yt-dlp/yt-dlp). Scuttle uses the nightly version and automatically performs self-healing updates to the most recently available version on download failures.
+### Downloading
+* **Safety:** Currently, downloading is exclusively done with [yt-dlp](https://github.com/yt-dlp/yt-dlp), and the only supported source is YouTube.
+* **Reliability:** Scuttle uses the nightly version of `yt-dlp`. On download failures, automatically performs self-healing nightly version updates to the most recently available version, and then re-tries the download.
+* **QOL:** Some important under the hood explanations of quality-of-life download logic that may not be apparent:
+    
+    * Audio from YouTube is downloaded on the first result that is found from the top 3 search results, but if a target duration is available,finds the closest track duration (to reduce cases of downloading MVs with extra unwanted audio, or versions with intros/outros).
+    
+    * Metadata from a YouTube download is overwritten if provided from an alternate platform's native link, otherwise a small <2 MB AI model attempts to extract and set metadata. Source code can be found on [this notebook](https://colab.research.google.com/drive/1MHd5qqSNmc9Of4HgElKvbQd45IZZ9-3I?usp=sharing).
 
 ### Audio quality and compatibilty
-* Audio files have a target of `192kbps` in `m4a` format for maximum device compatibility, and the web client streams audio even with mobile device screens powered off on iOS devices. 
-(For reference, about 3:30 of audio is around 5MB at this quality).
-* Leading and trailing silence is stripped for the purpose of minimizing file size and listening consistency.
+* Audio files have a target of `192kbps` in `m4a` format for maximum device compatibility. For reference, about 3:30 of audio is around 5MB at this quality level.
+* Web client streams audio with mobile device screens powered off (even on iOS devices).
+* Leading and trailing silence is stripped for the purpose of optimizing file size and listening consistency.
 * To eliminate volume disparity audio loudness is explicitly calibrated to **-16 LUFS** which follows [AES recommendations](https://www.radioworld.com/tech-and-gear/tech-tips/streaming-audio-loudness-guidelines-explained) for internet audio tracking.
 
 ### Integrated orchestration
-* A native desktop launcher handles the lifecycle of your server, including accessibility via a Discord webhook, and manages uptime of a Cloudflared tunnel to ensure maximum availability. **At the cost of being free, this could mean sudden rotations of user-accessible links to the web-client if the tunnel breaks.**
+* A native desktop launcher handles the lifecycle of your server, including accessibility via a Discord webhook, and manages uptime of a Cloudflared tunnel to ensure maximum availability. 
+
+    **At the cost of being free, this could mean sudden rotations of user-accessible links to the web-client if the tunnel breaks.**
+
 * On setup, installs all required software prerequisites and maintains updates of frequently updating critical packages.
 
 ### Better queue functionality
