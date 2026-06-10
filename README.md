@@ -1,7 +1,7 @@
 ![Scuttle banner](./docs/assets/readme_banner_black_background.png)
 ---
 
-Scuttle is an audio archival tool for managing and playing your personal audio collection. Self-host your audio library from your laptop and stream to any device with a browser.
+Scuttle is an audio archival tool for managing and playing your personal audio collection. Self-host your audio library from your laptop and stream to any device with a browser. For installation see [Quick Start](#quick-start).
 
 ---
 
@@ -20,6 +20,7 @@ Scuttle is an audio archival tool for managing and playing your personal audio c
 
 *(Additional screenshots and links to video demos with date)*
 
+
 ---
 
 # Features
@@ -28,7 +29,9 @@ Scuttle is an audio archival tool for managing and playing your personal audio c
 
 The only cost is electricity for self-hosting, and the resources for your computer to handle serving audio files.
 
+
 ---
+
 ### Downloading
 
 * **Safety:** Currently, downloading is exclusively done with [yt-dlp](https://github.com/yt-dlp/yt-dlp), and the only supported source is YouTube.
@@ -41,7 +44,9 @@ The only cost is electricity for self-hosting, and the resources for your comput
     
     * Metadata from a YouTube download is overwritten if provided from an alternate platform's native link, otherwise a small <2 MB AI model attempts to extract and set metadata. Source code can be found on [this notebook](https://colab.research.google.com/drive/1MHd5qqSNmc9Of4HgElKvbQd45IZZ9-3I?usp=sharing).
 
+
 ---
+
 ### Audio quality and compatibilty
 
 * Audio files have a target of `192kbps` in `m4a` format for maximum device compatibility. For reference, about 3:30 of audio is around 5MB at this quality level.
@@ -52,16 +57,22 @@ The only cost is electricity for self-hosting, and the resources for your comput
 
 * To eliminate volume disparity audio loudness is explicitly calibrated to **-16 LUFS** which follows [AES recommendations](https://www.radioworld.com/tech-and-gear/tech-tips/streaming-audio-loudness-guidelines-explained) for internet audio tracking.
 
+
 ---
+
 ### Integrated orchestration
 
 * A native desktop launcher handles the lifecycle of your server, including accessibility via a Discord webhook, and manages uptime of a Cloudflared tunnel to ensure maximum availability. 
 
     **At the cost of being free, this could mean sudden rotations of user-accessible links to the web-client if the tunnel breaks.**
 
-* On setup, installs all required software prerequisites and maintains updates of frequently updating critical packages.
+* On setup, installs all required software prerequisites and maintains updates of frequently updating critical packages. See [dependencies](#important-external-dependency-disclaimer) here.
+
+* It is recommended to change computer settings so that it stays on even with the screen off when connected to power, to ensure server uptime. This will be in effect until an anti-sleep battery-aware solution is implemented into the desktop launcher.
+
 
 ---
+
 ### Better queue functionality
 
 * Swipe to queue a song to the front **or** the back of the queue.
@@ -70,7 +81,9 @@ The only cost is electricity for self-hosting, and the resources for your comput
 
 * Due to unavoidable download and processing time, first download/plays are immediately sent to the front of the queue when available and are **not** instantly streamable.
 
+
 ---
+
 ### Import playlists
 
 Use native site share links to import playlists and tracks from other sources. Paste links directly into the search bar and press `Enter` to begin downloading playlists or tracks. 
@@ -82,7 +95,9 @@ Single track links are treated like regular searches and are pushed to the front
 * YouTube
 * Spotify
 
+
 ---
+
 ### Listening stats
 
 * Track your own statistics. Your listening data doesn't go anywhere and is stored exlusively on your own device.
@@ -93,22 +108,34 @@ Single track links are treated like regular searches and are pushed to the front
     * Total listened duration
     * Total audio storage usage
 
+
 ---
+
 # Quick Start
+
 1. Go to Scuttle's [Latest Releases](https://github.com/whimsypingu/scuttle-it/releases/latest) page.
+
 2. Download the `.zip` file for your OS (currently only Windows is supported).
+
 3. Unzip the project into your filesystem.
+
 4. Run the `scuttle` executable, and follow steps to initialize the environment and start the audio server. Installation may take a while.
 
 
 ### Requirements:
 Ensure you have `python` installed on your device. (You can test this by typing `python --version` into a terminal).
 
-### Important dependency disclaimer:
+### Important external dependency disclaimer:
 The default Scuttle setup downloads some external binaries during installation. Here is a brief explanation of them:
-* ffmpeg/ffprobe - Extracting and modifying audio files.
-* deno - JavaScript runtime engine to safely execute web scraper scripts (recommended for reliable yt-dlp usage).
-* cloudflared - Establishes free connection tunnel from your machine to the Cloudflare network, allowing you to access your Scuttle server from the internet without having to configure anything on your router.
+
+* **ffmpeg/ffprobe** - Extracting and modifying audio files.
+
+* **deno** - JavaScript runtime engine to safely execute web scraper scripts (recommended for reliable yt-dlp usage).
+
+* **cloudflared** - Establishes free connection tunnel from your machine to the Cloudflare network, allowing you to access your Scuttle server from the internet without having to configure anything on your router.
+
+For other dependencies that will require an internet connection to set up, see the [requirements.txt](./apps/audio-server/requirements.txt) file for the audio server.
+
 
 ---
 
@@ -126,8 +153,9 @@ scuttle-it/
 └── workspace.json
 ```
 
+---
 
-## AI Disclosure
+### AI Disclosure
 Parts of this codebase were developed with the assistance of Google Gemini and OpenAI ChatGPT free versions. All generated code in the existing main codebase has been manually reviewed.
 
 ## License
