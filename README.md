@@ -139,6 +139,8 @@ For other dependencies that will require an internet connection to set up, see t
 
 ---
 
+# Documentation
+
 ## Project Structure
 The project is organized as a monorepo to separate the concerns of data management and user interface. Each main component is found inside the `apps/` folder.
 
@@ -152,6 +154,51 @@ scuttle-it/
 ├── .gitignore
 └── workspace.json
 ```
+
+---
+
+## Roadmap
+The most basic version of Scuttle is now functional. However, there are a number of planned ideas for Scuttle in the future, and here they are listed in no particular order:
+
+- [ ] Internal artist handling improvements
+    - [ ] MusicBrainz-based metadata enrichment to automatically generate additional artist song catalog after listening to one.
+    - [ ] Merging artist records based on an ID to reduce duplicate artist entries for the same entity.
+    - [ ] More intuitive artist selection during track editing.
+
+- [ ] Recommendations
+    - [ ] Possibly allow users to set up their own central servers, which could host playlists and provide curated recommendations. For example, someone could set up their own recommendation server with custom genres or algorithms, and other users could connect to it and get recommendations from there.
+    - [ ] Auto-generate internally, either via waveform analysis (BUT this is computationally expensive), or with some kind of robust search algorithm using artist data.
+
+- [ ] Metadata enhancement
+    - [ ] Improvements to metadata extraction guesser (first iteration sitting at around 80% perfection, but with a heavy bias towards popular songs and not a wide enough array of seen training data. Source code can be found in the [download quality-of-life](#downloading) section).
+    - [ ] Smart MusicBrainz auto-filling metadata if possible for consistency across the library.
+
+- [ ] Profile
+    - [ ] Saved amount price comparisons to modern streaming platforms, and suggest users buy merch or concert tickets to their favorite artists.
+    - [ ] Allow multiple users to edit queue but listen on one device.
+    - [ ] Separate user sessions for the same server (although this is against the original intention of this project as a single user project).
+    - [ ] Show detailed analysis of user statistics, like most listened artist, longest track, etc.
+
+- [ ] Desktop launcher functionality
+    - [ ] Allow mounting another user's database and audio files easily (currently possible but only by manually editing the `.env` file).
+    - [ ] Upload existing user audio files to the Scuttle system.
+    - [ ] Download Scuttle audio files to elsewhere as their corrected names.
+    - [ ] Allow custom tunnel configuration.
+    - [ ] Allow users to restart server and tunnel from the frontend interface (may require some kind of IPC implementation).
+
+- [ ] UI/UX
+    - [ ] History queue.
+    - [ ] Cancel download jobs.
+    - [ ] Light mode(?)
+
+---
+
+## Known Issues
+There are also a number of known and unfixed issues in Scuttle.
+
+* Sometimes audio context will not resume correctly on iOS resulting in soundless audio, and requiring a pause and play.
+* Audio may appear distorted and high-pitched briefly when connecting or disconnecting bluetooth on iOS.
+
 
 ---
 
