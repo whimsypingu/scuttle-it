@@ -193,15 +193,19 @@ export const SearchTab = ({
 
 // const MOCK_SEARCH_PLAYLIST = { id: "s1", name: "Search Playlist", trackCount: 42, color: "#581c87" };
 
+// const GENRES = [
+//     { name: 'Podcasts', color: '#E13300' },
+//     { name: 'Made For You', color: '#1E3264' },
+//     { name: 'Charts', color: '#8D67AB' },
+//     { name: 'New Releases', color: '#E8115B' },
+//     { name: 'Discover', color: '#8D67AB' },
+//     { name: 'Live Events', color: '#7358FF' },
+//     { name: 'Pop', color: '#148A08' },
+//     { name: 'Hip-Hop', color: '#BC5900' },
+// ];
+
 const GENRES = [
-    { name: 'Podcasts', color: '#E13300' },
-    { name: 'Made For You', color: '#1E3264' },
-    { name: 'Charts', color: '#8D67AB' },
-    { name: 'New Releases', color: '#E8115B' },
-    { name: 'Discover', color: '#8D67AB' },
-    { name: 'Live Events', color: '#7358FF' },
-    { name: 'Pop', color: '#148A08' },
-    { name: 'Hip-Hop', color: '#BC5900' },
+    { name: 'Coming soon...', color: '#E13300' },
 ];
 
 const MockBrowserCategories = () => {
@@ -210,7 +214,7 @@ const MockBrowserCategories = () => {
         {/* Browse Categories */}
         <div className="flex flex-col gap-4 mt-2">
             <h2 className="text-lg font-medium">
-                Browse all
+                Browse
             </h2>
             
             <div className="grid grid-cols-2 gap-3">
