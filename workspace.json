@@ -11,7 +11,7 @@
             "bin": "apps/audio-server/bin",
 
             "data": "apps/audio-server/data",
-            "database": "apps/audio-server/database",
+            "sql": "apps/audio-server/database/sql",
 
             "toml": "apps/audio-server/pyproject.toml",
 

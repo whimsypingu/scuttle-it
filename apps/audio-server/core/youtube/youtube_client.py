@@ -19,7 +19,8 @@ class YouTubeClient():
         self,
         **overrides
     ):
-        self.data_dir: Path = settings.DATA_DIR
+        self.data_dir: Path = settings.DATA_DIR / "audio"
+        self.data_dir.mkdir(parents=True, exist_ok=True)
 
         self.yt_prefix: str = "" # "YT___"
         

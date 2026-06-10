@@ -103,8 +103,11 @@ class StatsManager:
         if self.recalculate_storage:
             logger.info(f"Recalculating audio storage")
             
+            data_dir = settings.DATA_DIR / "audio"
+            data_dir.mkdir(parents=True, exist_ok=True)
+
             total_audio_bytes = 0
-            for root, _, files in os.walk(settings.DATA_DIR): #uses the settings data directory, may need configuration to support mounting folders
+            for root, _, files in os.walk(data_dir): #uses the settings data directory, may need configuration to support mounting folders
                 for file in files:
                     if file.upper().endswith(self.AUDIO_EXTENSIONS):
                         file_path = os.path.join(root, file)

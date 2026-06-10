@@ -14,8 +14,8 @@ class Settings(BaseSettings):
 
     # --- ENV PATH VALIDATION ---
     BIN_DIR: DirectoryPath #validates that this directory actually exists
-    DATA_DIR: DirectoryPath 
-    DATABASE_DIR: DirectoryPath
+    DATA_DIR: DirectoryPath #mounted data directory
+    SQL_DIR: DirectoryPath #default database configuration sql files
     DIST_DIR: DirectoryPath #mounted frontend
     
     PYTHON_BIN_PATH: FilePath #consider adding binary executable checks

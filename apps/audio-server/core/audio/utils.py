@@ -6,7 +6,7 @@ from config import settings
 def resolve_track_path(track_id: str) -> Path:
     """Finds the first file matching track_id.* in the data directory."""
     for ext in [".flac", ".m4a", ".mp3"]: #EMERGENCY: remove this hardcoded value
-        file_path = settings.DATA_DIR / f"{track_id}{ext}"
+        file_path = settings.DATA_DIR / "audio" / f"{track_id}{ext}"
         if file_path.exists():
             return file_path
         
