@@ -18,7 +18,7 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            target: x86_64-pc-windows-mvsc
+            target: x86_64-pc-windows-msvc
             artifact_name: scuttle-win-x64.zip
             binary_name: scuttle.exe
           - os: ubuntu-latest
