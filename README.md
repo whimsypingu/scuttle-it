@@ -16,18 +16,22 @@ Scuttle is an audio archival tool for managing and playing your personal audio c
 
 <table>
     <tr>
-        <td align="center" width="60%">
-            <p><b>Desktop Launcher</b> <em>(5/11/26)</em></p>
-            <img src="./docs/assets/desktop_launcher_demo.png" width="600" alt="Desktop launcher demo"></img>
+        <td>
+            <img height="400" alt="scuttle_web_client_single_track" src="https://github.com/user-attachments/assets/bf9892fa-610b-4560-9817-ac7f2b8289a7" />
         </td>
-        <td align="center" width="40%">
-            <p><b>Web Client</b> <em>(5/11/26)</em></p>
-            <video src="https://github.com/user-attachments/assets/c76482a3-96f5-4ffb-94b7-9fa0437f97e1" controls muted loop style="max-width: 100%;"></video>
+        <td>
+            <img height="400" alt="scuttle_web_client_home" src="https://github.com/user-attachments/assets/e3e2d235-b74a-4bd8-8366-dc40f39751d7" />
+        </td>
+        <td>
+            <img height="400" alt="scuttle_web_client_queue" src="https://github.com/user-attachments/assets/de56acf2-e943-4bc2-9d69-bfead1bb79dc" />
+        </td>
+        <td>
+            <img height="400" alt="scuttle_web_client_profile" src="https://github.com/user-attachments/assets/a93e0a8a-020a-4b65-bdc9-94c5bfee279a" />
         </td>
     </tr>
 </table>
 
-*(Additional screenshots and links to video demos with date)*
+<p><em>(6/11/26)</em></p>
 
 
 ---
@@ -37,6 +41,11 @@ Scuttle is an audio archival tool for managing and playing your personal audio c
 ### Completely free
 
 The only cost is electricity for self-hosting, and the resources for your computer to handle serving audio files.
+
+<div align="center">
+    <img width="300" alt="scuttle_web_client_single_track" src="https://github.com/user-attachments/assets/bf9892fa-610b-4560-9817-ac7f2b8289a7" />
+    <p><em>(6/11/26)</em></p>
+</div>
 
 
 ---
@@ -52,6 +61,11 @@ The only cost is electricity for self-hosting, and the resources for your comput
     * Audio from YouTube is downloaded on the first result that is found from the top 3 search results, but if a target duration is available,finds the closest track duration (to reduce cases of downloading MVs with extra unwanted audio, or versions with intros/outros).
     
     * Metadata from a YouTube download is overwritten if provided from an alternate platform's native link, otherwise a small <2 MB AI model attempts to extract and set metadata. Source code can be found on [this notebook](https://colab.research.google.com/drive/1MHd5qqSNmc9Of4HgElKvbQd45IZZ9-3I?usp=sharing).
+
+<div align="center">
+    <img width="300" alt="scuttle_web_client_search" src="https://github.com/user-attachments/assets/de89f5f0-329c-4e91-b04f-abb68caa42e5" />
+    <p><em>(6/11/26)</em></p>
+</div>
 
 
 ---
@@ -73,7 +87,17 @@ The only cost is electricity for self-hosting, and the resources for your comput
 
 * A native desktop launcher handles the lifecycle of your server, including accessibility via a Discord webhook, and manages uptime of a Cloudflared tunnel to ensure maximum availability. 
 
-    **At the cost of being free, this could mean sudden rotations of user-accessible links to the web-client if the tunnel breaks.**
+<div align="center">
+    <img src="./docs/assets/desktop_launcher_demo.png" width="600" alt="Desktop launcher demo"></img>
+    <p><em>(5/11/26)</em></p>
+</div>
+
+<pre><b>**At the cost of being free, this could mean sudden rotations of user-accessible links to the web-client if the tunnel breaks.**</b></pre>
+
+<div align="center">
+    <img width="660" alt="scuttle_desktop_launcher_healing" src="https://github.com/user-attachments/assets/ace90d09-c210-4141-8e20-f18d4d5f7361" />   
+    <p><em>(6/11/26)</em></p>
+</div>
 
 * On setup, installs all required software prerequisites and maintains updates of frequently updating critical packages. See [dependencies](#important-external-dependency-disclaimer) here.
 
@@ -90,8 +114,13 @@ The only cost is electricity for self-hosting, and the resources for your comput
 
 * Due to unavoidable download and processing time, first download/plays are immediately sent to the front of the queue when available and are **not** instantly streamable.
 
+<div align="center">
+    <img width="300" alt="scuttle_web_client_queue" src="https://github.com/user-attachments/assets/de56acf2-e943-4bc2-9d69-bfead1bb79dc" />
+    <p><em>(6/11/26)</em></p>
+</div>
 
 ---
+
 
 ### Import playlists
 
@@ -103,6 +132,11 @@ Single track links are treated like regular searches and are pushed to the front
 
 * YouTube
 * Spotify
+
+<div align="center">
+    <img width="300" alt="scuttle_client_playlists" src="https://github.com/user-attachments/assets/44043675-622f-4ab1-a80a-01992c241938" />
+    <p><em>(6/11/26)</em></p>
+</div>
 
 
 ---
@@ -117,6 +151,11 @@ Single track links are treated like regular searches and are pushed to the front
     * Total listened duration
     * Total audio storage usage
 
+<div align="center">
+    <img width="300" alt="scuttle_web_client_profile" src="https://github.com/user-attachments/assets/a93e0a8a-020a-4b65-bdc9-94c5bfee279a" />   
+    <p><em>(6/11/26)</em></p>
+</div>
+
 
 ---
 
@@ -124,7 +163,7 @@ Single track links are treated like regular searches and are pushed to the front
 
 1. Go to Scuttle's [Latest Releases](https://github.com/whimsypingu/scuttle-it/releases/latest) page.
 
-2. Download the `.zip` file for your OS (currently only Windows is supported).
+2. Download the `.zip` file for your OS (currently only Windows is tested and fully supported).
 
 3. Unzip the project into your filesystem.
 
@@ -210,9 +249,6 @@ There are also a number of known and unfixed issues in Scuttle.
 
 
 ---
-
-### AI Disclosure
-Parts of this codebase were developed with the assistance of Google Gemini and OpenAI ChatGPT free versions. All generated code in the existing main codebase has been manually reviewed.
 
 ## License
 Distributed under the MIT [License](./LICENSE).
