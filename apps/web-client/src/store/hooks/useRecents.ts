@@ -1,6 +1,8 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
+import { scuttleFetch } from '@/lib/utils';
+
 
 export const useRecentsContent = (limit: number = 30) => {
     const queryKey = ["tracks", "recents"];
@@ -15,7 +17,7 @@ export const useRecentsContent = (limit: number = 30) => {
         queryKey,
         initialPageParam: 0,
         queryFn: async ({ pageParam }) => {
-            const response = await fetch(`/retrieve/recently-played?offset=${pageParam}&limit=${limit}`, { 
+            const response = await scuttleFetch(`/retrieve/recently-played?offset=${pageParam}&limit=${limit}`, { 
                 method: "GET" 
             });
             if (!response.ok) throw new Error("Failed to fetch recently played data");
