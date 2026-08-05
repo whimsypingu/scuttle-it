@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 
+import { scuttleFetch } from "@/lib/utils";
+
 import { DEFAULT_STATS } from "@/features/profile/profile.constants";
 
 import type { UserStats } from "@/features/profile/profile.types";
@@ -12,7 +14,7 @@ export const useStats = () => {
     const { data: stats = DEFAULT_STATS, isLoading, error } = useQuery<UserStats>({
         queryKey,
         queryFn: async () => {
-            const response = await fetch(`/stats/get`, { 
+            const response = await scuttleFetch(`/stats/get`, { 
                 method: "GET",
             });
             if (!response.ok) throw new Error("Failed to fetch stats");
