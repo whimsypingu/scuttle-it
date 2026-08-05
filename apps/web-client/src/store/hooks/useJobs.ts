@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query"
 
+import { scuttleFetch } from "@/lib/utils";
+
 import type { DownloadJob } from "@/job/job.types";
 
 
@@ -11,7 +13,7 @@ export const useDownloadJobs = () => {
     const { data, refetch, isLoading, error } = useQuery({
         queryKey,
         queryFn: async () => {
-            const response = await fetch(`/jobs/downloads`, { 
+            const response = await scuttleFetch(`/jobs/downloads`, { 
                 method: "GET" 
             });
             if (!response.ok) throw new Error("Failed to get download jobs");

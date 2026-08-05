@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { makeToast } from "@/features/toast/Toast";
 
+import { scuttleFetch } from "@/lib/utils";
+
 import type { EditPlaylistPayload, EditProfilePayload, EditTrackPayload } from "@/store/hooks/hooks.types";
 import type { TrackBase, TrackDetails } from "@/track/track.types";
 import type { PlaylistDetails, SummaryPlaylist } from "@/playlist/playlist.types";
@@ -13,7 +15,7 @@ export const useEditTrack = (track: TrackBase) => {
     const getTrackDetails = useQuery({
         queryKey: ["details", "tracks", track.id],
         queryFn: async () => {
-            const response = await fetch(`/retrieve/track/${track.id}`, { 
+            const response = await scuttleFetch(`/retrieve/track/${track.id}`, { 
                 method: "GET",
             });
             if (!response.ok) throw new Error("Failed to fetch track details");
@@ -27,7 +29,7 @@ export const useEditTrack = (track: TrackBase) => {
     const editTrackMutation = useMutation({
         mutationFn: async (payload: EditTrackPayload) => {
             //see: apps/audio-server/api/routers/edit_router.py
-            const response = await fetch(`/tracks/edit/${track.id}`, {
+            const response = await scuttleFetch(`/tracks/edit/${track.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -55,7 +57,7 @@ export const useEditTrack = (track: TrackBase) => {
     const deleteQueryKey = ["tracks"];
     const deleteTrackMutation = useMutation({
         mutationFn: async () => {
-            const response = await fetch(`/tracks/${track.id}`, {
+            const response = await scuttleFetch(`/tracks/${track.id}`, {
                 method: "DELETE",
             });
             if (!response.ok) throw new Error("Failed to delete track");
@@ -92,7 +94,7 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
     const getPlaylistDetails = useQuery({
         queryKey: ["details", "playlists", playlist.id],
         queryFn: async () => {
-            const response = await fetch(`/retrieve/playlist/${playlist.id}`, {
+            const response = await scuttleFetch(`/retrieve/playlist/${playlist.id}`, {
                 method: "GET",
             });
             if (!response.ok) throw new Error("Failed to get playlist details");
@@ -106,7 +108,7 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
     const editPlaylistMutation = useMutation({
         mutationFn: async (payload: EditPlaylistPayload) => {
             //see: apps/audio-server/api/routers/edit_router.py
-            const response = await fetch(`/playlists/edit/${playlist.id}`, {
+            const response = await scuttleFetch(`/playlists/edit/${playlist.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -134,7 +136,7 @@ export const useEditPlaylist = (playlist: SummaryPlaylist) => {
     const queryKey = ["playlists"];
     const deletePlaylistMutation = useMutation({
         mutationFn: async() => {
-            const response = await fetch(`/playlists/${playlist.id}`, {
+            const response = await scuttleFetch(`/playlists/${playlist.id}`, {
                 method: "DELETE",
             });
             if (!response.ok) throw new Error("Failed to delete playlist");
@@ -182,7 +184,7 @@ export const useEditProfile = () => {
 
     const editProfileMutation = useMutation({
         mutationFn: async (payload: EditProfilePayload) => {
-            const response = await fetch(`/stats/edit`, {
+            const response = await scuttleFetch(`/stats/edit`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
