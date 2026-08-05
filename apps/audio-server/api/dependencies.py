@@ -1,8 +1,9 @@
-from fastapi import Request, WebSocket
+from fastapi import Header, Request, WebSocket
 from database.database_manager import DatabaseManager
 from sync.websocket_manager import WebsocketManager
 from core.download.download_queue import DownloadQueue
 from core.stats.stats_manager import StatsManager
+from core.models.session import DeviceContext
 
 # Dependencies to get from the server lifespan as defined in /main.py
 
@@ -17,3 +18,16 @@ def get_stats_manager(request: Request) -> StatsManager:
 
 def get_dl_queue(request: Request) -> DownloadQueue:
     return request.app.state.dl_queue
+
+
+# handles device context extraction
+
+def get_device_context(
+    device_id: str = Header("DEFAULT_DEVICE_ID", alias="Scuttle-Device-Id"),
+    session_id: str = Header("DEFAULT_SESSION_ID", alias="Scuttle-Session-Id")
+) -> DeviceContext:
+    return DeviceContext(
+        device_id=device_id,
+        session_id=session_id
+    )
+    
