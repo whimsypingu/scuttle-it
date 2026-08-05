@@ -1,3 +1,5 @@
+import { scuttleFetch } from "@/lib/utils";
+
 import type { AudioCallback, AudioEvent, AudioStrategy, FlushListenDurationPayload, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions } from "@/features/audio/audio.types";
 
 
@@ -92,7 +94,7 @@ class AudioEngine implements IAudioEngine  {
         };
 
         try {
-            await fetch(`/stats/increment/listen-duration`, {
+            await scuttleFetch(`/stats/increment/listen-duration`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)

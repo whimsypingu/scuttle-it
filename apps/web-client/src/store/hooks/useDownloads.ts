@@ -1,6 +1,8 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
+import { scuttleFetch } from '@/lib/utils';
+
 
 export const useDownloadsContent = (limit: number = 30) => {
     const queryKey = ["tracks", "downloads"];
@@ -17,7 +19,7 @@ export const useDownloadsContent = (limit: number = 30) => {
         queryFn: async ({ pageParam }) => {
             console.log("useDownloads triggered");
 
-            const response = await fetch(`/retrieve/downloads?offset=${pageParam}&limit=${limit}`, { 
+            const response = await scuttleFetch(`/retrieve/downloads?offset=${pageParam}&limit=${limit}`, { 
                 method: "GET" 
             });
             if (!response.ok) throw new Error("Failed to fetch downloads");

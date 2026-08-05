@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { audioEngine } from "@/features/audio/audioEngine";
 import { makeToast } from "@/features/toast/Toast";
 
+import { scuttleFetch } from "@/lib/utils";
 import { getTrackDisplayMetadata, trackBaseToQueueTrack } from "@/track/track.utils";
 
 import type { QueueTrack } from "@/track/track.types";
@@ -18,7 +19,7 @@ export const useQueue = () => {
     const getQueue = useQuery({
         queryKey,
         queryFn: async () => {
-            const response = await fetch(`/queue/get`, {
+            const response = await scuttleFetch(`/queue/get`, {
                 method: "GET",
             });
             if (!response.ok) throw new Error("Failed to fetch queue");
