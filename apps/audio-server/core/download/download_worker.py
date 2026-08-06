@@ -152,9 +152,9 @@ class DownloadWorker:
                 #play queue modification
                 if job.to_queue:
                     if job.priority:
-                        await self.db_manager.push_next_play_queue(download_result.id) #push to front of the play queue
+                        await self.db_manager.push_next_play_queue(download_result.id, job.session_id) #push to front of the play queue
                     else:
-                        await self.db_manager.push_play_queue(download_result.id) #push to end of the play queue
+                        await self.db_manager.push_play_queue(download_result.id, job.session_id) #push to end of the play queue
 
                 await self.db_manager.build_search_index()
 

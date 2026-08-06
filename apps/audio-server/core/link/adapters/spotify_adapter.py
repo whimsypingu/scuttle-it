@@ -123,7 +123,7 @@ class SpotifyAdapter:
                 raise PlaylistResolutionError(f"Failed to resolve playlist metadata from Spotify: {e}") from e
             
 
-    async def expand_jobs(self, parsed_url: str) -> tuple[list[DownloadJob], CreatePlaylistPayload | None]:
+    async def expand_jobs(self, parsed_url: str, session_id: str) -> tuple[list[DownloadJob], CreatePlaylistPayload | None]:
         """Given a parsed url, attempt to return a list of DownloadJobs, either a single track in a list or a playlist."""
         link_type, extracted_id = self.extract_id(parsed_url)
 
@@ -138,6 +138,7 @@ class SpotifyAdapter:
                     query=f"{q[0]} - {q[1]}",
                     target_duration=q[2],
                     priority=True,
+                    session_id=session_id,
                     title_display=q[0],
                     artist_display=q[1],
                 )
@@ -157,6 +158,7 @@ class SpotifyAdapter:
                             query=f"{q[0]} - {q[1]}",
                             target_duration=q[2],
                             priority=False,
+                            session_id=session_id,
                             playlist_ids=[extracted_id],
                             title_display=q[0],
                             artist_display=q[1],
