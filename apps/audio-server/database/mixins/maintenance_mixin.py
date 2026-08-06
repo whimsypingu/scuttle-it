@@ -18,8 +18,9 @@ class MaintenanceMixin:
 
                 #insert into the play queue with normalized positions, this assigns a new play_queue.queue_id
                 await db.execute(f'''
-                    INSERT INTO play_queue (track_internal_id, position, added_at)
+                    INSERT INTO play_queue (session_internal_id, track_internal_id, position, added_at)
                     SELECT
+                        session_internal_id,
                         track_internal_id,
                         ROW_NUMBER() OVER (ORDER BY position) * {self.NEW_POSITION_GAP},
                         added_at
