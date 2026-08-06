@@ -64,7 +64,7 @@ class DownloadWorker:
                 if job.query:
 
                     #try extracting and parsing any possible links
-                    generated_jobs, generated_payload = await self.link_adapter.expand_jobs(url=job.query)
+                    generated_jobs, generated_payload = await self.link_adapter.expand_jobs(url=job.query, session_id=job.session_id)
 
                     if generated_jobs or generated_payload is not None:
                         if generated_payload is not None:
