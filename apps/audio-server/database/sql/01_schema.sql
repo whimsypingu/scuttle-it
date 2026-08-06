@@ -88,9 +88,9 @@ CREATE TABLE IF NOT EXISTS sessions (
     internal_id INTEGER PRIMARY KEY AUTOINCREMENT,
     id TEXT UNIQUE,
     created_at INTEGER DEFAULT (unixepoch())
-)
+);
 
-INSERT OR IGNORE INTO sessions (id) VALUES ("DEFAULT"); --initialize sessions
+INSERT OR IGNORE INTO sessions (id) VALUES ("DEFAULT_SESSION_ID"); --initialize sessions
 
 -- play queue
 CREATE TABLE IF NOT EXISTS play_queue (

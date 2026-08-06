@@ -22,6 +22,7 @@ DefaultCrashException = HTTPException(
 
 @QueueRouter.post("/set-first", response_model=SetFirstQueueResponse)
 async def set_first_play_queue(
+    device_ctx: DeviceContext = Depends(get_device_context),
     track_id: str = Query(..., min_length=1, description="Track ID to set first"),
     db_manager: DatabaseManager = Depends(get_db_manager),
     dl_queue: DownloadQueue = Depends(get_dl_queue)
@@ -35,9 +36,9 @@ async def set_first_play_queue(
             )
             await dl_queue.add(job)
         else:
-            await db_manager.set_first_play_queue(track_id) #status after attempting set
+            await db_manager.set_first_play_queue(track_id, device_ctx.session_id) #status after attempting set
         
-        updated_queue = await db_manager.get_play_queue() #get the updated queue
+        updated_queue = await db_manager.get_play_queue(device_ctx.session_id) #get the updated queue
 
         return {
             "download_required": download_required,
@@ -50,12 +51,13 @@ async def set_first_play_queue(
 
 @QueueRouter.patch("/reorder")
 async def reorder_queue(
+    device_ctx: DeviceContext = Depends(get_device_context),
     payload: ReorderQueuePayload = Body(...), #automatically parse JSON body into pydantic model
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        await db_manager.reorder_queue(payload) #status after attempting reorder
-        updated_queue = await db_manager.get_play_queue() #get the updated queue
+        await db_manager.reorder_queue(payload, device_ctx.session_id) #status after attempting reorder
+        updated_queue = await db_manager.get_play_queue(device_ctx.session_id) #get the updated queue
 
         return {
             "queue": updated_queue
@@ -67,6 +69,7 @@ async def reorder_queue(
 
 @QueueRouter.post("/push", response_model=PushQueueResponse)
 async def push_play_queue(
+    device_ctx: DeviceContext = Depends(get_device_context),
     track_id: str = Query(..., min_length=1, description="Track ID to push"),
     db_manager: DatabaseManager = Depends(get_db_manager),
     dl_queue: DownloadQueue = Depends(get_dl_queue)
@@ -80,9 +83,9 @@ async def push_play_queue(
             )
             await dl_queue.add(job)
         else:
-            await db_manager.push_play_queue(track_id) #status after attempting push
+            await db_manager.push_play_queue(track_id, device_ctx.session_id) #status after attempting push
     
-        updated_queue = await db_manager.get_play_queue() #get the updated queue
+        updated_queue = await db_manager.get_play_queue(device_ctx.session_id) #get the updated queue
 
         return {
             "download_required": download_required,
@@ -95,6 +98,7 @@ async def push_play_queue(
 
 @QueueRouter.post("/push-next", response_model=PushNextQueueResponse)
 async def push_next_play_queue(
+    device_ctx: DeviceContext = Depends(get_device_context),
     track_id: str = Query(..., min_length=1, description="Track ID to push next"),
     db_manager: DatabaseManager = Depends(get_db_manager),
     dl_queue: DownloadQueue = Depends(get_dl_queue)
@@ -108,9 +112,9 @@ async def push_next_play_queue(
             )
             await dl_queue.add(job)
         else:
-            await db_manager.push_next_play_queue(track_id) #status after attempting push
+            await db_manager.push_next_play_queue(track_id, device_ctx.session_id) #status after attempting push
     
-        updated_queue = await db_manager.get_play_queue() #get the updated queue
+        updated_queue = await db_manager.get_play_queue(device_ctx.session_id) #get the updated queue
 
         return {
             "download_required": download_required,
@@ -123,12 +127,13 @@ async def push_next_play_queue(
 
 @QueueRouter.post("/pop", response_model=PopQueueResponse)
 async def pop_play_queue(
+    device_ctx: DeviceContext = Depends(get_device_context),
     queue_id: int = Query(..., description="Unique instance ID of the queued track to pop"),
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        await db_manager.pop_play_queue(queue_id) #status after attempting pop
-        updated_queue = await db_manager.get_play_queue() #get the updated queue
+        await db_manager.pop_play_queue(queue_id, device_ctx.session_id) #status after attempting pop
+        updated_queue = await db_manager.get_play_queue(device_ctx.session_id) #get the updated queue
 
         return {
             "queue": updated_queue
@@ -140,11 +145,12 @@ async def pop_play_queue(
 
 @QueueRouter.post("/shuffle", response_model=ShuffleQueueResponse)
 async def shuffle_play_queue(
+    device_ctx: DeviceContext = Depends(get_device_context),
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        await db_manager.shuffle_play_queue()
-        updated_queue = await db_manager.get_play_queue()
+        await db_manager.shuffle_play_queue(device_ctx.session_id)
+        updated_queue = await db_manager.get_play_queue(device_ctx.session_id)
 
         return {
             "queue": updated_queue
@@ -155,15 +161,16 @@ async def shuffle_play_queue(
 
 
 @QueueRouter.post("/set-all/playlist/{playlist_id}", response_model=SetAllQueueResponse)
-async def set_all_play_queue( 
+async def set_all_play_queue(
+    device_ctx: DeviceContext = Depends(get_device_context),
     playlist_id: str = Path(..., min_length=1, description="Playlist ID"),
     sortmode: int = Query(default=0, ge=0, le=2, description="0=position, 1=added_at, 2=shuffle"),
     db_manager: DatabaseManager = Depends(get_db_manager),
     dl_queue: DownloadQueue = Depends(get_dl_queue)
 ):
     try:
-        set_count, skipped = await db_manager.set_all_play_queue(playlist_id, sortmode) #status after attempting set
-        updated_queue = await db_manager.get_play_queue() #get the updated queue -- EMERGENCY: make this stuff not like this bruh
+        set_count, skipped = await db_manager.set_all_play_queue(playlist_id, sortmode, device_ctx.session_id) #status after attempting set
+        updated_queue = await db_manager.get_play_queue(device_ctx.session_id) #get the updated queue -- EMERGENCY: make this stuff not like this bruh
 
         for track_id in skipped:
             job = DownloadJob(
@@ -184,11 +191,12 @@ async def set_all_play_queue(
 
 @QueueRouter.post("/clear", response_model=QueueResponse)
 async def clear_play_queue_endpoint(
+    device_ctx: DeviceContext = Depends(get_device_context),
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        await db_manager.clear_play_queue() #status after attempting clear
-        updated_queue = await db_manager.get_play_queue() #get the updated queue -- EMERGENCY: make this stuff not like this bruh
+        await db_manager.clear_play_queue(device_ctx.session_id) #status after attempting clear
+        updated_queue = await db_manager.get_play_queue(device_ctx.session_id) #get the updated queue -- EMERGENCY: make this stuff not like this bruh
 
         return {
             "queue": updated_queue
@@ -204,11 +212,7 @@ async def get_play_queue(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try: 
-        #
-        print(device_ctx.device_id)
-        print(device_ctx.session_id)
-
-        results = await db_manager.get_play_queue()
+        results = await db_manager.get_play_queue(device_ctx.session_id)
         return {
             "queue": results
         }
