@@ -32,7 +32,8 @@ async def set_first_play_queue(
         if download_required: 
             job = DownloadJob(
                 track_id=track_id,
-                priority=True
+                priority=True,
+                session_id=device_ctx.session_id
             )
             await dl_queue.add(job)
         else:
@@ -79,7 +80,8 @@ async def push_play_queue(
         if download_required: 
             job = DownloadJob(
                 track_id=track_id,
-                priority=False #low priority, append to back of queue
+                priority=False, #low priority, append to back of queue
+                session_id=device_ctx.session_id
             )
             await dl_queue.add(job)
         else:
@@ -108,7 +110,8 @@ async def push_next_play_queue(
         if download_required: 
             job = DownloadJob(
                 track_id=track_id,
-                priority=True #high priority, prepend to front of queue
+                priority=True, #high priority, prepend to front of queue
+                session_id=device_ctx.session_id
             )
             await dl_queue.add(job)
         else:
@@ -175,7 +178,8 @@ async def set_all_play_queue(
         for track_id in skipped:
             job = DownloadJob(
                 track_id=track_id,
-                priority=False
+                priority=False,
+                session_id=device_ctx.session_id
             )
             await dl_queue.add(job)
 
