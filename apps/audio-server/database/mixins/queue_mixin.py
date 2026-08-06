@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class PlayQueueMixin:
     """Handles database backed play queue"""
 
-    async def set_first_play_queue(self, track_id) -> bool:
+    async def set_first_play_queue(self, track_id, session_id) -> bool:
         """Set and replace the first element of the Play Queue"""
         logger.info(f"Setting track_id {track_id} as the first entry in the Play Queue...")
 
@@ -21,9 +21,11 @@ class PlayQueueMixin:
                 cursor = await db.execute('''
                     DELETE FROM play_queue
                     WHERE queue_id = (
-                        SELECT queue_id
-                        FROM play_queue
-                        ORDER BY position
+                        SELECT pq.queue_id
+                        FROM play_queue pq
+                        JOIN sessions s ON s.internal_id = pq.session_internal_id
+                        WHERE s.id = ?
+                        ORDER BY pq.position ASC
                         LIMIT 1
                     )
                     RETURNING position;
@@ -33,11 +35,11 @@ class PlayQueueMixin:
 
                 #insert
                 await db.execute('''
-                    INSERT INTO play_queue (track_internal_id, position)
-                    SELECT internal_id, ?
-                    FROM tracks
-                    WHERE id = ?;
-                ''', (first_position, track_id))
+                    INSERT INTO play_queue (session_internal_id, track_internal_id, position)
+                    SELECT s.internal_id, t.internal_id, ?
+                    FROM tracks t, sessions s
+                    WHERE t.id = ? AND s.id = ?;
+                ''', (first_position, track_id, session_id))
 
                 logger.info(f"Successfully set track_id {track_id} as the first entry of the Play Queue with position value: {first_position}")
                 return True
@@ -47,7 +49,7 @@ class PlayQueueMixin:
             raise
 
 
-    async def reorder_queue(self, payload: ReorderQueuePayload) -> bool:
+    async def reorder_queue(self, payload: ReorderQueuePayload, session_id: str) -> bool:
         """
         Intelligent self-healing reordering with three-zone logic:
         1. < min: Min - self.NEW_POSITION_GAP
@@ -66,8 +68,8 @@ class PlayQueueMixin:
                 pq.queue_id,
                 pq.position
             FROM play_queue pq
-            JOIN tracks t ON t.internal_id = pq.track_internal_id
-            WHERE pq.position {operator} (
+            JOIN sessions s ON s.internal_id = pq.session_internal_id
+            WHERE s.id = ? AND pq.position {operator} (
                 SELECT position
                 FROM play_queue
                 WHERE queue_id = ?
@@ -75,7 +77,7 @@ class PlayQueueMixin:
             ORDER BY pq.position {ordering}
             LIMIT 2;
         '''
-        params = (payload.target_queue_id,)
+        params = (session_id, payload.target_queue_id)
 
         try:
             async with self.session() as db:
@@ -111,13 +113,18 @@ class PlayQueueMixin:
             raise
 
 
-    async def push_play_queue(self, track_id) -> bool:
+    async def push_play_queue(self, track_id, session_id) -> bool:
         """Push to the end of the Play Queue"""
         logger.info(f"Pushing track_id {track_id} to the end of the Play Queue...")
 
         try:
             async with self.session() as db:
-                cursor = await db.execute("SELECT COALESCE(MAX(position), 0.0) FROM play_queue;")
+                cursor = await db.execute('''
+                    SELECT COALESCE(MAX(pq.position), 0.0) 
+                    FROM play_queue pq
+                    JOIN sessions s ON s.internal_id = pq.session_internal_id
+                    WHERE s.id = ?;
+                ''', (session_id,))
                 row = await cursor.fetchone()
                 current_max = row[0]
 
@@ -125,11 +132,11 @@ class PlayQueueMixin:
                 
                 #insert
                 await db.execute('''
-                    INSERT INTO play_queue (track_internal_id, position)
-                    SELECT internal_id, ?
-                    FROM tracks
-                    WHERE id = ?;
-                ''', (new_position, track_id))
+                    INSERT INTO play_queue (session_internal_id, track_internal_id, position)
+                    SELECT s.internal_id, t.internal_id, ?
+                    FROM tracks t, sessions s
+                    WHERE t.id = ? AND s.id = ?;
+                ''', (new_position, track_id, session_id))
 
                 logger.info(f"Successfully pushed track_id {track_id} to the end of the Play Queue with position value: {new_position}")
                 return True
@@ -139,18 +146,20 @@ class PlayQueueMixin:
             raise
 
 
-    async def push_next_play_queue(self, track_id) -> bool:
+    async def push_next_play_queue(self, track_id, session_id) -> bool:
         """Push to the second spot in the Play Queue"""
         logger.info(f"Pushing track_id {track_id} into the next position of the Play Queue...")
 
         try:
             async with self.session() as db:
                 cursor = await db.execute('''
-                    SELECT position
-                    FROM play_queue
+                    SELECT pq.position
+                    FROM play_queue pq
+                    JOIN sessions s ON s.internal_id = pq.session_internal_id
+                    WHERE s.id = ?
                     ORDER BY position ASC
                     LIMIT 2;
-                ''')
+                ''', (session_id,))
                 rows = await cursor.fetchall()
 
                 if not rows:                                                                #empty queue, set to first
@@ -162,11 +171,11 @@ class PlayQueueMixin:
                 
                 #insert
                 await db.execute('''
-                    INSERT INTO play_queue (track_internal_id, position)
-                    SELECT internal_id, ?
-                    FROM tracks
-                    WHERE id = ?;
-                ''', (new_position, track_id))
+                    INSERT INTO play_queue (session_internal_id, track_internal_id, position)
+                    SELECT s.internal_id, t.internal_id, ?
+                    FROM tracks t, sessions s
+                    WHERE t.id = ? AND s.id = ?;
+                ''', (new_position, track_id, session_id))
 
                 logger.info(f"Successfully pushed track_id {track_id} to the next position of the Play Queue with position value: {new_position}")
                 return True
@@ -176,13 +185,21 @@ class PlayQueueMixin:
             raise
 
 
-    async def pop_play_queue(self, queue_id) -> bool:
+    async def pop_play_queue(self, queue_id, session_id) -> bool:
         """Pop a specific item from the Play Queue"""
         logger.info(f"Popping track with queue_id {queue_id} the Play Queue...")
 
         try:
             async with self.session() as db:
-                cursor = await db.execute("DELETE FROM play_queue WHERE queue_id = ?;", (queue_id,))
+                cursor = await db.execute('''
+                    DELETE FROM play_queue 
+                    WHERE queue_id = ?
+                        AND session_internal_id = (
+                            SELECT internal_id
+                            FROM sessions
+                            WHERE session_id = ?
+                        );
+                ''', (queue_id, session_id))
                 if cursor.rowcount == 0:
                     logger.info(f"Track {queue_id} already gone or doesn't exist.")
                     return False
@@ -195,7 +212,7 @@ class PlayQueueMixin:
             raise
 
 
-    async def set_all_play_queue(self, playlist_id, sortmode) -> tuple[int, list[str]]:
+    async def set_all_play_queue(self, playlist_id, sortmode, session_id) -> tuple[int, list[str]]:
         """Setting a playlist with a sort order as the Play Queue, returns set_count and ids of tracks requiring downloads"""
         logger.info(f"Setting playlist with playlist_id {playlist_id} as the Play Queue...")
 
@@ -253,14 +270,22 @@ class PlayQueueMixin:
                     random.shuffle(downloaded_rows)
                     random.shuffle(skipped)
 
+                #precalculate the session internal id for fast delete and insert
+                cursor = await db.execute("SELECT internal_id FROM sessions WHERE id = ?", (session_id,))
+                session_row = await cursor.fetchone()
+                if not session_row:
+                    raise ValueError(f"Session '{session_id}' does not exist.")
+                session_internal_id = session_row[0]
+
                 #form the right data type to send to the queue
                 to_queue = [
-                    (row["internal_id"], (idx + 1) * self.NEW_POSITION_GAP) 
+                    (session_internal_id, row["internal_id"], (idx + 1) * self.NEW_POSITION_GAP) 
                     for idx, row in enumerate(downloaded_rows)
                 ]
+
                 if to_queue:
-                    await db.execute("DELETE FROM play_queue;")
-                    await db.executemany("INSERT INTO play_queue (track_internal_id, position) VALUES (?, ?);", to_queue)
+                    await db.execute("DELETE FROM play_queue WHERE session_internal_id = ?;", (session_internal_id,))
+                    await db.executemany("INSERT INTO play_queue (session_internal_id, track_internal_id, position) VALUES (?, ?, ?);", to_queue)
                     
                 logger.info(f"Successfully set playlist {playlist_id} as the Play Queue")
                 return len(to_queue), skipped
@@ -270,17 +295,26 @@ class PlayQueueMixin:
             raise
 
 
-    async def shuffle_play_queue(self) -> bool:
+    async def shuffle_play_queue(self, session_id) -> bool:
         """Shuffles all elements of the Play Queue except the first, if there is one"""
         logger.info(f"Shuffling the Play Queue...")
 
         try:
             async with self.session() as db:
+                #precalculate the session internal id for fast delete and insert
+                cursor = await db.execute("SELECT internal_id FROM sessions WHERE id = ?", (session_id,))
+                session_row = await cursor.fetchone()
+                if not session_row:
+                    raise ValueError(f"Session '{session_id}' does not exist.")
+                session_internal_id = session_row[0]
+
+                #fetch queue items scoped within the session
                 cursor = await db.execute('''
-                    SELECT track_internal_id, position
+                    SELECT queue_id, position
                     FROM play_queue
+                    WHERE session_internal_id = ?
                     ORDER BY position ASC;
-                ''')
+                ''', (session_internal_id,))
                 rows = await cursor.fetchall()
 
                 if len(rows) <= 1:
@@ -293,13 +327,16 @@ class PlayQueueMixin:
                 random.shuffle(shuffle_tracks)
 
                 #assign new positions to remainder of queue
-                to_queue = [
-                    (track["track_internal_id"], current_track["position"] + ((idx + 1) * self.NEW_POSITION_GAP))
+                to_update = [
+                    (current_track["position"] + ((idx + 1) * self.NEW_POSITION_GAP), track["queue_id"], session_internal_id)
                     for idx, track in enumerate(shuffle_tracks)
                 ]
 
-                await db.execute("DELETE FROM play_queue WHERE position > ?;", (current_track["position"],))
-                await db.executemany("INSERT INTO play_queue (track_internal_id, position) VALUES (?, ?);", to_queue)
+                await db.executemany('''
+                    UPDATE play_queue
+                    SET position = ?
+                    WHERE queue_id = ? AND session_internal_id = ?;
+                ''', to_update)
 
                 logger.info(f"Successfully shuffled {len(shuffle_tracks)} tracks.")
                 return True
@@ -309,7 +346,7 @@ class PlayQueueMixin:
             raise
 
     
-    async def clear_play_queue(self) -> bool:
+    async def clear_play_queue(self, session_id) -> bool:
         """Clears all elements of the Play Queue except the first, if there is one"""
         logger.info(f"Clearing the Play Queue...")
 
@@ -318,11 +355,18 @@ class PlayQueueMixin:
                 await db.execute('''
                     DELETE FROM play_queue
                     WHERE queue_id NOT IN (
-                        SELECT queue_id FROM play_queue
+                        SELECT pq.queue_id
+                        FROM play_queue pq
+                        JOIN sessions s ON s.internal_id = pq.session_internal_id
+                        WHERE s.session_id = ?
                         ORDER BY position ASC
                         LIMIT 1
+                    ) AND session_internal_id = (
+                        SELECT internal_id
+                        FROM sessions
+                        WHERE id = ?
                     );
-                ''')
+                ''', (session_id, session_id))
 
                 logger.info("Successfully cleared the Play Queue")
                 return True
@@ -332,7 +376,7 @@ class PlayQueueMixin:
             raise
 
 
-    async def get_play_queue(self) -> list[QueueTrack]:
+    async def get_play_queue(self, session_id) -> list[QueueTrack]:
         """Retrieve the full play queue with all metadata"""
 
         UNIT_SEP = "\x1f"
@@ -364,13 +408,15 @@ class PlayQueueMixin:
             JOIN tracks t ON pq.track_internal_id = t.internal_id
             JOIN track_artists ta ON ta.track_internal_id = t.internal_id
             JOIN artists a ON a.internal_id = ta.artist_internal_id
+            JOIN sessions s ON s.internal_id = pq.session_internal_id
+            WHERE s.id = ?
             GROUP BY pq.position
             ORDER BY pq.position ASC;
         '''
 
         try:
             async with self.session() as db:
-                async with db.execute(query) as cursor:
+                async with db.execute(query, (session_id,)) as cursor:
                     rows = await cursor.fetchall()
 
                     return [

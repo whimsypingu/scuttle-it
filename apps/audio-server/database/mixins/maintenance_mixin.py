@@ -24,7 +24,7 @@ class MaintenanceMixin:
                         ROW_NUMBER() OVER (ORDER BY position) * {self.NEW_POSITION_GAP},
                         added_at
                     FROM temp_play_queue;
-                ''')
+                ''') #may require further updates to support multi-session architecture
 
                 await db.execute("DROP TABLE temp_play_queue;") #delete just in case, although TEMP should handle that
 
