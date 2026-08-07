@@ -1,4 +1,5 @@
 import sqlite3
+import random
 
 from core.models.artist import ArtistBase
 from core.models.playlist import PlaylistBase, PlaylistDetails, SummaryPlaylist
@@ -116,3 +117,8 @@ def row_to_playlist_details(
         **playlistbase.model_dump(),
         description=row["description"]
     )
+
+
+#sessions
+def generate_session_id(length: int = 4):
+    return "".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", k=length))
