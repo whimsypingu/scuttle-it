@@ -14,7 +14,7 @@ class PlayQueueMixin:
 
     async def set_first_play_queue(self, track_id, session_id) -> bool:
         """Set and replace the first element of the Play Queue"""
-        logger.info(f"Setting track_id {track_id} as the first entry in the Play Queue...")
+        logger.info(f"Setting track_id {track_id} as the first entry in the Play Queue with session_id {session_id}...")
 
         try: 
             async with self.session() as db:
@@ -29,7 +29,7 @@ class PlayQueueMixin:
                         LIMIT 1
                     )
                     RETURNING position;
-                ''')
+                ''', (session_id,))
                 row = await cursor.fetchone() #returns None if empty
                 first_position = row[0] if row is not None else self.NEW_POSITION_GAP
 
@@ -41,11 +41,11 @@ class PlayQueueMixin:
                     WHERE t.id = ? AND s.id = ?;
                 ''', (first_position, track_id, session_id))
 
-                logger.info(f"Successfully set track_id {track_id} as the first entry of the Play Queue with position value: {first_position}")
+                logger.info(f"Successfully set track_id {track_id} as the first entry of the Play Queue with session_id {session_id} with position value: {first_position}")
                 return True
 
         except Exception:
-            logger.exception(f"Failed to set track_id {track_id} as the first entry of the Play Queue")
+            logger.exception(f"Failed to set track_id {track_id} as the first entry of the Play Queue with session_id {session_id}")
             raise
 
 
@@ -57,7 +57,7 @@ class PlayQueueMixin:
         3. between: midpoint of nearest previous and next position
         """
         """Universal reordering: moves track to a new position. can be used for a loop all move to end"""
-        logger.info(f"Reordering track with queue_id {payload.source_queue_id} in the Play Queue")
+        logger.info(f"Reordering track with queue_id {payload.source_queue_id} in the Play Queue with session_id {session_id}...")
 
         #trick to get the (up to) two tracks that surround the new position of the source track after reordering (includes source track)
         operator = ">=" if payload.below else "<="
@@ -105,17 +105,17 @@ class PlayQueueMixin:
                     WHERE queue_id = ?;
                 ''', (new_position, payload.source_queue_id))
 
-                logger.info(f"Successfully reordered track with queue_id {payload.source_queue_id} to position {new_position} in Play Queue")
+                logger.info(f"Successfully reordered track with queue_id {payload.source_queue_id} to position {new_position} in Play Queue with session_id {session_id}")
                 return True
         
         except Exception:
-            logger.exception(f"Failed to reorder track with queue_id {payload.source_queue_id} to position {new_position} in Play Queue")
+            logger.exception(f"Failed to reorder track with queue_id {payload.source_queue_id} to position {new_position} in Play Queue with session_id {session_id}")
             raise
 
 
     async def push_play_queue(self, track_id, session_id) -> bool:
         """Push to the end of the Play Queue"""
-        logger.info(f"Pushing track_id {track_id} to the end of the Play Queue...")
+        logger.info(f"Pushing track_id {track_id} to the end of the Play Queue with session_id {session_id}...")
 
         try:
             async with self.session() as db:
@@ -138,17 +138,17 @@ class PlayQueueMixin:
                     WHERE t.id = ? AND s.id = ?;
                 ''', (new_position, track_id, session_id))
 
-                logger.info(f"Successfully pushed track_id {track_id} to the end of the Play Queue with position value: {new_position}")
+                logger.info(f"Successfully pushed track_id {track_id} to the end of the Play Queue with session_id {session_id} with position value: {new_position}")
                 return True
         
         except Exception:
-            logger.exception(f"Failed to push track_id {track_id} to end of the Play Queue")
+            logger.exception(f"Failed to push track_id {track_id} to end of the Play Queue with session_id {session_id}")
             raise
 
 
     async def push_next_play_queue(self, track_id, session_id) -> bool:
         """Push to the second spot in the Play Queue"""
-        logger.info(f"Pushing track_id {track_id} into the next position of the Play Queue...")
+        logger.info(f"Pushing track_id {track_id} into the next position of the Play Queue with session_id {session_id}...")
 
         try:
             async with self.session() as db:
@@ -177,17 +177,17 @@ class PlayQueueMixin:
                     WHERE t.id = ? AND s.id = ?;
                 ''', (new_position, track_id, session_id))
 
-                logger.info(f"Successfully pushed track_id {track_id} to the next position of the Play Queue with position value: {new_position}")
+                logger.info(f"Successfully pushed track_id {track_id} to the next position of the Play Queue with session_id {session_id} with position value: {new_position}")
                 return True
         
         except Exception:
-            logger.exception(f"Failed to push track_id {track_id} to next position in the Play Queue")
+            logger.exception(f"Failed to push track_id {track_id} to next position in the Play Queue with session_id {session_id}")
             raise
 
 
     async def pop_play_queue(self, queue_id, session_id) -> bool:
         """Pop a specific item from the Play Queue"""
-        logger.info(f"Popping track with queue_id {queue_id} the Play Queue...")
+        logger.info(f"Popping track with queue_id {queue_id} the Play Queue with session_id {session_id}...")
 
         try:
             async with self.session() as db:
@@ -197,24 +197,24 @@ class PlayQueueMixin:
                         AND session_internal_id = (
                             SELECT internal_id
                             FROM sessions
-                            WHERE session_id = ?
+                            WHERE id = ?
                         );
                 ''', (queue_id, session_id))
                 if cursor.rowcount == 0:
                     logger.info(f"Track {queue_id} already gone or doesn't exist.")
                     return False
                     
-                logger.info(f"Successfully popped {queue_id} from the Play Queue")
+                logger.info(f"Successfully popped {queue_id} from the Play Queue with session_id {session_id}")
                 return True
 
         except Exception:
-            logger.exception(f"Failed to pop track {queue_id} from the Play Queue")
+            logger.exception(f"Failed to pop track {queue_id} from the Play Queue with session_id {session_id}")
             raise
 
 
     async def set_all_play_queue(self, playlist_id, sortmode, session_id) -> tuple[int, list[str]]:
         """Setting a playlist with a sort order as the Play Queue, returns set_count and ids of tracks requiring downloads"""
-        logger.info(f"Setting playlist with playlist_id {playlist_id} as the Play Queue...")
+        logger.info(f"Setting playlist with playlist_id {playlist_id} as the Play Queue with session_id {session_id}...")
 
         #see: apps/audio-server/api/routers/retrieval_router.py for mapping
         #select only the track internal_id, id, and download status, to perform splitting later since we need the not-downloaded tracks
@@ -287,17 +287,17 @@ class PlayQueueMixin:
                     await db.execute("DELETE FROM play_queue WHERE session_internal_id = ?;", (session_internal_id,))
                     await db.executemany("INSERT INTO play_queue (session_internal_id, track_internal_id, position) VALUES (?, ?, ?);", to_queue)
                     
-                logger.info(f"Successfully set playlist {playlist_id} as the Play Queue")
+                logger.info(f"Successfully set playlist {playlist_id} as the Play Queue with session_id {session_id}")
                 return len(to_queue), skipped
 
         except Exception:
-            logger.exception(f"Failed to set playlist {playlist_id} as the Play Queue")
+            logger.exception(f"Failed to set playlist {playlist_id} as the Play Queue with session_id {session_id}")
             raise
 
 
     async def shuffle_play_queue(self, session_id) -> bool:
         """Shuffles all elements of the Play Queue except the first, if there is one"""
-        logger.info(f"Shuffling the Play Queue...")
+        logger.info(f"Shuffling the Play Queue with session_id {session_id}...")
 
         try:
             async with self.session() as db:
@@ -342,13 +342,13 @@ class PlayQueueMixin:
                 return True
             
         except Exception:
-            logger.exception(f"Failed to shuffle Play Queue")
+            logger.exception(f"Failed to shuffle Play Queue with session_id {session_id}")
             raise
 
     
     async def clear_play_queue(self, session_id) -> bool:
         """Clears all elements of the Play Queue except the first, if there is one"""
-        logger.info(f"Clearing the Play Queue...")
+        logger.info(f"Clearing the Play Queue with session_id {session_id}...")
 
         try:
             async with self.session() as db:
@@ -368,11 +368,11 @@ class PlayQueueMixin:
                     );
                 ''', (session_id, session_id))
 
-                logger.info("Successfully cleared the Play Queue")
+                logger.info(f"Successfully cleared the Play Queue with session_id {session_id}")
                 return True
         
         except Exception:
-            logger.exception(f"Failed to clear the Play Queue")
+            logger.exception(f"Failed to clear the Play Queue with session_id {session_id}")
             raise
 
 
@@ -428,5 +428,5 @@ class PlayQueueMixin:
                     ]
 
         except Exception:
-            logger.exception("Failed to retrieve Play Queue contents")
+            logger.exception(f"Failed to retrieve Play Queue with session_id {session_id} contents")
             raise
