@@ -15,13 +15,19 @@ export const SyncLogic = () => {
         //check for ?n=true on startup
         const initSession = async () => {
             const params = new URLSearchParams(window.location.search);
-            const forceNewSession = params.get("n") === "true";
+            const forceNewSession = params.get("n") === "true"; //flag indicating that a new session should be created
 
-            //check if a session already exists
-            const sessionExists = await customSessionIdExists();
-
-            if (forceNewSession || !sessionExists) {
+            if (forceNewSession) {
                 createSession();
+                return;
+            }
+
+            const forceCustomSession = params.has("n"); //flag existence indicates that at the least, this should not be a DEFAULT SESSION
+            const sessionExists = await customSessionIdExists(); //check if a custom session already exists
+
+            if (forceCustomSession && !sessionExists) {
+                createSession();
+                return;
             }
         };
         initSession();
