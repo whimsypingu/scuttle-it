@@ -24,6 +24,7 @@ from api.routers.websocket_router import WebsocketRouter
 from api.routers.like_router import LikeRouter
 from api.routers.job_router import JobRouter
 from api.routers.stats_router import StatsRouter
+from api.routers.session_router import SessionRouter
 
 from core.youtube.youtube_client import YouTubeClient
 from core.audio.processor import AudioProcessor
@@ -121,6 +122,7 @@ app.include_router(WebsocketRouter)
 app.include_router(LikeRouter)
 app.include_router(JobRouter)
 app.include_router(StatsRouter)
+app.include_router(SessionRouter)
 
 @app.get("/status")
 async def get_status():

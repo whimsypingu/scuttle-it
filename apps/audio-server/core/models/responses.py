@@ -34,3 +34,7 @@ class ShuffleQueueResponse(QueueResponse):
 class SetAllQueueResponse(QueueResponse):
     set_count: int
     skip_count: int
+
+
+class CreateSessionResponse(ScuttleBase):
+    session_id: str

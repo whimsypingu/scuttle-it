@@ -29,3 +29,10 @@ export interface SetAllQueueResponse {
     skipCount: number;
     queue: QueueTrack[];
 }
+
+/**
+ * useSession
+ */
+export interface CreateSessionResponse {
+    sessionId: string;
+}

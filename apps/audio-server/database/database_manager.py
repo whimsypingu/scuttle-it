@@ -17,6 +17,7 @@ from database.mixins.queue_mixin import PlayQueueMixin
 from database.mixins.edit_mixin import EditMixin
 from database.mixins.like_mixin import LikeMixin
 from database.mixins.stats_mixin import StatsMixin
+from database.mixins.session_mixin import SessionMixin
 
 
 logger = logging.getLogger(__name__)
@@ -33,7 +34,8 @@ class DatabaseManager(
     PlayQueueMixin,
     EditMixin,
     LikeMixin,
-    StatsMixin
+    StatsMixin,
+    SessionMixin
 ):
     def __init__(
         self,
