@@ -68,7 +68,6 @@ class SessionMixin:
                 return True
 
         except Exception:
-            logg
-            er.exception(f"Failed to delete session_id {session_id}")
+            logger.exception(f"Failed to delete session_id {session_id}")
             raise
         
