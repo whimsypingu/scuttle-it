@@ -3,8 +3,6 @@ import asyncio
 import logging
 
 from database.database_manager import DatabaseManager
-from sync.pokes import WSPokeFactory
-from sync.websocket_manager import WebsocketManager
 
 from config import settings
 
@@ -15,11 +13,9 @@ class StatsManager:
     def __init__(
         self,
         flush_interval: int,
-        db_manager: DatabaseManager,
-        ws_manager: WebsocketManager
+        db_manager: DatabaseManager
     ):
         self.db_manager = db_manager
-        self.ws_manager = ws_manager
 
         self.flush_interval = flush_interval
 

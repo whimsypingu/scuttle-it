@@ -32,6 +32,7 @@ from database.database_manager import DatabaseManager
 from sync.websocket_manager import WebsocketManager
 from core.download.download_queue import DownloadQueue
 from core.download.download_worker import DownloadWorker
+from core.session.session_manager import SessionManager
 from core.stats.stats_manager import StatsManager
 from core.link.link_adapter import LinkAdapter
 
@@ -56,9 +57,14 @@ async def lifespan(app: FastAPI):
     stats_manager = StatsManager(
         flush_interval=300, #how frequently to flush stats
         db_manager=db_manager,
-        ws_manager=ws_manager
     )
     app.state.stats_manager = stats_manager
+
+    session_manager = SessionManager(
+        flush_interval=3*60*60, #flush every few hours
+        db_manager=db_manager,
+    )
+    app.state.session_manager = session_manager
 
     link_adapter = LinkAdapter()
     app.state.link_adapter = link_adapter
@@ -90,6 +96,9 @@ async def lifespan(app: FastAPI):
     #poll every interval seconds to flush stats into the database
     asyncio.create_task(stats_manager.run())
 
+    #poll every interval to flush and cleanup session activity into database
+    asyncio.create_task(session_manager.run())
+
     await db_manager.build_from_directory()
     await db_manager.build_search_index()
     await db_manager.normalize_play_queue_positions()
@@ -100,6 +109,7 @@ async def lifespan(app: FastAPI):
     for w in workers:
         w.stop()
     stats_manager.stop()
+    session_manager.stop()
 
 
 app = FastAPI(

@@ -87,7 +87,8 @@ ON playlist_tracks (playlist_internal_id, position, track_internal_id);
 CREATE TABLE IF NOT EXISTS sessions (
     internal_id INTEGER PRIMARY KEY AUTOINCREMENT,
     id TEXT UNIQUE,
-    created_at INTEGER DEFAULT (unixepoch())
+    created_at INTEGER DEFAULT (unixepoch()),
+    last_active INTEGER DEFAULT (unixepoch())
 );
 
 INSERT OR IGNORE INTO sessions (id) VALUES ("DEFAULT_SESSION_ID"); --initialize sessions

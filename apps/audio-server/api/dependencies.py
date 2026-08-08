@@ -1,7 +1,11 @@
-from fastapi import Header, Request, WebSocket
+import time
+
+from fastapi import Depends, Header, Request, WebSocket
+
 from database.database_manager import DatabaseManager
 from sync.websocket_manager import WebsocketManager
 from core.download.download_queue import DownloadQueue
+from core.session.session_manager import SessionManager
 from core.stats.stats_manager import StatsManager
 from core.models.session import DeviceContext
 
@@ -30,4 +34,17 @@ def get_device_context(
         device_id=device_id,
         session_id=session_id
     )
-    
+
+
+# updates session activity
+
+async def set_session_active(
+    request: Request,
+    ctx: DeviceContext = Depends(get_device_context)
+):
+    session_manager: SessionManager = request.app.state.session_manager
+    last_active_ts = time.time()
+
+    if ctx.session_id:
+        await session_manager.update_last_active(ctx.session_id, last_active_ts)
+
