@@ -21,3 +21,7 @@ class FFmpegInstallError(SetupError):
 class CloudflaredInstallError(SetupError):
     """Raised when cloudflared installation fails"""
     pass
+
+class QrInstallError(SetupError):
+    """Raised when qr installation fails"""
+    pass
