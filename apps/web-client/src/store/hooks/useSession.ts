@@ -21,6 +21,19 @@ export const useSession = () => {
         staleTime: Infinity, //only stale when mutated
     });
 
+    //change session
+    const handleSessionChange = async (sessionId: string, toastMessage: string) => {
+        await setSessionId(sessionId);
+
+        queryClient.setQueryData(queryKey, sessionId); //set the active session id in tanstack cache
+        audioEngine.clear();
+        queryClient.removeQueries({ queryKey: ["tracks", "play_queue" ] }); //reset audio and queue state
+
+        //clean up url state without forcing a full page reload
+        window.history.replaceState({}, document.title, "/");
+        makeToast("", toastMessage);
+    };
+
     //request a new session
     const createSessionMutation = useMutation({
         mutationFn: async () => {
@@ -33,21 +46,33 @@ export const useSession = () => {
             return data as CreateSessionResponse;
         },
         onSuccess: async (data) => {
-            await setSessionId(data.sessionId);
+            await handleSessionChange(data.sessionId, `New Session`);
+        }
+    });
 
-            queryClient.setQueryData(queryKey, data.sessionId); //set the active session id in tanstack cache
-            audioEngine.clear();
-            queryClient.removeQueries({ queryKey: ["tracks", "play_queue" ] }); //reset audio and queue state
+    //join a session
+    const joinSessionMutation = useMutation({
+        mutationFn: async (sessionId: string) => {
+            const trimmedSessionId = sessionId.trim();
+            if (!trimmedSessionId) throw new Error("Join code cannot be empty");
 
-            //clean up url state without forcing a full page reload
-            window.history.replaceState({}, document.title, "/");
-            makeToast("", "New Session");
+            const response = await scuttleFetch(`/session/join/${trimmedSessionId}`, {
+                method: "GET",
+            });
+            if (!response.ok) throw new Error("Failed to join session");
+
+            return trimmedSessionId;
+        },
+        onSuccess: async (sessionId) => {
+            await handleSessionChange(sessionId, `Joined Session`);
         }
     });
 
     return {
         sessionId: getSession.data,
         createSession: createSessionMutation.mutate,
+        joinSession: joinSessionMutation.mutate,
+        joinSessionAsync: joinSessionMutation.mutateAsync,
     };
 };
 
