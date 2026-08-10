@@ -84,7 +84,6 @@ ON playlist_tracks (playlist_internal_id, position, track_internal_id);
 
 
 -- sessions
-DROP TABLE sessions;
 CREATE TABLE IF NOT EXISTS sessions (
     internal_id INTEGER PRIMARY KEY AUTOINCREMENT,
     id TEXT UNIQUE,
@@ -92,7 +91,6 @@ CREATE TABLE IF NOT EXISTS sessions (
     last_active INTEGER DEFAULT (unixepoch())
 );
 
-INSERT OR IGNORE INTO sessions (id) VALUES ("000"); --initialize sessions
 
 -- play queue
 CREATE TABLE IF NOT EXISTS play_queue (
@@ -117,5 +115,3 @@ CREATE TABLE IF NOT EXISTS settings (
     created_at INTEGER DEFAULT (unixepoch()),
     loopmode INTEGER DEFAULT 1 --loop modes: 0=None, 1=All, 2=One 
 );
-
-INSERT OR IGNORE INTO settings (id, username) VALUES (1, "whimsypingu"); --initialize settings
