@@ -30,7 +30,14 @@ export const useSession = () => {
         queryClient.removeQueries({ queryKey: ["tracks", "play_queue" ] }); //reset audio and queue state
 
         //clean up url state without forcing a full page reload
-        window.history.replaceState({}, document.title, "/");
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete("n");
+        newUrl.searchParams.delete("s"); //strip only the session change parameters
+        window.history.replaceState(
+            {}, 
+            document.title, 
+            newUrl.pathname + newUrl.search + newUrl.hash
+        );
         makeToast("", toastMessage);
     };
 
