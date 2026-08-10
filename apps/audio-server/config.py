@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     JS_RUNTIME_BIN_PATH: FilePath
     FFMPEG_BIN_PATH: FilePath
     FFPROBE_BIN_PATH: FilePath
+    QR_GEN_BIN_PATH: FilePath
 
     model_config = SettingsConfigDict(
         env_file=ENV_FILE,
