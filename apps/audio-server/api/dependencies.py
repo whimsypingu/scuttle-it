@@ -2,6 +2,7 @@ import time
 
 from fastapi import Depends, Header, Request, WebSocket
 
+from config import settings
 from database.database_manager import DatabaseManager
 from sync.websocket_manager import WebsocketManager
 from core.download.download_queue import DownloadQueue
@@ -28,7 +29,7 @@ def get_dl_queue(request: Request) -> DownloadQueue:
 
 def get_device_context(
     device_id: str = Header("DEFAULT_DEVICE_ID", alias="Scuttle-Device-Id"),
-    session_id: str = Header("DEFAULT_SESSION_ID", alias="Scuttle-Session-Id")
+    session_id: str = Header(settings.DEFAULT_SESSION_ID, alias="Scuttle-Session-Id")
 ) -> DeviceContext:
     return DeviceContext(
         device_id=device_id,

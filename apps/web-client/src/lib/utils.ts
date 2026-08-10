@@ -15,7 +15,7 @@ export function cn(...inputs: ClassValue[]) {
 const DEVICE_ID_KEY = "scuttle_device_id";
 const SESSION_ID_KEY = "scuttle_session_id";
 
-const DEFAULT_SESSION_ID = "DEFAULT_SESSION_ID"; //see schema initialization description in /audio-server
+const DEFAULT_SESSION_ID = "000"; //see schema initialization description in /audio-server
 
 /**
  * Retrieves an existing unique device ID from indexeddb or creates a persistent one

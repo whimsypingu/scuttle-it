@@ -41,7 +41,7 @@ class SessionManager:
             self.last_active_buffer.clear()
 
         try:
-            await self.db_manager.update_last_actives(last_active_buffer_snapshot)
+            await self.db_manager.update_last_active(last_active_buffer_snapshot)
 
             logger.info(f"Successfully flushed last active sessions into database")
         

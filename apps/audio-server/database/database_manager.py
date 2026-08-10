@@ -45,7 +45,7 @@ class DatabaseManager(
         self.sql_dir: Path = settings.SQL_DIR
 
         self.NEW_POSITION_GAP = 100.0
-        self.DEFAULT_SESSION_ID = "DEFAULT_SESSION_ID"
+        self.DEFAULT_SESSION_ID = settings.DEFAULT_SESSION_ID
         self.SESSION_EXPIRE_TIME = 3 * 24 * 60 * 60     #3 days
 
         for key, value in overrides.items():
