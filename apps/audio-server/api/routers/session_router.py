@@ -1,7 +1,8 @@
 import tempfile
 import traceback
+import subprocess
+from pathlib import Path as FilePath
 
-from asyncio import subprocess
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Response, status
 
 from config import settings
@@ -60,8 +61,9 @@ async def join_session_endpoint(
 async def generate_qr(
     url: str = Query(..., description="The URL or text to encode")
 ):
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-        tmp_path = Path(tmp.name)
+    tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+    tmp_path = FilePath(tmp.name)
+    tmp.close()
 
     try:
         target_image = settings.ASSETS_DIR / "qr_silhouette.png"
