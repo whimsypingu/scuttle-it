@@ -10,6 +10,7 @@ import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
 
 import type { EditProfilePayload } from "@/store/hooks/hooks.types";
 import { useSession } from "@/store/hooks/useSession";
+import { HoldToDeleteButton } from "@/components/ui/hold-delete";
 
 
 interface EditRoomFormProps {
@@ -57,21 +58,10 @@ export const EditRoomForm = ({
                     />
                 </div>
 
-                {/* 
-                <div className="flex flex-row gap-3 items-center">
-                    <label className="text-sm font-medium text-muted-foreground w-18 shrink-0">
-                        Scuttled
-                    </label>
-                    <div className="flex flex-row items-baseline gap-3 select-all px-3">
-                        <span className="text-md font-normal text-foreground">
-                            {convertDate(stats.createdAt, { includeDay: true })}
-                        </span>
-                        
-                        <span className="text-sm font-normal text-muted-foreground">
-                            ({convertRelativeDate(stats.createdAt)})
-                        </span>
-                    </div>
-                </div> */}
+                {/* Delete Button */}
+                <div className="flex justify-end pt-2 pb-1">
+                    <HoldToDeleteButton onDelete={null} />
+                </div>
             </div>
 
             {/* Save */}
