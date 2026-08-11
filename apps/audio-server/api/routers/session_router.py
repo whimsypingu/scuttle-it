@@ -1,8 +1,8 @@
-from asyncio import subprocess
 import tempfile
 import traceback
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
+from asyncio import subprocess
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Response, status
 
 from config import settings
 from api.dependencies import get_db_manager
@@ -55,9 +55,10 @@ async def join_session_endpoint(
         traceback.print_exc()
         raise DefaultCrashException
 
-@SessionRouter.get("/{session_id}/qr.png")
+
+@SessionRouter.get("/qr.png")
 async def generate_qr(
-    session_id: str = Path(..., min_length=1, description="Session ID")
+    url: str = Query(..., description="The URL or text to encode")
 ):
     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
         tmp_path = Path(tmp.name)
@@ -69,7 +70,7 @@ async def generate_qr(
             "-v", "7",
             "-l", "L",
             "-a", str(target_image),
-            "-m", session_id,
+            "-m", url,
             "-o", str(tmp_path)
         ]
         result = subprocess.run(cmd, capture_output=True)
