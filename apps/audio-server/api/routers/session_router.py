@@ -61,7 +61,7 @@ async def join_session_endpoint(
 async def generate_qr(
     url: str = Query(..., description="The URL or text to encode")
 ):
-    tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+    tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False) #rather unfortunate that i did not implement stdout for the binary
     tmp_path = FilePath(tmp.name)
     tmp.close()
 
@@ -69,7 +69,7 @@ async def generate_qr(
         target_image = settings.ASSETS_DIR / "qr_silhouette.png"
         cmd = [
             str(settings.QR_GEN_BIN_PATH),
-            "-v", "7",
+            "-v", "7", #consider upping the version to a higher supported version for longer qr codes, but 7-L supports 154 chars anyway which is a lot
             "-l", "L",
             "-a", str(target_image),
             "-m", url,
@@ -83,10 +83,10 @@ async def generate_qr(
 
     finally:
         if tmp_path.exists():
-            tmp_path.unlink()
+            tmp_path.unlink() #clean up tempfile
 
     return Response(
         content=image_bytes,
         media_type="image/png",
-        headers={"Cache-Control": "public,immutable"}
+        headers={"Cache-Control": "public, max-age=86400, immutable"}
     )
