@@ -53,7 +53,7 @@ export const useSession = () => {
             return data as CreateSessionResponse;
         },
         onSuccess: async (data) => {
-            await handleSessionChange(data.sessionId, `New Session`);
+            await handleSessionChange(data.sessionId, `New Room: ${data.sessionId}`);
         }
     });
 
@@ -71,7 +71,7 @@ export const useSession = () => {
             return trimmedSessionId;
         },
         onSuccess: async (sessionId) => {
-            await handleSessionChange(sessionId, `Joined Session`);
+            await handleSessionChange(sessionId, `Joined Room: ${sessionId}`);
         }
     });
 

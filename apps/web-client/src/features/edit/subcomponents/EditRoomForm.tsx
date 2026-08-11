@@ -1,16 +1,10 @@
 import { useState } from "react";
-import { useEditProfile } from "@/store/hooks/useEdit";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import { convertDate, convertRelativeDate } from "@/features/profile/profile.utils";
-
 import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
-
-import type { EditProfilePayload } from "@/store/hooks/hooks.types";
 import { useSession } from "@/store/hooks/useSession";
-import { HoldToDeleteButton } from "@/components/ui/hold-delete";
 
 
 interface EditRoomFormProps {
@@ -20,7 +14,7 @@ interface EditRoomFormProps {
 export const EditRoomForm = ({ 
     onSave 
 }: EditRoomFormProps) => {
-    const { sessionId, joinSession } = useSession();
+    const { sessionId, createSession } = useSession();
     const [joinCodeInput, setJoinCodeInput] = useState("");
 
     const handleSave = () => {
@@ -33,12 +27,17 @@ export const EditRoomForm = ({
         onSave();
     }
 
+    const handleCreate = () => {
+        createSession();
+        onSave();
+    }
+
     const joinUrl = encodeURIComponent(`${window.location.origin}/?s=${sessionId}`);
 
     return (
         <div className="flex flex-col h-full">
             <div className="h-full custom-scrollbar overflow-y-auto flex flex-col gap-4">
-                {/* Username Section */}
+                {/* Current/Join Room Code */}
                 <div className="flex px-4 items-center justify-center">
                     <Input
                         value={joinCodeInput}
@@ -49,7 +48,8 @@ export const EditRoomForm = ({
                     />
                 </div>
                 
-                <div className="flex p-4 items-center justify-center">
+                {/* QR code */}
+                <div className="flex py-4 items-center justify-center">
                     <img
                         src={`/session/qr.png?url=${joinUrl}`}
                         alt={`QR Code for session ${sessionId}`}
@@ -58,9 +58,15 @@ export const EditRoomForm = ({
                     />
                 </div>
 
-                {/* Delete Button */}
-                <div className="flex justify-end pt-2 pb-1">
-                    <HoldToDeleteButton onDelete={null} />
+                {/* Create Button */}
+                <div className="flex px-4 items-center justify-center">
+                    <Button
+                        className="p-6"
+                        variant="secondary"
+                        onClick={handleCreate}
+                    >
+                        New Room
+                    </Button>
                 </div>
             </div>
 
