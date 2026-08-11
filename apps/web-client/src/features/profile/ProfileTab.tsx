@@ -42,6 +42,13 @@ export const ProfileTab = ({
         };
         setEditTarget(editProfileTarget);
     }
+    const openEditRoomForm = () => {
+        const editProfileTarget: ActiveEditTarget = {
+            type: "editRoom",
+            data: null,
+        };
+        setEditTarget(editProfileTarget);
+    }
 
     return (
         <>
@@ -73,7 +80,7 @@ export const ProfileTab = ({
                     {/* SUB-HEADER: SESSION INFORMATION */}
                     <section 
                         className="flex items-center gap-6"
-                        onClick={openEditProfileForm}    
+                        onClick={openEditRoomForm}    
                     >
                         <div className="flex w-full items-center px-4 py-3 rounded-xl bg-zinc-900/50 border border-zinc-800/50 hover:border-primary/30 transition-colors">
                             <div className="p-3 rounded-lg bg-zinc-800 mr-4">

@@ -25,4 +25,8 @@ export const EDIT_CONFIG: Record<EditableType, EditPopupMetadata> = {
         title: "Profile",
         description: "",
     },
+    editRoom: {
+        title: "Room",
+        description: "",
+    },
 };
