@@ -22,12 +22,12 @@ export const useSession = () => {
     });
 
     //change session
-    const handleSessionChange = async (sessionId: string, toastMessage: string) => {
+    const handleSessionChange = async (sessionId: string) => {
         await setSessionId(sessionId);
 
         queryClient.setQueryData(queryKey, sessionId); //set the active session id in tanstack cache
         audioEngine.clear();
-        queryClient.removeQueries({ queryKey: ["tracks", "play_queue" ] }); //reset audio and queue state
+        queryClient.refetchQueries({ queryKey: ["tracks", "play_queue" ] }); //reset audio and queue state
 
         //clean up url state without forcing a full page reload
         const newUrl = new URL(window.location.href);
@@ -38,7 +38,6 @@ export const useSession = () => {
             document.title, 
             newUrl.pathname + newUrl.search + newUrl.hash
         );
-        makeToast("", toastMessage);
     };
 
     //request a new session
@@ -53,7 +52,8 @@ export const useSession = () => {
             return data as CreateSessionResponse;
         },
         onSuccess: async (data) => {
-            await handleSessionChange(data.sessionId, `New Room: ${data.sessionId}`);
+            await handleSessionChange(data.sessionId);
+            makeToast("New Room: ", data.sessionId);
         }
     });
 
@@ -71,7 +71,8 @@ export const useSession = () => {
             return trimmedSessionId;
         },
         onSuccess: async (sessionId) => {
-            await handleSessionChange(sessionId, `Joined Room: ${sessionId}`);
+            await handleSessionChange(sessionId);
+            makeToast("Joined Room: ", sessionId);
         }
     });
 
