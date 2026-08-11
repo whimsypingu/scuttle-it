@@ -15,6 +15,7 @@ class Settings(BaseSettings):
 
     # --- ENV PATH VALIDATION ---
     BIN_DIR: DirectoryPath #validates that this directory actually exists
+    ASSETS_DIR: DirectoryPath #static backend files
     DATA_DIR: DirectoryPath #mounted data directory
     SQL_DIR: DirectoryPath #default database configuration sql files
     DIST_DIR: DirectoryPath #mounted frontend

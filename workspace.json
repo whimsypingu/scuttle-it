@@ -10,6 +10,7 @@
             "venv": "apps/audio-server/venv",
             "bin": "apps/audio-server/bin",
 
+            "assets": "apps/audio-server/assets",
             "data": "apps/audio-server/data",
             "sql": "apps/audio-server/database/sql",
 

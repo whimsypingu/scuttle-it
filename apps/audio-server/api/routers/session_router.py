@@ -1,9 +1,12 @@
+from asyncio import subprocess
+import tempfile
 import traceback
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
+
+from config import settings
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
-
 from core.models.responses import CreateSessionResponse
 
 
@@ -51,3 +54,36 @@ async def join_session_endpoint(
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException
+
+@SessionRouter.get("/{session_id}/qr.png")
+async def generate_qr(
+    session_id: str = Path(..., min_length=1, description="Session ID")
+):
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+        tmp_path = Path(tmp.name)
+
+    try:
+        target_image = settings.ASSETS_DIR / "qr_silhouette.png"
+        cmd = [
+            str(settings.QR_GEN_BIN_PATH),
+            "-v", "7",
+            "-l", "L",
+            "-a", str(target_image),
+            "-m", session_id,
+            "-o", str(tmp_path)
+        ]
+        result = subprocess.run(cmd, capture_output=True)
+        if result.returncode != 0:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="QR generation failed")
+
+        image_bytes = tmp_path.read_bytes()
+
+    finally:
+        if tmp_path.exists():
+            tmp_path.unlink()
+
+    return Response(
+        content=image_bytes,
+        media_type="image/png",
+        headers={"Cache-Control": "public,immutable"}
+    )
