@@ -44,7 +44,7 @@ async def set_session_active(
     ctx: DeviceContext = Depends(get_device_context)
 ):
     session_manager: SessionManager = request.app.state.session_manager
-    last_active_ts = time.time()
+    last_active_ts = int(time.time())
 
     if ctx.session_id:
         await session_manager.update_last_active(ctx.session_id, last_active_ts)
