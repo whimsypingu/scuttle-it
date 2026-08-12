@@ -24,7 +24,7 @@ from api.routers.websocket_router import WebsocketRouter
 from api.routers.like_router import LikeRouter
 from api.routers.job_router import JobRouter
 from api.routers.stats_router import StatsRouter
-from api.routers.session_router import SessionRouter
+from api.routers.room_router import RoomRouter
 
 from core.youtube.youtube_client import YouTubeClient
 from core.audio.processor import AudioProcessor
@@ -32,7 +32,7 @@ from database.database_manager import DatabaseManager
 from sync.websocket_manager import WebsocketManager
 from core.download.download_queue import DownloadQueue
 from core.download.download_worker import DownloadWorker
-from core.session.session_manager import SessionManager
+from core.room.room_manager import RoomManager
 from core.stats.stats_manager import StatsManager
 from core.link.link_adapter import LinkAdapter
 
@@ -60,11 +60,11 @@ async def lifespan(app: FastAPI):
     )
     app.state.stats_manager = stats_manager
 
-    session_manager = SessionManager(
+    room_manager = RoomManager(
         flush_interval=3*60*60, #flush every few hours
         db_manager=db_manager,
     )
-    app.state.session_manager = session_manager
+    app.state.room_manager = room_manager
 
     link_adapter = LinkAdapter()
     app.state.link_adapter = link_adapter
@@ -96,8 +96,8 @@ async def lifespan(app: FastAPI):
     #poll every interval seconds to flush stats into the database
     asyncio.create_task(stats_manager.run())
 
-    #poll every interval to flush and cleanup session activity into database
-    asyncio.create_task(session_manager.run())
+    #poll every interval to flush and cleanup room activity into database
+    asyncio.create_task(room_manager.run())
 
     await db_manager.build_from_directory()
     await db_manager.build_search_index()
@@ -109,7 +109,7 @@ async def lifespan(app: FastAPI):
     for w in workers:
         w.stop()
     stats_manager.stop()
-    session_manager.stop()
+    room_manager.stop()
 
 
 app = FastAPI(
@@ -132,7 +132,7 @@ app.include_router(WebsocketRouter)
 app.include_router(LikeRouter)
 app.include_router(JobRouter)
 app.include_router(StatsRouter)
-app.include_router(SessionRouter)
+app.include_router(RoomRouter)
 
 @app.get("/status")
 async def get_status():

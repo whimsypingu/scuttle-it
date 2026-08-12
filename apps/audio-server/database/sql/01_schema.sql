@@ -83,8 +83,9 @@ CREATE INDEX IF NOT EXISTS idx_playlist_tracks_position
 ON playlist_tracks (playlist_internal_id, position, track_internal_id);
 
 
--- sessions
-CREATE TABLE IF NOT EXISTS sessions (
+-- rooms
+DROP TABLE sessions;
+CREATE TABLE IF NOT EXISTS rooms (
     internal_id INTEGER PRIMARY KEY AUTOINCREMENT,
     id TEXT UNIQUE,
     created_at INTEGER DEFAULT (unixepoch()),
@@ -93,20 +94,21 @@ CREATE TABLE IF NOT EXISTS sessions (
 
 
 -- play queue
+DROP TABLE play_queue;
 CREATE TABLE IF NOT EXISTS play_queue (
     queue_id INTEGER PRIMARY KEY, --used for state management
-    session_internal_id INTEGER NOT NULL, --session separator for multiple queues
+    room_internal_id INTEGER NOT NULL, --room separator for multiple queues
     track_internal_id INTEGER NOT NULL,
     position REAL NOT NULL,
     added_at INTEGER DEFAULT (unixepoch()),
     FOREIGN KEY (track_internal_id) REFERENCES tracks(internal_id) ON DELETE CASCADE,
-    FOREIGN KEY (session_internal_id) REFERENCES sessions(internal_id) ON DELETE CASCADE,
-    UNIQUE(session_internal_id, position)
+    FOREIGN KEY (room_internal_id) REFERENCES rooms(internal_id) ON DELETE CASCADE,
+    UNIQUE(room_internal_id, position)
 );
 
 -- play queue position index
 CREATE INDEX IF NOT EXISTS idx_play_queue_position
-ON play_queue(session_internal_id, position); --index by session id for session based sorting
+ON play_queue(room_internal_id, position); --index by room id for room based sorting
 
 -- settings
 CREATE TABLE IF NOT EXISTS settings (

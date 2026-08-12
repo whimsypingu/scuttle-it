@@ -6,7 +6,7 @@ from database.database_manager import DatabaseManager
 logger = logging.getLogger(__name__)
 
 
-class SessionManager:
+class RoomManager:
     def __init__(
         self,
         flush_interval: int,
@@ -16,7 +16,7 @@ class SessionManager:
 
         self.flush_interval = flush_interval
 
-        #running buffer mapping session_id -> last active time
+        #running buffer mapping room_id -> last active time
         self.last_active_buffer: dict[str, int] = {}
 
         #atomicity
@@ -24,11 +24,11 @@ class SessionManager:
 
         self.is_running = True
 
-    async def update_last_active(self, session_id: str, last_active: int):
+    async def update_last_active(self, room_id: str, last_active: int):
         """Updates the listened at buffer with the most recent value"""
         async with self.lock:
-            self.last_active_buffer[session_id] = max(
-                self.last_active_buffer.get(session_id, last_active),
+            self.last_active_buffer[room_id] = max(
+                self.last_active_buffer.get(room_id, last_active),
                 last_active
             )
 
@@ -43,20 +43,20 @@ class SessionManager:
         try:
             await self.db_manager.update_last_active(last_active_buffer_snapshot)
 
-            logger.info(f"Successfully flushed last active sessions into database")
+            logger.info(f"Successfully flushed last active rooms into database")
         
         except Exception as e:
             logger.error(f"Error: {str(e)}")
 
     async def run(self):
-        """Main loop for running the SessionManager instance and periodically handling flush and cleanup every flush_interval seconds"""
-        logger.info(f"SessionManager started.")
+        """Main loop for running the RoomManager instance and periodically handling flush and cleanup every flush_interval seconds"""
+        logger.info(f"RoomManager started.")
 
         try:
             while self.is_running:
                 await asyncio.sleep(self.flush_interval)
                 await self.flush()
-                await self.db_manager.cleanup_sessions()
+                await self.db_manager.cleanup_rooms()
         except asyncio.CancelledError:
             await self.flush()
 

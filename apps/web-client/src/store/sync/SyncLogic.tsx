@@ -1,66 +1,66 @@
 import { useEffect } from "react";
 
-import { useSession } from "@/store/hooks/useSession";
-import { customSessionIdExists, getOrDefaultSessionId } from "@/lib/utils";
+import { useRoom } from "@/store/hooks/useRoom";
+import { customRoomIdExists, getOrDefaultRoomId } from "@/lib/utils";
 import { getWebSocket, destroyWebSocket } from "@/store/sync/websocket";
 
 
 export const SyncLogic = () => {
-    const { createSession, joinSessionAsync } = useSession();
+    const { createRoom, joinRoomAsync } = useRoom();
 
     useEffect(() => {
         //initialize websocket
         getWebSocket();
 
         //check for ?n=true on startup
-        const initSession = async () => {
+        const initRoom = async () => {
             const params = new URLSearchParams(window.location.search);
 
-            const forceNewSession = params.has("n"); //force a new session with a ?n flag
-            if (forceNewSession) {
-                console.log("[SyncLogic] Force creating new session");
-                createSession();
+            const forceNewRoom = params.has("n"); //force a new room with a ?n flag
+            if (forceNewRoom) {
+                console.log("[SyncLogic] Force creating new room");
+                createRoom();
                 return;
             }
 
-            const joinCode = params.get("s")?.trim(); //join a session with the ?s=ABCD flag
+            const joinCode = params.get("s")?.trim(); //join a room with the ?s=ABCD flag
             if (joinCode) {
                 try {
-                    console.log(`[SyncLogic] Joining session: ${joinCode}`);
-                    await joinSessionAsync(joinCode);
+                    console.log(`[SyncLogic] Joining room: ${joinCode}`);
+                    await joinRoomAsync(joinCode);
                     return; //successful
                 } catch (err) {
-                    console.log(`[SyncLogic] Failed to join session ${joinCode}, creating new session`);
-                    createSession();
+                    console.log(`[SyncLogic] Failed to join room ${joinCode}, creating new room`);
+                    createRoom();
                     return;
                 }
             }
 
-            const sessionExists = await customSessionIdExists(); //check if a custom session already exists
-            if (sessionExists) {
-                const existingSessionId = await getOrDefaultSessionId();
+            const roomExists = await customRoomIdExists(); //check if a custom room already exists
+            if (roomExists) {
+                const existingRoomId = await getOrDefaultRoomId();
                 try {
-                    console.log(`[SyncLogic] Joining existing cached session: ${existingSessionId}`);
-                    await joinSessionAsync(existingSessionId);
+                    console.log(`[SyncLogic] Joining existing cached room: ${existingRoomId}`);
+                    await joinRoomAsync(existingRoomId);
                     return; //success
                 } catch (err) {
-                    console.log(`[SyncLogic] Failed to join existing cached session ${existingSessionId}, creating new session`);
-                    createSession(); //stored session was purged, so create a new one
+                    console.log(`[SyncLogic] Failed to join existing cached room ${existingRoomId}, creating new room`);
+                    createRoom(); //stored room was purged, so create a new one
                     return;
                 }
             }
 
-            console.log(`[SyncLogic] Joining default session`);
-            const defaultSessionId = await getOrDefaultSessionId();
-            await joinSessionAsync(defaultSessionId);
+            console.log(`[SyncLogic] Joining default room`);
+            const defaultRoomId = await getOrDefaultRoomId();
+            await joinRoomAsync(defaultRoomId);
         };
-        initSession();
+        initRoom();
 
         //clean up websocket
         return () => {
             destroyWebSocket();
         };
-    }, [createSession]);
+    }, [createRoom]);
 
     return null;
 };

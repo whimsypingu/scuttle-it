@@ -36,5 +36,5 @@ class SetAllQueueResponse(QueueResponse):
     skip_count: int
 
 
-class CreateSessionResponse(ScuttleBase):
-    session_id: str
+class CreateRoomResponse(ScuttleBase):
+    room_id: str

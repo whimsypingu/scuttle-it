@@ -13,9 +13,9 @@ export function cn(...inputs: ClassValue[]) {
 
 // constants to find custom identifiers
 const DEVICE_ID_KEY = "scuttle_device_id";
-const SESSION_ID_KEY = "scuttle_session_id";
+const ROOM_ID_KEY = "scuttle_room_id";
 
-const DEFAULT_SESSION_ID = "000"; //see schema initialization description in /audio-server
+const DEFAULT_ROOM_ID = "000"; //see schema initialization description in /audio-server
 
 /**
  * Retrieves an existing unique device ID from indexeddb or creates a persistent one
@@ -34,27 +34,27 @@ export async function getOrCreateDeviceId(): Promise<string> {
 }
 
 /**
- * Handles getting and setting the persistent session ID and accompanying methods
+ * Handles getting and setting the persistent room ID and accompanying methods
  * @returns Custom UUID
  */
-export async function getOrDefaultSessionId(): Promise<string> {
-    let sessionId = await get<string>(SESSION_ID_KEY);
+export async function getOrDefaultRoomId(): Promise<string> {
+    let roomId = await get<string>(ROOM_ID_KEY);
 
     //fallback
-    if (!sessionId) {
-        sessionId = DEFAULT_SESSION_ID;
-        await set(SESSION_ID_KEY, sessionId);
+    if (!roomId) {
+        roomId = DEFAULT_ROOM_ID;
+        await set(ROOM_ID_KEY, roomId);
     }
 
-    return sessionId;
+    return roomId;
 }
-export async function setSessionId(sessionId: string): Promise<string> {
-    await set(SESSION_ID_KEY, sessionId);
-    return sessionId;
+export async function setRoomId(roomId: string): Promise<string> {
+    await set(ROOM_ID_KEY, roomId);
+    return roomId;
 }
-export async function customSessionIdExists(): Promise<boolean> {
-    let sessionId = await get<string>(SESSION_ID_KEY);
-    return Boolean(sessionId && sessionId !== DEFAULT_SESSION_ID);
+export async function customRoomIdExists(): Promise<boolean> {
+    let roomId = await get<string>(ROOM_ID_KEY);
+    return Boolean(roomId && roomId !== DEFAULT_ROOM_ID);
 }
 
 
@@ -64,15 +64,15 @@ export async function customSessionIdExists(): Promise<boolean> {
  */
 export async function scuttleFetch(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
     const deviceId = await getOrCreateDeviceId();
-    const sessionId = await getOrDefaultSessionId();
+    const roomId = await getOrDefaultRoomId();
 
     // debug
-    // console.log("device, session ids:", deviceId, sessionId);
+    // console.log("device, room ids:", deviceId, roomId);
 
     const headers = new Headers(init.headers);
 
     headers.set("Scuttle-Device-ID", deviceId);
-    headers.set("Scuttle-Session-ID", sessionId);
+    headers.set("Scuttle-Room-ID", roomId);
 
     return fetch(input, {
         ...init,

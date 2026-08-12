@@ -56,7 +56,7 @@ class LinkAdapter():
     
     
     #attempt internal conversion to the right kind of adapter and convert into a list of download jobs
-    async def expand_jobs(self, url: str, session_id: str) -> tuple[list[DownloadJob], CreatePlaylistPayload | None]:
+    async def expand_jobs(self, url: str, room_id: str) -> tuple[list[DownloadJob], CreatePlaylistPayload | None]:
         """Resolves a raw URL using the optimal adapter and extracts individual download jobs.
 
         This method acts as a router that identifies the correct source adapter 
@@ -78,6 +78,6 @@ class LinkAdapter():
         adapter, parsed_url = self._get_adapter(url)
 
         if adapter and hasattr(adapter, "expand_jobs"):
-            return await adapter.expand_jobs(parsed_url, session_id)
+            return await adapter.expand_jobs(parsed_url, room_id)
         return [], None
 

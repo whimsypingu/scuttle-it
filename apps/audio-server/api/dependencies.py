@@ -6,9 +6,9 @@ from config import settings
 from database.database_manager import DatabaseManager
 from sync.websocket_manager import WebsocketManager
 from core.download.download_queue import DownloadQueue
-from core.session.session_manager import SessionManager
+from core.room.room_manager import RoomManager
 from core.stats.stats_manager import StatsManager
-from core.models.session import DeviceContext
+from core.models.room import DeviceContext
 
 # Dependencies to get from the server lifespan as defined in /main.py
 
@@ -29,23 +29,23 @@ def get_dl_queue(request: Request) -> DownloadQueue:
 
 def get_device_context(
     device_id: str = Header("DEFAULT_DEVICE_ID", alias="Scuttle-Device-Id"),
-    session_id: str = Header(settings.DEFAULT_SESSION_ID, alias="Scuttle-Session-Id")
+    room_id: str = Header(settings.DEFAULT_ROOM_ID, alias="Scuttle-Room-Id")
 ) -> DeviceContext:
     return DeviceContext(
         device_id=device_id,
-        session_id=session_id
+        room_id=room_id
     )
 
 
-# updates session activity
+# updates room activity
 
-async def set_session_active(
+async def set_room_active(
     request: Request,
     ctx: DeviceContext = Depends(get_device_context)
 ):
-    session_manager: SessionManager = request.app.state.session_manager
+    room_manager: RoomManager = request.app.state.room_manager
     last_active_ts = int(time.time())
 
-    if ctx.session_id:
-        await session_manager.update_last_active(ctx.session_id, last_active_ts)
+    if ctx.room_id:
+        await room_manager.update_last_active(ctx.room_id, last_active_ts)
 

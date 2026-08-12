@@ -77,7 +77,7 @@ export const ProfileTab = ({
                         </div>
                     </section>
 
-                    {/* SUB-HEADER: SESSION INFORMATION */}
+                    {/* SUB-HEADER: ROOM INFORMATION */}
                     <section 
                         className="flex items-center gap-6"
                         onClick={openEditRoomForm}    

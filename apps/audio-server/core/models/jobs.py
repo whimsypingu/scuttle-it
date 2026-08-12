@@ -32,7 +32,7 @@ class DownloadJob(JobBase):
     
     to_queue: bool = True #do we put this in the queue after download
     priority: bool = False #is it important or not for queue priority, if to_queue is true
-    session_id: str = settings.DEFAULT_SESSION_ID #send to which play queue afterwards
+    room_id: str = settings.DEFAULT_ROOM_ID #send to which play queue afterwards
 
     playlist_ids: list[str] | None = None #list of playlist IDs, if instantiating
     title_display: str | None = None #optional title display deterministic

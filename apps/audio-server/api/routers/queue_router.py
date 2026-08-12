@@ -2,16 +2,16 @@ import traceback
 
 from fastapi import APIRouter, Body, Depends, Path, Query, HTTPException
 
-from api.dependencies import get_db_manager, get_device_context, get_dl_queue, set_session_active
+from api.dependencies import get_db_manager, get_device_context, get_dl_queue, set_room_active
 from database.database_manager import DatabaseManager
 from core.download.download_queue import DownloadQueue
 from core.models.jobs import DownloadJob
-from core.models.session import DeviceContext
+from core.models.room import DeviceContext
 
 from core.models.responses import PopQueueResponse, PushNextQueueResponse, PushQueueResponse, QueueResponse, SetAllQueueResponse, SetFirstQueueResponse, ShuffleQueueResponse
 from core.models.payloads import ReorderQueuePayload
 
-QueueRouter = APIRouter(prefix="/queue", tags=["Queue"], dependencies=[Depends(set_session_active)])
+QueueRouter = APIRouter(prefix="/queue", tags=["Queue"], dependencies=[Depends(set_room_active)])
 
 #temporary crash exception
 DefaultCrashException = HTTPException(
@@ -33,13 +33,13 @@ async def set_first_play_queue(
             job = DownloadJob(
                 track_id=track_id,
                 priority=True,
-                session_id=device_ctx.session_id
+                room_id=device_ctx.room_id
             )
             await dl_queue.add(job)
         else:
-            await db_manager.set_first_play_queue(track_id, device_ctx.session_id) #status after attempting set
+            await db_manager.set_first_play_queue(track_id, device_ctx.room_id) #status after attempting set
         
-        updated_queue = await db_manager.get_play_queue(device_ctx.session_id) #get the updated queue
+        updated_queue = await db_manager.get_play_queue(device_ctx.room_id) #get the updated queue
 
         return {
             "download_required": download_required,
@@ -57,8 +57,8 @@ async def reorder_queue(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        await db_manager.reorder_queue(payload, device_ctx.session_id) #status after attempting reorder
-        updated_queue = await db_manager.get_play_queue(device_ctx.session_id) #get the updated queue
+        await db_manager.reorder_queue(payload, device_ctx.room_id) #status after attempting reorder
+        updated_queue = await db_manager.get_play_queue(device_ctx.room_id) #get the updated queue
 
         return {
             "queue": updated_queue
@@ -81,13 +81,13 @@ async def push_play_queue(
             job = DownloadJob(
                 track_id=track_id,
                 priority=False, #low priority, append to back of queue
-                session_id=device_ctx.session_id
+                room_id=device_ctx.room_id
             )
             await dl_queue.add(job)
         else:
-            await db_manager.push_play_queue(track_id, device_ctx.session_id) #status after attempting push
+            await db_manager.push_play_queue(track_id, device_ctx.room_id) #status after attempting push
     
-        updated_queue = await db_manager.get_play_queue(device_ctx.session_id) #get the updated queue
+        updated_queue = await db_manager.get_play_queue(device_ctx.room_id) #get the updated queue
 
         return {
             "download_required": download_required,
@@ -111,13 +111,13 @@ async def push_next_play_queue(
             job = DownloadJob(
                 track_id=track_id,
                 priority=True, #high priority, prepend to front of queue
-                session_id=device_ctx.session_id
+                room_id=device_ctx.room_id
             )
             await dl_queue.add(job)
         else:
-            await db_manager.push_next_play_queue(track_id, device_ctx.session_id) #status after attempting push
+            await db_manager.push_next_play_queue(track_id, device_ctx.room_id) #status after attempting push
     
-        updated_queue = await db_manager.get_play_queue(device_ctx.session_id) #get the updated queue
+        updated_queue = await db_manager.get_play_queue(device_ctx.room_id) #get the updated queue
 
         return {
             "download_required": download_required,
@@ -135,8 +135,8 @@ async def pop_play_queue(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        await db_manager.pop_play_queue(queue_id, device_ctx.session_id) #status after attempting pop
-        updated_queue = await db_manager.get_play_queue(device_ctx.session_id) #get the updated queue
+        await db_manager.pop_play_queue(queue_id, device_ctx.room_id) #status after attempting pop
+        updated_queue = await db_manager.get_play_queue(device_ctx.room_id) #get the updated queue
 
         return {
             "queue": updated_queue
@@ -152,8 +152,8 @@ async def shuffle_play_queue(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        await db_manager.shuffle_play_queue(device_ctx.session_id)
-        updated_queue = await db_manager.get_play_queue(device_ctx.session_id)
+        await db_manager.shuffle_play_queue(device_ctx.room_id)
+        updated_queue = await db_manager.get_play_queue(device_ctx.room_id)
 
         return {
             "queue": updated_queue
@@ -172,14 +172,14 @@ async def set_all_play_queue(
     dl_queue: DownloadQueue = Depends(get_dl_queue)
 ):
     try:
-        set_count, skipped = await db_manager.set_all_play_queue(playlist_id, sortmode, device_ctx.session_id) #status after attempting set
-        updated_queue = await db_manager.get_play_queue(device_ctx.session_id) #get the updated queue -- EMERGENCY: make this stuff not like this bruh
+        set_count, skipped = await db_manager.set_all_play_queue(playlist_id, sortmode, device_ctx.room_id) #status after attempting set
+        updated_queue = await db_manager.get_play_queue(device_ctx.room_id) #get the updated queue -- EMERGENCY: make this stuff not like this bruh
 
         for track_id in skipped:
             job = DownloadJob(
                 track_id=track_id,
                 priority=False,
-                session_id=device_ctx.session_id
+                room_id=device_ctx.room_id
             )
             await dl_queue.add(job)
 
@@ -199,8 +199,8 @@ async def clear_play_queue_endpoint(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        await db_manager.clear_play_queue(device_ctx.session_id) #status after attempting clear
-        updated_queue = await db_manager.get_play_queue(device_ctx.session_id) #get the updated queue -- EMERGENCY: make this stuff not like this bruh
+        await db_manager.clear_play_queue(device_ctx.room_id) #status after attempting clear
+        updated_queue = await db_manager.get_play_queue(device_ctx.room_id) #get the updated queue -- EMERGENCY: make this stuff not like this bruh
 
         return {
             "queue": updated_queue
@@ -216,7 +216,7 @@ async def get_play_queue(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try: 
-        results = await db_manager.get_play_queue(device_ctx.session_id)
+        results = await db_manager.get_play_queue(device_ctx.room_id)
         return {
             "queue": results
         }

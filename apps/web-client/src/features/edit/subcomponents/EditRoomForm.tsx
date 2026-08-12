@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
-import { useSession } from "@/store/hooks/useSession";
+import { useRoom } from "@/store/hooks/useRoom";
 import { makeToast } from "@/features/toast/Toast";
 
 
@@ -15,13 +15,13 @@ interface EditRoomFormProps {
 export const EditRoomForm = ({ 
     onSave 
 }: EditRoomFormProps) => {
-    const { sessionId, createSession, joinSessionAsync } = useSession();
+    const { roomId, createRoom, joinRoomAsync } = useRoom();
     const [joinCodeInput, setJoinCodeInput] = useState("");
 
     const handleSave = async () => {
-        if (joinCodeInput && joinCodeInput != sessionId) {
+        if (joinCodeInput && joinCodeInput != roomId) {
             try {
-                await joinSessionAsync(joinCodeInput);
+                await joinRoomAsync(joinCodeInput);
             } catch (err) {
                 makeToast("Invalid: ", joinCodeInput);
             }
@@ -30,11 +30,11 @@ export const EditRoomForm = ({
     }
 
     const handleCreate = () => {
-        createSession();
+        createRoom();
         onSave();
     }
 
-    const joinUrl = encodeURIComponent(`${window.location.origin}/?s=${sessionId}`);
+    const joinUrl = encodeURIComponent(`${window.location.origin}/?s=${roomId}`);
 
     return (
         <div className="flex flex-col h-full">
@@ -53,7 +53,7 @@ export const EditRoomForm = ({
                                 const filteredValue = e.target.value.toUpperCase().replace(/[^A-Z0]/g, "");
                                 setJoinCodeInput(filteredValue);
                             }}
-                            placeholder={sessionId}
+                            placeholder={roomId}
                             maxLength={4}
                             className="h-14 w-[10ch] text-2xl font-bold font-mono text-center tracking-[0.4em] pr-0 uppercase"
                         />
@@ -63,8 +63,8 @@ export const EditRoomForm = ({
                 {/* QR code */}
                 <div className="flex px-4 py-4 items-center justify-center">
                     <img
-                        src={`/session/qr.png?url=${joinUrl}`}
-                        alt={`QR Code for session ${sessionId}`}
+                        src={`/room/qr.png?url=${joinUrl}`}
+                        alt={`QR Code for room ${roomId}`}
                         className="w-full aspect-square rounded-lg bg-white p-1"
                         loading="lazy"
                     />

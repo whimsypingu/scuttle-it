@@ -5,7 +5,7 @@ from api.dependencies import get_db_manager, get_device_context, get_dl_queue
 from database.database_manager import DatabaseManager
 from core.download.download_queue import DownloadQueue
 from core.models.jobs import DownloadJob
-from core.models.session import DeviceContext
+from core.models.room import DeviceContext
 
 SearchRouter = APIRouter(prefix="/search", tags=["Search"])
 
@@ -41,7 +41,7 @@ async def search_youtube(
         job = DownloadJob(
             query=q,
             query_limit=query_limit,
-            session_id=device_ctx.session_id
+            room_id=device_ctx.room_id
         )
         await dl_queue.add(job)
         return {

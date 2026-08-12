@@ -119,6 +119,6 @@ def row_to_playlist_details(
     )
 
 
-#sessions
-def generate_session_id(length: int = 4):
+#rooms
+def generate_room_id(length: int = 4):
     return "".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", k=length))

@@ -96,7 +96,7 @@ class YouTubeAdapter:
                 raise PlaylistResolutionError(f"Failed to playlist track metadata from YouTube: {e}") from e
 
 
-    async def expand_jobs(self, parsed_url: str, session_id: str) -> tuple[list[DownloadJob], CreatePlaylistPayload | None]:
+    async def expand_jobs(self, parsed_url: str, room_id: str) -> tuple[list[DownloadJob], CreatePlaylistPayload | None]:
         """Given a parsed url, attempt to return a list of DownloadJobs, either a single track in a list or a playlist."""
         link_type, extracted_id = self.extract_id(parsed_url)
 
@@ -104,7 +104,7 @@ class YouTubeAdapter:
             return [], None
         
         if link_type == "track":
-            job = DownloadJob(track_id=extracted_id, priority=True, session_id=session_id)
+            job = DownloadJob(track_id=extracted_id, priority=True, room_id=room_id)
             return [job], None
         
         if link_type == "playlist":
@@ -112,7 +112,7 @@ class YouTubeAdapter:
                 name, description, track_ids = await self._resolve_playlist(extracted_id)
 
                 jobs = [
-                    DownloadJob(track_id=t, priority=False, session_id=session_id, playlist_ids=[extracted_id])
+                    DownloadJob(track_id=t, priority=False, room_id=room_id, playlist_ids=[extracted_id])
                     for t in track_ids
                 ]
                 payload = CreatePlaylistPayload(

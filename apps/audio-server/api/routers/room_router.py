@@ -8,10 +8,10 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query, Response, st
 from config import settings
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
-from core.models.responses import CreateSessionResponse
+from core.models.responses import CreateRoomResponse
 
 
-SessionRouter = APIRouter(prefix="/session", tags=["Sessions"])
+RoomRouter = APIRouter(prefix="/room", tags=["Rooms"])
 
 #temporary crash exception
 DefaultCrashException = HTTPException(
@@ -20,33 +20,33 @@ DefaultCrashException = HTTPException(
 )
 
 
-@SessionRouter.post("/create", response_model=CreateSessionResponse)
-async def create_session_endpoint(
+@RoomRouter.post("/create", response_model=CreateRoomResponse)
+async def create_room_endpoint(
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        session_id = await db_manager.create_session()
+        room_id = await db_manager.create_room()
         return {
-            "session_id": session_id
+            "room_id": room_id
         }
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException
 
-@SessionRouter.get("/join/{session_id}")
-async def join_session_endpoint(
-    session_id: str = Path(..., min_length=1, description="Session ID"),
+@RoomRouter.get("/join/{room_id}")
+async def join_room_endpoint(
+    room_id: str = Path(..., min_length=1, description="Room ID"),
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        is_valid = await db_manager.validate_session(session_id)
+        is_valid = await db_manager.validate_room(room_id)
 
         if is_valid:
             return Response(status_code=status.HTTP_204_NO_CONTENT)
         
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Session invalid or expired"
+            detail="Room invalid or expired"
         )
 
     except HTTPException:
@@ -57,7 +57,7 @@ async def join_session_endpoint(
         raise DefaultCrashException
 
 
-@SessionRouter.get("/qr.png")
+@RoomRouter.get("/qr.png")
 async def generate_qr(
     url: str = Query(..., description="The URL or text to encode")
 ):

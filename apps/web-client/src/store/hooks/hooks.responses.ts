@@ -31,8 +31,8 @@ export interface SetAllQueueResponse {
 }
 
 /**
- * useSession
+ * useRoom
  */
-export interface CreateSessionResponse {
-    sessionId: string;
+export interface CreateRoomResponse {
+    roomId: string;
 }

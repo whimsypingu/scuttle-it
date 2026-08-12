@@ -64,7 +64,7 @@ class DownloadWorker:
                 if job.query:
 
                     #try extracting and parsing any possible links
-                    generated_jobs, generated_payload = await self.link_adapter.expand_jobs(url=job.query, session_id=job.session_id)
+                    generated_jobs, generated_payload = await self.link_adapter.expand_jobs(url=job.query, room_id=job.room_id)
 
                     if generated_jobs or generated_payload is not None:
                         if generated_payload is not None:
@@ -152,9 +152,9 @@ class DownloadWorker:
                 #play queue modification
                 if job.to_queue:
                     if job.priority:
-                        await self.db_manager.push_next_play_queue(download_result.id, job.session_id) #push to front of the play queue
+                        await self.db_manager.push_next_play_queue(download_result.id, job.room_id) #push to front of the play queue
                     else:
-                        await self.db_manager.push_play_queue(download_result.id, job.session_id) #push to end of the play queue
+                        await self.db_manager.push_play_queue(download_result.id, job.room_id) #push to end of the play queue
 
                 await self.db_manager.build_search_index()
 
