@@ -69,7 +69,7 @@ async def generate_qr(
         target_image = settings.ASSETS_DIR / "qr_silhouette.png"
         cmd = [
             str(settings.QR_GEN_BIN_PATH),
-            "-v", "7", #consider upping the version to a higher supported version for longer qr codes, but 7-L supports 154 chars anyway which is a lot
+            "-v", "9", #consider upping the version to a higher supported version for longer qr codes, but 7-L supports 154 chars anyway which is a lot
             "-l", "L",
             "-a", str(target_image),
             "-m", url,

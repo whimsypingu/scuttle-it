@@ -49,7 +49,10 @@ export const EditRoomForm = ({
                     >
                         <Input
                             value={joinCodeInput}
-                            onChange={(e) => setJoinCodeInput(e.target.value.toUpperCase())}
+                            onChange={(e) => {
+                                const filteredValue = e.target.value.toUpperCase().replace(/[^A-Z0]/g, "");
+                                setJoinCodeInput(filteredValue);
+                            }}
                             placeholder={sessionId}
                             maxLength={4}
                             className="h-14 w-[10ch] text-2xl font-bold font-mono text-center tracking-[0.4em] pr-0 uppercase"
@@ -58,7 +61,7 @@ export const EditRoomForm = ({
                 </div>
                 
                 {/* QR code */}
-                <div className="flex py-4 items-center justify-center">
+                <div className="flex px-4 py-4 items-center justify-center">
                     <img
                         src={`/session/qr.png?url=${joinUrl}`}
                         alt={`QR Code for session ${sessionId}`}
