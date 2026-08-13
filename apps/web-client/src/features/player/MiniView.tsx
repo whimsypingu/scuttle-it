@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
 
 import { useQueue } from '@/store/hooks/useQueue';
+import { useAudioMain } from "@/features/audio/useAudioEngine";
 
 import { MiniViewListenModeButton, MiniViewPlayPauseButton, MiniViewShimmer, MiniViewSlider } from '@/features/player/subcomponents/MiniViewControls';
 import { getTrackDisplayMetadata } from '@/track/track.utils';
 
 import type { MiniViewProps } from '@/features/player/player.types';
-import { useAudioMain } from "@/features/audio/useAudioEngine";
 
 
 export const MiniView = ({ onExpand }: MiniViewProps) => {

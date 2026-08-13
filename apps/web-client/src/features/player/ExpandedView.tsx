@@ -2,21 +2,23 @@ import { motion } from 'framer-motion';
 import { CaretDownIcon } from '@phosphor-icons/react';
 
 import { useQueue } from '@/store/hooks/useQueue';
+import { useAudioMain } from "@/features/audio/useAudioEngine";
 
 import { ExpandedViewControls } from '@/features/player/subcomponents/ExpandedViewControls';
 import { QueueList } from '@/features/player/subcomponents/QueueList';
+import { QueueInfo } from '@/features/player/subcomponents/QueueInfo';
 
 import { getTrackDisplayMetadata } from '@/track/track.utils';
 
 import { PLAYER_CONFIG } from '@/features/player/player.constants';
 
 import type { ExpandedViewProps } from '@/features/player/player.types';
-import { QueueInfo } from './subcomponents/QueueInfo';
 
 
 //consider not propagating isCompact down to here and just start it here
 export const ExpandedView = ({ isCompact, setIsCompact, onClose, playerDragControls }: ExpandedViewProps) => {
     const { queue } = useQueue(); //get the latest queue from tanstack
+    const { isMain } = useAudioMain();
 
     const currentTrack = queue?.[0];
     console.log(currentTrack);
@@ -105,7 +107,9 @@ export const ExpandedView = ({ isCompact, setIsCompact, onClose, playerDragContr
                     </motion.div>
 
                     {/* CONTROLS */}
-                    <ExpandedViewControls />
+                    {isMain && (
+                        <ExpandedViewControls />
+                    )}
                 </motion.div>
             </motion.div>
 
