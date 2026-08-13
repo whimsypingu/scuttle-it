@@ -60,10 +60,10 @@ export const useRoom = () => {
         onSuccess: async (data) => {
             await handleRoomChange(data);
 
-            //debug
-            const printout = `${data.roomId} ${data.isMain}`;
-            console.log(printout);
-            makeToast("New Room: ", printout);
+            // //debug
+            // const printout = `${data.roomId} ${data.isMain}`;
+            // console.log(printout);
+            makeToast("New Room: ", data.roomId);
         }
     });
 
@@ -84,10 +84,10 @@ export const useRoom = () => {
         onSuccess: async (data) => {
             await handleRoomChange(data);
 
-            //debug
-            const printout = `${data.roomId} ${data.isMain}`;
-            console.log(printout);
-            makeToast("Joined Room: ", printout);
+            // //debug
+            // const printout = `${data.roomId} ${data.isMain}`;
+            // console.log(printout);
+            makeToast("Joined Room: ", data.roomId);
         }
     });
 
