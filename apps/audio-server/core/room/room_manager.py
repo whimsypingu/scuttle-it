@@ -1,6 +1,7 @@
 import asyncio
 import logging
 
+from core.models.room import Device, DeviceContext, Room
 from database.database_manager import DatabaseManager
 
 logger = logging.getLogger(__name__)
@@ -14,6 +15,10 @@ class RoomManager:
     ):
         self.db_manager = db_manager
 
+        #in-memory mapping of room_id to Rooms
+        self.rooms: dict[str, Room] = {}
+        self.device_to_room: dict[str, str] = {}
+
         self.flush_interval = flush_interval
 
         #running buffer mapping room_id -> last active time
@@ -23,6 +28,30 @@ class RoomManager:
         self.lock = asyncio.Lock()
 
         self.is_running = True
+
+
+    def device_active(self, room_id: str, device_id: str):
+        """Given a room_id and device_id 'touch' the device to note it is active"""
+        #change room mapping if necessary
+        last_room_id = self.device_to_room[device_id]
+        if last_room_id != room_id:
+            old_room = self.rooms.get(last_room_id)
+
+            if old_room:
+                old_room.remove_device(device_id)
+
+                #clean up old room in memory if empty
+                if not old_room.devices:
+                    del self.rooms[last_room_id]
+
+        #create the room in mem if it doesnt exist yet
+        if room_id not in self.rooms:
+            self.rooms[room_id] = Room(id=room_id)
+
+        #add/touch the device
+        self.rooms[room_id].add_or_touch_device(device_id)
+        self.device_to_room[device_id] = room_id #update lookup table
+        
 
     async def update_last_active(self, room_id: str, last_active: int):
         """Updates the listened at buffer with the most recent value"""
