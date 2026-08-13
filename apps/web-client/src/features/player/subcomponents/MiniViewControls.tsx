@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useAudioMain, useAudioPlayback, useAudioTime } from "@/features/audio/useAudioEngine";
+import { useEffect, useState } from "react";
+import { useAudioPlayback, useAudioTime } from "@/features/audio/useAudioEngine";
 import { useQueue } from "@/store/hooks/useQueue";
 
 import { PlayIcon, PauseIcon, WaveformIcon } from "@phosphor-icons/react";
@@ -16,26 +16,18 @@ export const MiniViewPlayPauseButton = () => {
     const currentTrack = queue?.[0];
 
     const { isPaused } = useAudioPlayback();
-    const { isMain } = useAudioMain();
-
-    const handleClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
-
-        if (isMain) {
-            audioEngine.playPauseTrack({ trackId: currentTrack?.id });
-        }
-    }
 
     return (
         <>
         {/* PLAY/PAUSE */}
         <button
             className="p-2 transition-transform active:scale-95"
-            onClick={handleClick}
+            onClick={(e) => {
+                e.stopPropagation();
+                audioEngine.playPauseTrack({ trackId: currentTrack?.id });
+            }}
         >
-            {!isMain ? (
-                <WaveformIcon size={PLAYER_CONFIG.iconSize} />
-            ) : isPaused ? (
+            {isPaused ? (
                 <PlayIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
             ) : (
                 <PauseIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
@@ -44,6 +36,20 @@ export const MiniViewPlayPauseButton = () => {
         </>
     );
 };
+
+export const MiniViewListenModeButton = () => {
+    return (
+        <>
+        {/* LISTENING MODE */}
+        <button
+            className="p-2 transition-transform active:scale-95"
+            onClick={(e) => {}}
+        >
+            <WaveformIcon size={PLAYER_CONFIG.iconSize} />
+        </button>
+        </>
+    );
+}
 
 
 export const MiniViewSlider = () => {
@@ -75,16 +81,31 @@ export const MiniViewSlider = () => {
 
     return (
         <>
-            {/* SLIDER */}
-            <MiniSlider
-                value={[localValue]} 
-                max={duration} 
-                step={0.1}
-                onClick={(e) => e.stopPropagation()}
-                onValueChange={handleValueChange}
-                onValueCommit={handleValueCommit}
-                onPointerUp={handleValueCommit} //fallback for when swipe goes out of bounds
-            />
+        {/* SLIDER */}
+        <MiniSlider
+            value={[localValue]} 
+            max={duration} 
+            step={0.1}
+            onClick={(e) => e.stopPropagation()}
+            onValueChange={handleValueChange}
+            onValueCommit={handleValueCommit}
+            onPointerUp={handleValueCommit} //fallback for when swipe goes out of bounds
+        />
+        </>
+    );
+};
+
+
+export const MiniViewShimmerer = () => {
+    return (
+        <>
+        {/* SHIMMER SWEEP */}
+        <div 
+            className="relative h-1.5 w-full overflow-hidden rounded-full bg-slate-800/60" 
+            onClick={(e) => e.stopPropagation()}
+        >
+            <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+        </div>
         </>
     );
 };

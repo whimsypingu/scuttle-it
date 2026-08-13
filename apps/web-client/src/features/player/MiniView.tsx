@@ -2,14 +2,16 @@ import { motion } from 'framer-motion';
 
 import { useQueue } from '@/store/hooks/useQueue';
 
-import { MiniViewPlayPauseButton, MiniViewSlider } from '@/features/player/subcomponents/MiniViewControls';
+import { MiniViewListenModeButton, MiniViewPlayPauseButton, MiniViewShimmerer, MiniViewSlider } from '@/features/player/subcomponents/MiniViewControls';
 import { getTrackDisplayMetadata } from '@/track/track.utils';
 
 import type { MiniViewProps } from '@/features/player/player.types';
+import { useAudioMain } from "@/features/audio/useAudioEngine";
 
 
 export const MiniView = ({ onExpand }: MiniViewProps) => {
     const { queue } = useQueue(); //get the latest queue from tanstack
+    const { isMain } = useAudioMain();
 
     const currentTrack = queue?.[0];
     console.log(currentTrack);
@@ -71,11 +73,19 @@ export const MiniView = ({ onExpand }: MiniViewProps) => {
 
                 </div>
 
-                <MiniViewPlayPauseButton />
+                {isMain ? (
+                    <MiniViewPlayPauseButton />
+                ) : (
+                    <MiniViewListenModeButton />
+                )}
             </div>
 
             {/* SLIDER */}
-            <MiniViewSlider />
+            {isMain ? (
+                <MiniViewSlider />
+            ) : (
+                <MiniViewShimmerer />
+            )}
         </motion.div>
         </>
     );
