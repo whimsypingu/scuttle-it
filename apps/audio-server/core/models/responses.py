@@ -36,5 +36,6 @@ class SetAllQueueResponse(QueueResponse):
     skip_count: int
 
 
-class CreateRoomResponse(ScuttleBase):
+class CreateJoinRoomResponse(ScuttleBase):
     room_id: str
+    is_main: bool

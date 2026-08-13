@@ -33,6 +33,7 @@ export interface SetAllQueueResponse {
 /**
  * useRoom
  */
-export interface CreateRoomResponse {
+export interface CreateJoinRoomResponse {
     roomId: string;
+    isMain: boolean;
 }

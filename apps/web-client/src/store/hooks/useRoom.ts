@@ -5,7 +5,7 @@ import { audioEngine } from "@/features/audio/audioEngine";
 import { getOrDefaultRoomId, setRoomId, scuttleFetch, getOrCreateDeviceId } from "@/lib/utils";
 import { getWebSocket } from "@/store/sync/websocket";
 
-import type { CreateRoomResponse } from "@/store/hooks/hooks.responses";
+import type { CreateJoinRoomResponse } from "@/store/hooks/hooks.responses";
 
 
 export const useRoom = () => {
@@ -54,11 +54,14 @@ export const useRoom = () => {
             if (!response.ok) throw new Error("Failed to create room");
 
             const data = await response.json();
-            return data as CreateRoomResponse;
+            return data as CreateJoinRoomResponse;
         },
         onSuccess: async (data) => {
             await handleRoomChange(data.roomId);
-            makeToast("New Room: ", data.roomId);
+
+            const printout = `${data.roomId} ${data.isMain}`;
+            console.log(printout);
+            makeToast("New Room: ", printout);
         }
     });
 
@@ -73,11 +76,15 @@ export const useRoom = () => {
             });
             if (!response.ok) throw new Error("Failed to join room");
 
-            return trimmedRoomId;
+            const data = await response.json();
+            return data as CreateJoinRoomResponse;
         },
-        onSuccess: async (roomId) => {
-            await handleRoomChange(roomId);
-            makeToast("Joined Room: ", roomId);
+        onSuccess: async (data) => {
+            await handleRoomChange(data.roomId);
+
+            const printout = `${data.roomId} ${data.isMain}`;
+            console.log(printout);
+            makeToast("Joined Room: ", printout);
         }
     });
 
