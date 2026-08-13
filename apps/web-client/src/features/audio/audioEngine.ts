@@ -13,6 +13,7 @@ class AudioEngine implements IAudioEngine  {
     private previousTime = 0; //delta tracking helper variable
 
     public setQueueFlag = false; //flag for autoplaying queue swap behavior
+    public isMain = true; //flag for whether audio should even play or not on this device
     
     private constructor() { null }
 
@@ -109,6 +110,12 @@ class AudioEngine implements IAudioEngine  {
     }
 
     public async playTrack({ trackId, forceRestart = false }: PlayTrackOptions) {
+        if (!this.isMain) {
+            console.log(`%c[Scuttle Metrics] ID: ${trackId}`, 'color: #3b82f6; font-weight: bold');
+            console.log(`  └─ Ignoring Play: isMain`);
+            return;
+        }
+
         const startTime = performance.now(); //diagnostic for how long it takes to load and play audio
 
         this.setQueueFlag = false; //set the queue swap flag to false for safety

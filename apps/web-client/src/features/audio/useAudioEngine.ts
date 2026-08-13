@@ -79,6 +79,7 @@ export const useBackupSync = () => {
 
 export const usePrefetchSync = () => {
     if (!("serviceWorker" in navigator)) return; //guard clause for if service workers are unsupported or blocked
+    if (!audioEngine.isMain) return;
 
     const { queue } = useQueue();
 

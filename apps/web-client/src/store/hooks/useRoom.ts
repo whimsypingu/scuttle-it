@@ -23,11 +23,12 @@ export const useRoom = () => {
     });
 
     //change room
-    const handleRoomChange = async (roomId: string) => {
-        await setRoomId(roomId);
+    const handleRoomChange = async (data: CreateJoinRoomResponse) => {
+        await setRoomId(data.roomId);
 
-        queryClient.setQueryData(queryKey, roomId); //set the active room id in tanstack cache
+        queryClient.setQueryData(queryKey, data.roomId); //set the active room id in tanstack cache
         audioEngine.clear();
+        audioEngine.isMain = data.isMain;
         queryClient.refetchQueries({ queryKey: ["tracks", "play_queue" ] }); //reset audio and queue state
 
         //clean up url state without forcing a full page reload
@@ -42,7 +43,7 @@ export const useRoom = () => {
 
         //reconnect websocket connection
         const deviceId = await getOrCreateDeviceId();
-        getWebSocket(roomId, deviceId);
+        getWebSocket(data.roomId, deviceId);
     };
 
     //request a new room
@@ -57,8 +58,9 @@ export const useRoom = () => {
             return data as CreateJoinRoomResponse;
         },
         onSuccess: async (data) => {
-            await handleRoomChange(data.roomId);
+            await handleRoomChange(data);
 
+            //debug
             const printout = `${data.roomId} ${data.isMain}`;
             console.log(printout);
             makeToast("New Room: ", printout);
@@ -80,8 +82,9 @@ export const useRoom = () => {
             return data as CreateJoinRoomResponse;
         },
         onSuccess: async (data) => {
-            await handleRoomChange(data.roomId);
+            await handleRoomChange(data);
 
+            //debug
             const printout = `${data.roomId} ${data.isMain}`;
             console.log(printout);
             makeToast("Joined Room: ", printout);

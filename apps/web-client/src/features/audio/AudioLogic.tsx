@@ -84,6 +84,17 @@ export const AudioLogic = () => {
     useEffect(() => {
         if (!("mediaSession" in navigator) || !currentTrack) return;
 
+        //completely strip mediaSession
+        if (!audioEngine.isMain) {
+            navigator.mediaSession.metadata = null;
+            navigator.mediaSession.playbackState = "none";
+            navigator.mediaSession.setActionHandler("nexttrack", null);
+            navigator.mediaSession.setActionHandler("previoustrack", null);
+            navigator.mediaSession.setActionHandler("play", null);
+            navigator.mediaSession.setActionHandler("pause", null);
+            return;            
+        }
+
         //get and update mediaSession metadata
         const { 
             titleDisplay: currentTitle,
@@ -139,7 +150,7 @@ export const AudioLogic = () => {
             navigator.mediaSession.setActionHandler("play", null);
             navigator.mediaSession.setActionHandler("pause", null);
         };
-    }, [currentTrack, nextTrack, isPaused]); //trigger whenever currentTrack or play state changes
+    }, [currentTrack, nextTrack, isPaused, audioEngine.isMain]); //trigger whenever currentTrack or play state changes
 
     return null;
 };
