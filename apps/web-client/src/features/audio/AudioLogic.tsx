@@ -10,6 +10,10 @@ export const AudioLogic = () => {
     useBackupSync(); //syncs to server backed queue a few seconds before a track ends to ensure data integrity. in the future we could add a flag for this
     usePrefetchSync();
 
+    //bump these hooks to the top to prevent triggering a hook violation somewhere
+    const { isPaused } = useAudioPlayback(); //hook into playstate
+    const { isMain } = useAudioMain(); //hook into main or not
+
     const { queue, pop, reorder } = useQueue(); //get the latest queue from tanstack
     const { settings } = useSettings();
     
@@ -78,9 +82,6 @@ export const AudioLogic = () => {
     }, []); //runs once and never again
 
 
-    const { isPaused } = useAudioPlayback(); //hook into playstate
-    const { isMain } = useAudioMain(); //hook into main or not
-
     //mediaSession
     useEffect(() => {
         if (!("mediaSession" in navigator) || !currentTrack) return;
@@ -93,7 +94,7 @@ export const AudioLogic = () => {
             navigator.mediaSession.setActionHandler("previoustrack", null);
             navigator.mediaSession.setActionHandler("play", null);
             navigator.mediaSession.setActionHandler("pause", null);
-            return;            
+            return;
         }
 
         //get and update mediaSession metadata

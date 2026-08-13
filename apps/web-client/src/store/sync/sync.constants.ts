@@ -1,6 +1,7 @@
 //see: scuttle/apps/audio-server/sync/pokes.py
 export const WS_POKE_TYPES = {
     DOWNLOAD_JOB_STATUS_UPDATE: "DOWNLOAD_JOB_STATUS_UPDATE",
+    QUEUE_UPDATE: "QUEUE_UPDATE",
 } as const;
 
 export const MIN_RECONNECT_DELAY = 1000;

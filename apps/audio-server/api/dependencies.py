@@ -10,6 +10,9 @@ from core.room.room_manager import RoomManager
 from core.stats.stats_manager import StatsManager
 from core.models.room import DeviceContext
 
+from sync.pokes import WSPokeFactory
+
+
 # Dependencies to get from the server lifespan as defined in /main.py
 def get_db_manager(request: Request) -> DatabaseManager:
     return request.app.state.db_manager
@@ -36,14 +39,22 @@ def get_device_context(
 
 
 # updates room activity
-
 async def set_room_active(
-    request: Request,
-    ctx: DeviceContext = Depends(get_device_context)
+    ctx: DeviceContext = Depends(get_device_context),
+    room_manager: RoomManager = Depends(get_room_manager)
 ):
-    room_manager: RoomManager = request.app.state.room_manager
-    last_active_ts = int(time.time())
-
     if ctx.room_id:
+        last_active_ts = int(time.time())
         await room_manager.update_last_active(ctx.room_id, last_active_ts)
 
+async def room_queue_update(
+    ctx: DeviceContext = Depends(get_device_context),
+    room_manager: RoomManager = Depends(get_room_manager)
+):
+    yield
+
+    #run this after the endpoint finishes
+    await room_manager.broadcast_room(
+        ctx.room_id, 
+        WSPokeFactory.queue_update()
+    )
