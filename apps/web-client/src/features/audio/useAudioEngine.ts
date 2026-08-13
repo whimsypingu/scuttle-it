@@ -3,6 +3,20 @@ import { audioEngine } from "@/features/audio/audioEngine"
 import { useQueue } from "@/store/hooks/useQueue";
 
 
+export const useAudioMain = () => {
+    const [isMain, setIsMain] = useState(() => audioEngine.getMain());
+
+    useEffect(() => {
+        const unSubMain = audioEngine.on("mainchange", (value) => setIsMain(value));
+
+        return () => {
+            unSubMain();
+        };
+    }, []);
+
+    return { isMain };
+}
+
 export const useAudioPlayback = () => {
     const [isPaused, setIsPaused] = useState(() => audioEngine.isPaused());
 
@@ -79,7 +93,7 @@ export const useBackupSync = () => {
 
 export const usePrefetchSync = () => {
     if (!("serviceWorker" in navigator)) return; //guard clause for if service workers are unsupported or blocked
-    if (!audioEngine.isMain) return;
+    if (!audioEngine.getMain()) return;
 
     const { queue } = useQueue();
 

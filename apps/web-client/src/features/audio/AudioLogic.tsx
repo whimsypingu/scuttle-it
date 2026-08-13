@@ -1,7 +1,7 @@
 import { useQueue } from "@/store/hooks/useQueue";
 import { useSettings } from "@/store/hooks/useSettings";
 import { useEffect, useRef } from "react";
-import { useAudioPlayback, useBackupSync, usePrefetchSync } from "@/features/audio/useAudioEngine";
+import { useAudioMain, useAudioPlayback, useBackupSync, usePrefetchSync } from "@/features/audio/useAudioEngine";
 
 import { audioEngine } from "@/features/audio/audioEngine";
 import { getTrackDisplayMetadata } from "@/track/track.utils";
@@ -79,13 +79,14 @@ export const AudioLogic = () => {
 
 
     const { isPaused } = useAudioPlayback(); //hook into playstate
+    const { isMain } = useAudioMain(); //hook into main or not
 
     //mediaSession
     useEffect(() => {
         if (!("mediaSession" in navigator) || !currentTrack) return;
 
         //completely strip mediaSession
-        if (!audioEngine.isMain) {
+        if (!isMain) {
             navigator.mediaSession.metadata = null;
             navigator.mediaSession.playbackState = "none";
             navigator.mediaSession.setActionHandler("nexttrack", null);
@@ -150,7 +151,7 @@ export const AudioLogic = () => {
             navigator.mediaSession.setActionHandler("play", null);
             navigator.mediaSession.setActionHandler("pause", null);
         };
-    }, [currentTrack, nextTrack, isPaused, audioEngine.isMain]); //trigger whenever currentTrack or play state changes
+    }, [currentTrack, nextTrack, isPaused, isMain]); //trigger whenever currentTrack or play state changes
 
     return null;
 };

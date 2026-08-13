@@ -6,20 +6,42 @@ export interface AudioStatus {
     ended: boolean;
 }
 
-export type AudioEventMap = {
+
+// Types for lower-level events scoped to AudioStrategy
+export type AudioStrategyEventMap = {
     play: boolean;
     pause: boolean;
     timeupdate: number;
     durationchange: number;
     ended: void;
 };
-export type AudioEvent = keyof AudioEventMap;
+export type AudioStrategyEvent = keyof AudioStrategyEventMap;
 
-export type AudioCallback<K extends AudioEvent> = (data: AudioEventMap[K]) => void; //generic callback type
+export type AudioStrategyCallback<K extends AudioStrategyEvent> = (data: AudioStrategyEventMap[K]) => void; //generic callback type
 
-export type AudioEventListeners = {
-    [K in AudioEvent]: Set<AudioCallback<K>>;
+export type AudioStrategyEventListeners = {
+    [K in AudioStrategyEvent]: Set<AudioStrategyCallback<K>>;
 };
+
+
+// Types for events scoped to the AudioEngine
+export type EngineOnlyEventMap = {
+    mainchange: boolean;
+};
+export type EngineOnlyEvent = keyof EngineOnlyEventMap;
+
+export type EngineOnlyCallback<K extends EngineOnlyEvent> = (data: EngineOnlyEventMap[K]) => void;
+
+export type EngineOnlyEventListeners = {
+    [K in EngineOnlyEvent]: Set<EngineOnlyCallback<K>>;
+};
+
+
+// Unified types
+export type AudioEngineEventMap = AudioStrategyEventMap & EngineOnlyEventMap;
+export type AudioEngineEvent = keyof AudioEngineEventMap;
+
+export type AudioEngineCallback<K extends AudioEngineEvent> = (data: AudioEngineEventMap[K]) => void;
 
 
 export interface AudioStrategy {
@@ -28,11 +50,11 @@ export interface AudioStrategy {
 
     /**
      * Registers a listener for a specific audio event. Use for granular updates per event
-     * @param event - The specific AudioEvent to listen for
+     * @param event - The specific AudioStrategyEvent to listen for
      * @param callback - Function receiving event-specific data to trigger
      * @returns An unsubscribe function to clean up the effect
      */
-    on<K extends AudioEvent>(event: K, callback: AudioCallback<K>): () => void;
+    on<K extends AudioStrategyEvent>(event: K, callback: AudioStrategyCallback<K>): () => void;
 
     /**
      * Returns the ID of the track currently loaded in the media element.
@@ -94,10 +116,10 @@ export interface AudioStrategy {
 export interface IAudioEngine {
     /**
      * Registers a listener for a specific audio event. Use for granular updates per event
-     * @param event - The specific AudioEvent to listen for
+     * @param event - The specific AudioStrategyEvent to listen for
      * @param callback - Function receiving event-specific data to trigger
      */
-    on<K extends AudioEvent>(event: K, callback: AudioCallback<K>): () => void;
+    on<K extends AudioEngineEvent>(event: K, callback: AudioEngineCallback<K>): () => void;
 
     /**
      * Loads and plays a specific track
@@ -143,6 +165,16 @@ export interface IAudioEngine {
      * Behavior: delete all audio stuff and set to blank.
      */
     clear(): void;
+
+    /**
+     * @returns Internal isMain field for whether to allow audio or not.
+     */
+    getMain(): boolean;
+
+    /**
+     * Sets the internal isMain flag and emits new value.
+     */
+    setMain(value: boolean): void;
 }
 
 //interfaces for functions within IAudioEngine

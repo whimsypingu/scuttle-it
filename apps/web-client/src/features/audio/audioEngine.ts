@@ -1,6 +1,6 @@
 import { scuttleFetch } from "@/lib/utils";
 
-import type { AudioCallback, AudioEvent, AudioStrategy, FlushListenDurationPayload, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions } from "@/features/audio/audio.types";
+import type { AudioStrategyCallback, AudioStrategyEvent, AudioStrategy, FlushListenDurationPayload, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions, AudioEngineCallback, AudioEngineEvent, EngineOnlyEventListeners, EngineOnlyEvent, EngineOnlyEventMap } from "@/features/audio/audio.types";
 
 
 class AudioEngine implements IAudioEngine  {
@@ -13,8 +13,12 @@ class AudioEngine implements IAudioEngine  {
     private previousTime = 0; //delta tracking helper variable
 
     public setQueueFlag = false; //flag for autoplaying queue swap behavior
-    public isMain = true; //flag for whether audio should even play or not on this device
     
+    private isMain = true; //flag for whether audio should even play or not on this device
+    private listeners: EngineOnlyEventListeners = {
+        mainchange: new Set(),
+    };
+
     private constructor() { null }
 
     //dynamic import the strategy to prevent downloading extra logic
@@ -47,14 +51,14 @@ class AudioEngine implements IAudioEngine  {
 
     //track listening stats
     private setupListenStats() {
-        this.strategy.on("play" as AudioEvent, (callback: any) => {
+        this.strategy.on("play" as AudioStrategyEvent, () => {
             if (this.currentTrackId !== this.strategy.getCurrentTrackId()) {
                 this.flushListenDuration(this.currentTrackId, this.listenDuration); //fire and forget
             }
             this.currentTrackId = this.strategy.getCurrentTrackId();
         });
 
-        this.strategy.on("timeupdate" as AudioEvent, (callback: any) => {
+        this.strategy.on("timeupdate" as AudioStrategyEvent, () => {
             const currentTime = this.strategy.getCurrentTime();
             const delta = currentTime - this.previousTime;
 
@@ -69,11 +73,11 @@ class AudioEngine implements IAudioEngine  {
             }
         });
 
-        this.strategy.on("pause" as AudioEvent, () => {
+        this.strategy.on("pause" as AudioStrategyEvent, () => {
             this.flushListenDuration(this.currentTrackId, this.listenDuration);
         });
 
-        this.strategy.on("ended" as AudioEvent, () => {
+        this.strategy.on("ended" as AudioStrategyEvent, () => {
             this.flushListenDuration(this.currentTrackId, this.listenDuration);
         });
     } 
@@ -105,8 +109,24 @@ class AudioEngine implements IAudioEngine  {
         }
     }
 
-    public on<K extends AudioEvent>(event: K, callback: AudioCallback<K>) {
-        return this.strategy.on(event, callback);
+
+    //internal engine-events-only emitter
+    private emit<K extends EngineOnlyEvent>(event: K, data: EngineOnlyEventMap[K]) {
+        const eventSet = this.listeners[event];
+        if (eventSet) {
+            eventSet.forEach((callback) => callback(data));
+        }
+    }
+
+    public on<K extends AudioEngineEvent>(event: K, callback: AudioEngineCallback<K>) {
+        //engine scoped events
+        if (event in this.listeners) {
+            this.listeners[event as EngineOnlyEvent].add(callback as any);
+            return () => this.listeners[event as EngineOnlyEvent].delete(callback as any);
+        }
+
+        //fallback to strategy
+        return this.strategy.on(event as AudioStrategyEvent, callback as AudioStrategyCallback<AudioStrategyEvent>);
     }
 
     public async playTrack({ trackId, forceRestart = false }: PlayTrackOptions) {
@@ -135,6 +155,12 @@ class AudioEngine implements IAudioEngine  {
 
     //very forgiving function that attempts to play or pause depending on state, and uses best effort for trackId
     public async playPauseTrack({ trackId }: PlayPauseTrackOptions) {
+        if (!this.isMain) {
+            console.log(`%c[Scuttle Metrics] ID: ${trackId}`, 'color: #3b82f6; font-weight: bold');
+            console.log(`  └─ Ignoring Play: isMain`);
+            return;
+        }
+
         const targetId = trackId ?? this.strategy.getCurrentTrackId();
 
         if (this.strategy.isPaused()) {
@@ -177,6 +203,17 @@ class AudioEngine implements IAudioEngine  {
 
     public clear() {
         this.strategy.clear();
+    }
+
+    public getMain() {
+        return this.isMain;
+    }
+
+    public setMain(value: boolean) {
+        if (this.isMain !== value) {
+            this.isMain = value;
+            this.emit("mainchange", this.isMain); //emitter
+        }
     }
 }
 

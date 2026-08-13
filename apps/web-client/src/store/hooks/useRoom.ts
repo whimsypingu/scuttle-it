@@ -28,7 +28,7 @@ export const useRoom = () => {
 
         queryClient.setQueryData(queryKey, data.roomId); //set the active room id in tanstack cache
         audioEngine.clear();
-        audioEngine.isMain = data.isMain;
+        audioEngine.setMain(data.isMain);
         queryClient.refetchQueries({ queryKey: ["tracks", "play_queue" ] }); //reset audio and queue state
 
         //clean up url state without forcing a full page reload

@@ -1,4 +1,4 @@
-import type { AudioCallback, AudioEvent, AudioEventListeners, AudioEventMap, AudioStrategy } from "@/features/audio/audio.types";
+import type { AudioStrategyCallback, AudioStrategyEvent, AudioStrategyEventListeners, AudioStrategyEventMap, AudioStrategy } from "@/features/audio/audio.types";
 
 
 /**
@@ -15,7 +15,7 @@ export class IOSStrategy implements AudioStrategy {
     readonly strategy = "ios-stream";
 
     private static instance: IOSStrategy
-    private listeners: AudioEventListeners = {
+    private listeners: AudioStrategyEventListeners = {
         play: new Set(),
         pause: new Set(),
         timeupdate: new Set(),
@@ -39,7 +39,7 @@ export class IOSStrategy implements AudioStrategy {
     }
 
     //binds the audio events to the hidden track element which is provided as an 'el' field
-    private bindAudioEvents(el: HTMLAudioElement) {
+    private bindAudioStrategyEvents(el: HTMLAudioElement) {
         el.onplay = () => {
             console.log("[IOSStrategy] play");
             this.emit("play", false); //isPaused = false
@@ -166,7 +166,7 @@ export class IOSStrategy implements AudioStrategy {
     }
 
     //hook the set of functions to call on the actual audio element
-    private emit<K extends AudioEvent>(event: K, data: AudioEventMap[K]) {
+    private emit<K extends AudioStrategyEvent>(event: K, data: AudioStrategyEventMap[K]) {
         const eventSet = this.listeners[event];
         if (eventSet) {
             eventSet.forEach((callback) => callback(data));
@@ -174,7 +174,7 @@ export class IOSStrategy implements AudioStrategy {
     }
 
     //subscription to an event with the function to call
-    public on<K extends AudioEvent>(event: K, callback: AudioCallback<K>) {
+    public on<K extends AudioStrategyEvent>(event: K, callback: AudioStrategyCallback<K>) {
         this.listeners[event].add(callback);
         return () => this.listeners[event].delete(callback);
     }
@@ -218,7 +218,7 @@ export class IOSStrategy implements AudioStrategy {
         this.internalEl = internalAudio;
 
         //bind internal events to the public emitters
-        this.bindAudioEvents(internalAudio);
+        this.bindAudioStrategyEvents(internalAudio);
 
         /**
          * Re-wire:
