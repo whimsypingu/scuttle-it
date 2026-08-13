@@ -49,7 +49,7 @@ class RoomManager:
 
         #create the room in mem if it doesnt exist yet
         if room_id not in self.rooms:
-            self.rooms[room_id] = Room(id=room_id)
+            self.rooms[room_id] = Room(id=room_id) #potentially require a validation check with db?
 
         #add/touch the device
         device = self.rooms[room_id].add_or_touch_device(device_id)
