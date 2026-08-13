@@ -1,23 +1,18 @@
 import time
 
-from fastapi import Depends, Header, Request, WebSocket
+from fastapi import Depends, Header, Request
 from fastapi.requests import HTTPConnection
 
 from config import settings
 from database.database_manager import DatabaseManager
-# from sync.websocket_manager import WebsocketManager
 from core.download.download_queue import DownloadQueue
 from core.room.room_manager import RoomManager
 from core.stats.stats_manager import StatsManager
 from core.models.room import DeviceContext
 
 # Dependencies to get from the server lifespan as defined in /main.py
-
 def get_db_manager(request: Request) -> DatabaseManager:
     return request.app.state.db_manager
-
-# def get_ws_manager(websocket: WebSocket) -> WebsocketManager:
-#     return websocket.app.state.ws_manager
 
 def get_room_manager(connection: HTTPConnection) -> RoomManager:
     return connection.app.state.room_manager
@@ -30,7 +25,6 @@ def get_dl_queue(request: Request) -> DownloadQueue:
 
 
 # handles device context extraction
-
 def get_device_context(
     device_id: str = Header("DEFAULT_DEVICE_ID", alias="Scuttle-Device-Id"),
     room_id: str = Header(settings.DEFAULT_ROOM_ID, alias="Scuttle-Room-Id")

@@ -12,7 +12,6 @@ from core.audio.processor import AudioProcessor
 from database.database_manager import DatabaseManager
 
 from sync.pokes import WSPokeFactory
-# from sync.websocket_manager import WebsocketManager
 from core.room.room_manager import RoomManager
 
 from core.download.exceptions import DownloadWorkerJobExpanded, DownloadWorkerJobError
@@ -29,7 +28,6 @@ class DownloadWorker:
         audio_processor: AudioProcessor,
         yt_client: YouTubeClient,
         db_manager: DatabaseManager,
-        # ws_manager: WebsocketManager,
         room_manager: RoomManager,
         stats_manager: StatsManager,
         link_adapter: LinkAdapter
@@ -40,7 +38,6 @@ class DownloadWorker:
         self.audio_processor = audio_processor
         self.yt_client = yt_client
         self.db_manager = db_manager
-        # self.ws_manager = ws_manager
         self.room_manager = room_manager
         self.stats_manager = stats_manager
         self.link_adapter = link_adapter

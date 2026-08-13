@@ -1,8 +1,7 @@
 import traceback
 
 from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect
-from api.dependencies import get_room_manager #, get_ws_manager
-# from sync.websocket_manager import WebsocketManager
+from api.dependencies import get_room_manager
 from core.room.room_manager import RoomManager
 
 WebsocketRouter = APIRouter(prefix="/websocket", tags=["Websocket"])
@@ -12,7 +11,6 @@ async def websocket_endpoint(
     ws: WebSocket,
     room_id: str = Query(..., min_length=1, max_length=4, alias="roomId"),
     device_id: str = Query(..., alias="deviceId"),
-    # ws_manager: WebsocketManager = Depends(get_ws_manager)
     room_manager: RoomManager = Depends(get_room_manager)
 ):
     """
@@ -37,14 +35,3 @@ async def websocket_endpoint(
             room_id=room_id,
             device_id=device_id
         )
-
-    # ws_manager.connect(ws)
-    # try: 
-    #     while True:
-    #         # Just keep connection alive, do not expect messages from client
-    #         await ws.receive_text() #just ws.receive() writes a ton of error logs and raises a RuntimeError trying to receive after a disconnect
-    # except WebSocketDisconnect:
-    #     pass
-    # finally:
-    #     ws_manager.disconnect(ws) 
-
