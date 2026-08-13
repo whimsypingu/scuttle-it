@@ -47,7 +47,7 @@ async def set_room_active(
         last_active_ts = int(time.time())
         await room_manager.update_last_active(ctx.room_id, last_active_ts)
 
-async def room_queue_update(
+async def queue_update_room_broadcast(
     ctx: DeviceContext = Depends(get_device_context),
     room_manager: RoomManager = Depends(get_room_manager)
 ):
@@ -57,4 +57,15 @@ async def room_queue_update(
     await room_manager.broadcast_room(
         ctx.room_id, 
         WSPokeFactory.queue_update()
+    )
+
+
+#updates app-wide activity
+async def track_update_all_broadcast(
+    room_manager: RoomManager = Depends(get_room_manager)
+):
+    yield
+
+    await room_manager.broadcast_all(
+        WSPokeFactory.track_update()
     )

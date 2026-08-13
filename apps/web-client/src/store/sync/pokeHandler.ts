@@ -35,8 +35,12 @@ export function handleWSPoke(poke: WSPoke): void {
             });
             break;
 
+        case WS_POKE_TYPES.TRACK_UPDATE:
+            queryClient.refetchQueries({ queryKey: ["tracks"] }) //track edits and deletions
+            break;
+
         case WS_POKE_TYPES.QUEUE_UPDATE:
-            queryClient.refetchQueries({ queryKey: ["tracks", "play_queue"] });
+            queryClient.refetchQueries({ queryKey: ["tracks", "play_queue"] }); //room-specific scoped changes
             break;
 
         default:

@@ -2,7 +2,7 @@ import traceback
 
 from fastapi import APIRouter, Body, Depends, Path, Query, HTTPException
 
-from api.dependencies import get_db_manager, get_device_context, get_dl_queue, room_queue_update, set_room_active
+from api.dependencies import get_db_manager, get_device_context, get_dl_queue, queue_update_room_broadcast, set_room_active
 from database.database_manager import DatabaseManager
 from core.download.download_queue import DownloadQueue
 from core.models.jobs import DownloadJob
@@ -20,7 +20,7 @@ DefaultCrashException = HTTPException(
 )
 
 
-@QueueRouter.post("/set-first", response_model=SetFirstQueueResponse, dependencies=[Depends(room_queue_update)])
+@QueueRouter.post("/set-first", response_model=SetFirstQueueResponse, dependencies=[Depends(queue_update_room_broadcast)])
 async def set_first_play_queue(
     device_ctx: DeviceContext = Depends(get_device_context),
     track_id: str = Query(..., min_length=1, description="Track ID to set first"),
@@ -50,7 +50,7 @@ async def set_first_play_queue(
         raise DefaultCrashException
 
 
-@QueueRouter.patch("/reorder", dependencies=[Depends(room_queue_update)])
+@QueueRouter.patch("/reorder", dependencies=[Depends(queue_update_room_broadcast)])
 async def reorder_queue(
     device_ctx: DeviceContext = Depends(get_device_context),
     payload: ReorderQueuePayload = Body(...), #automatically parse JSON body into pydantic model
@@ -68,7 +68,7 @@ async def reorder_queue(
         raise DefaultCrashException
 
 
-@QueueRouter.post("/push", response_model=PushQueueResponse, dependencies=[Depends(room_queue_update)])
+@QueueRouter.post("/push", response_model=PushQueueResponse, dependencies=[Depends(queue_update_room_broadcast)])
 async def push_play_queue(
     device_ctx: DeviceContext = Depends(get_device_context),
     track_id: str = Query(..., min_length=1, description="Track ID to push"),
@@ -98,7 +98,7 @@ async def push_play_queue(
         raise DefaultCrashException
     
 
-@QueueRouter.post("/push-next", response_model=PushNextQueueResponse, dependencies=[Depends(room_queue_update)])
+@QueueRouter.post("/push-next", response_model=PushNextQueueResponse, dependencies=[Depends(queue_update_room_broadcast)])
 async def push_next_play_queue(
     device_ctx: DeviceContext = Depends(get_device_context),
     track_id: str = Query(..., min_length=1, description="Track ID to push next"),
@@ -128,7 +128,7 @@ async def push_next_play_queue(
         raise DefaultCrashException
 
 
-@QueueRouter.post("/pop", response_model=PopQueueResponse, dependencies=[Depends(room_queue_update)])
+@QueueRouter.post("/pop", response_model=PopQueueResponse, dependencies=[Depends(queue_update_room_broadcast)])
 async def pop_play_queue(
     device_ctx: DeviceContext = Depends(get_device_context),
     queue_id: int = Query(..., description="Unique instance ID of the queued track to pop"),
@@ -146,7 +146,7 @@ async def pop_play_queue(
         raise DefaultCrashException
     
 
-@QueueRouter.post("/shuffle", response_model=ShuffleQueueResponse, dependencies=[Depends(room_queue_update)])
+@QueueRouter.post("/shuffle", response_model=ShuffleQueueResponse, dependencies=[Depends(queue_update_room_broadcast)])
 async def shuffle_play_queue(
     device_ctx: DeviceContext = Depends(get_device_context),
     db_manager: DatabaseManager = Depends(get_db_manager)
@@ -163,7 +163,7 @@ async def shuffle_play_queue(
         raise DefaultCrashException
 
 
-@QueueRouter.post("/set-all/playlist/{playlist_id}", response_model=SetAllQueueResponse, dependencies=[Depends(room_queue_update)])
+@QueueRouter.post("/set-all/playlist/{playlist_id}", response_model=SetAllQueueResponse, dependencies=[Depends(queue_update_room_broadcast)])
 async def set_all_play_queue(
     device_ctx: DeviceContext = Depends(get_device_context),
     playlist_id: str = Path(..., min_length=1, description="Playlist ID"),
@@ -193,7 +193,7 @@ async def set_all_play_queue(
         raise DefaultCrashException
     
 
-@QueueRouter.post("/clear", response_model=QueueResponse, dependencies=[Depends(room_queue_update)])
+@QueueRouter.post("/clear", response_model=QueueResponse, dependencies=[Depends(queue_update_room_broadcast)])
 async def clear_play_queue_endpoint(
     device_ctx: DeviceContext = Depends(get_device_context),
     db_manager: DatabaseManager = Depends(get_db_manager)
