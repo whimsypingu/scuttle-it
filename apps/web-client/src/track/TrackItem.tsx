@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, useMotionValue, useMotionValueEvent, useTransform } from 'framer-motion';
 import { useQueue } from '@/store/hooks/useQueue';
+import { useAudioMain } from '@/features/audio/useAudioEngine';
 
 import { MusicNoteIcon, ShoppingBagIcon } from '@phosphor-icons/react';
 
@@ -99,12 +100,13 @@ export const TrackItem = ({
 
 	/* TAP ACTION HANDLING */
 	const { queue } = useQueue(); //get the latest queue from tanstack
+	const { isMain } = useAudioMain();
 
 	const currentTrack = queue[0];
 	const isActive = currentTrack?.id === track.id;
 
     const handleTap = async () => {
-        if (isDragging) return; //cancel taps on drags
+        if (isDragging || !isMain) return; //cancel taps on drags, or if its not an allowed action
 
 		try {
 			//wrapper for actionHandler, see models.utils.ts for implementation
