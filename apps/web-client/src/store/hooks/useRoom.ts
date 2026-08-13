@@ -39,6 +39,10 @@ export const useRoom = () => {
             document.title, 
             newUrl.pathname + newUrl.search + newUrl.hash
         );
+
+        //reconnect websocket connection
+        const deviceId = await getOrCreateDeviceId();
+        getWebSocket(roomId, deviceId);
     };
 
     //request a new room
@@ -55,10 +59,6 @@ export const useRoom = () => {
         onSuccess: async (data) => {
             await handleRoomChange(data.roomId);
             makeToast("New Room: ", data.roomId);
-
-            //reconnect websocket connection
-            const deviceId = await getOrCreateDeviceId();
-            getWebSocket(data.roomId, deviceId);
         }
     });
 
@@ -78,10 +78,6 @@ export const useRoom = () => {
         onSuccess: async (roomId) => {
             await handleRoomChange(roomId);
             makeToast("Joined Room: ", roomId);
-
-            //reconnect websocket connection
-            const deviceId = await getOrCreateDeviceId();
-            getWebSocket(roomId, deviceId);
         }
     });
 
