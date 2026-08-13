@@ -4,7 +4,7 @@ import { useQueue } from "@/store/hooks/useQueue";
 
 import { PlayIcon, PauseIcon, WaveformIcon } from "@phosphor-icons/react";
 
-import { MiniSlider } from "@/components/ui/mini-slider";
+import { MiniShimmer, MiniSlider } from "@/components/ui/mini-slider";
 
 import { audioEngine } from "@/features/audio/audioEngine";
 
@@ -96,16 +96,11 @@ export const MiniViewSlider = () => {
 };
 
 
-export const MiniViewShimmerer = () => {
+export const MiniViewShimmer = () => {
     return (
         <>
         {/* SHIMMER SWEEP */}
-        <div 
-            className="relative h-1.5 w-full overflow-hidden rounded-full bg-slate-800/60" 
-            onClick={(e) => e.stopPropagation()}
-        >
-            <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
-        </div>
+        <MiniShimmer />
         </>
     );
 };

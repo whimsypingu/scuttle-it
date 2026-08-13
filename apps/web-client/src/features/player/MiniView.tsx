@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 
 import { useQueue } from '@/store/hooks/useQueue';
 
-import { MiniViewListenModeButton, MiniViewPlayPauseButton, MiniViewShimmerer, MiniViewSlider } from '@/features/player/subcomponents/MiniViewControls';
+import { MiniViewListenModeButton, MiniViewPlayPauseButton, MiniViewShimmer, MiniViewSlider } from '@/features/player/subcomponents/MiniViewControls';
 import { getTrackDisplayMetadata } from '@/track/track.utils';
 
 import type { MiniViewProps } from '@/features/player/player.types';
@@ -84,7 +84,7 @@ export const MiniView = ({ onExpand }: MiniViewProps) => {
             {isMain ? (
                 <MiniViewSlider />
             ) : (
-                <MiniViewShimmerer />
+                <MiniViewShimmer />
             )}
         </motion.div>
         </>
