@@ -35,8 +35,9 @@ class RoomManager:
     def device_active(self, room_id: str, device_id: str) -> Device:
         """Given a room_id and device_id 'touch' the device to note it is active"""
         #change room mapping if necessary
-        last_room_id = self.device_to_room[device_id]
-        if last_room_id != room_id:
+        last_room_id = self.device_to_room.get(device_id)
+
+        if last_room_id and last_room_id != room_id:
             old_room = self.rooms.get(last_room_id)
 
             if old_room:
@@ -101,6 +102,8 @@ class RoomManager:
         """Sends a JSON message to every active WebSocket across all rooms"""
         for room_id in self.room.keys():
             await self.broadcast_room(room_id, message)
+
+        logger.info(f"RoomManager broadcasting to all clients: {message}")
 
 
 

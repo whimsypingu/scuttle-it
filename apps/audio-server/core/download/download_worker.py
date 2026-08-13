@@ -12,7 +12,8 @@ from core.audio.processor import AudioProcessor
 from database.database_manager import DatabaseManager
 
 from sync.pokes import WSPokeFactory
-from sync.websocket_manager import WebsocketManager
+# from sync.websocket_manager import WebsocketManager
+from core.room.room_manager import RoomManager
 
 from core.download.exceptions import DownloadWorkerJobExpanded, DownloadWorkerJobError
 from core.youtube.exceptions import YtdlpDownloadError, YtdlpTimeoutError
@@ -28,7 +29,8 @@ class DownloadWorker:
         audio_processor: AudioProcessor,
         yt_client: YouTubeClient,
         db_manager: DatabaseManager,
-        ws_manager: WebsocketManager,
+        # ws_manager: WebsocketManager,
+        room_manager: RoomManager,
         stats_manager: StatsManager,
         link_adapter: LinkAdapter
     ):
@@ -38,7 +40,8 @@ class DownloadWorker:
         self.audio_processor = audio_processor
         self.yt_client = yt_client
         self.db_manager = db_manager
-        self.ws_manager = ws_manager
+        # self.ws_manager = ws_manager
+        self.room_manager = room_manager
         self.stats_manager = stats_manager
         self.link_adapter = link_adapter
 
@@ -55,7 +58,7 @@ class DownloadWorker:
                 self.current_job = job
                 
                 #poke the frontend with update status
-                await self.ws_manager.broadcast(
+                await self.room_manager.broadcast_all(
                     WSPokeFactory.download_job_status_update(job)
                 )
                 logger.info(f"[{self.worker_id}] Processing: {job.identifier}")
@@ -163,7 +166,7 @@ class DownloadWorker:
                 await self.dl_queue.complete_job(job.id, success=True)
 
                 #poke the frontend with update status
-                await self.ws_manager.broadcast(
+                await self.room_manager.broadcast_all(
                     WSPokeFactory.download_job_status_update(job)
                 )
                 logger.info(f"[{self.worker_id}] Successfully finished {job.identifier}")
@@ -171,7 +174,7 @@ class DownloadWorker:
             #playlist caught, expanded into new download jobs per song
             except DownloadWorkerJobExpanded as e:
                 await self.dl_queue.complete_job(job.id, success=True)
-                await self.ws_manager.broadcast(
+                await self.room_manager.broadcast_all(
                     WSPokeFactory.download_job_status_update(job)
                 )
                 logger.info(f"[{self.worker_id}] Successfully expanded jobs from {job.identifier}")
@@ -179,7 +182,7 @@ class DownloadWorker:
             #fall through error
             except Exception as e:
                 await self.dl_queue.complete_job(job.id, success=False)
-                await self.ws_manager.broadcast(
+                await self.room_manager.broadcast_all(
                     WSPokeFactory.download_job_status_update(job)
                 )
                 logger.error(f"[{self.worker_id}] Error: {str(e)}")

@@ -84,7 +84,6 @@ ON playlist_tracks (playlist_internal_id, position, track_internal_id);
 
 
 -- rooms
-DROP TABLE sessions;
 CREATE TABLE IF NOT EXISTS rooms (
     internal_id INTEGER PRIMARY KEY AUTOINCREMENT,
     id TEXT UNIQUE,
@@ -94,7 +93,6 @@ CREATE TABLE IF NOT EXISTS rooms (
 
 
 -- play queue
-DROP TABLE play_queue;
 CREATE TABLE IF NOT EXISTS play_queue (
     queue_id INTEGER PRIMARY KEY, --used for state management
     room_internal_id INTEGER NOT NULL, --room separator for multiple queues

@@ -1,6 +1,6 @@
 import time
 
-from pydantic import Field
+from pydantic import ConfigDict, Field
 from fastapi import WebSocket
 
 from core.models.base import ScuttleBase
@@ -20,13 +20,17 @@ class Device(ScuttleBase):
     last_seen: int = Field(default_factory=_current_timestamp_int)
     websocket: WebSocket | None = Field(default=None, exclude=True) #remove from json
 
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True
+    )
+
     def touch(self) -> None:
         self.last_seen = _current_timestamp_int()
 
 class Room(ScuttleBase):
     internal_id: int | None = None #not in use
     id: str
-    devices: dict[str, Device]
+    devices: dict[str, Device] = Field(default_factory=dict)
 
     def add_or_touch_device(self, device_id: str) -> Device:
         #touchup

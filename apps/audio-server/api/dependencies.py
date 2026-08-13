@@ -1,10 +1,11 @@
 import time
 
 from fastapi import Depends, Header, Request, WebSocket
+from fastapi.requests import HTTPConnection
 
 from config import settings
 from database.database_manager import DatabaseManager
-from sync.websocket_manager import WebsocketManager
+# from sync.websocket_manager import WebsocketManager
 from core.download.download_queue import DownloadQueue
 from core.room.room_manager import RoomManager
 from core.stats.stats_manager import StatsManager
@@ -15,8 +16,11 @@ from core.models.room import DeviceContext
 def get_db_manager(request: Request) -> DatabaseManager:
     return request.app.state.db_manager
 
-def get_ws_manager(websocket: WebSocket) -> WebsocketManager:
-    return websocket.app.state.ws_manager
+# def get_ws_manager(websocket: WebSocket) -> WebsocketManager:
+#     return websocket.app.state.ws_manager
+
+def get_room_manager(connection: HTTPConnection) -> RoomManager:
+    return connection.app.state.room_manager
 
 def get_stats_manager(request: Request) -> StatsManager:
     return request.app.state.stats_manager
