@@ -56,9 +56,9 @@ export const SyncLogic = () => {
         const startSync = async () => {
             await initRoom();
 
+            //this happens within initRoom -> createRoom/joinRoom
             const roomId = await getOrDefaultRoomId();
             const deviceId = await getOrCreateDeviceId();
-
             getWebSocket(roomId, deviceId);
         };
 

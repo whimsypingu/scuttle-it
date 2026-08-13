@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { makeToast } from "@/features/toast/Toast";
 import { audioEngine } from "@/features/audio/audioEngine";
-import { getOrDefaultRoomId, setRoomId, scuttleFetch } from "@/lib/utils";
+import { getOrDefaultRoomId, setRoomId, scuttleFetch, getOrCreateDeviceId } from "@/lib/utils";
+import { getWebSocket } from "@/store/sync/websocket";
 
 import type { CreateRoomResponse } from "@/store/hooks/hooks.responses";
 
@@ -54,6 +55,10 @@ export const useRoom = () => {
         onSuccess: async (data) => {
             await handleRoomChange(data.roomId);
             makeToast("New Room: ", data.roomId);
+
+            //reconnect websocket connection
+            const deviceId = await getOrCreateDeviceId();
+            getWebSocket(data.roomId, deviceId);
         }
     });
 
@@ -73,6 +78,10 @@ export const useRoom = () => {
         onSuccess: async (roomId) => {
             await handleRoomChange(roomId);
             makeToast("Joined Room: ", roomId);
+
+            //reconnect websocket connection
+            const deviceId = await getOrCreateDeviceId();
+            getWebSocket(roomId, deviceId);
         }
     });
 
