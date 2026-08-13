@@ -56,7 +56,8 @@ async def queue_update_room_broadcast(
     #run this after the endpoint finishes
     await room_manager.broadcast_room(
         ctx.room_id, 
-        WSPokeFactory.queue_update()
+        WSPokeFactory.queue_update(),
+        [ctx.device_id]
     )
 
 

@@ -76,16 +76,28 @@ class RoomManager:
 
             logger.info(f"Device '{device_id}' detached WebSocket in room '{room_id}'.")
 
-    async def broadcast_room(self, room_id: str, message: dict[str, Any]) -> None:
+
+    async def broadcast_room(
+        self, 
+        room_id: str, 
+        message: dict[str, Any], 
+        exclude: list[str] | None = None
+    ) -> None:
         """Sends a JSON message to active WebSockets in a room"""
         room = self.rooms.get(room_id)
         if not room:
             return
 
+        exclude_device_ids = exclude or []
         failed_device_ids: list[str] = []
+
         for device_id, device in room.devices.items():
             #skip over nonexistent websockets
             if not device.websocket:
+                continue
+
+            #skip excluded device_ids
+            if device_id in exclude_device_ids:
                 continue
 
             try:
@@ -97,11 +109,17 @@ class RoomManager:
         for failed_device_id in failed_device_ids:
             self.disconnect_websocket(room_id, failed_device_id)
 
+        logger.info(f"RoomManager broadcasting to room {room_id}: {message}")
 
-    async def broadcast_all(self, message: dict[str, Any]) -> None:
+
+    async def broadcast_all(
+        self, 
+        message: dict[str, Any], 
+        exclude: list[str] | None = None
+    ) -> None:
         """Sends a JSON message to every active WebSocket across all rooms"""
-        for room_id in self.room.keys():
-            await self.broadcast_room(room_id, message)
+        for room_id in self.rooms.keys():
+            await self.broadcast_room(room_id, message, exclude)
 
         logger.info(f"RoomManager broadcasting to all clients: {message}")
 
