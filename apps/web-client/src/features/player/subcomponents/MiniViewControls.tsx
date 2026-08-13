@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { useAudioPlayback, useAudioTime } from "@/features/audio/useAudioEngine";
+import React, { useEffect, useState } from "react";
+import { useAudioMain, useAudioPlayback, useAudioTime } from "@/features/audio/useAudioEngine";
 import { useQueue } from "@/store/hooks/useQueue";
 
-import { PlayIcon, PauseIcon } from "@phosphor-icons/react";
+import { PlayIcon, PauseIcon, WaveformIcon } from "@phosphor-icons/react";
 
 import { MiniSlider } from "@/components/ui/mini-slider";
 
@@ -16,18 +16,26 @@ export const MiniViewPlayPauseButton = () => {
     const currentTrack = queue?.[0];
 
     const { isPaused } = useAudioPlayback();
+    const { isMain } = useAudioMain();
+
+    const handleClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+
+        if (isMain) {
+            audioEngine.playPauseTrack({ trackId: currentTrack?.id });
+        }
+    }
 
     return (
         <>
         {/* PLAY/PAUSE */}
         <button
             className="p-2 transition-transform active:scale-95"
-            onClick={(e) => {
-                e.stopPropagation();
-                audioEngine.playPauseTrack({ trackId: currentTrack?.id });
-            }}
+            onClick={handleClick}
         >
-            {isPaused ? (
+            {!isMain ? (
+                <WaveformIcon size={PLAYER_CONFIG.iconSize} />
+            ) : isPaused ? (
                 <PlayIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
             ) : (
                 <PauseIcon size={PLAYER_CONFIG.iconSize} weight="fill" />
@@ -67,16 +75,16 @@ export const MiniViewSlider = () => {
 
     return (
         <>
-        {/* SLIDER */}
-        <MiniSlider
-            value={[localValue]} 
-            max={duration} 
-            step={0.1}
-            onClick={(e) => e.stopPropagation()}
-            onValueChange={handleValueChange}
-            onValueCommit={handleValueCommit}
-            onPointerUp={handleValueCommit} //fallback for when swipe goes out of bounds
-        />
+            {/* SLIDER */}
+            <MiniSlider
+                value={[localValue]} 
+                max={duration} 
+                step={0.1}
+                onClick={(e) => e.stopPropagation()}
+                onValueChange={handleValueChange}
+                onValueCommit={handleValueCommit}
+                onPointerUp={handleValueCommit} //fallback for when swipe goes out of bounds
+            />
         </>
     );
 };
