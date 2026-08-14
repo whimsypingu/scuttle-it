@@ -2,6 +2,7 @@ import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-q
 import { useMemo, useState } from 'react';
 
 import { makeToast } from '@/features/toast/Toast';
+import { scuttleFetch } from '@/lib/utils';
 import { getTrackDisplayMetadata, trackBaseToPlaylistTrack } from '@/track/track.utils';
 
 import type { InfiniteData } from '@tanstack/react-query';
@@ -30,7 +31,7 @@ export const useLikesContent = (limit: number = 30) => {
         queryKey,
         initialPageParam: 0,
         queryFn: async ({ pageParam }) => {
-            const response = await fetch(`/retrieve/likes?offset=${pageParam}&limit=${limit}&sortmode=${sortmode}`, {
+            const response = await scuttleFetch(`/retrieve/likes?offset=${pageParam}&limit=${limit}&sortmode=${sortmode}`, {
                 method: "GET",
             });
             if (!response.ok) throw new Error("Failed to fetch likes");
@@ -77,7 +78,7 @@ export const useLikesMutations = () => {
     //set a track to liked or unliked state
     const setLikeMutation = useMutation({
         mutationFn: async ({ track, liked }: SetLikeMutationProps) => {
-            const response = await fetch(`/like/set?track_id=${track.id}&liked=${liked}`, {
+            const response = await scuttleFetch(`/like/set?track_id=${track.id}&liked=${liked}`, {
                 method: "POST",
             });
             if (!response.ok) throw new Error(`Failed to ${liked ? "like" : "unlike"}`);

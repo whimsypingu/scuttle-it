@@ -1,7 +1,7 @@
 import { useQueue } from "@/store/hooks/useQueue";
 import { useSettings } from "@/store/hooks/useSettings";
 import { useEffect, useRef } from "react";
-import { useAudioPlayback, useBackupSync, usePrefetchSync } from "@/features/audio/useAudioEngine";
+import { useAudioMain, useAudioPlayback, useBackupSync, usePrefetchSync } from "@/features/audio/useAudioEngine";
 
 import { audioEngine } from "@/features/audio/audioEngine";
 import { getTrackDisplayMetadata } from "@/track/track.utils";
@@ -9,6 +9,9 @@ import { getTrackDisplayMetadata } from "@/track/track.utils";
 export const AudioLogic = () => {
     useBackupSync(); //syncs to server backed queue a few seconds before a track ends to ensure data integrity. in the future we could add a flag for this
     usePrefetchSync();
+
+    const { isPaused } = useAudioPlayback(); //hook into playstate
+    const { isMain } = useAudioMain(); //hook into main or not
 
     const { queue, pop, reorder } = useQueue(); //get the latest queue from tanstack
     const { settings } = useSettings();
@@ -27,13 +30,6 @@ export const AudioLogic = () => {
         onEndedHandlerRef.current = () => {
             console.log(`%c[AudioLogic]%c Executing end logic for: ${currentTrack?.title}`, "color: #ff00ff;", "color: inherit;");
             
-            //check for an entire queue swap out, if it happened, then ignore pop and just set the audio to play the head of the queue when the previous audio naturally ends
-            if (audioEngine.setQueueFlag && currentTrack) {
-                audioEngine.setQueueFlag = false; //reset flag
-                audioEngine.playTrack({ trackId: currentTrack.id, forceRestart: true });
-                return; //exit early, do not pop or do any funny loop behavior
-            }
-
             switch (settings.loopmode) {
                 case 0: // No loop
                     pop({ 
@@ -78,11 +74,20 @@ export const AudioLogic = () => {
     }, []); //runs once and never again
 
 
-    const { isPaused } = useAudioPlayback(); //hook into playstate
-
     //mediaSession
     useEffect(() => {
         if (!("mediaSession" in navigator) || !currentTrack) return;
+
+        //completely strip mediaSession
+        if (!isMain) {
+            navigator.mediaSession.metadata = null;
+            navigator.mediaSession.playbackState = "none";
+            navigator.mediaSession.setActionHandler("nexttrack", null);
+            navigator.mediaSession.setActionHandler("previoustrack", null);
+            navigator.mediaSession.setActionHandler("play", null);
+            navigator.mediaSession.setActionHandler("pause", null);
+            return;
+        }
 
         //get and update mediaSession metadata
         const { 
@@ -139,7 +144,7 @@ export const AudioLogic = () => {
             navigator.mediaSession.setActionHandler("play", null);
             navigator.mediaSession.setActionHandler("pause", null);
         };
-    }, [currentTrack, nextTrack, isPaused]); //trigger whenever currentTrack or play state changes
+    }, [currentTrack, nextTrack, isPaused, isMain]); //trigger whenever currentTrack or play state changes
 
     return null;
 };

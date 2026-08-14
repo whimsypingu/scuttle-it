@@ -9,7 +9,8 @@ export type ActiveEditTarget =
     | { type: "createPlaylist"; data: null }
     | { type: "editPlaylist"; data: SummaryPlaylist }
     | { type: "clearQueue"; data: null }
-    | { type: "editProfile"; data: UserStats };
+    | { type: "editProfile"; data: UserStats }
+    | { type: "editRoom"; data: null };
     //add more things to edit later, like playlists
 export type EditableType = ActiveEditTarget["type"];
 

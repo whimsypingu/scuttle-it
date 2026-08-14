@@ -110,7 +110,7 @@ The only cost is electricity for self-hosting, and the resources for your comput
 
 * Swipe to queue a song to the front **or** the back of the queue.
 
-* Swipe on playlists (just like you would a track) to play them directly. 
+* Swipe on playlists (just like you would a track) to queue them (either custom order or shuffled).
 
 * Due to unavoidable download and processing time, first download/plays are immediately sent to the front of the queue when available and are **not** instantly streamable.
 
@@ -119,8 +119,33 @@ The only cost is electricity for self-hosting, and the resources for your comput
     <p><em>(6/11/26)</em></p>
 </div>
 
+
 ---
 
+### Rooms
+
+Create separate listening rooms or join existing rooms. Functionality will differ whether you are the main device or a secondary listener within a room, with many secondary device features being heavily limited (either due to technical limitations or design choices).
+
+| Feature | Description | Main | Secondary |
+| :--- | :--- | :---: | :---: |
+| Audio playback operations | Play, pause, skip, loop... | ✔ | ✘ |
+| Queue operations | Add, delete, reorder... | ✔ | ✔ |
+| Downloads | Search and download into the queue | ✔ | ✔ |
+
+<div align="center">
+    <img width="300" alt="scuttle_secondary_device" src="https://github.com/user-attachments/assets/1d9cf69f-e461-4293-afa9-58e1f2d8200a" />
+    <p><em>(8/14/26)</em></p>
+</div>
+
+Change the listening session by typing in a valid room code or scan the QR code. Scroll down to see a 'New Room' option and make a fresh individual listening session with an empty queue. Note that while the queues are separate across rooms, playlists, likes, and all standard app data structures as well as tracks are shared among all users. So if a download happens in Room A, it will be only be queued to Room A, but anyone in Room B will then be able to listen to the same track as well.
+
+<div align="center">
+    <img width="300" alt="scuttle_join_code_form" src="https://github.com/user-attachments/assets/95bbc67c-ca3c-41f2-ba2a-38971c6a6040" />
+    <p><em>(8/14/26)</em></p>
+</div>
+
+
+---
 
 ### Import playlists
 
@@ -176,11 +201,13 @@ Ensure you have `python` installed on your device. (You can test this by typing 
 ### Important external dependency disclaimer:
 The default Scuttle setup downloads some external binaries during installation. Here is a brief explanation of them:
 
-* **ffmpeg/ffprobe** - Extracting and modifying audio files.
+* **[FFmpeg](https://www.ffmpeg.org/) / [FFprobe](https://ffmpeg.org/ffprobe.html)** - Extracting and modifying audio files.
 
-* **deno** - JavaScript runtime engine to safely execute web scraper scripts (recommended for reliable yt-dlp usage).
+* **[Deno](https://deno.com/)** - JavaScript runtime engine to safely execute web scraper scripts (recommended for reliable yt-dlp usage).
 
-* **cloudflared** - Establishes free connection tunnel from your machine to the Cloudflare network, allowing you to access your Scuttle server from the internet without having to configure anything on your router.
+* **[cloudflared](https://github.com/cloudflare/cloudflared)** - Establishes free connection tunnel from your machine to the Cloudflare network, allowing you to access your Scuttle server from the internet without having to configure anything on your router.
+
+* **[qr-codes](https://github.com/whimsypingu/qr-codes)** - Generates custom QR codes.
 
 For other dependencies that will require an internet connection to set up, see the [requirements.txt](./apps/audio-server/requirements.txt) file for the audio server.
 
@@ -223,8 +250,8 @@ The most basic version of Scuttle is now functional. However, there are a number
 
 - [ ] Profile
     - [ ] Saved amount price comparisons to modern streaming platforms, and suggest users buy merch or concert tickets to their favorite artists.
-    - [ ] Allow multiple users to edit queue but listen on one device.
-    - [ ] Separate user sessions for the same server (although this is against the original intention of this project as a single user project).
+    - [x] Allow multiple users to edit queue but listen on one device.
+    - [x] Separate user sessions for the same server (although this is against the original intention of this project as a single user project).
     - [ ] Show detailed analysis of user statistics, like most listened artist, longest track, etc.
 
 - [ ] Desktop launcher functionality
@@ -232,7 +259,7 @@ The most basic version of Scuttle is now functional. However, there are a number
     - [ ] Upload existing user audio files to the Scuttle system.
     - [ ] Download Scuttle audio files to elsewhere as their corrected names.
     - [ ] Allow custom tunnel configuration.
-    - [ ] Allow users to restart server and tunnel from the frontend interface (may require some kind of IPC implementation).
+    - [ ] Allow users to restart server and tunnel from the web-client frontend interface (may require some kind of IPC implementation).
 
 - [ ] UI/UX
     - [ ] History queue.
@@ -244,7 +271,7 @@ The most basic version of Scuttle is now functional. However, there are a number
 ## Known Issues
 There are also a number of known and unfixed issues in Scuttle.
 
-* Sometimes audio context will not resume correctly on iOS resulting in soundless audio, and requiring a pause and play.
+* Sometimes audio context will not resume correctly on iOS resulting in soundless audio, and requiring a pause and play (very rare, seems to occasionally happen after a call is taken during audio playback).
 * Audio may appear distorted and high-pitched briefly when connecting or disconnecting bluetooth on iOS.
 
 

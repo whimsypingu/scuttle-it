@@ -16,6 +16,7 @@ def set_env_defaults(overwrite: bool = True):
     defaults = {
         "HOST": "0.0.0.0",
         "PORT": 8000,
+        "ASSETS_DIR": get_workspace_path("apps.audio-server.assets"),
         "DATA_DIR": get_workspace_path("apps.audio-server.data", ensure_exists=True),
         "SQL_DIR": get_workspace_path("apps.audio-server.sql"),
         "DIST_DIR": get_workspace_path("apps.web-client.dist"),

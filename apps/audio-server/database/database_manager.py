@@ -17,6 +17,7 @@ from database.mixins.queue_mixin import PlayQueueMixin
 from database.mixins.edit_mixin import EditMixin
 from database.mixins.like_mixin import LikeMixin
 from database.mixins.stats_mixin import StatsMixin
+from database.mixins.room_mixin import RoomMixin
 
 
 logger = logging.getLogger(__name__)
@@ -33,7 +34,8 @@ class DatabaseManager(
     PlayQueueMixin,
     EditMixin,
     LikeMixin,
-    StatsMixin
+    StatsMixin,
+    RoomMixin
 ):
     def __init__(
         self,
@@ -43,6 +45,8 @@ class DatabaseManager(
         self.sql_dir: Path = settings.SQL_DIR
 
         self.NEW_POSITION_GAP = 100.0
+        self.DEFAULT_ROOM_ID = settings.DEFAULT_ROOM_ID
+        self.ROOM_EXPIRE_TIME = 3 * 24 * 60 * 60     #3 days
 
         for key, value in overrides.items():
             if hasattr(self, key):

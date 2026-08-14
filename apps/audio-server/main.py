@@ -24,11 +24,12 @@ from api.routers.websocket_router import WebsocketRouter
 from api.routers.like_router import LikeRouter
 from api.routers.job_router import JobRouter
 from api.routers.stats_router import StatsRouter
+from api.routers.room_router import RoomRouter
 
 from core.youtube.youtube_client import YouTubeClient
 from core.audio.processor import AudioProcessor
 from database.database_manager import DatabaseManager
-from sync.websocket_manager import WebsocketManager
+from core.room.room_manager import RoomManager
 from core.download.download_queue import DownloadQueue
 from core.download.download_worker import DownloadWorker
 from core.stats.stats_manager import StatsManager
@@ -49,15 +50,17 @@ async def lifespan(app: FastAPI):
     db_manager = DatabaseManager()
     app.state.db_manager = db_manager
 
-    ws_manager = WebsocketManager()
-    app.state.ws_manager = ws_manager
-
     stats_manager = StatsManager(
         flush_interval=300, #how frequently to flush stats
         db_manager=db_manager,
-        ws_manager=ws_manager
     )
     app.state.stats_manager = stats_manager
+
+    room_manager = RoomManager(
+        flush_interval=3*60*60, #flush every few hours
+        db_manager=db_manager,
+    )
+    app.state.room_manager = room_manager
 
     link_adapter = LinkAdapter()
     app.state.link_adapter = link_adapter
@@ -77,7 +80,7 @@ async def lifespan(app: FastAPI):
             audio_processor=audio_processor,
             yt_client=YouTubeClient(),
             db_manager=db_manager,
-            ws_manager=ws_manager,
+            room_manager=room_manager,
             stats_manager=stats_manager,
             link_adapter=link_adapter,
         )
@@ -89,6 +92,9 @@ async def lifespan(app: FastAPI):
     #poll every interval seconds to flush stats into the database
     asyncio.create_task(stats_manager.run())
 
+    #poll every interval to flush and cleanup room activity into database
+    asyncio.create_task(room_manager.run())
+
     await db_manager.build_from_directory()
     await db_manager.build_search_index()
     await db_manager.normalize_play_queue_positions()
@@ -99,6 +105,7 @@ async def lifespan(app: FastAPI):
     for w in workers:
         w.stop()
     stats_manager.stop()
+    room_manager.stop()
 
 
 app = FastAPI(
@@ -121,6 +128,7 @@ app.include_router(WebsocketRouter)
 app.include_router(LikeRouter)
 app.include_router(JobRouter)
 app.include_router(StatsRouter)
+app.include_router(RoomRouter)
 
 @app.get("/status")
 async def get_status():

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-import { User } from "lucide-react";
+import { Blend, User } from "lucide-react";
 import { MusicNotesIcon, ClockIcon, HardDrivesIcon } from "@phosphor-icons/react";
 
 import { useStats } from "@/store/hooks/useProfile";
@@ -42,6 +42,13 @@ export const ProfileTab = ({
         };
         setEditTarget(editProfileTarget);
     }
+    const openEditRoomForm = () => {
+        const editProfileTarget: ActiveEditTarget = {
+            type: "editRoom",
+            data: null,
+        };
+        setEditTarget(editProfileTarget);
+    }
 
     return (
         <>
@@ -70,13 +77,29 @@ export const ProfileTab = ({
                         </div>
                     </section>
 
+                    {/* SUB-HEADER: ROOM INFORMATION */}
+                    <section 
+                        className="flex items-center gap-6"
+                        onClick={openEditRoomForm}    
+                    >
+                        <div className="flex w-full items-center px-4 py-3 rounded-xl bg-zinc-900/50 border border-zinc-800/50 hover:border-primary/30 transition-colors">
+                            <div className="p-3 rounded-lg bg-zinc-800 mr-4">
+                                <Blend size={24} className="text-primary" />
+                            </div>
+
+                            <p className="text-lg font-mono text-zinc-100">
+                                Room
+                            </p>
+                        </div>
+                    </section>
+
                     {/* GENERAL STATS */}
                     <section>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {displayStats.map(({ label, value, suffix, Icon }) => (
                                 <div 
                                     key={label}
-                                    className="flex items-center p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/50 hover:border-primary/30 transition-colors"
+                                    className="flex items-center px-4 py-3 rounded-xl bg-zinc-900/50 border border-zinc-800/50 hover:border-primary/30 transition-colors"
                                 >
                                     <div className="p-3 rounded-lg bg-zinc-800 mr-4">
                                         <Icon size={24} weight="fill" className="text-primary" />

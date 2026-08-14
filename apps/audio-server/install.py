@@ -6,6 +6,7 @@ from boot.setup_venv import ensure_venv, run_pip_install, install_ytdlp
 from boot.install_deno import download_deno
 from boot.install_ffmpeg import download_ffmpeg
 from boot.install_cloudflared import download_cloudflared
+from boot.install_qr import download_qr
 
 logging.basicConfig(
     level=logging.INFO,
@@ -28,6 +29,7 @@ try:
     download_deno(force=False)              #js runtime (for ytdlp)
     download_ffmpeg(force=False)            #ffmpeg
     download_cloudflared(force=False)       #cloudflared (default tunnel)
+    download_qr(force=False)
 
     
 except SetupError as e:

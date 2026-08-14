@@ -252,6 +252,3 @@ class PlaylistMixin:
         except Exception:
             logger.exception("Failed to reorder Playlist")
             raise
-
-
-

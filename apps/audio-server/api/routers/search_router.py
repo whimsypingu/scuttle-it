@@ -1,10 +1,11 @@
 import traceback
 
 from fastapi import APIRouter, Depends, Query, HTTPException
-from api.dependencies import get_db_manager, get_dl_queue
+from api.dependencies import get_db_manager, get_device_context, get_dl_queue
 from database.database_manager import DatabaseManager
 from core.download.download_queue import DownloadQueue
 from core.models.jobs import DownloadJob
+from core.models.room import DeviceContext
 
 SearchRouter = APIRouter(prefix="/search", tags=["Search"])
 
@@ -31,6 +32,7 @@ async def search_database(
 
 @SearchRouter.post("/yt-search")
 async def search_youtube(
+    ctx: DeviceContext = Depends(get_device_context),
     q: str = Query(..., min_length=1, description="YouTube search query"),
     query_limit: int = Query(default=5, ge=1, le=10),
     dl_queue: DownloadQueue = Depends(get_dl_queue)
@@ -38,7 +40,8 @@ async def search_youtube(
     try:
         job = DownloadJob(
             query=q,
-            query_limit=query_limit
+            query_limit=query_limit,
+            room_id=ctx.room_id
         )
         await dl_queue.add(job)
         return {

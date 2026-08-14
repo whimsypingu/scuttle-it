@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
+import { scuttleFetch } from '@/lib/utils';
+
 import { DEFAULT_SETTINGS } from "@/settings/settings.constants";
 
 import type { Loopmode, Settings } from "@/settings/settings.types";
@@ -13,7 +15,7 @@ export const useSettings = () => {
     const { data: settings = DEFAULT_SETTINGS, isLoading, error } = useQuery({
         queryKey,
         queryFn: async () => {
-            const response = await fetch(`/settings/get`, { method: "GET" });
+            const response = await scuttleFetch(`/settings/get`, { method: "GET" });
             if (!response.ok) throw new Error("Failed to fetch settings");
             
             const data = await response.json();
@@ -25,7 +27,7 @@ export const useSettings = () => {
     //set the loopmode
     const setLoopmodeMutation = useMutation({
         mutationFn: async (newLoopmode: Loopmode) => {
-            const response = await fetch(`/settings/set-loopmode?loopmode=${newLoopmode}`, { method: "POST" });
+            const response = await scuttleFetch(`/settings/set-loopmode?loopmode=${newLoopmode}`, { method: "POST" });
 
             if (!response.ok) throw new Error("Failed to set loopmode in settings");
 

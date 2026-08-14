@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useAudioPlayback, useAudioTime } from "@/features/audio/useAudioEngine";
 import { useQueue } from "@/store/hooks/useQueue";
 
-import { PlayIcon, PauseIcon } from "@phosphor-icons/react";
+import { PlayIcon, PauseIcon, WaveformIcon } from "@phosphor-icons/react";
 
-import { MiniSlider } from "@/components/ui/mini-slider";
+import { MiniShimmer, MiniSlider } from "@/components/ui/mini-slider";
 
 import { audioEngine } from "@/features/audio/audioEngine";
 
@@ -36,6 +36,20 @@ export const MiniViewPlayPauseButton = () => {
         </>
     );
 };
+
+export const MiniViewListenModeButton = () => {
+    return (
+        <>
+        {/* LISTENING MODE */}
+        <button
+            className="p-2 transition-transform active:scale-95"
+            onClick={(e) => {}}
+        >
+            <WaveformIcon size={PLAYER_CONFIG.iconSize} />
+        </button>
+        </>
+    );
+}
 
 
 export const MiniViewSlider = () => {
@@ -77,6 +91,16 @@ export const MiniViewSlider = () => {
             onValueCommit={handleValueCommit}
             onPointerUp={handleValueCommit} //fallback for when swipe goes out of bounds
         />
+        </>
+    );
+};
+
+
+export const MiniViewShimmer = () => {
+    return (
+        <>
+        {/* SHIMMER SWEEP */}
+        <MiniShimmer />
         </>
     );
 };

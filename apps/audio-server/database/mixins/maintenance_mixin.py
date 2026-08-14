@@ -18,13 +18,14 @@ class MaintenanceMixin:
 
                 #insert into the play queue with normalized positions, this assigns a new play_queue.queue_id
                 await db.execute(f'''
-                    INSERT INTO play_queue (track_internal_id, position, added_at)
+                    INSERT INTO play_queue (room_internal_id, track_internal_id, position, added_at)
                     SELECT
+                        room_internal_id,
                         track_internal_id,
                         ROW_NUMBER() OVER (ORDER BY position) * {self.NEW_POSITION_GAP},
                         added_at
                     FROM temp_play_queue;
-                ''')
+                ''') #may require further updates to support multi-room architecture
 
                 await db.execute("DROP TABLE temp_play_queue;") #delete just in case, although TEMP should handle that
 

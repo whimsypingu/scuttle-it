@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS pins (
 -- playlist and titles junction table
 CREATE TABLE IF NOT EXISTS playlist_tracks (
     playlist_internal_id INTEGER NOT NULL,
-    track_internal_id TEXT NOT NULL,
+    track_internal_id INTEGER NOT NULL,
     position REAL NOT NULL,
     added_at INTEGER DEFAULT (unixepoch()),
     FOREIGN KEY (playlist_internal_id) REFERENCES playlists(internal_id) ON DELETE CASCADE,
@@ -83,25 +83,35 @@ CREATE INDEX IF NOT EXISTS idx_playlist_tracks_position
 ON playlist_tracks (playlist_internal_id, position, track_internal_id);
 
 
+-- rooms
+CREATE TABLE IF NOT EXISTS rooms (
+    internal_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT UNIQUE,
+    loopmode INTEGER DEFAULT 1, --loop modes: 0=None, 1=All, 2=One 
+    created_at INTEGER DEFAULT (unixepoch()),
+    last_active INTEGER DEFAULT (unixepoch())
+);
+
+
 -- play queue
 CREATE TABLE IF NOT EXISTS play_queue (
     queue_id INTEGER PRIMARY KEY, --used for state management
-    track_internal_id TEXT NOT NULL,
-    position REAL NOT NULL UNIQUE,
+    room_internal_id INTEGER NOT NULL, --room separator for multiple queues
+    track_internal_id INTEGER NOT NULL,
+    position REAL NOT NULL,
     added_at INTEGER DEFAULT (unixepoch()),
-    FOREIGN KEY (track_internal_id) REFERENCES tracks(internal_id) ON DELETE CASCADE
+    FOREIGN KEY (track_internal_id) REFERENCES tracks(internal_id) ON DELETE CASCADE,
+    FOREIGN KEY (room_internal_id) REFERENCES rooms(internal_id) ON DELETE CASCADE,
+    UNIQUE(room_internal_id, position)
 );
 
 -- play queue position index
 CREATE INDEX IF NOT EXISTS idx_play_queue_position
-ON play_queue(position);
+ON play_queue(room_internal_id, position); --index by room id for room based sorting
 
 -- settings
 CREATE TABLE IF NOT EXISTS settings (
     id INTEGER PRIMARY KEY CHECK (id = 1), --ensures only one row
     username TEXT NOT NULL,
-    created_at INTEGER DEFAULT (unixepoch()),
-    loopmode INTEGER DEFAULT 1 --loop modes: 0=None, 1=All, 2=One 
+    created_at INTEGER DEFAULT (unixepoch())
 );
-
-INSERT OR IGNORE INTO settings (id, username) VALUES (1, "whimsypingu"); --initialize settings

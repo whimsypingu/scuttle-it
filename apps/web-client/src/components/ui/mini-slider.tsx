@@ -11,51 +11,76 @@ function MiniSlider({
 	max = 100,
 	...props
 }: React.ComponentProps<typeof SliderPrimitive.Root>) {
-const _values = React.useMemo(
-	() =>
-	Array.isArray(value)
-		? value
-		: Array.isArray(defaultValue)
-		? defaultValue
-		: [min, max],
-	[value, defaultValue, min, max]
-)
+	const _values = React.useMemo(
+		() =>
+		Array.isArray(value)
+			? value
+			: Array.isArray(defaultValue)
+			? defaultValue
+			: [min, max],
+		[value, defaultValue, min, max]
+	)
 
-return (
-	<SliderPrimitive.Root
-		data-slot="slider"
-		defaultValue={defaultValue}
-		value={value}
-		min={min}
-		max={max}
-		className={cn(
-			// "relative flex w-full touch-none items-center select-none data-disabled:opacity-50 data-vertical:h-full data-vertical:min-h-40 data-vertical:w-auto data-vertical:flex-col",
-			"relative flex w-full touch-none items-end select-none group",
-			className
-		)}
-		{...props}
-	>
-		<SliderPrimitive.Track
-			data-slot="slider-track"
-			// className="relative grow overflow-hidden rounded-full bg-muted data-horizontal:h-1 data-horizontal:w-full data-vertical:h-full data-vertical:w-1"
-			className="relative grow overflow-hidden bg-transparent border-transparent data-horizontal:h-[3px] data-horizontal:w-full"
+	return (
+		<SliderPrimitive.Root
+			data-slot="slider"
+			defaultValue={defaultValue}
+			value={value}
+			min={min}
+			max={max}
+			className={cn(
+				// "relative flex w-full touch-none items-center select-none data-disabled:opacity-50 data-vertical:h-full data-vertical:min-h-40 data-vertical:w-auto data-vertical:flex-col",
+				"relative flex w-full touch-none items-end select-none group",
+				className
+			)}
+			{...props}
 		>
-			<SliderPrimitive.Range
-				data-slot="slider-range"
-				// className="absolute bg-primary select-none data-horizontal:h-full data-vertical:w-full"
-				className="absolute bg-primary select-none data-horizontal:h-full"
-			/>
-		</SliderPrimitive.Track>
-		{Array.from({ length: _values.length }, (_, index) => (
-			<SliderPrimitive.Thumb
-				data-slot="slider-thumb"
-				key={index}
-				// className="relative block size-2 shrink-0 rounded-full border border-ring bg-white ring-ring/50 transition-[color,box-shadow] select-none after:absolute after:-inset-2 hover:ring-3 focus-visible:ring-3 focus-visible:outline-hidden active:ring-3 disabled:pointer-events-none disabled:opacity-50"
-				className="relative block size-4 shrink-0 select-none focus-visible:outline-none bg-transparent border-transparent"
-			/>
-		))}
-	</SliderPrimitive.Root>
-)
+			<SliderPrimitive.Track
+				data-slot="slider-track"
+				// className="relative grow overflow-hidden rounded-full bg-muted data-horizontal:h-1 data-horizontal:w-full data-vertical:h-full data-vertical:w-1"
+				className="relative grow overflow-hidden bg-slate-800/50 border-transparent data-horizontal:h-[3px] data-horizontal:w-full"
+				//EMERGENCY: replace bg-slate-800/50 with bg-transparent to remove the track color, ask friends what looks good
+			>
+				<SliderPrimitive.Range
+					data-slot="slider-range"
+					// className="absolute bg-primary select-none data-horizontal:h-full data-vertical:w-full"
+					className="absolute bg-primary select-none data-horizontal:h-full"
+				/>
+			</SliderPrimitive.Track>
+			{Array.from({ length: _values.length }, (_, index) => (
+				<SliderPrimitive.Thumb
+					data-slot="slider-thumb"
+					key={index}
+					// className="relative block size-2 shrink-0 rounded-full border border-ring bg-white ring-ring/50 transition-[color,box-shadow] select-none after:absolute after:-inset-2 hover:ring-3 focus-visible:ring-3 focus-visible:outline-hidden active:ring-3 disabled:pointer-events-none disabled:opacity-50"
+					className="relative block size-4 shrink-0 select-none focus-visible:outline-none bg-transparent border-transparent"
+				/>
+			))}
+		</SliderPrimitive.Root>
+	)
 }
 
-export { MiniSlider }
+function MiniShimmer({
+	className,
+	...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+	return (
+		<div
+			data-slot="slider-shimmer"
+			className={cn(
+				"relative flex w-full touch-none items-end select-none group", //requires h-4 from thumb's size-4
+				className
+			)}
+			{...props}
+		>
+			<div
+				//convert from SliderPrimitive.track: "relative grow overflow-hidden bg-transparent border-transparent data-horizontal:h-[3px] data-horizontal:w-full"
+				className="relative grow overflow-hidden bg-slate-800/50 border-transparent h-[3px] w-full"
+			>
+				{/* Shimmer sweep */}
+				<div className="absolute inset-0 -translate-x-full animate-[shimmer_2.5s_infinite_linear] bg-gradient-to-r from-transparent via-primary/80 to-transparent" />
+			</div>
+		</div>
+	)
+}
+
+export { MiniSlider, MiniShimmer }

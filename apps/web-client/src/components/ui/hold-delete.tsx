@@ -48,10 +48,6 @@ export const HoldToDeleteButton = ({ onDelete }: { onDelete: () => void }) => {
                     <span>{isHolding ? "Hold to Delete..." : "Delete Permanently"}</span>
                 </div>
             </Button>
-            
-            {/* <p className="text-[10px] text-muted-foreground/40 uppercase tracking-widest font-bold">
-                Press and hold to confirm
-            </p> */}
         </div>
     );
 };

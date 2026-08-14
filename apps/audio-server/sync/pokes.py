@@ -8,6 +8,8 @@ from pydantic import BaseModel
 #see: scuttle/apps/web-client/src/store/sync/sync.types.ts
 class WSPokeType(str, Enum):
     DOWNLOAD_JOB_STATUS_UPDATE = "DOWNLOAD_JOB_STATUS_UPDATE"
+    TRACK_UPDATE = "TRACK_UPDATE"
+    QUEUE_UPDATE = "QUEUE_UPDATE"
 
 
 #make sure to serialize everything before so no objects break the websocket connections
@@ -21,5 +23,19 @@ class WSPokeFactory:
         return {
             "type": WSPokeType.DOWNLOAD_JOB_STATUS_UPDATE,
             "payload": job.model_dump(by_alias=True)
+        }
+
+    @staticmethod
+    def track_update() -> dict:
+        return {
+            "type": WSPokeType.TRACK_UPDATE,
+            "payload": None
+        }
+
+    @staticmethod
+    def queue_update() -> dict:
+        return {
+            "type": WSPokeType.QUEUE_UPDATE,
+            "payload": None
         }
     

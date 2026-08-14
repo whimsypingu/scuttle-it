@@ -3,11 +3,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { audioEngine } from "@/features/audio/audioEngine";
 import { makeToast } from "@/features/toast/Toast";
 
+import { scuttleFetch } from "@/lib/utils";
 import { getTrackDisplayMetadata, trackBaseToQueueTrack } from "@/track/track.utils";
 
 import type { QueueTrack } from "@/track/track.types";
-import type { PopMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetAllPlaylistMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
-import type { SetFirstQueueResponse, SetAllQueueResponse, PushQueueResponse, PushNextQueueResponse, PopQueueResponse, ShuffleQueueResponse, ReorderQueueResponse } from "./hooks.responses";
+import type { PopMutationProps, PushAllPlaylistMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetAllPlaylistMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
+import type { SetFirstQueueResponse, SetAllQueueResponse, PushQueueResponse, PushNextQueueResponse, PopQueueResponse, ShuffleQueueResponse, ReorderQueueResponse, PushAllQueueResponse } from "./hooks.responses";
 
 
 export const useQueue = () => {
@@ -18,7 +19,7 @@ export const useQueue = () => {
     const getQueue = useQuery({
         queryKey,
         queryFn: async () => {
-            const response = await fetch(`/queue/get`, {
+            const response = await scuttleFetch(`/queue/get`, {
                 method: "GET",
             });
             if (!response.ok) throw new Error("Failed to fetch queue");
@@ -32,7 +33,7 @@ export const useQueue = () => {
     //set the first track in the queue
     const setFirstMutation = useMutation({
         mutationFn: async ({ track }: SetFirstMutationProps) => {
-            const response = await fetch(`/queue/set-first?track_id=${track.id}`, {
+            const response = await scuttleFetch(`/queue/set-first?track_id=${track.id}`, {
                 method: "POST",
             });
             if (!response.ok) throw new Error("Failed to set first entry in queue");
@@ -79,7 +80,7 @@ export const useQueue = () => {
     //reorder queue tracks
     const reorderMutation = useMutation({
         mutationFn: async ({ sourceQueueId, targetQueueId, below }: ReorderMutationProps) => {
-            const response = await fetch(`/queue/reorder`, { 
+            const response = await scuttleFetch(`/queue/reorder`, { 
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -138,7 +139,7 @@ export const useQueue = () => {
     //push a track to the end of the queue
     const pushMutation = useMutation({
         mutationFn: async ({ track }: PushMutationProps) => {
-            const response = await fetch(`/queue/push?track_id=${track.id}`, {
+            const response = await scuttleFetch(`/queue/push?track_id=${track.id}`, {
                 method: "POST",
             });
             if (!response.ok) throw new Error("Failed to push to queue");
@@ -182,7 +183,7 @@ export const useQueue = () => {
     //push a track to the front of the queue
     const pushNextMutation = useMutation({
         mutationFn: async ({ track }: PushNextMutationProps) => {
-            const response = await fetch(`/queue/push-next?track_id=${track.id}`, {
+            const response = await scuttleFetch(`/queue/push-next?track_id=${track.id}`, {
                 method: "POST",
             });
             if (!response.ok) throw new Error("Failed to push to queue");
@@ -227,7 +228,7 @@ export const useQueue = () => {
     // remove a track from the queue
     const popMutation = useMutation({
         mutationFn: async ({ queueTrack }: PopMutationProps) => {
-            const response = await fetch(`/queue/pop?queue_id=${queueTrack.queueId}`, {
+            const response = await scuttleFetch(`/queue/pop?queue_id=${queueTrack.queueId}`, {
                 method: "POST",
             });
             if (!response.ok) throw new Error("Failed to pop from queue");
@@ -264,7 +265,7 @@ export const useQueue = () => {
     // shuffle
     const shuffleMutation = useMutation({
         mutationFn: async () => {
-            const response = await fetch(`/queue/shuffle`, {
+            const response = await scuttleFetch(`/queue/shuffle`, {
                 method: "POST",
             });
             if (!response.ok) throw new Error("Failed to shuffle queue");
@@ -307,7 +308,7 @@ export const useSetQueue = () => {
     const setAllPlaylistMutation = useMutation({
         mutationFn: async ({ playlist, sortmode }: SetAllPlaylistMutationProps) => {
             const query = sortmode !== undefined ? `?sortmode=${sortmode}` : "";
-            const response = await fetch(`/queue/set-all/playlist/${playlist.id}${query}`, {
+            const response = await scuttleFetch(`/queue/set-all/playlist/${playlist.id}${query}`, {
                 method: "POST",
             });
             if (!response.ok) throw new Error("Failed to set queue");
@@ -316,21 +317,13 @@ export const useSetQueue = () => {
             return data as SetAllQueueResponse;
         },
         onSuccess: (data, variables) => {
-            const oldQueue = queryClient.getQueryData<QueueTrack[]>(queryKey);
-            if (data.setCount > 0 && oldQueue && oldQueue.length > 0) {                
+            if (data.setCount > 0) {        
                 queryClient.setQueryData(queryKey, data.queue);
 
-                //special handling for iOS breaking due to swipes not allowing audio event play/loading
-                if (!audioEngine.isPaused()) {
-                    audioEngine.setQueueFlag = true; //set an internal flag to force onEnded to behave differently: src/features/audio/AudioLogic.tsx
-                    audioEngine.seek(audioEngine.getDuration() - 0.1); //scrub to the end of the current track. this skirts the iOS blocking audio play on 
-
-                    makeToast(variables.sortmode !== 2 ? "Playing: " : "Shuffled: ", variables.playlist.name);
-                } else {
-                    audioEngine.seek(0);
-
-                    makeToast(variables.sortmode !== 2 ? "Queue: " : "Shuffled: ", variables.playlist.name); //require user interaction (tap) to start audio, for consistency across platforms
-                }
+                //previously, discovered iOS breaks and does not allow swipe to play audio, requiring extra jankmeat to make it work
+                //now, assume that this can only be triggered by a tap, resulting in successful audio playback
+				audioEngine.playTrack({ trackId: data.queue[0].id, forceRestart: true });
+                makeToast(variables.sortmode !== 2 ? "Playing: " : "Shuffled: ", variables.playlist.name); 
             } else if (data.skipCount > 0) {
                 makeToast("Queueing: ", variables.playlist.name); //no downloaded tracks available, but downloading is happening on skipCount tracks
             } else {
@@ -342,10 +335,37 @@ export const useSetQueue = () => {
         },
     });
 
+    // push a playlist to the end of the queue. does not optimistically update the queue
+    const pushAllPlaylistMutation = useMutation({
+        mutationFn: async ({ playlist, sortmode }: PushAllPlaylistMutationProps) => {
+            const query = sortmode !== undefined ? `?sortmode=${sortmode}` : "";
+            const response = await scuttleFetch(`/queue/push-all/playlist/${playlist.id}${query}`, {
+                method: "POST",
+            });
+            if (!response.ok) throw new Error("Failed to push to queue");
+
+            const data = await response.json();
+            return data as PushAllQueueResponse;
+        },
+        onSuccess: (data, variables) => {
+            if (data.setCount > 0) {                
+                queryClient.setQueryData(queryKey, data.queue);
+                makeToast(variables.sortmode !== 2 ? "Queued: " : "Shuffled: ", variables.playlist.name);
+            } else if (data.skipCount > 0) {
+                makeToast("Queueing: ", variables.playlist.name); //no downloaded tracks available, but downloading is happening on skipCount tracks
+            } else {
+                makeToast("Empty: ", variables.playlist.name); //empty playlist
+            }
+        },
+        onError: (err) => {
+            console.log("Push queue failed.");
+        },
+    });
+
     // clear the remaining queue
     const clearMutation = useMutation({
         mutationFn: async () => {
-            const response = await fetch(`/queue/clear`, {
+            const response = await scuttleFetch(`/queue/clear`, {
                 method: "POST",
             });
             if (!response.ok) throw new Error("Failed to clear queue");
@@ -380,6 +400,7 @@ export const useSetQueue = () => {
 
     return {
         setPlaylist: setAllPlaylistMutation.mutate,
+        pushPlaylist: pushAllPlaylistMutation.mutate,
         clearQueue: clearMutation.mutate,
     };
 };

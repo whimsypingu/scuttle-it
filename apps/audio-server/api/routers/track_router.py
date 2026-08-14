@@ -1,14 +1,14 @@
 import traceback
 
 from fastapi import APIRouter, Body, Depends, Path, HTTPException, Response, status
-from api.dependencies import get_db_manager, get_stats_manager
+from api.dependencies import get_db_manager, get_stats_manager, track_update_all_broadcast
 from database.database_manager import DatabaseManager
 from core.stats.stats_manager import StatsManager
 
 from core.models.payloads import EditTrackPayload
 from core.audio.utils import delete_track_file
 
-TrackRouter = APIRouter(prefix="/tracks", tags=["Tracks"])
+TrackRouter = APIRouter(prefix="/tracks", tags=["Tracks"], dependencies=[Depends(track_update_all_broadcast)])
 
 #temporary crash exception
 DefaultCrashException = HTTPException(

@@ -1,8 +1,10 @@
 import time
 import uuid
 from enum import Enum
-from core.models.base import ScuttleBase
 from pydantic import Field, model_validator
+
+from config import settings
+from core.models.base import ScuttleBase
 
 
 class JobStatus(str, Enum):
@@ -30,6 +32,7 @@ class DownloadJob(JobBase):
     
     to_queue: bool = True #do we put this in the queue after download
     priority: bool = False #is it important or not for queue priority, if to_queue is true
+    room_id: str = settings.DEFAULT_ROOM_ID #send to which play queue afterwards
 
     playlist_ids: list[str] | None = None #list of playlist IDs, if instantiating
     title_display: str | None = None #optional title display deterministic

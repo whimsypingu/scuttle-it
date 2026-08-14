@@ -2,6 +2,8 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 
 import { queryClient } from "@/store/queryClient";
 
+import { scuttleFetch } from '@/lib/utils';
+
 import type { TrackBase } from "@/track/track.types";
 import type { YTSearchMutationProps } from "@/store/hooks/hooks.types";
 import type { DownloadJob } from "@/job/job.types";
@@ -11,7 +13,7 @@ export const useSearch = (query: string) => {
     const dbSearch = useQuery({
         queryKey: ["search", "database", query],
         queryFn: async () => {
-            const response = await fetch(`/search/db-search?q=${encodeURIComponent(query)}`, { 
+            const response = await scuttleFetch(`/search/db-search?q=${encodeURIComponent(query)}`, { 
                 method: "GET" 
             });
             if (!response.ok) throw new Error("Search failed");
@@ -24,7 +26,7 @@ export const useSearch = (query: string) => {
 
     const ytSearch = useMutation({
         mutationFn: async ({ q, limit = 1 }: YTSearchMutationProps) => {
-            const response = await fetch(`/search/yt-search?q=${encodeURIComponent(q)}&query_limit=${limit}`, { 
+            const response = await scuttleFetch(`/search/yt-search?q=${encodeURIComponent(q)}&query_limit=${limit}`, { 
                 method: "POST" 
             });
             if (!response.ok) throw new Error("YouTube request failed");

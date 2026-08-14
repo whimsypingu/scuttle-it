@@ -2,6 +2,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteD
 import { useMemo, useState } from "react";
 
 import { makeToast } from "@/features/toast/Toast";
+import { scuttleFetch } from "@/lib/utils";
 
 import type { SummaryPlaylist } from "@/playlist/playlist.types";
 import type { CreatePlaylistPayload, ReorderPlaylistMutationProps, SetPinMutationProps, Sortmode } from "@/store/hooks/hooks.types";
@@ -21,7 +22,7 @@ export const usePlaylists = () => {
     const getPlaylists = useQuery({
         queryKey,
         queryFn: async () => {
-            const response = await fetch(`/playlists`, {
+            const response = await scuttleFetch(`/playlists`, {
                 method: "GET",
             });
             if (!response.ok) throw new Error("Failed to fetch playlists");
@@ -54,7 +55,7 @@ export const usePins = () => {
     const getPlaylists = useQuery({
         queryKey,
         queryFn: async () => {
-            const response = await fetch(`/playlists/pins`, {
+            const response = await scuttleFetch(`/playlists/pins`, {
                 method: "GET",
             });
             if (!response.ok) throw new Error("Failed to fetch pinned playlists");
@@ -87,7 +88,7 @@ export const usePinsMutations = () => {
     //set a track to liked or unliked state
     const setPinMutation = useMutation({
         mutationFn: async ({ playlist, pinned }: SetPinMutationProps) => {
-            const response = await fetch(`/playlists/pin/set?playlist_id=${playlist.id}&pinned=${pinned}`, {
+            const response = await scuttleFetch(`/playlists/pin/set?playlist_id=${playlist.id}&pinned=${pinned}`, {
                 method: "POST",
             });
             if (!response.ok) throw new Error(`Failed to ${pinned ? "pin" : "unpin"}`);
@@ -153,7 +154,7 @@ export const usePlaylistContent = (playlistId: string, limit: number = 30) => {
         queryKey,
         initialPageParam: 0,
         queryFn: async ({ pageParam }) => {
-            const response = await fetch(`/retrieve/playlist/${playlistId}?offset=${pageParam}&limit=${limit}&sortmode=${sortmode}`, {
+            const response = await scuttleFetch(`/retrieve/playlist/${playlistId}?offset=${pageParam}&limit=${limit}&sortmode=${sortmode}`, {
                 method: "GET",
             });
             if (!response.ok) throw new Error("Failed to fetch playlist content");
@@ -201,7 +202,7 @@ export const usePlaylistsMutations = () => {
     //create a playlist
     const createPlaylistMutation = useMutation({
         mutationFn: async(payload: CreatePlaylistPayload) => {
-            const response = await fetch(`/playlists`, {
+            const response = await scuttleFetch(`/playlists`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -246,7 +247,7 @@ export const usePlaylistsMutations = () => {
 
     const reorderPlaylistMutation = useMutation({
         mutationFn: async ({ playlistId, sourceId, targetId, below }: ReorderPlaylistMutationProps) => {
-            const response = await fetch(`/playlists/reorder/${playlistId}`, { 
+            const response = await scuttleFetch(`/playlists/reorder/${playlistId}`, { 
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",

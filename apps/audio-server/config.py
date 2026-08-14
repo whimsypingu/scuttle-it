@@ -11,9 +11,11 @@ class Settings(BaseSettings):
     # --- SERVER CONFIG ---
     HOST: str = "0.0.0.0"
     PORT: int = 8000
+    DEFAULT_ROOM_ID: str = "000"
 
     # --- ENV PATH VALIDATION ---
     BIN_DIR: DirectoryPath #validates that this directory actually exists
+    ASSETS_DIR: DirectoryPath #static backend files
     DATA_DIR: DirectoryPath #mounted data directory
     SQL_DIR: DirectoryPath #default database configuration sql files
     DIST_DIR: DirectoryPath #mounted frontend
@@ -22,6 +24,7 @@ class Settings(BaseSettings):
     JS_RUNTIME_BIN_PATH: FilePath
     FFMPEG_BIN_PATH: FilePath
     FFPROBE_BIN_PATH: FilePath
+    QR_GEN_BIN_PATH: FilePath
 
     model_config = SettingsConfigDict(
         env_file=ENV_FILE,

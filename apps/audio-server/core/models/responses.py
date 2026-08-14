@@ -34,3 +34,11 @@ class ShuffleQueueResponse(QueueResponse):
 class SetAllQueueResponse(QueueResponse):
     set_count: int
     skip_count: int
+class PushAllQueueResponse(QueueResponse):
+    set_count: int
+    skip_count: int
+
+
+class CreateJoinRoomResponse(ScuttleBase):
+    room_id: str
+    is_main: bool

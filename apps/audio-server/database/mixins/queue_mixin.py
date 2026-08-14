@@ -12,42 +12,44 @@ logger = logging.getLogger(__name__)
 class PlayQueueMixin:
     """Handles database backed play queue"""
 
-    async def set_first_play_queue(self, track_id) -> bool:
+    async def set_first_play_queue(self, track_id, room_id) -> bool:
         """Set and replace the first element of the Play Queue"""
-        logger.info(f"Setting track_id {track_id} as the first entry in the Play Queue...")
+        logger.info(f"Setting track_id {track_id} as the first entry in the Play Queue with room_id {room_id}...")
 
         try: 
             async with self.session() as db:
                 cursor = await db.execute('''
                     DELETE FROM play_queue
                     WHERE queue_id = (
-                        SELECT queue_id
-                        FROM play_queue
-                        ORDER BY position
+                        SELECT pq.queue_id
+                        FROM play_queue pq
+                        JOIN rooms r ON r.internal_id = pq.room_internal_id
+                        WHERE r.id = ?
+                        ORDER BY pq.position ASC
                         LIMIT 1
                     )
                     RETURNING position;
-                ''')
+                ''', (room_id,))
                 row = await cursor.fetchone() #returns None if empty
                 first_position = row[0] if row is not None else self.NEW_POSITION_GAP
 
                 #insert
                 await db.execute('''
-                    INSERT INTO play_queue (track_internal_id, position)
-                    SELECT internal_id, ?
-                    FROM tracks
-                    WHERE id = ?;
-                ''', (first_position, track_id))
+                    INSERT INTO play_queue (room_internal_id, track_internal_id, position)
+                    SELECT r.internal_id, t.internal_id, ?
+                    FROM tracks t, rooms r
+                    WHERE t.id = ? AND r.id = ?;
+                ''', (first_position, track_id, room_id))
 
-                logger.info(f"Successfully set track_id {track_id} as the first entry of the Play Queue with position value: {first_position}")
+                logger.info(f"Successfully set track_id {track_id} as the first entry of the Play Queue with room_id {room_id} with position value: {first_position}")
                 return True
 
         except Exception:
-            logger.exception(f"Failed to set track_id {track_id} as the first entry of the Play Queue")
+            logger.exception(f"Failed to set track_id {track_id} as the first entry of the Play Queue with room_id {room_id}")
             raise
 
 
-    async def reorder_queue(self, payload: ReorderQueuePayload) -> bool:
+    async def reorder_queue(self, payload: ReorderQueuePayload, room_id: str) -> bool:
         """
         Intelligent self-healing reordering with three-zone logic:
         1. < min: Min - self.NEW_POSITION_GAP
@@ -55,7 +57,7 @@ class PlayQueueMixin:
         3. between: midpoint of nearest previous and next position
         """
         """Universal reordering: moves track to a new position. can be used for a loop all move to end"""
-        logger.info(f"Reordering track with queue_id {payload.source_queue_id} in the Play Queue")
+        logger.info(f"Reordering track with queue_id {payload.source_queue_id} in the Play Queue with room_id {room_id}...")
 
         #trick to get the (up to) two tracks that surround the new position of the source track after reordering (includes source track)
         operator = ">=" if payload.below else "<="
@@ -66,8 +68,8 @@ class PlayQueueMixin:
                 pq.queue_id,
                 pq.position
             FROM play_queue pq
-            JOIN tracks t ON t.internal_id = pq.track_internal_id
-            WHERE pq.position {operator} (
+            JOIN rooms r ON r.internal_id = pq.room_internal_id
+            WHERE r.id = ? AND pq.position {operator} (
                 SELECT position
                 FROM play_queue
                 WHERE queue_id = ?
@@ -75,7 +77,7 @@ class PlayQueueMixin:
             ORDER BY pq.position {ordering}
             LIMIT 2;
         '''
-        params = (payload.target_queue_id,)
+        params = (room_id, payload.target_queue_id)
 
         try:
             async with self.session() as db:
@@ -103,21 +105,26 @@ class PlayQueueMixin:
                     WHERE queue_id = ?;
                 ''', (new_position, payload.source_queue_id))
 
-                logger.info(f"Successfully reordered track with queue_id {payload.source_queue_id} to position {new_position} in Play Queue")
+                logger.info(f"Successfully reordered track with queue_id {payload.source_queue_id} to position {new_position} in Play Queue with room_id {room_id}")
                 return True
         
         except Exception:
-            logger.exception(f"Failed to reorder track with queue_id {payload.source_queue_id} to position {new_position} in Play Queue")
+            logger.exception(f"Failed to reorder track with queue_id {payload.source_queue_id} to position {new_position} in Play Queue with room_id {room_id}")
             raise
 
 
-    async def push_play_queue(self, track_id) -> bool:
+    async def push_play_queue(self, track_id, room_id) -> bool:
         """Push to the end of the Play Queue"""
-        logger.info(f"Pushing track_id {track_id} to the end of the Play Queue...")
+        logger.info(f"Pushing track_id {track_id} to the end of the Play Queue with room_id {room_id}...")
 
         try:
             async with self.session() as db:
-                cursor = await db.execute("SELECT COALESCE(MAX(position), 0.0) FROM play_queue;")
+                cursor = await db.execute('''
+                    SELECT COALESCE(MAX(pq.position), 0.0) 
+                    FROM play_queue pq
+                    JOIN rooms r ON r.internal_id = pq.room_internal_id
+                    WHERE r.id = ?;
+                ''', (room_id,))
                 row = await cursor.fetchone()
                 current_max = row[0]
 
@@ -125,32 +132,34 @@ class PlayQueueMixin:
                 
                 #insert
                 await db.execute('''
-                    INSERT INTO play_queue (track_internal_id, position)
-                    SELECT internal_id, ?
-                    FROM tracks
-                    WHERE id = ?;
-                ''', (new_position, track_id))
+                    INSERT INTO play_queue (room_internal_id, track_internal_id, position)
+                    SELECT r.internal_id, t.internal_id, ?
+                    FROM tracks t, rooms r
+                    WHERE t.id = ? AND r.id = ?;
+                ''', (new_position, track_id, room_id))
 
-                logger.info(f"Successfully pushed track_id {track_id} to the end of the Play Queue with position value: {new_position}")
+                logger.info(f"Successfully pushed track_id {track_id} to the end of the Play Queue with room_id {room_id} with position value: {new_position}")
                 return True
         
         except Exception:
-            logger.exception(f"Failed to push track_id {track_id} to end of the Play Queue")
+            logger.exception(f"Failed to push track_id {track_id} to end of the Play Queue with room_id {room_id}")
             raise
 
 
-    async def push_next_play_queue(self, track_id) -> bool:
+    async def push_next_play_queue(self, track_id, room_id) -> bool:
         """Push to the second spot in the Play Queue"""
-        logger.info(f"Pushing track_id {track_id} into the next position of the Play Queue...")
+        logger.info(f"Pushing track_id {track_id} into the next position of the Play Queue with room_id {room_id}...")
 
         try:
             async with self.session() as db:
                 cursor = await db.execute('''
-                    SELECT position
-                    FROM play_queue
+                    SELECT pq.position
+                    FROM play_queue pq
+                    JOIN rooms r ON r.internal_id = pq.room_internal_id
+                    WHERE r.id = ?
                     ORDER BY position ASC
                     LIMIT 2;
-                ''')
+                ''', (room_id,))
                 rows = await cursor.fetchall()
 
                 if not rows:                                                                #empty queue, set to first
@@ -162,42 +171,50 @@ class PlayQueueMixin:
                 
                 #insert
                 await db.execute('''
-                    INSERT INTO play_queue (track_internal_id, position)
-                    SELECT internal_id, ?
-                    FROM tracks
-                    WHERE id = ?;
-                ''', (new_position, track_id))
+                    INSERT INTO play_queue (room_internal_id, track_internal_id, position)
+                    SELECT r.internal_id, t.internal_id, ?
+                    FROM tracks t, rooms r
+                    WHERE t.id = ? AND r.id = ?;
+                ''', (new_position, track_id, room_id))
 
-                logger.info(f"Successfully pushed track_id {track_id} to the next position of the Play Queue with position value: {new_position}")
+                logger.info(f"Successfully pushed track_id {track_id} to the next position of the Play Queue with room_id {room_id} with position value: {new_position}")
                 return True
         
         except Exception:
-            logger.exception(f"Failed to push track_id {track_id} to next position in the Play Queue")
+            logger.exception(f"Failed to push track_id {track_id} to next position in the Play Queue with room_id {room_id}")
             raise
 
 
-    async def pop_play_queue(self, queue_id) -> bool:
+    async def pop_play_queue(self, queue_id, room_id) -> bool:
         """Pop a specific item from the Play Queue"""
-        logger.info(f"Popping track with queue_id {queue_id} the Play Queue...")
+        logger.info(f"Popping track with queue_id {queue_id} the Play Queue with room_id {room_id}...")
 
         try:
             async with self.session() as db:
-                cursor = await db.execute("DELETE FROM play_queue WHERE queue_id = ?;", (queue_id,))
+                cursor = await db.execute('''
+                    DELETE FROM play_queue 
+                    WHERE queue_id = ?
+                        AND room_internal_id = (
+                            SELECT internal_id
+                            FROM rooms
+                            WHERE id = ?
+                        );
+                ''', (queue_id, room_id))
                 if cursor.rowcount == 0:
                     logger.info(f"Track {queue_id} already gone or doesn't exist.")
                     return False
                     
-                logger.info(f"Successfully popped {queue_id} from the Play Queue")
+                logger.info(f"Successfully popped {queue_id} from the Play Queue with room_id {room_id}")
                 return True
 
         except Exception:
-            logger.exception(f"Failed to pop track {queue_id} from the Play Queue")
+            logger.exception(f"Failed to pop track {queue_id} from the Play Queue with room_id {room_id}")
             raise
 
 
-    async def set_all_play_queue(self, playlist_id, sortmode) -> tuple[int, list[str]]:
+    async def set_all_play_queue(self, playlist_id, sortmode, room_id) -> tuple[int, list[str]]:
         """Setting a playlist with a sort order as the Play Queue, returns set_count and ids of tracks requiring downloads"""
-        logger.info(f"Setting playlist with playlist_id {playlist_id} as the Play Queue...")
+        logger.info(f"Setting playlist with playlist_id {playlist_id} as the Play Queue with room_id {room_id}...")
 
         #see: apps/audio-server/api/routers/retrieval_router.py for mapping
         #select only the track internal_id, id, and download status, to perform splitting later since we need the not-downloaded tracks
@@ -253,34 +270,138 @@ class PlayQueueMixin:
                     random.shuffle(downloaded_rows)
                     random.shuffle(skipped)
 
+                #precalculate the room internal id for fast delete and insert
+                cursor = await db.execute("SELECT internal_id FROM rooms WHERE id = ?", (room_id,))
+                room_row = await cursor.fetchone()
+                if not room_row:
+                    raise ValueError(f"Room '{room_id}' does not exist.")
+                room_internal_id = room_row[0]
+
                 #form the right data type to send to the queue
                 to_queue = [
-                    (row["internal_id"], (idx + 1) * self.NEW_POSITION_GAP) 
+                    (room_internal_id, row["internal_id"], (idx + 1) * self.NEW_POSITION_GAP) 
                     for idx, row in enumerate(downloaded_rows)
                 ]
+
                 if to_queue:
-                    await db.execute("DELETE FROM play_queue;")
-                    await db.executemany("INSERT INTO play_queue (track_internal_id, position) VALUES (?, ?);", to_queue)
+                    await db.execute("DELETE FROM play_queue WHERE room_internal_id = ?;", (room_internal_id,))
+                    await db.executemany("INSERT INTO play_queue (room_internal_id, track_internal_id, position) VALUES (?, ?, ?);", to_queue)
                     
-                logger.info(f"Successfully set playlist {playlist_id} as the Play Queue")
+                logger.info(f"Successfully set playlist {playlist_id} as the Play Queue with room_id {room_id}")
                 return len(to_queue), skipped
 
         except Exception:
-            logger.exception(f"Failed to set playlist {playlist_id} as the Play Queue")
+            logger.exception(f"Failed to set playlist {playlist_id} as the Play Queue with room_id {room_id}")
             raise
 
 
-    async def shuffle_play_queue(self) -> bool:
-        """Shuffles all elements of the Play Queue except the first, if there is one"""
-        logger.info(f"Shuffling the Play Queue...")
+    async def push_all_play_queue(self, playlist_id, sortmode, room_id) -> tuple[int, list[str]]:
+        """Pushing a playlist with a sort order into the end of the Play Queue, returns set_count and ids of tracks requiring downloads"""
+        logger.info(f"Pushing playlist with playlist_id {playlist_id} as the Play Queue with room_id {room_id}...")
+
+        #see: apps/audio-server/api/routers/retrieval_router.py for mapping
+        #select only the track internal_id, id, and download status, to perform splitting later since we need the not-downloaded tracks
+        match playlist_id:
+            case "likes":
+                SORT_CLAUSE_MAP = {
+                    0: "ORDER BY l.position ASC",
+                    1: "ORDER BY l.liked_at DESC",
+                    2: "", #ignore sort and shuffle manually
+                }
+                query = f'''
+                    SELECT
+                        t.internal_id,
+                        t.id,
+                        CASE WHEN d.track_internal_id IS NOT NULL THEN 1 ELSE 0 END AS downloaded
+                    FROM likes l
+                    JOIN tracks t ON t.internal_id = l.track_internal_id
+                    LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
+                    {SORT_CLAUSE_MAP[sortmode]};
+                '''
+                params = ()
+            case _:
+                SORT_CLAUSE_MAP = {
+                    0: "ORDER BY pt.position ASC",
+                    1: "ORDER BY pt.added_at DESC",
+                    2: "", #ignore sort and shuffle manually
+                }
+                query = f'''
+                    SELECT
+                        t.internal_id,
+                        t.id,
+                        CASE WHEN d.track_internal_id IS NOT NULL THEN 1 ELSE 0 END AS downloaded
+                    FROM playlist_tracks pt
+                    JOIN playlists p ON p.internal_id = pt.playlist_internal_id
+                    JOIN tracks t ON t.internal_id = pt.track_internal_id
+                    LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
+                    WHERE p.id = ?
+                    {SORT_CLAUSE_MAP[sortmode]};
+                '''
+                params = (playlist_id,)
 
         try:
             async with self.session() as db:
+                cursor = await db.execute(query, params)
+                rows = await cursor.fetchall()
+
+                #filter and split between tracks ready to go (and should be in queue) vs ones that require download
+                downloaded_rows = [row for row in rows if row["downloaded"]]
+                skipped = [row["id"] for row in rows if not row["downloaded"]]
+
+                #perform manual python based shuffling, random uses fisher yates natively and is O(n): https://softwareengineering.stackexchange.com/questions/215737/how-python-random-shuffle-works
+                if sortmode == 2:
+                    random.shuffle(downloaded_rows)
+                    random.shuffle(skipped)
+
+                #precalculate the room internal id for fast delete and insert
+                cursor = await db.execute("SELECT internal_id FROM rooms WHERE id = ?;", (room_id,))
+                room_row = await cursor.fetchone()
+                if not room_row:
+                    raise ValueError(f"Room '{room_id}' does not exist.")
+                room_internal_id = room_row[0]
+
+                #precalculate the current maximum position in this room's play queue
+                cursor = await db.execute("SELECT COALESCE(MAX(position), 0) FROM play_queue WHERE room_internal_id = ?;", (room_internal_id,))
+                last_position_row = await cursor.fetchone()
+                last_position = last_position_row[0] if last_position_row else 0
+
+                #form the right data type to send to the queue
+                to_queue = [
+                    (room_internal_id, row["internal_id"], last_position + ((idx + 1) * self.NEW_POSITION_GAP)) 
+                    for idx, row in enumerate(downloaded_rows)
+                ]
+
+                if to_queue:
+                    await db.executemany("INSERT INTO play_queue (room_internal_id, track_internal_id, position) VALUES (?, ?, ?);", to_queue)
+                    
+                logger.info(f"Successfully pushed playlist {playlist_id} as the Play Queue with room_id {room_id}")
+                return len(to_queue), skipped
+
+        except Exception:
+            logger.exception(f"Failed to push playlist {playlist_id} as the Play Queue with room_id {room_id}")
+            raise
+
+
+    async def shuffle_play_queue(self, room_id) -> bool:
+        """Shuffles all elements of the Play Queue except the first, if there is one"""
+        logger.info(f"Shuffling the Play Queue with room_id {room_id}...")
+
+        try:
+            async with self.session() as db:
+                #precalculate the room internal id for fast delete and insert
+                cursor = await db.execute("SELECT internal_id FROM rooms WHERE id = ?", (room_id,))
+                room_row = await cursor.fetchone()
+                if not room_row:
+                    raise ValueError(f"Room '{room_id}' does not exist.")
+                room_internal_id = room_row[0]
+
+                #fetch queue items scoped within the room
                 cursor = await db.execute('''
-                    SELECT track_internal_id, position
+                    SELECT queue_id, position
                     FROM play_queue
+                    WHERE room_internal_id = ?
                     ORDER BY position ASC;
-                ''')
+                ''', (room_internal_id,))
                 rows = await cursor.fetchall()
 
                 if len(rows) <= 1:
@@ -293,46 +414,56 @@ class PlayQueueMixin:
                 random.shuffle(shuffle_tracks)
 
                 #assign new positions to remainder of queue
-                to_queue = [
-                    (track["track_internal_id"], current_track["position"] + ((idx + 1) * self.NEW_POSITION_GAP))
+                to_update = [
+                    (current_track["position"] + ((idx + 1) * self.NEW_POSITION_GAP), track["queue_id"], room_internal_id)
                     for idx, track in enumerate(shuffle_tracks)
                 ]
 
-                await db.execute("DELETE FROM play_queue WHERE position > ?;", (current_track["position"],))
-                await db.executemany("INSERT INTO play_queue (track_internal_id, position) VALUES (?, ?);", to_queue)
+                await db.executemany('''
+                    UPDATE play_queue
+                    SET position = ?
+                    WHERE queue_id = ? AND room_internal_id = ?;
+                ''', to_update)
 
                 logger.info(f"Successfully shuffled {len(shuffle_tracks)} tracks.")
                 return True
             
         except Exception:
-            logger.exception(f"Failed to shuffle Play Queue")
+            logger.exception(f"Failed to shuffle Play Queue with room_id {room_id}")
             raise
 
     
-    async def clear_play_queue(self) -> bool:
+    async def clear_play_queue(self, room_id) -> bool:
         """Clears all elements of the Play Queue except the first, if there is one"""
-        logger.info(f"Clearing the Play Queue...")
+        logger.info(f"Clearing the Play Queue with room_id {room_id}...")
 
         try:
             async with self.session() as db:
                 await db.execute('''
                     DELETE FROM play_queue
                     WHERE queue_id NOT IN (
-                        SELECT queue_id FROM play_queue
+                        SELECT pq.queue_id
+                        FROM play_queue pq
+                        JOIN rooms r ON r.internal_id = pq.room_internal_id
+                        WHERE r.id = ?
                         ORDER BY position ASC
                         LIMIT 1
+                    ) AND room_internal_id = (
+                        SELECT internal_id
+                        FROM rooms
+                        WHERE id = ?
                     );
-                ''')
+                ''', (room_id, room_id))
 
-                logger.info("Successfully cleared the Play Queue")
+                logger.info(f"Successfully cleared the Play Queue with room_id {room_id}")
                 return True
         
         except Exception:
-            logger.exception(f"Failed to clear the Play Queue")
+            logger.exception(f"Failed to clear the Play Queue with room_id {room_id}")
             raise
 
 
-    async def get_play_queue(self) -> list[QueueTrack]:
+    async def get_play_queue(self, room_id) -> list[QueueTrack]:
         """Retrieve the full play queue with all metadata"""
 
         UNIT_SEP = "\x1f"
@@ -364,13 +495,15 @@ class PlayQueueMixin:
             JOIN tracks t ON pq.track_internal_id = t.internal_id
             JOIN track_artists ta ON ta.track_internal_id = t.internal_id
             JOIN artists a ON a.internal_id = ta.artist_internal_id
+            JOIN rooms r ON r.internal_id = pq.room_internal_id
+            WHERE r.id = ?
             GROUP BY pq.position
             ORDER BY pq.position ASC;
         '''
 
         try:
             async with self.session() as db:
-                async with db.execute(query) as cursor:
+                async with db.execute(query, (room_id,)) as cursor:
                     rows = await cursor.fetchall()
 
                     return [
@@ -382,5 +515,5 @@ class PlayQueueMixin:
                     ]
 
         except Exception:
-            logger.exception("Failed to retrieve Play Queue contents")
+            logger.exception(f"Failed to retrieve Play Queue with room_id {room_id} contents")
             raise

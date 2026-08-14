@@ -7,6 +7,7 @@ import { CreatePlaylistForm } from "@/features/edit/subcomponents/CreatePlaylist
 import { EditPlaylistForm } from "@/features/edit/subcomponents/EditPlaylistForm";
 import { ClearQueueForm } from "@/features/edit/subcomponents/ClearQueueForm";
 import { EditProfileForm } from "@/features/edit/subcomponents/EditProfileForm";
+import { EditRoomForm } from "@/features/edit/subcomponents/EditRoomForm";
 
 import { EDIT_CONFIG } from "@/features/edit/edit.constants";
 
@@ -58,6 +59,12 @@ export const EditPopup = () => {
                 return (
                     <EditProfileForm
                         stats={editTarget.data}
+                        onSave={handleClose}
+                    />
+                );
+            case "editRoom":
+                return (
+                    <EditRoomForm
                         onSave={handleClose}
                     />
                 );
