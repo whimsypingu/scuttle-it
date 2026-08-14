@@ -10,7 +10,6 @@ export const AudioLogic = () => {
     useBackupSync(); //syncs to server backed queue a few seconds before a track ends to ensure data integrity. in the future we could add a flag for this
     usePrefetchSync();
 
-    //bump these hooks to the top to prevent triggering a hook violation somewhere
     const { isPaused } = useAudioPlayback(); //hook into playstate
     const { isMain } = useAudioMain(); //hook into main or not
 

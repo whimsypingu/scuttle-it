@@ -3,6 +3,7 @@ import { audioEngine } from "@/features/audio/audioEngine"
 import { useQueue } from "@/store/hooks/useQueue";
 
 
+//building react-style hooks to hook into the custom audioEngine, to trigger things when certain audio actions happen
 export const useAudioMain = () => {
     const [isMain, setIsMain] = useState(() => audioEngine.getMain());
 
@@ -16,6 +17,7 @@ export const useAudioMain = () => {
 
     return { isMain };
 }
+
 
 export const useAudioPlayback = () => {
     const [isPaused, setIsPaused] = useState(() => audioEngine.isPaused());
@@ -69,6 +71,7 @@ export const useAudioEnded = () => {
 }
 
 
+//custom hooks to support syncing with the server
 export const useBackupSync = () => {
     const { time, duration } = useAudioTime();
     const { refetch } = useQueue();
@@ -87,17 +90,17 @@ export const useBackupSync = () => {
             setHasSynced(true);
             refetch(); //for now, refetch the queue data. insignificant compared to actual audio data anyway, but could be optimized later
         }
-    });
+    }, [time, duration, hasSynced]);
 }
 
 
 export const usePrefetchSync = () => {
     const { queue } = useQueue();
 
-    if (!("serviceWorker" in navigator)) return; //guard clause for if service workers are unsupported or blocked
-    if (!audioEngine.getMain()) return;
-
     const prefetchSync = () => {
+        if (!("serviceWorker" in navigator)) return; //guard clause for if service workers are unsupported or blocked
+        if (!audioEngine.getMain()) return; //move this check inside of the useEffect to avoid violating rule of hooks with an early return
+    
         if (navigator.serviceWorker.controller && queue.length) {
             const prefetchWindow = queue.slice(0, 10); //EMERGENCY: don't hardcode 10 items to prefetch, either dynamically changed or a defined constant
             navigator.serviceWorker.controller.postMessage({
@@ -116,6 +119,8 @@ export const usePrefetchSync = () => {
 
     //initial load, wait for service worker to establish and then begin caching asap
     useEffect(() => {
+        if (!("serviceWorker" in navigator)) return;
+        
         navigator.serviceWorker.addEventListener("controllerchange", prefetchSync);
         return () => {
             navigator.serviceWorker.removeEventListener("controllerchange", prefetchSync);
