@@ -274,7 +274,7 @@ class PlayQueueMixin:
                 cursor = await db.execute("SELECT internal_id FROM rooms WHERE id = ?", (room_id,))
                 room_row = await cursor.fetchone()
                 if not room_row:
-                    raise ValueError(f"Rpom '{room_id}' does not exist.")
+                    raise ValueError(f"Room '{room_id}' does not exist.")
                 room_internal_id = room_row[0]
 
                 #form the right data type to send to the queue
@@ -292,6 +292,93 @@ class PlayQueueMixin:
 
         except Exception:
             logger.exception(f"Failed to set playlist {playlist_id} as the Play Queue with room_id {room_id}")
+            raise
+
+
+    async def push_all_play_queue(self, playlist_id, sortmode, room_id) -> tuple[int, list[str]]:
+        """Pushing a playlist with a sort order into the end of the Play Queue, returns set_count and ids of tracks requiring downloads"""
+        logger.info(f"Pushing playlist with playlist_id {playlist_id} as the Play Queue with room_id {room_id}...")
+
+        #see: apps/audio-server/api/routers/retrieval_router.py for mapping
+        #select only the track internal_id, id, and download status, to perform splitting later since we need the not-downloaded tracks
+        match playlist_id:
+            case "likes":
+                SORT_CLAUSE_MAP = {
+                    0: "ORDER BY l.position ASC",
+                    1: "ORDER BY l.liked_at DESC",
+                    2: "", #ignore sort and shuffle manually
+                }
+                query = f'''
+                    SELECT
+                        t.internal_id,
+                        t.id,
+                        CASE WHEN d.track_internal_id IS NOT NULL THEN 1 ELSE 0 END AS downloaded
+                    FROM likes l
+                    JOIN tracks t ON t.internal_id = l.track_internal_id
+                    LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
+                    {SORT_CLAUSE_MAP[sortmode]};
+                '''
+                params = ()
+            case _:
+                SORT_CLAUSE_MAP = {
+                    0: "ORDER BY pt.position ASC",
+                    1: "ORDER BY pt.added_at DESC",
+                    2: "", #ignore sort and shuffle manually
+                }
+                query = f'''
+                    SELECT
+                        t.internal_id,
+                        t.id,
+                        CASE WHEN d.track_internal_id IS NOT NULL THEN 1 ELSE 0 END AS downloaded
+                    FROM playlist_tracks pt
+                    JOIN playlists p ON p.internal_id = pt.playlist_internal_id
+                    JOIN tracks t ON t.internal_id = pt.track_internal_id
+                    LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
+                    WHERE p.id = ?
+                    {SORT_CLAUSE_MAP[sortmode]};
+                '''
+                params = (playlist_id,)
+
+        try:
+            async with self.session() as db:
+                cursor = await db.execute(query, params)
+                rows = await cursor.fetchall()
+
+                #filter and split between tracks ready to go (and should be in queue) vs ones that require download
+                downloaded_rows = [row for row in rows if row["downloaded"]]
+                skipped = [row["id"] for row in rows if not row["downloaded"]]
+
+                #perform manual python based shuffling, random uses fisher yates natively and is O(n): https://softwareengineering.stackexchange.com/questions/215737/how-python-random-shuffle-works
+                if sortmode == 2:
+                    random.shuffle(downloaded_rows)
+                    random.shuffle(skipped)
+
+                #precalculate the room internal id for fast delete and insert
+                cursor = await db.execute("SELECT internal_id FROM rooms WHERE id = ?;", (room_id,))
+                room_row = await cursor.fetchone()
+                if not room_row:
+                    raise ValueError(f"Room '{room_id}' does not exist.")
+                room_internal_id = room_row[0]
+
+                #precalculate the current maximum position in this room's play queue
+                cursor = await db.execute("SELECT COALESCE(MAX(position), 0) FROM play_queue WHERE room_internal_id = ?;", (room_internal_id,))
+                last_position_row = await cursor.fetchone()
+                last_position = last_position_row[0] if last_position_row else 0
+
+                #form the right data type to send to the queue
+                to_queue = [
+                    (room_internal_id, row["internal_id"], last_position + ((idx + 1) * self.NEW_POSITION_GAP)) 
+                    for idx, row in enumerate(downloaded_rows)
+                ]
+
+                if to_queue:
+                    await db.executemany("INSERT INTO play_queue (room_internal_id, track_internal_id, position) VALUES (?, ?, ?);", to_queue)
+                    
+                logger.info(f"Successfully pushed playlist {playlist_id} as the Play Queue with room_id {room_id}")
+                return len(to_queue), skipped
+
+        except Exception:
+            logger.exception(f"Failed to push playlist {playlist_id} as the Play Queue with room_id {room_id}")
             raise
 
 

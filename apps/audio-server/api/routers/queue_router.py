@@ -8,7 +8,7 @@ from core.download.download_queue import DownloadQueue
 from core.models.jobs import DownloadJob
 from core.models.room import DeviceContext
 
-from core.models.responses import PopQueueResponse, PushNextQueueResponse, PushQueueResponse, QueueResponse, SetAllQueueResponse, SetFirstQueueResponse, ShuffleQueueResponse
+from core.models.responses import PopQueueResponse, PushAllQueueResponse, PushNextQueueResponse, PushQueueResponse, QueueResponse, SetAllQueueResponse, SetFirstQueueResponse, ShuffleQueueResponse
 from core.models.payloads import ReorderQueuePayload
 
 QueueRouter = APIRouter(prefix="/queue", tags=["Queue"], dependencies=[Depends(set_room_active)])
@@ -191,7 +191,37 @@ async def set_all_play_queue(
     except Exception as e:
         traceback.print_exc()
         raise DefaultCrashException
-    
+
+
+@QueueRouter.post("/push-all/playlist/{playlist_id}", response_model=PushAllQueueResponse, dependencies=[Depends(queue_update_room_broadcast)])
+async def push_all_play_queue(
+    ctx: DeviceContext = Depends(get_device_context),
+    playlist_id: str = Path(..., min_length=1, description="Playlist ID"),
+    sortmode: int = Query(default=0, ge=0, le=2, description="0=position, 1=added_at, 2=shuffle"),
+    db_manager: DatabaseManager = Depends(get_db_manager),
+    dl_queue: DownloadQueue = Depends(get_dl_queue)
+):
+    try:
+        set_count, skipped = await db_manager.push_all_play_queue(playlist_id, sortmode, ctx.room_id) #status after attempting set
+        updated_queue = await db_manager.get_play_queue(ctx.room_id) #get the updated queue -- EMERGENCY: make this stuff not like this bruh
+
+        for track_id in skipped:
+            job = DownloadJob(
+                track_id=track_id,
+                priority=False,
+                room_id=ctx.room_id
+            )
+            await dl_queue.add(job)
+
+        return {
+            "set_count": set_count,
+            "skip_count": len(skipped),
+            "queue": updated_queue
+        }
+    except Exception as e:
+        traceback.print_exc()
+        raise DefaultCrashException
+
 
 @QueueRouter.post("/clear", response_model=QueueResponse, dependencies=[Depends(queue_update_room_broadcast)])
 async def clear_play_queue_endpoint(
