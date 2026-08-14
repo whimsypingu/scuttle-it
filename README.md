@@ -110,7 +110,7 @@ The only cost is electricity for self-hosting, and the resources for your comput
 
 * Swipe to queue a song to the front **or** the back of the queue.
 
-* Swipe on playlists (just like you would a track) to play them directly. 
+* Swipe on playlists (just like you would a track) to queue them (either custom order or shuffled).
 
 * Due to unavoidable download and processing time, first download/plays are immediately sent to the front of the queue when available and are **not** instantly streamable.
 
@@ -119,8 +119,21 @@ The only cost is electricity for self-hosting, and the resources for your comput
     <p><em>(6/11/26)</em></p>
 </div>
 
+
 ---
 
+### Rooms
+
+Create separate listening rooms or join existing rooms. Functionality will differ whether you are the main device or a secondary listener within a room, with many secondary device features being heavily limited (either due to technical limitations or design choices).
+
+| Feature | Description | Main | Secondary |
+| :--- | :--- | :---: | :---: |
+| Audio playback operations | Play, pause, skip, loop... | ✔ | ✘ |
+| Queue operations | Add, delete, reorder... | ✔ | ✔ |
+| Downloads | Search and download into the queue | ✔ | ✔ |
+
+
+---
 
 ### Import playlists
 
