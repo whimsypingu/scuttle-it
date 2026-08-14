@@ -14,7 +14,7 @@ import type { PlaylistAction, PlaylistItemProps } from '@/playlist/playlist.type
 export const PlaylistItem = ({ 
     playlist,
     onSelect,
-    actions = ["shufflePlay", "play", "pin", "edit"] //default setup
+    actions = ["shufflePush", "push", "pin", "edit"] //default setup
 }: PlaylistItemProps) => {
 
     /* DRAG ACTION HANDLING */

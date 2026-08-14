@@ -13,7 +13,7 @@ import { REORDER_BLACKLIST } from './playlist.constants';
 
 export const usePlaylistActionHandler = () => {
     //access the mutations from the tanstack query hook
-    const { setPlaylist } = useSetQueue();
+    const { setPlaylist, pushPlaylist } = useSetQueue();
     const { setPin } = usePinsMutations();
     const { setEditTarget } = useEditTarget();
 
@@ -45,12 +45,22 @@ export const usePlaylistActionHandler = () => {
                 });
                 break;
 
-            case "delete":
-                makeToast(props.action);
-                break;
-
             case "shufflePlay":
                 setPlaylist({
+                    playlist: props.playlist,
+                    sortmode: 2,
+                });
+                break;
+
+            case "push":
+                pushPlaylist({
+                    playlist: props.playlist,
+                    sortmode: 0,
+                });
+                break;
+            
+            case "shufflePush":
+                pushPlaylist({
                     playlist: props.playlist,
                     sortmode: 2,
                 });
