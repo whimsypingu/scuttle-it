@@ -16,7 +16,7 @@ AudioRouter = APIRouter(prefix="/audio", tags=["Audio"])
 
 @AudioRouter.get("/stream/{track_id}")
 async def get_audio_stream(
-    device_ctx: DeviceContext = Depends(get_device_context),
+    ctx: DeviceContext = Depends(get_device_context),
     room_id: str | None = Query(None, description="Room ID"),
     track_id: str = Path(..., min_length=1, description="Track ID"),
     db_manager: DatabaseManager = Depends(get_db_manager),
@@ -24,7 +24,7 @@ async def get_audio_stream(
 ):
     try:
         if not await db_manager.is_track_downloaded(track_id):
-            active_room_id = room_id or device_ctx.room_id #prefer raw room_id embedded into url, for src= requests, otherwise fallback
+            active_room_id = room_id or ctx.room_id #prefer raw room_id embedded into url, for src= requests, otherwise fallback
             job = DownloadJob(
                 track_id=track_id,
                 priority=True,

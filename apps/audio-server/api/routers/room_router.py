@@ -25,13 +25,13 @@ DefaultCrashException = HTTPException(
 
 @RoomRouter.post("/create", response_model=CreateJoinRoomResponse)
 async def create_room_endpoint(
-    device_ctx: DeviceContext = Depends(get_device_context),
+    ctx: DeviceContext = Depends(get_device_context),
     db_manager: DatabaseManager = Depends(get_db_manager),
     room_manager: RoomManager = Depends(get_room_manager)
 ):
     try:
         room_id = await db_manager.create_room()
-        device: Device = room_manager.device_active(room_id, device_ctx.device_id)
+        device: Device = room_manager.device_active(room_id, ctx.device_id)
 
         return {
             "room_id": room_id,
@@ -43,7 +43,7 @@ async def create_room_endpoint(
 
 @RoomRouter.get("/join/{join_room_id}", response_model=CreateJoinRoomResponse)
 async def join_room_endpoint(
-    device_ctx: DeviceContext = Depends(get_device_context),
+    ctx: DeviceContext = Depends(get_device_context),
     join_room_id: str = Path(..., min_length=1, description="Join Room ID"),
     db_manager: DatabaseManager = Depends(get_db_manager),
     room_manager: RoomManager = Depends(get_room_manager)
@@ -52,7 +52,7 @@ async def join_room_endpoint(
         is_valid = await db_manager.validate_room(join_room_id)
 
         if is_valid:
-            device: Device = room_manager.device_active(join_room_id, device_ctx.device_id)
+            device: Device = room_manager.device_active(join_room_id, ctx.device_id)
 
             return {
                 "room_id": join_room_id,

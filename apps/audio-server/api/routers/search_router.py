@@ -32,7 +32,7 @@ async def search_database(
 
 @SearchRouter.post("/yt-search")
 async def search_youtube(
-    device_ctx: DeviceContext = Depends(get_device_context),
+    ctx: DeviceContext = Depends(get_device_context),
     q: str = Query(..., min_length=1, description="YouTube search query"),
     query_limit: int = Query(default=5, ge=1, le=10),
     dl_queue: DownloadQueue = Depends(get_dl_queue)
@@ -41,7 +41,7 @@ async def search_youtube(
         job = DownloadJob(
             query=q,
             query_limit=query_limit,
-            room_id=device_ctx.room_id
+            room_id=ctx.room_id
         )
         await dl_queue.add(job)
         return {
