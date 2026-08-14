@@ -154,8 +154,14 @@ class RoomManager:
             invalid_room_ids = await self.db_manager.cleanup_rooms()
 
             async with self.lock:
+                #clear up rooms
                 for room_id in invalid_room_ids:
-                    self.rooms.pop(room_id, None)
+                    removed_room = self.rooms.pop(room_id, None)
+
+                    #clear up device mapping, removing devices mapped to this room
+                    if removed_room:
+                        for device_id in removed_room.devices.keys():
+                            self.device_to_room.pop(device_id, None)
 
             logger.info(f"Cleaned up {len(invalid_room_ids)} stale rooms.")
 
