@@ -6,17 +6,17 @@ logger = logging.getLogger(__name__)
 class SettingsMixin:
     """Handles database synced settings"""
 
-    async def set_loopmode(self, loopmode) -> bool:
+    async def set_loopmode(self, loopmode, room_id) -> bool:
         """Set the loopmode"""
-        logger.info(f"Setting loopmode to {loopmode}")
+        logger.info(f"Setting loopmode to {loopmode} in room {room_id}")
 
-        if (loopmode >= 3):
+        if (loopmode > 2 or loopmode < 0):
             logger.warning("Attempting to set loopmode to out of bounds range, skipping.")
             return False
 
         try:
             async with self.session() as db:
-                await db.execute("UPDATE settings SET loopmode = ? WHERE id = 1;", (loopmode,))
+                await db.execute("UPDATE rooms SET loopmode = ? WHERE id = ?;", (loopmode, room_id))
 
                 logger.info(f"Successfully set loopmode to {loopmode}")
                 return True
@@ -26,14 +26,16 @@ class SettingsMixin:
             raise
 
 
-    async def get_settings(self) -> dict:
+    async def get_settings(self, room_id) -> dict:
         """Get the settings"""
+        logger.info(f"Retrieving settings for room {room_id}")
 
-        query = "SELECT loopmode FROM settings WHERE id = 1;"
+        query = "SELECT loopmode FROM rooms WHERE id = ?;"
+        params = (room_id,)
 
         try:
             async with self.session() as db:
-                async with db.execute(query) as cursor:
+                async with db.execute(query, params) as cursor:
                     row = await cursor.fetchone()
 
                     return dict(row)

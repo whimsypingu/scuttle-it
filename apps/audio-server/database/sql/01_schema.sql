@@ -87,6 +87,7 @@ ON playlist_tracks (playlist_internal_id, position, track_internal_id);
 CREATE TABLE IF NOT EXISTS rooms (
     internal_id INTEGER PRIMARY KEY AUTOINCREMENT,
     id TEXT UNIQUE,
+    loopmode INTEGER DEFAULT 1, --loop modes: 0=None, 1=All, 2=One 
     created_at INTEGER DEFAULT (unixepoch()),
     last_active INTEGER DEFAULT (unixepoch())
 );
@@ -112,6 +113,5 @@ ON play_queue(room_internal_id, position); --index by room id for room based sor
 CREATE TABLE IF NOT EXISTS settings (
     id INTEGER PRIMARY KEY CHECK (id = 1), --ensures only one row
     username TEXT NOT NULL,
-    created_at INTEGER DEFAULT (unixepoch()),
-    loopmode INTEGER DEFAULT 1 --loop modes: 0=None, 1=All, 2=One 
+    created_at INTEGER DEFAULT (unixepoch())
 );
