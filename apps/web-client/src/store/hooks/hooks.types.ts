@@ -62,6 +62,10 @@ export interface SetAllPlaylistMutationProps {
     playlist: PlaylistBase;
     sortmode?: Sortmode;
 }
+export interface PushAllPlaylistMutationProps {
+    playlist: PlaylistBase;
+    sortmode?: Sortmode;
+}
 
 
 

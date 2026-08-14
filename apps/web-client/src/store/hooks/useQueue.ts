@@ -7,8 +7,8 @@ import { scuttleFetch } from "@/lib/utils";
 import { getTrackDisplayMetadata, trackBaseToQueueTrack } from "@/track/track.utils";
 
 import type { QueueTrack } from "@/track/track.types";
-import type { PopMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetAllPlaylistMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
-import type { SetFirstQueueResponse, SetAllQueueResponse, PushQueueResponse, PushNextQueueResponse, PopQueueResponse, ShuffleQueueResponse, ReorderQueueResponse } from "./hooks.responses";
+import type { PopMutationProps, PushAllPlaylistMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetAllPlaylistMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
+import type { SetFirstQueueResponse, SetAllQueueResponse, PushQueueResponse, PushNextQueueResponse, PopQueueResponse, ShuffleQueueResponse, ReorderQueueResponse, PushAllQueueResponse } from "./hooks.responses";
 
 
 export const useQueue = () => {
@@ -343,6 +343,33 @@ export const useSetQueue = () => {
         },
     });
 
+    // push a playlist to the end of the queue. does not optimistically update the queue
+    const pushAllPlaylistMutation = useMutation({
+        mutationFn: async ({ playlist, sortmode }: PushAllPlaylistMutationProps) => {
+            const query = sortmode !== undefined ? `?sortmode=${sortmode}` : "";
+            const response = await scuttleFetch(`/queue/push-all/playlist/${playlist.id}${query}`, {
+                method: "POST",
+            });
+            if (!response.ok) throw new Error("Failed to push to queue");
+
+            const data = await response.json();
+            return data as PushAllQueueResponse;
+        },
+        onSuccess: (data, variables) => {
+            if (data.setCount > 0) {                
+                queryClient.setQueryData(queryKey, data.queue);
+                makeToast("Queued: ", variables.playlist.name);
+            } else if (data.skipCount > 0) {
+                makeToast("Queueing: ", variables.playlist.name); //no downloaded tracks available, but downloading is happening on skipCount tracks
+            } else {
+                makeToast("Empty: ", variables.playlist.name); //empty playlist
+            }
+        },
+        onError: (err) => {
+            console.log("Push queue failed.");
+        },
+    });
+
     // clear the remaining queue
     const clearMutation = useMutation({
         mutationFn: async () => {
@@ -381,6 +408,7 @@ export const useSetQueue = () => {
 
     return {
         setPlaylist: setAllPlaylistMutation.mutate,
+        pushPlaylist: pushAllPlaylistMutation.mutate,
         clearQueue: clearMutation.mutate,
     };
 };

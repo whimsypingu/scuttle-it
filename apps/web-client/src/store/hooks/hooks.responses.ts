@@ -29,6 +29,11 @@ export interface SetAllQueueResponse {
     skipCount: number;
     queue: QueueTrack[];
 }
+export interface PushAllQueueResponse {
+    setCount: number;
+    skipCount: number;
+    queue: QueueTrack[];
+}
 
 /**
  * useRoom

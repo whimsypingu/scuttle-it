@@ -1,4 +1,4 @@
-import { PlayIcon, QuestionIcon, ShuffleIcon } from '@phosphor-icons/react';
+import { PlayIcon, QuestionIcon, ShuffleIcon, RowsPlusBottomIcon } from '@phosphor-icons/react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 import { formatReadableTime } from '@/features/audio/audio.utils';
@@ -9,6 +9,7 @@ import { PLAYLIST_CONFIG } from '@/playlist/playlist.constants';
 import type { PlaylistInfoProps } from '@/playlist/playlist.types';
 import type { Sortmode } from '@/store/hooks/hooks.types';
 import { useSetQueue } from '@/store/hooks/useQueue';
+import { useAudioMain } from '@/features/audio/useAudioEngine';
 
 
 export const PlaylistInfo = ({
@@ -22,16 +23,25 @@ export const PlaylistInfo = ({
         setSortmode 
     } = scrollContext;
 
-    const { setPlaylist } = useSetQueue();
+    const { setPlaylist, pushPlaylist } = useSetQueue();
+    const { isMain } = useAudioMain();
 
     const isSortable = (typeof sortmode === "number") && !!setSortmode; //check specifically for existence, not truthiness for sortmode because 0 is falsy
     const CurrentIcon = isSortable ? SORTMODE_CONFIG[sortmode].icon : QuestionIcon; //precompute current Icon if available, otherwise see a QuestionIcon which should never happen
 
     //play the entire playlist with the given sorted order
-    const handlePlay = () => {
+    const handlePlay = (shuffle: boolean) => {
         setPlaylist({
             playlist,
-            sortmode,
+            sortmode: shuffle ? 2 : sortmode,
+        });
+    }
+
+    //push the entire playlist with the given sorted order
+    const handlePush = (shuffle: boolean) => {
+        pushPlaylist({
+            playlist,
+            sortmode: shuffle ? 2 : sortmode,
         });
     }
 
@@ -61,21 +71,43 @@ export const PlaylistInfo = ({
 
             {/* RIGHT ACTION GROUP */}
             <div className="ml-auto flex items-end gap-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-all">
-                {/* PLAY ALL */}
-                <button 
-                    className="p-1"
-                    onClick={handlePlay}
-                >
-                    <PlayIcon size={PLAYLIST_CONFIG.iconSize} weight="fill" />
-                </button>
-                
-                {/* SHUFFLE */}
-                <button 
-                    className="p-1"
-                    onClick={handleShuffle}    
-                >
-                    <ShuffleIcon size={PLAYLIST_CONFIG.iconSize} weight="bold" />
-                </button>
+                {isMain ? (
+                    <>
+                    {/* PLAY ALL */}
+                    <button 
+                        className="p-1"
+                        onClick={() => handlePlay(false)}
+                    >
+                        <PlayIcon size={PLAYLIST_CONFIG.iconSize} weight="fill" />
+                    </button>
+                    
+                    {/* SHUFFLE */}
+                    <button 
+                        className="p-1"
+                        onClick={() => handlePlay(true)}
+                    >
+                        <ShuffleIcon size={PLAYLIST_CONFIG.iconSize} weight="bold" />
+                    </button>
+                    </>
+                ) : (
+                    <>
+                    {/* QUEUE ALL */}
+                    <button 
+                        className="p-1"
+                        onClick={() => handlePush(false)}
+                    >
+                        <RowsPlusBottomIcon size={PLAYLIST_CONFIG.iconSize} weight="fill" />
+                    </button>
+                    
+                    {/* SHUFFLE */}
+                    <button 
+                        className="p-1"
+                        onClick={() => handlePush(true)}
+                    >
+                        <ShuffleIcon size={PLAYLIST_CONFIG.iconSize} weight="bold" />
+                    </button>
+                    </>
+                )}
 
                 {/* SORT TRIGGER */}
                 {isSortable && (
