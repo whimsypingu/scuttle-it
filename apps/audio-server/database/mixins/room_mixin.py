@@ -95,7 +95,7 @@ class RoomMixin:
             logger.exception("Failed to update last_active for rooms")
 
 
-    async def cleanup_rooms(self) -> bool:
+    async def cleanup_rooms(self) -> list[str]:
         """Clean up and remove all rooms that are expired"""
         logger.info(f"Cleaning up rooms...")
 
@@ -103,13 +103,17 @@ class RoomMixin:
 
         try:
             async with self.session() as db:
-                await db.execute('''
+                cursor = await db.execute('''
                     DELETE FROM rooms
-                    WHERE id != ? AND COALESCE(last_active, 0) < ?;
+                    WHERE id != ? AND COALESCE(last_active, 0) < ?
+                    RETURNING id;
                 ''', (self.DEFAULT_ROOM_ID, cutoff_ts))
 
-                logger.info(f"Successfully cleaned up expired rooms")
-                return True
+                rows = await cursor.fetchall()
+                deleted_ids = [row[0] for row in rows]
+
+                logger.info(f"Successfully cleaned up {len(deleted_ids)} expired rooms")
+                return deleted_ids
             
         except Exception:
             logger.exception(f"Failed to clean up expired rooms")

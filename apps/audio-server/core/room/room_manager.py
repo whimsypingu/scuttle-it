@@ -149,6 +149,19 @@ class RoomManager:
         except Exception as e:
             logger.error(f"Error: {str(e)}")
 
+    async def cleanup_rooms(self):
+        try:
+            invalid_room_ids = await self.db_manager.cleanup_rooms()
+
+            async with self.lock:
+                for room_id in invalid_room_ids:
+                    self.rooms.pop(room_id, None)
+
+            logger.info(f"Cleaned up {len(invalid_room_ids)} stale rooms.")
+
+        except Exception as e:
+            logger.error(f"Error: {str(e)}")
+
     async def run(self):
         """Main loop for running the RoomManager instance and periodically handling flush and cleanup every flush_interval seconds"""
         logger.info(f"RoomManager started.")
@@ -157,7 +170,7 @@ class RoomManager:
             while self.is_running:
                 await asyncio.sleep(self.flush_interval)
                 await self.flush()
-                await self.db_manager.cleanup_rooms()
+                await self.cleanup_rooms()
         except asyncio.CancelledError:
             await self.flush()
 
