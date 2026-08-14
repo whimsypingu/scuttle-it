@@ -132,6 +132,18 @@ Create separate listening rooms or join existing rooms. Functionality will diffe
 | Queue operations | Add, delete, reorder... | ✔ | ✔ |
 | Downloads | Search and download into the queue | ✔ | ✔ |
 
+<div align="center">
+    <img width="300" alt="scuttle_secondary_device" src="https://github.com/user-attachments/assets/1d9cf69f-e461-4293-afa9-58e1f2d8200a" />
+    <p><em>(8/14/26)</em></p>
+</div>
+
+Change the listening session by typing in a valid room code or scan the QR code. Scroll down to see a 'New Room' option and make a fresh individual listening session with an empty queue. Note that while the queues are separate across rooms, playlists, likes, and all standard app data structures as well as tracks are shared among all users. So if a download happens in Room A, it will be only be queued to Room A, but anyone in Room B will then be able to listen to the same track as well.
+
+<div align="center">
+    <img width="300" alt="scuttle_join_code_form" src="https://github.com/user-attachments/assets/95bbc67c-ca3c-41f2-ba2a-38971c6a6040" />
+    <p><em>(8/14/26)</em></p>
+</div>
+
 
 ---
 
@@ -189,11 +201,13 @@ Ensure you have `python` installed on your device. (You can test this by typing 
 ### Important external dependency disclaimer:
 The default Scuttle setup downloads some external binaries during installation. Here is a brief explanation of them:
 
-* **ffmpeg/ffprobe** - Extracting and modifying audio files.
+* **[FFmpeg](https://www.ffmpeg.org/) / [FFprobe](https://ffmpeg.org/ffprobe.html)** - Extracting and modifying audio files.
 
-* **deno** - JavaScript runtime engine to safely execute web scraper scripts (recommended for reliable yt-dlp usage).
+* **[Deno](https://deno.com/)** - JavaScript runtime engine to safely execute web scraper scripts (recommended for reliable yt-dlp usage).
 
-* **cloudflared** - Establishes free connection tunnel from your machine to the Cloudflare network, allowing you to access your Scuttle server from the internet without having to configure anything on your router.
+* **[cloudflared](https://github.com/cloudflare/cloudflared)** - Establishes free connection tunnel from your machine to the Cloudflare network, allowing you to access your Scuttle server from the internet without having to configure anything on your router.
+
+* **[qr-codes](https://github.com/whimsypingu/qr-codes)** - Generates custom QR codes.
 
 For other dependencies that will require an internet connection to set up, see the [requirements.txt](./apps/audio-server/requirements.txt) file for the audio server.
 
