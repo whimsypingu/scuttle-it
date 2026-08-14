@@ -52,17 +52,17 @@ export const usePlaylistActionHandler = () => {
                 });
                 break;
 
-            case "push":
+            case "pushSwipe":
                 pushPlaylist({
                     playlist: props.playlist,
-                    sortmode: 0,
+                    sortmode: 0, //0 is manual position descending order, see: apps/web-client/store/hooks/hooks.types.ts for SortmodeProps
                 });
                 break;
             
-            case "shufflePush":
+            case "shufflePushSwipe":
                 pushPlaylist({
                     playlist: props.playlist,
-                    sortmode: 2,
+                    sortmode: 2, //2 is shuffle playlist, see: apps/web-client/store/hooks/hooks.types.ts for SortmodeProps
                 });
                 break;
 

@@ -82,7 +82,7 @@ export interface YTSearchMutationProps {
  * Sorting Playlists
  */
 export type SortmodeProps = 
-    | { sortmode: 0; desc: "Position descending" }
+    | { sortmode: 0; desc: "Position descending" } //manual ordering
     | { sortmode: 1; desc: "Date added descending" }
     | { sortmode: 2; desc: "Shuffle" };
 export type Sortmode = SortmodeProps["sortmode"];

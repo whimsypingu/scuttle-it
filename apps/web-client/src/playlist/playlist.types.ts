@@ -27,8 +27,8 @@ export type PlaylistActionProps =
     | { action: "delete"; playlist: SummaryPlaylist }
     | { action: "play"; playlist: SummaryPlaylist }
     | { action: "shufflePlay"; playlist: SummaryPlaylist }
-    | { action: "push"; playlist: SummaryPlaylist }
-    | { action: "shufflePush"; playlist: SummaryPlaylist }
+    | { action: "pushSwipe"; playlist: SummaryPlaylist }
+    | { action: "shufflePushSwipe"; playlist: SummaryPlaylist }
     | { action: "edit"; playlist: SummaryPlaylist };
 export type PlaylistAction = PlaylistActionProps["action"];
 

@@ -33,7 +33,7 @@ export const PlaylistInfo = ({
     const handlePlay = (shuffle: boolean) => {
         setPlaylist({
             playlist,
-            sortmode: shuffle ? 2 : sortmode,
+            sortmode: shuffle ? 2 : sortmode, //2 is shuffle playlist, see: apps/web-client/store/hooks/hooks.types.ts for SortmodeProps
         });
     }
 
@@ -43,14 +43,6 @@ export const PlaylistInfo = ({
             playlist,
             sortmode: shuffle ? 2 : sortmode,
         });
-    }
-
-    //shuffle and play the playlist
-    const handleShuffle = () => {
-        setPlaylist({
-            playlist,
-            sortmode: 2, //2 is shuffle playlist, see: apps/web-client/store/hooks/hooks.types.ts for SortmodeProps
-        })
     }
 
     return (

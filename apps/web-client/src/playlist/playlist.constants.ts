@@ -30,11 +30,11 @@ export const PLAYLIST_ACTION_CONFIG: Record<PlaylistAction, PlaylistActionConfig
         icon: ShuffleIcon,
         color: "var(--color-brand)"
     },
-    push: {
+    pushSwipe: {
         icon: RowsPlusBottomIcon,
         color: "var(--color-brand)"
     },
-    shufflePush: {
+    shufflePushSwipe: {
         icon: ShuffleIcon,
         color: "var(--color-brand)"
     },
