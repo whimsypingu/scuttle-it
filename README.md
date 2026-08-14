@@ -236,8 +236,8 @@ The most basic version of Scuttle is now functional. However, there are a number
 
 - [ ] Profile
     - [ ] Saved amount price comparisons to modern streaming platforms, and suggest users buy merch or concert tickets to their favorite artists.
-    - [ ] Allow multiple users to edit queue but listen on one device.
-    - [ ] Separate user sessions for the same server (although this is against the original intention of this project as a single user project).
+    - [x] Allow multiple users to edit queue but listen on one device.
+    - [x] Separate user sessions for the same server (although this is against the original intention of this project as a single user project).
     - [ ] Show detailed analysis of user statistics, like most listened artist, longest track, etc.
 
 - [ ] Desktop launcher functionality
@@ -245,7 +245,7 @@ The most basic version of Scuttle is now functional. However, there are a number
     - [ ] Upload existing user audio files to the Scuttle system.
     - [ ] Download Scuttle audio files to elsewhere as their corrected names.
     - [ ] Allow custom tunnel configuration.
-    - [ ] Allow users to restart server and tunnel from the frontend interface (may require some kind of IPC implementation).
+    - [ ] Allow users to restart server and tunnel from the web-client frontend interface (may require some kind of IPC implementation).
 
 - [ ] UI/UX
     - [ ] History queue.
@@ -257,7 +257,7 @@ The most basic version of Scuttle is now functional. However, there are a number
 ## Known Issues
 There are also a number of known and unfixed issues in Scuttle.
 
-* Sometimes audio context will not resume correctly on iOS resulting in soundless audio, and requiring a pause and play.
+* Sometimes audio context will not resume correctly on iOS resulting in soundless audio, and requiring a pause and play (very rare, seems to occasionally happen after a call is taken during audio playback).
 * Audio may appear distorted and high-pitched briefly when connecting or disconnecting bluetooth on iOS.
 
 
