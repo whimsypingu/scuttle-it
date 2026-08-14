@@ -322,6 +322,7 @@ export const useSetQueue = () => {
                 queryClient.setQueryData(queryKey, data.queue);
 
                 //special handling for iOS breaking due to swipes not allowing audio event play/loading
+                //this may be deprecated now and further testing could reveal we might be able to remove the .setQueueFlag entirely
                 if (!audioEngine.isPaused()) {
                     audioEngine.setQueueFlag = true; //set an internal flag to force onEnded to behave differently: src/features/audio/AudioLogic.tsx
                     audioEngine.seek(audioEngine.getDuration() - 0.1); //scrub to the end of the current track. this skirts the iOS blocking audio play on 
@@ -358,7 +359,7 @@ export const useSetQueue = () => {
         onSuccess: (data, variables) => {
             if (data.setCount > 0) {                
                 queryClient.setQueryData(queryKey, data.queue);
-                makeToast("Queued: ", variables.playlist.name);
+                makeToast(variables.sortmode !== 2 ? "Queued: " : "Shuffled: ", variables.playlist.name);
             } else if (data.skipCount > 0) {
                 makeToast("Queueing: ", variables.playlist.name); //no downloaded tracks available, but downloading is happening on skipCount tracks
             } else {
