@@ -317,22 +317,28 @@ export const useSetQueue = () => {
             return data as SetAllQueueResponse;
         },
         onSuccess: (data, variables) => {
-            const oldQueue = queryClient.getQueryData<QueueTrack[]>(queryKey);
-            if (data.setCount > 0 && oldQueue && oldQueue.length > 0) {                
+            // const oldQueue = queryClient.getQueryData<QueueTrack[]>(queryKey);
+            if (data.setCount > 0) { //} && oldQueue && oldQueue.length > 0) {                
                 queryClient.setQueryData(queryKey, data.queue);
 
                 //special handling for iOS breaking due to swipes not allowing audio event play/loading
                 //this may be deprecated now and further testing could reveal we might be able to remove the .setQueueFlag entirely
-                if (!audioEngine.isPaused()) {
-                    audioEngine.setQueueFlag = true; //set an internal flag to force onEnded to behave differently: src/features/audio/AudioLogic.tsx
-                    audioEngine.seek(audioEngine.getDuration() - 0.1); //scrub to the end of the current track. this skirts the iOS blocking audio play on 
+                // if (!audioEngine.isPaused()) {
+                //     audioEngine.setQueueFlag = true; //set an internal flag to force onEnded to behave differently: src/features/audio/AudioLogic.tsx
+                //     audioEngine.seek(audioEngine.getDuration() - 0.1); //scrub to the end of the current track. this skirts the iOS blocking audio play on 
 
-                    makeToast(variables.sortmode !== 2 ? "Playing: " : "Shuffled: ", variables.playlist.name);
-                } else {
-                    audioEngine.seek(0);
+                //     makeToast(variables.sortmode !== 2 ? "Playing: " : "Shuffled: ", variables.playlist.name);
+                // } else {
+                //     audioEngine.seek(0);
+                //     audioEngine.playTrack({
+                //         trackId: 
+                //     })
 
-                    makeToast(variables.sortmode !== 2 ? "Queue: " : "Shuffled: ", variables.playlist.name); //require user interaction (tap) to start audio, for consistency across platforms
-                }
+                //     makeToast(variables.sortmode !== 2 ? "Queue: " : "Shuffled: ", variables.playlist.name); //require user interaction (tap) to start audio, for consistency across platforms
+                // }
+
+				audioEngine.playTrack({ trackId: data.queue[0].id, forceRestart: true });
+                makeToast(variables.sortmode !== 2 ? "Playing: " : "Shuffled: ", variables.playlist.name); 
             } else if (data.skipCount > 0) {
                 makeToast("Queueing: ", variables.playlist.name); //no downloaded tracks available, but downloading is happening on skipCount tracks
             } else {
