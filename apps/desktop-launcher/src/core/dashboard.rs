@@ -144,15 +144,6 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
         )
         .on_press(Message::ToggleMenu);
 
-        //close menu button
-        let menu_close_bar = row![
-            space::horizontal(),
-            button(if app.is_menu_open { "Close" } else { "Options" })
-                .on_press(Message::ToggleMenu)
-        ]
-        .width(Length::Fill)
-        .align_y(Alignment::Center);
-    
         //webhook input field
         let webhook_input = column![
             text("Webhook").size(16),
@@ -177,12 +168,36 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
         ]
         .spacing(10);
 
-        //
+        //token input field
+        let token_input = column![
+            text("Token").size(16),
+            row![
+                text_input("Cloudflare tunnel token...", &app.token)
+                    .on_input_maybe(if app.is_token_locked {
+                        None
+                    } else {
+                        Some(Message::TokenChanged)
+                    })
+                    .padding(10)
+                    .size(14),
+
+                button(if app.is_token_locked { "Edit" } else { "Save" })
+                    .on_press(if app.is_token_locked {
+                        Message::UnlockToken
+                    } else {
+                        Message::LockToken(app.token.clone())
+                    })
+            ]
+            .spacing(10),
+        ]
+        .spacing(10);
+
+        //construct the layout that pops up
         let sidebar = opaque(
             container(
                 column![
-                    menu_close_bar,
                     webhook_input,
+                    token_input,
                 ]
                 .spacing(20),
             )
