@@ -33,9 +33,13 @@ struct App {
     setup_handle: Option<Handle>,
 
     logs: Vec<String>,
+    
+    is_menu_open: bool,
 
     webhook: String,
     is_webhook_locked: bool,
+
+    token: String,
 
     host: String,
     port: String,
@@ -57,6 +61,10 @@ impl App {
         let initial_env_webhook = Workspace::retrieve_env(constants::env_keys::WEBHOOK)
             .unwrap_or_default();
 
+        //load in initial tunnel token state
+        let initial_env_token = Workspace::retrieve_env(constants::env_keys::TOKEN)
+            .unwrap_or_default();
+
         //other initial env vars
         let initial_env_host = Workspace::retrieve_env(constants::env_keys::HOST)
             .unwrap_or_else(|| constants::DEFAULT_HOST.to_string());
@@ -73,8 +81,12 @@ impl App {
 
             logs: Vec::new(),
 
+            is_menu_open: false,
+
             webhook: initial_env_webhook.clone(),
             is_webhook_locked: !initial_env_webhook.is_empty(),
+
+            token: initial_env_token.clone(),
 
             host: initial_env_host,
             port: initial_env_port,

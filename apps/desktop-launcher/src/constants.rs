@@ -5,6 +5,7 @@ pub mod files {
 
 pub mod env_keys {
     pub const WEBHOOK: &str = "WEBHOOK_URL";
+    pub const TOKEN: &str = "TUNNEL_TOKEN";
     pub const PYTHON: &str = "PYTHON_BIN_PATH";
     pub const TUNNEL: &str = "TUNNEL_BIN_PATH";
     pub const HOST: &str = "HOST";
