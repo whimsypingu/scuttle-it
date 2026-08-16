@@ -196,11 +196,14 @@ fn extract_persistent_cloudflared_url(line: &str) -> Option<String> {
 ///
 /// Returns a `Message::TunnelHealthTick` which triggers a background health check task.
 pub fn tunnel_health_subscription(server_status: &ServiceStatus, tunnel_status: &ServiceStatus) -> Subscription<Message> {
-    //requires server = RUNNING and tunnel = RUNNING
-    let is_active = matches!(server_status, ServiceStatus::Running) && matches!(tunnel_status, ServiceStatus::Running);
+    //requires server = RUNNING and tunnel = STARTING | RUNNING with varying ping frequency
+    let interval = match (server_status, tunnel_status) {
+        (ServiceStatus::Running, ServiceStatus::Starting) => Some(time::Duration::from_secs(constants::HEALTH_CHECK_STARTING_INTERVAL)),
+        (ServiceStatus::Running, ServiceStatus::Running) => Some(time::Duration::from_secs(constants::HEALTH_CHECK_RUNNING_INTERVAL)),
+        _ => None, //no timer
+    };
 
-    if is_active {
-        let duration = time::Duration::from_secs(constants::HEALTH_CHECK_RUNNING_INTERVAL);
+    if let Some(duration) = interval {
         time::every(duration).map(|_| Message::TunnelHealthTick)
     } else {
         Subscription::none()

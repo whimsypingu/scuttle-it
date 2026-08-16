@@ -341,6 +341,7 @@ impl App {
                 self.is_checking_tunnel_health = false; //reset check guard
                 match result {
                     Ok(_) => { //bing chilling
+                        if self.tunnel_status != ServiceStatus::Running { self.tunnel_status = ServiceStatus::Running }; //tunnel is running, set it to Running
                         Task::none()
                     }
                     Err(e) => {
