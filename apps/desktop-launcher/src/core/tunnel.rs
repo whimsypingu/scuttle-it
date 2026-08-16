@@ -4,6 +4,7 @@ use iced::futures::channel::mpsc;
 
 use reqwest;
 use std::process::Stdio;
+use std::path::PathBuf;
 use tokio::process::Command;
 use tokio::io::{BufReader, AsyncBufReadExt};
 
@@ -56,35 +57,57 @@ pub fn tunnel_subscription(server_status: &ServiceStatus, tunnel_status: &Servic
 /// Returns a `Stream` of `Message` variants to be handled by the main `update` loop.
 pub fn tunnel_worker() -> impl Stream<Item = Message> {
     stream::channel(100, |mut output: mpsc::Sender<Message>| async move {
-        // --- 1. Environment Configuration ---
-        // Uses functional chaining to gather all required variables or bail with an error.
-        let config = Workspace::retrieve_env(constants::env_keys::TUNNEL)   
-            .ok_or("Tunnel executable not setup correctly in env")
-            .map(|t| (t, constants::DEFAULT_HOST.to_string()))
-            .and_then(|(t, h)| Workspace::retrieve_env(constants::env_keys::PORT)
-                .ok_or("Port not setup correctly in env").map(|p| (t, h, p)))
-            .and_then(|(t, h, p)| Workspace::get_project_root_dir()
-                .map_err(|_| "Could not find project root directory").map(|r| (t, h, p, r)));
+
+        //helper enum to represent execution mode
+        enum Mode {
+            Persistent(String), //persistent tunnel mode
+            Quick(String), //ephemeral
+        }
+
+        let config = (|| -> Result<(String, PathBuf, Mode), String> {
+            let tunnel_bin = Workspace::retrieve_env(constants::env_keys::TUNNEL)
+                .ok_or("Tunnel executable not setup correctly in env")?;
+
+            let root_dir = Workspace::get_project_root_dir()
+                .map_err(|_| "Could not find project root directory")?;
+
+            let token = Workspace::retrieve_env(constants::env_keys::TOKEN);
+            
+            if let Some(token) = token {
+                Ok((tunnel_bin, root_dir, Mode::Persistent(token)))
+            } else {
+                let port = Workspace::retrieve_env(constants::env_keys::PORT)
+                    .ok_or("Port not setup correctly in env")?;
+                let host = constants::DEFAULT_HOST.to_string();
+                let target_url = format!("http://{}:{}/", host, port);
+
+                Ok((tunnel_bin, root_dir, Mode::Quick(target_url)))
+            }
+        })();
 
         //if any gathrered required env vars failed error and bail
-        let (tunnel_bin, host, port, root_dir) = match config {
+        let (tunnel_bin, root_dir, mode) = match config {
             Ok(values) => values,
             Err(e) => {
                 let _ = output.send(Message::StopServer(Err(e.to_string()))).await;
                 return;
             }
         };
-        let target_url = format!("http://{}:{}/", host, port);
 
         // --- 2. Command Preparation ---
         let mut cmd = Command::new(tunnel_bin);
-        cmd.args([
-            "tunnel",
-            "--url", &target_url
-        ])
-        .current_dir(root_dir)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
+        cmd.current_dir(root_dir)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped());
+
+        match &mode {
+            Mode::Persistent(token) => {
+                cmd.args(["tunnel", "run", "--token", token]);
+            }
+            Mode::Quick(target_url) => {
+                cmd.args(["tunnel", "--url", target_url]);
+            }
+        }
 
         #[cfg(windows)]
         {
@@ -104,7 +127,10 @@ pub fn tunnel_worker() -> impl Stream<Item = Message> {
                     let _ = output.send(Message::TunnelLog(line.clone())).await;
 
                     //check if it is the url
-                    if !url_detected && line.contains(".trycloudflare.com") {
+                    if matches!(mode, Mode::Quick(_))
+                        && !url_detected 
+                        && line.contains(".trycloudflare.com") 
+                    {
                         if let Some(url) = extract_cloudflared_url(&line) {
                             let _ = output.send(Message::SetTunnelUrl(url)).await;
                             url_detected = true;

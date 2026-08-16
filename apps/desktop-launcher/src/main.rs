@@ -40,6 +40,7 @@ struct App {
     is_webhook_locked: bool,
 
     token: String,
+    is_token_locked: bool,
 
     host: String,
     port: String,
@@ -196,35 +197,21 @@ impl App {
                 self.is_token_locked = false;
                 Task::none()
             }
-            Message::LockWebhook(save_text) => {
-                self.is_webhook_locked = true;
+            Message::LockToken(save_text) => {
+                self.is_token_locked = true;
                 Task::perform(
-                    core::webhook::run_save_webhook(save_text),
-                    Message::SaveWebhook
+                    core::token::run_save_token(save_text),
+                    Message::SaveToken
                 )
             }
-            Message::SaveWebhook(result) => {
+            Message::SaveToken(result) => {
                 match result {
                     Ok(_) => {}
                     Err(_) => {
-                        self.is_webhook_locked = false;
+                        self.is_token_locked = false;
                     }
                 }
-
-                //notifications about server local access and server tunnel access
-                let msg_server = core::webhook::notifications::server_url_access(self.port.clone());
-                let task_server = Task::perform(
-                    core::webhook::notify_webhook(self.client.clone(), msg_server),
-                    Message::WebhookSent
-                );
-
-                let msg_tunnel = core::webhook::notifications::tunnel_url_access(self.tunnel_url.clone());
-                let task_tunnel = Task::perform(
-                    core::webhook::notify_webhook(self.client.clone(), msg_tunnel),
-                    Message::WebhookSent
-                );
-
-                Task::batch(vec![task_server, task_tunnel])
+                Task::none()
             }
 
             // --- SERVER ---
