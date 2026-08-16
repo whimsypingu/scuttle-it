@@ -36,6 +36,9 @@ pub enum Message {
     TunnelHealthTick,
     TunnelHealth(Result<(), String>),
 
+    // --- menu ---
+    ToggleMenu,
+
     // --- webhook ---
     WebhookChanged(String),
     UnlockWebhook,

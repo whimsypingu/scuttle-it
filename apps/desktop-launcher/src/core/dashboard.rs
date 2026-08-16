@@ -13,9 +13,24 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
         _ => Color::from_rgb(0.5, 0.5, 0.5), //gray
     };
 
-    let is_server_running = matches!(app.server_status, ServiceStatus::Starting | ServiceStatus::Running);
-    let is_tunnel_running = matches!(app.tunnel_status, ServiceStatus::Starting | ServiceStatus::Running);
+    let is_server_running = matches!(
+        app.server_status, 
+        ServiceStatus::Starting | ServiceStatus::Running
+    );
+    let is_tunnel_running = matches!(
+        app.tunnel_status, 
+        ServiceStatus::Starting | ServiceStatus::Running
+    );
 
+    //menu toggle
+    let menu_toggle_bar = row![
+        button(if app.is_menu_open { "Close" } else { "Options" })
+            .on_press(Message::ToggleMenu)
+    ]
+    .width(Length::Fill)
+    .align_y(Alignment::Center);
+
+    //main dashboard controls
     let controls = row![
         column![
             row![
@@ -56,31 +71,8 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
     .spacing(50)
     .align_y(Alignment::Center);
 
-    let webhook_input = column![
-        text("Webhook").size(16),
-        row![
-            text_input("https://discord.com/api/webhooks/...", &app.webhook)
-                .on_input_maybe(if app.is_webhook_locked {
-                    None
-                } else {
-                    Some(Message::WebhookChanged)
-                })
-                .padding(10)
-                .size(14),
 
-            button(if app.is_webhook_locked { "Edit" } else { "Save" })
-                .on_press(if app.is_webhook_locked {
-                    Message::UnlockWebhook
-                } else {
-                    Message::LockWebhook(app.webhook.clone())
-                })
-        ]
-        .spacing(10),
-    ]
-    .spacing(10)
-    .width(Length::Fixed(400.0));
-
-
+    //tunnel url display
     let url_display = if let Some(url) = &app.tunnel_url {
         column![
             text("Public Tunnel URL:").size(12),
@@ -115,23 +107,102 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
     // }
 
 
-    let content = column![
+    //center main panel content
+    let dashboard_center = column![
         text("Scuttle").size(32),
         controls,
-        webhook_input,
         url_display,
-        // scrollable(log_column).height(Length::Fixed(300.0)),
     ]
-    .padding(40)
     .spacing(40)
-    .align_x(Alignment::Center)
+    .align_x(Alignment::Center);
+
+
+    let main_panel = container(dashboard_center)
+        .width(Length::Fill)
+        .height(Length::Fill)
+        .center_x(Length::Fill)
+        .center_y(Length::Fill);
+
+
+    //webhook input field
+    let webhook_input = column![
+        text("Webhook").size(16),
+        row![
+            text_input("https://discord.com/api/webhooks/...", &app.webhook)
+                .on_input_maybe(if app.is_webhook_locked {
+                    None
+                } else {
+                    Some(Message::WebhookChanged)
+                })
+                .padding(10)
+                .size(14),
+
+            button(if app.is_webhook_locked { "Edit" } else { "Save" })
+                .on_press(if app.is_webhook_locked {
+                    Message::UnlockWebhook
+                } else {
+                    Message::LockWebhook(app.webhook.clone())
+                })
+        ]
+        .spacing(10),
+    ]
+    .spacing(10)
+    .width(Length::Fixed(400.0));
+
+    let mut main_content_row = row![main_panel]
+        .width(Length::Fill)
+        .height(Length::Fill);
+
+    if app.is_menu_open {
+        let sidebar_content = column![
+            text("Settings").size(20),
+            webhook_input,
+        ]
+        .spacing(20)
+        .width(Length::Fixed(320.0))
+        .padding(20);
+
+        let sidebar = container(sidebar_content)
+            .height(Length::Fill);
+
+        main_content_row = main_content_row.push(sidebar);
+    }
+
+
+    //main container
+    let content = column![
+        menu_toggle_bar,
+        main_content_row,
+    ]
+    .padding(30)
+    .spacing(20)
     .height(Length::Fill);
 
     container(content)
         .width(Length::Fill)
         .height(Length::Fill)
-        .center_x(Length::Fill)
-        .center_y(Length::Fill)
         .into()
+
+
+
+
+    // let content = column![
+    //     text("Scuttle").size(32),
+    //     controls,
+    //     webhook_input,
+    //     url_display,
+    //     // scrollable(log_column).height(Length::Fixed(300.0)),
+    // ]
+    // .padding(40)
+    // .spacing(40)
+    // .align_x(Alignment::Center)
+    // .height(Length::Fill);
+
+    // container(content)
+    //     .width(Length::Fill)
+    //     .height(Length::Fill)
+    //     .center_x(Length::Fill)
+    //     .center_y(Length::Fill)
+    //     .into()
 }
 

@@ -139,6 +139,12 @@ impl App {
                 Task::none()
             }
 
+            // --- MENU ---
+            Message::ToggleMenu => {
+                self.is_menu_open = !self.is_menu_open;
+                Task::none()
+            }
+
             // --- WEBHOOK ---
             Message::WebhookChanged(new_text) => {
                 self.webhook = new_text;
