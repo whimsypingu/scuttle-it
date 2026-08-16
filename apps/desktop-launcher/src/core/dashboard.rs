@@ -25,8 +25,23 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
     //menu toggle header
     let menu_toggle_bar = row![
         space::horizontal(),
-        button(if app.is_menu_open { "Close" } else { "Options" })
+        button(text("☰").size(18))
             .on_press(Message::ToggleMenu)
+            .padding(8)
+            .style(|_theme, status| {
+                let text_color = match status {
+                    button::Status::Hovered | button::Status::Pressed => {
+                        Color::from_rgb(0.95, 0.95, 0.95)
+                    }
+                    _ => Color::from_rgb(0.7, 0.7, 0.7),
+                };
+
+                button::Style {
+                    text_color,
+                    background: None,
+                    ..Default::default()
+                }
+            })
     ]
     .width(Length::Fill)
     .align_y(Alignment::Center);
