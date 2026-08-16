@@ -127,15 +127,31 @@ pub fn tunnel_worker() -> impl Stream<Item = Message> {
                     let _ = output.send(Message::TunnelLog(line.clone())).await;
 
                     //check if it is the url
-                    if matches!(mode, Mode::Quick(_))
-                        && !url_detected 
-                        && line.contains(".trycloudflare.com") 
-                    {
-                        if let Some(url) = extract_cloudflared_url(&line) {
+                    if !url_detected {
+                        let detected_url = match &mode {
+                            Mode::Persistent(_) if line.contains("hostname") => {
+                                extract_persistent_cloudflared_url(&line)
+                            }
+                            Mode::Quick(_) if line.contains(".trycloudflare.com") => {
+                                extract_cloudflared_url(&line)
+                            }
+                            _ => None,
+                        };
+
+                        if let Some(url) = detected_url {
                             let _ = output.send(Message::SetTunnelUrl(url)).await;
                             url_detected = true;
                         }
                     }
+                    // if matches!(mode, Mode::Quick(_))
+                    //     && !url_detected 
+                    //     && line.contains(".trycloudflare.com")
+                    // {
+                    //     if let Some(url) = extract_cloudflared_url(&line) {
+                    //         let _ = output.send(Message::SetTunnelUrl(url)).await;
+                    //         url_detected = true;
+                    //     }
+                    // }
                 }
             },
             Err(e) => {
@@ -161,6 +177,24 @@ fn extract_cloudflared_url(line: &str) -> Option<String> {
     None
 }
 
+fn extract_persistent_cloudflared_url(line: &str) -> Option<String> {
+    let cleaned = line.replace('\\', "");
+
+    let start_pattern = "\"hostname\":\"";
+    let end_pattern = "\"";
+
+    if let Some(start_idx) = cleaned.find(start_pattern) {
+        let val_start = start_idx + start_pattern.len(); //start looking for stuff after this point
+        let rest = &cleaned[val_start..];
+
+        if let Some(end_idx) = rest.find(end_pattern) {
+            let domain = &rest[..end_idx];
+            return Some(format!("https://{}", domain));
+        }
+    }
+
+    None
+}
 
 /// Monitors the health of the tunnel based on its current status.
 ///
