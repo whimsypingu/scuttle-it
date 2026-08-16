@@ -25,7 +25,7 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
     //menu toggle header
     let menu_toggle_bar = row![
         space::horizontal(),
-        button(text("☰").size(18))
+        button(text("☰").size(22))
             .on_press(Message::ToggleMenu)
             .padding(8)
             .style(|_theme, status| {

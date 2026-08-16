@@ -239,6 +239,7 @@ impl App {
                 Task::none()
             }
             Message::StopServer(result) => {
+                self.tunnel_url = None;
                 match result {
                     Ok(_) => {
                         self.server_status = ServiceStatus::Idle;
