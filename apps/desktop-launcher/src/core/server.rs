@@ -126,16 +126,12 @@ pub fn server_worker() -> impl Stream<Item = Message> {
 pub fn server_health_subscription(server_status: &ServiceStatus) -> Subscription<Message> {
     //requires server = STARTING | RUNNING with varying ping frequency
     let interval = match server_status {
-        ServiceStatus::Starting => Some(time::Duration::from_secs(constants::HEALTH_CHECK_STARTING_INTERVAL)),
-        ServiceStatus::Running => Some(time::Duration::from_secs(constants::HEALTH_CHECK_RUNNING_INTERVAL)),
-        _ => None, //no timer
+        ServiceStatus::Starting => constants::HEALTH_CHECK_STARTING_INTERVAL,
+        ServiceStatus::Running => constants::HEALTH_CHECK_RUNNING_INTERVAL,
+        _ => return Subscription::none(), //no timer
     };
 
-    if let Some(duration) = interval {
-        time::every(duration).map(|_| Message::ServerHealthTick)
-    } else {
-        Subscription::none()
-    }
+    time::every(time::Duration::from_secs(interval)).map(|_| Message::ServerHealthTick)
 }
 
 

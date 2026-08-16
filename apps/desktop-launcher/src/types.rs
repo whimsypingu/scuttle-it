@@ -36,12 +36,22 @@ pub enum Message {
     TunnelHealthTick,
     TunnelHealth(Result<(), String>),
 
+    // --- menu ---
+    ToggleMenu,
+    OpenUrl(String),
+
     // --- webhook ---
     WebhookChanged(String),
     UnlockWebhook,
     LockWebhook(String),
     SaveWebhook(Result<(), String>),
     WebhookSent(Result<(), String>),
+
+    // --- token ---
+    TokenChanged(String),
+    UnlockToken,
+    LockToken(String),
+    SaveToken(Result<(), String>),
 
     // --- logs ---
     SetupLog(String),

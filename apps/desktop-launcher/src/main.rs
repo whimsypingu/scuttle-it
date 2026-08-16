@@ -33,9 +33,14 @@ struct App {
     setup_handle: Option<Handle>,
 
     logs: Vec<String>,
+    
+    is_menu_open: bool,
 
     webhook: String,
     is_webhook_locked: bool,
+
+    token: String,
+    is_token_locked: bool,
 
     host: String,
     port: String,
@@ -57,6 +62,10 @@ impl App {
         let initial_env_webhook = Workspace::retrieve_env(constants::env_keys::WEBHOOK)
             .unwrap_or_default();
 
+        //load in initial tunnel token state
+        let initial_env_token = Workspace::retrieve_env(constants::env_keys::TOKEN)
+            .unwrap_or_default();
+
         //other initial env vars
         let initial_env_host = Workspace::retrieve_env(constants::env_keys::HOST)
             .unwrap_or_else(|| constants::DEFAULT_HOST.to_string());
@@ -73,8 +82,13 @@ impl App {
 
             logs: Vec::new(),
 
+            is_menu_open: false,
+
             webhook: initial_env_webhook.clone(),
             is_webhook_locked: !initial_env_webhook.is_empty(),
+
+            token: initial_env_token.clone(),
+            is_token_locked: !initial_env_token.is_empty(),
 
             host: initial_env_host,
             port: initial_env_port,
@@ -122,6 +136,16 @@ impl App {
                     Ok(_) => self.setup_status = SetupStatus::Done,
                     Err(e) => self.setup_status = SetupStatus::Errored(e)
                 }
+                Task::none()
+            }
+
+            // --- MENU ---
+            Message::ToggleMenu => {
+                self.is_menu_open = !self.is_menu_open;
+                Task::none()
+            }
+            Message::OpenUrl(url) => {
+                let _ = open::that(url);
                 Task::none()
             }
 
@@ -174,6 +198,32 @@ impl App {
                 Task::none()
             }
 
+            // --- TOKEN ---
+            Message::TokenChanged(new_text) => {
+                self.token = new_text;
+                Task::none()
+            }
+            Message::UnlockToken => {
+                self.is_token_locked = false;
+                Task::none()
+            }
+            Message::LockToken(save_text) => {
+                self.is_token_locked = true;
+                Task::perform(
+                    core::token::run_save_token(save_text),
+                    Message::SaveToken
+                )
+            }
+            Message::SaveToken(result) => {
+                match result {
+                    Ok(_) => {}
+                    Err(_) => {
+                        self.is_token_locked = false;
+                    }
+                }
+                Task::none()
+            }
+
             // --- SERVER ---
             Message::StartServer => {
                 self.server_status = ServiceStatus::Starting;
@@ -189,6 +239,7 @@ impl App {
                 Task::none()
             }
             Message::StopServer(result) => {
+                self.tunnel_url = None;
                 match result {
                     Ok(_) => {
                         self.server_status = ServiceStatus::Idle;
@@ -290,6 +341,7 @@ impl App {
                 self.is_checking_tunnel_health = false; //reset check guard
                 match result {
                     Ok(_) => { //bing chilling
+                        if self.tunnel_status != ServiceStatus::Running { self.tunnel_status = ServiceStatus::Running }; //tunnel is running, set it to Running
                         Task::none()
                     }
                     Err(e) => {

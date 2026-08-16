@@ -109,7 +109,12 @@ impl Workspace {
 
             if let Some((k, v)) = line.split_once("=") {
                 if k.trim() == key {
-                    return Some(v.trim().trim_matches('"').to_string());
+                    let val = v.trim().trim_matches('"').trim(); //handle empty field
+                    return if val.is_empty() {
+                        None
+                    } else {
+                        Some(val.to_string())
+                    };
                 }
             }
         }
