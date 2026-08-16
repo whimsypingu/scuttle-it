@@ -32,18 +32,26 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
     .align_y(Alignment::Center);
 
     //scuttle footer
-    let scuttle_link_footer = row![
-        space::horizontal(),
-        button(text("scuttleit.com")
-                .size(12)
-                .style(|_theme| text::Style {
-                    color: Some(Color::from_rgb(0.5, 0.5, 0.5)),
-                }))
+    let scuttle_link_footer = container(
+        button(text("scuttleit.com").size(12))
             .on_press(Message::OpenUrl("https://scuttleit.com".to_string()))
-            .style(button::text), //clean boxless
-        space::horizontal(),
-    ]
+            .style(|_theme, status| {
+                let text_color = match status {
+                    button::Status::Hovered | button::Status::Pressed => {
+                        Color::from_rgb(0.95, 0.95, 0.95)
+                    }
+                    _ => Color::from_rgb(0.5, 0.5, 0.5),
+                };
+
+                button::Style {
+                    text_color,
+                    background: None,
+                    ..Default::default()
+                }
+            }),
+    )
     .width(Length::Fill)
+    .align_x(Alignment::Center)
     .align_y(Alignment::Center);
 
 
