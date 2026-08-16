@@ -143,15 +143,6 @@ pub fn tunnel_worker() -> impl Stream<Item = Message> {
                             url_detected = true;
                         }
                     }
-                    // if matches!(mode, Mode::Quick(_))
-                    //     && !url_detected 
-                    //     && line.contains(".trycloudflare.com")
-                    // {
-                    //     if let Some(url) = extract_cloudflared_url(&line) {
-                    //         let _ = output.send(Message::SetTunnelUrl(url)).await;
-                    //         url_detected = true;
-                    //     }
-                    // }
                 }
             },
             Err(e) => {

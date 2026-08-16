@@ -217,64 +217,6 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
         layers.push(overlay_row.into());
     }
 
-
     stack(layers).into()
-
-
-    // let mut main_content_row = row![main_panel]
-    //     .width(Length::Fill)
-    //     .height(Length::Fill);
-
-    // if app.is_menu_open {
-    //     let sidebar_content = column![
-    //         text("Settings").size(20),
-    //         webhook_input,
-    //     ]
-    //     .spacing(20)
-    //     .width(Length::Fixed(320.0))
-    //     .padding(20);
-
-    //     let sidebar = container(sidebar_content)
-    //         .height(Length::Fill);
-
-    //     main_content_row = main_content_row.push(sidebar);
-    // }
-
-
-    // //main container
-    // let content = column![
-    //     menu_toggle_bar,
-    //     main_content_row,
-    // ]
-    // .padding(30)
-    // .spacing(20)
-    // .height(Length::Fill);
-
-    // container(content)
-    //     .width(Length::Fill)
-    //     .height(Length::Fill)
-    //     .into()
-
-
-
-
-    // let content = column![
-    //     text("Scuttle").size(32),
-    //     controls,
-    //     webhook_input,
-    //     url_display,
-    //     // scrollable(log_column).height(Length::Fixed(300.0)),
-    // ]
-    // .padding(40)
-    // .spacing(40)
-    // .align_x(Alignment::Center)
-    // .height(Length::Fill);
-
-    // container(content)
-    //     .width(Length::Fill)
-    //     .height(Length::Fill)
-    //     .center_x(Length::Fill)
-    //     .center_y(Length::Fill)
-    //     .into()
 }
 
