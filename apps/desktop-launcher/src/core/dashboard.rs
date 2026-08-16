@@ -138,13 +138,21 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
                 .width(Length::Fill)
                 .height(Length::Fill)
                 .style(|_| container::Style {
-                    background: Some(Color::from_rgb(0.0, 0.0, 0.0).into()),
+                    background: Some(Color::from_rgba(0.0, 0.0, 0.0, 0.5).into()),
                     ..Default::default()
                 }),
         )
         .on_press(Message::ToggleMenu);
 
-
+        //close menu button
+        let menu_close_bar = row![
+            space::horizontal(),
+            button(if app.is_menu_open { "Close" } else { "Options" })
+                .on_press(Message::ToggleMenu)
+        ]
+        .width(Length::Fill)
+        .align_y(Alignment::Center);
+    
         //webhook input field
         let webhook_input = column![
             text("Webhook").size(16),
@@ -169,9 +177,11 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
         ]
         .spacing(10);
 
+        //
         let sidebar = opaque(
             container(
                 column![
+                    menu_close_bar,
                     webhook_input,
                 ]
                 .spacing(20),
