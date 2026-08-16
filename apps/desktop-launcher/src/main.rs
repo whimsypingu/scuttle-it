@@ -87,6 +87,7 @@ impl App {
             is_webhook_locked: !initial_env_webhook.is_empty(),
 
             token: initial_env_token.clone(),
+            is_token_locked: !initial_env_token.is_empty(),
 
             host: initial_env_host,
             port: initial_env_port,
@@ -184,6 +185,46 @@ impl App {
                     }
                 }
                 Task::none()
+            }
+
+            // --- TOKEN ---
+            Message::TokenChanged(new_text) => {
+                self.token = new_text;
+                Task::none()
+            }
+            Message::UnlockToken => {
+                self.is_token_locked = false;
+                Task::none()
+            }
+            Message::LockWebhook(save_text) => {
+                self.is_webhook_locked = true;
+                Task::perform(
+                    core::webhook::run_save_webhook(save_text),
+                    Message::SaveWebhook
+                )
+            }
+            Message::SaveWebhook(result) => {
+                match result {
+                    Ok(_) => {}
+                    Err(_) => {
+                        self.is_webhook_locked = false;
+                    }
+                }
+
+                //notifications about server local access and server tunnel access
+                let msg_server = core::webhook::notifications::server_url_access(self.port.clone());
+                let task_server = Task::perform(
+                    core::webhook::notify_webhook(self.client.clone(), msg_server),
+                    Message::WebhookSent
+                );
+
+                let msg_tunnel = core::webhook::notifications::tunnel_url_access(self.tunnel_url.clone());
+                let task_tunnel = Task::perform(
+                    core::webhook::notify_webhook(self.client.clone(), msg_tunnel),
+                    Message::WebhookSent
+                );
+
+                Task::batch(vec![task_server, task_tunnel])
             }
 
             // --- SERVER ---

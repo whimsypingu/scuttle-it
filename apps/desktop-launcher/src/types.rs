@@ -43,6 +43,12 @@ pub enum Message {
     SaveWebhook(Result<(), String>),
     WebhookSent(Result<(), String>),
 
+    // --- token ---
+    TokenChanged(String),
+    UnlockToken,
+    LockToken(String),
+    SaveToken(Result<(), String>),
+
     // --- logs ---
     SetupLog(String),
     ServerLog(String),
