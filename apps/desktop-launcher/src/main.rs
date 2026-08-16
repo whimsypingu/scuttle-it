@@ -144,6 +144,10 @@ impl App {
                 self.is_menu_open = !self.is_menu_open;
                 Task::none()
             }
+            Message::OpenUrl(url) => {
+                let _ = open::that(url);
+                Task::none()
+            }
 
             // --- WEBHOOK ---
             Message::WebhookChanged(new_text) => {

@@ -38,6 +38,7 @@ pub enum Message {
 
     // --- menu ---
     ToggleMenu,
+    OpenUrl(String),
 
     // --- webhook ---
     WebhookChanged(String),

@@ -22,7 +22,7 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
         ServiceStatus::Starting | ServiceStatus::Running
     );
 
-    //menu toggle
+    //menu toggle header
     let menu_toggle_bar = row![
         space::horizontal(),
         button(if app.is_menu_open { "Close" } else { "Options" })
@@ -30,6 +30,22 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
     ]
     .width(Length::Fill)
     .align_y(Alignment::Center);
+
+    //scuttle footer
+    let scuttle_link_footer = row![
+        space::horizontal(),
+        button(text("scuttleit.com")
+                .size(12)
+                .style(|_theme| text::Style {
+                    color: Some(Color::from_rgb(0.5, 0.5, 0.5)),
+                }))
+            .on_press(Message::OpenUrl("https://scuttleit.com".to_string()))
+            .style(button::text), //clean boxless
+        space::horizontal(),
+    ]
+    .width(Length::Fill)
+    .align_y(Alignment::Center);
+
 
     //main dashboard controls
     let controls = row![
@@ -125,6 +141,7 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
     let main_dashboard = column![
         menu_toggle_bar, //pin to top
         dashboard_body,
+        scuttle_link_footer, //pin to bottom
     ]
     .width(Length::Fill)
     .height(Length::Fill);
