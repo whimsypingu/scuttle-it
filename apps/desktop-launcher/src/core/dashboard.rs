@@ -108,9 +108,8 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
 
 
     //main dashboard content
-    let main_dashboard = container(
+    let dashboard_body = container(
         column![
-            menu_toggle_bar,
             text("Scuttle").size(32),
             controls,
             url_display,
@@ -122,6 +121,13 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
     .height(Length::Fill)
     .center_x(Length::Fill)
     .center_y(Length::Fill);
+
+    let main_dashboard = column![
+        menu_toggle_bar, //pin to top
+        dashboard_body,
+    ]
+    .width(Length::Fill)
+    .height(Length::Fill);
 
     //layer stack
     let mut layers: Vec<Element<'_, Message>> = vec![main_dashboard.into()];
