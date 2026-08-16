@@ -114,22 +114,38 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
     //tunnel url display
     let url_display = if let Some(url) = &app.tunnel_url {
         column![
-            text("Public Tunnel URL:").size(12),
-            text_input(
-                "Tunnel URL will appear here...",
-                url,
-            )
-            .padding(10)
+            text("Tunnel URL:").size(12),
+            button(text(url).size(14))
+                .on_press(Message::OpenUrl(url.clone()))
+                .padding(0)
+                .style(|_theme, status| {
+                    let text_color = match status {
+                        button::Status::Hovered | button::Status::Pressed => {
+                            Color::from_rgb(0.4, 0.7, 1.0)
+                        }
+                        _ => Color::from_rgb(0.3, 0.55, 0.9),
+                    };
+
+                    button::Style {
+                        text_color,
+                        background: None,
+                        ..Default::default()
+                    }
+                })
         ]
         .spacing(10)
-        .width(Length::Fixed(400.0))
+        .width(Length::Fixed(300.0))
     } else {
         column![
             text("Tunnel URL:").size(12),
-            text("Waiting for tunnel to initialize...").color([0.5, 0.5, 0.5])
+            text("Waiting for tunnel to initialize...")
+                .size(14)
+                .style(|_theme| text::Style {
+                    color: Some(Color::from_rgb(0.5, 0.5, 0.5)),
+                })
         ]
         .spacing(10)
-        .width(Length::Fixed(400.0))
+        .width(Length::Fixed(300.0))
     };
 
 
@@ -150,10 +166,11 @@ pub fn view_dashboard(app: &App) -> Element<'_, Message> {
     let dashboard_body = container(
         column![
             text("Scuttle").size(32),
+            space::vertical().height(40),
             controls,
+            space::vertical().height(60),
             url_display,
         ]
-        .spacing(40)
         .align_x(Alignment::Center),
     )
     .width(Length::Fill)
