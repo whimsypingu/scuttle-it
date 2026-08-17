@@ -221,7 +221,7 @@ impl App {
                         self.is_token_locked = false;
                     }
                 }
-                Task::none()
+                Task::done(Message::StopTunnel(Ok(())))
             }
 
             // --- SERVER ---
