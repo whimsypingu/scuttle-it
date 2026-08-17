@@ -97,12 +97,14 @@ h1 {
 
 .card-media {
     width: 100%;
-    height: auto;
+    max-height: 160px;
     background-color: #0d1117;
     border-bottom: 1px solid #30363d;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    overflow: hidden;
+    transition: all 0.35s ease;
+}
+.demo-card:hover .card-media {
+    max-height: 800px;
 }
 
 .card-media img {
@@ -110,13 +112,18 @@ h1 {
     width: auto; */
     width: 100%;
     height: auto;
-    object-fit: contain;
-    object-position: top center;
+    transform: translateY(-100px);
+    filter: blur(4px);
+    transition: all 0.35s ease;
     /*
     border-radius: 18px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
     */
+}
+.demo-card:hover .card-media img {
+    transform: translateY(0px);
+    filter: blur(0);
 }
 
 .card-caption {
@@ -131,9 +138,33 @@ h1 {
     margin-bottom: 4px;
 }
 
-.card-caption p {
+.card-features {
+    list-style: none;
+    padding: 0;
+    margin-top: 8px;
+    max-height: 120px;
+    opacity: 1;
+    overflow: hidden;
+    transition: all 0.35s ease;
+}
+.demo-card:hover .card-caption .card-features {
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0px;
+}
+
+.card-features li {
     font-size: 0.8rem;
     color: #8b949e;
-    line-height: 1.4;
-    margin: 0;
+    line-height: 1.5;
+    position: relative;
+    padding-left: 14px;
+}
+
+/* Custom subtle bullet indicator */
+.card-features li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #E50914;
 }
