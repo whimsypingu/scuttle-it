@@ -103,12 +103,12 @@ The only cost is electricity for self-hosting, and the resources for your comput
 
 * It is recommended to change computer settings so that it stays on even with the screen off when connected to power, to ensure server uptime. This will be in effect until an anti-sleep battery-aware solution is implemented into the desktop launcher.
 
-* An additional options menu provides fields to store a webhook to a Discord server to receive links (recommended for non-persistent Cloudflared tunnels), and to store a tunnel token for a persistent tunnel.
-
 <div align="center">
     <img src="./docs/assets/demo/scuttle_dl_ss_sidebar.png" width="600" alt="Desktop launcher sidebar"></img>
     <p><em>(8/17/26)</em></p>
 </div>
+
+* An additional options menu provides fields to store a webhook to a Discord server to receive links (recommended for non-persistent Cloudflared tunnels), and to store a tunnel token for a persistent tunnel.
 
 
 ---
@@ -266,6 +266,7 @@ The most basic version of Scuttle is now functional. However, there are a number
     - [ ] Upload existing user audio files to the Scuttle system.
     - [ ] Download Scuttle audio files to elsewhere as their corrected names.
     - [ ] Allow custom tunnel configuration.
+    - [x] Allow persistent tunnel configuration.
     - [ ] Allow users to restart server and tunnel from the web-client frontend interface (may require some kind of IPC implementation).
 
 - [ ] UI/UX
