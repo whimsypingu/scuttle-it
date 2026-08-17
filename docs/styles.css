@@ -39,8 +39,12 @@ h1 {
 }
 
 .showcase-section {
+    width: 100%;
     margin-top: 2rem;
     margin-bottom: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .showcase-section h2 {
@@ -52,7 +56,9 @@ h1 {
 
 /* Horizontal Scroll Container */
 .carousel-track {
+    width: 100%;
     display: flex;
+    justify-content: flex-start;
     gap: 16px;
     overflow-x: auto;
     padding-bottom: 12px; /* Space for custom scrollbar */
@@ -77,6 +83,36 @@ h1 {
 
 .carousel-track::-webkit-scrollbar-thumb:hover {
     background: #484f58;
+}
+
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #30363d;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color 0.25s ease, width 0.25s ease, border-radius 0.25s ease;
+}
+
+.dot:hover {
+    background-color: #8b949e;
+}
+
+/* Active indicator converts to a rounded pill shape */
+.dot.active {
+    background-color: #E50914;
+    width: 22px;
+    border-radius: 4px;
 }
 
 /* Demo Card Item */
