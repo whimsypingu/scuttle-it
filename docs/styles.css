@@ -112,7 +112,7 @@ h1 {
     width: auto; */
     width: 100%;
     height: auto;
-    transform: translateY(-100px);
+    transform: translateY(-100px) scale(0.95);
     filter: blur(4px);
     transition: all 0.35s ease;
     /*
@@ -121,8 +121,12 @@ h1 {
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
     */
 }
+.demo-card:hover .card-media img {
+    transform: translateY(-80px) scale(1);
+    filter: blur(0);
+}
 .demo-card.expanded .card-media img {
-    transform: translateY(0px);
+    transform: translateY(0px) scale(1);
     filter: blur(0);
 }
 
