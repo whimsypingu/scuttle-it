@@ -11,12 +11,22 @@
 <body>
 
     <div class="page-layout">
-        <div class="header-container">
+        <section class="header-container">
             <img src="assets/logo_transparent_background.svg" alt="Scuttle Logo" class="header-logo"/>
             <h1>Scuttle</h1>
-        </div>
+        </section>
 
-        <section class="showcase-section">
+        <section class="project-description">
+            <p>
+                A self-hosted platform for streaming, downloading, and curating your audio collection.
+            </p>
+
+            <p>
+                For the full documentation, see the <a href="https://github.com/whimsypingu/scuttle-it">Github.</a>
+            </p>
+        </section>
+
+        <section class="screenshot-showcase">
             <div class="carousel-track">
                 <!-- Card 1 -->
                 <div class="demo-card">
@@ -81,10 +91,20 @@
                 </div>
             </div>
 
-            <div class="carousel-dots">
+            <!-- Dynamically Generated Dots -->
+            <div class="carousel-dots"></div>
+        </section>
+
+        <!-- <section class="technical-description">
+            <h2>Technical Details</h2>
+
+            <h3>Audio Quality</h3>
+            <div class="tech-item">
                 
             </div>
-        </section>
+
+            <p><strong>FastAPI</strong></p>
+        </section> -->
     </div>
 </body>
 </html>

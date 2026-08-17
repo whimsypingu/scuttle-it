@@ -18,19 +18,20 @@ body {
     margin: 0 auto;
 }
 
+/* Header */
 .header-container {
     display: flex;
     gap: 12px;
     margin-bottom: 1rem;
 }
 
-.header-logo {
+.header-container .header-logo {
     height: 2.8rem;
     width: auto;
     filter: brightness(0) invert(1);
 }
 
-h1 {
+.header-container h1 {
     font-size: 2rem;
     font-weight: 500;
     margin: 0;
@@ -38,7 +39,33 @@ h1 {
     letter-spacing: -0.02em;
 }
 
-.showcase-section {
+/* Project Summary Section */
+.project-description {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+}
+
+.project-description p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #8b949e;
+}
+
+.project-description a {
+    color: #E50914;
+    transition: all 0.2s ease;
+}
+.project-description a:hover {
+    color: #ff2d35;
+}
+.project-description a:visited {
+    color: #E50914;
+}
+
+/* Screenshot carousel */
+.screenshot-showcase {
     width: 100%;
     margin-top: 2rem;
     margin-bottom: 2.5rem;
@@ -47,7 +74,7 @@ h1 {
     align-items: center;
 }
 
-.showcase-section h2 {
+.screenshot-showcase h2 {
     font-size: 1.25rem;
     font-weight: 500;
     color: #8b949e;
@@ -206,5 +233,44 @@ h1 {
     content: "•";
     position: absolute;
     left: 0;
+    color: #E50914;
+}
+
+/* Technical Summary Section */
+.technical-description {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+    color: #8b949e;
+}
+
+.technical-description h2 {
+    font-size: 1.4rem;
+    font-weight: 500;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+.technical-description h3 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.technical-description p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #8b949e;
+}
+
+.technical-description a {
+    color: #E50914;
+    transition: all 0.2s ease;
+}
+.technical-description a:hover {
+    color: #ff2d35;
+}
+.technical-description a:visited {
     color: #E50914;
 }
