@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scuttle</title>
+    <link rel="icon" href="assets/logo_transparent_background.ico" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="page-layout">
+        <div class="header-container">
+            <img src="assets/logo_transparent_background.svg" alt="Scuttle Logo" class="header-logo"/>
+            <h1>Scuttle</h1>
+        </div>
+
+        <section class="showcase-section">
+            <div class="carousel-track">
+                <!-- Card 1 -->
+                <div class="demo-card">
+                    <div class="card-media">
+                        <img src="assets/demo/scuttle_wc_ss_home.png" alt="Client Home Mockups">
+                    </div>
+                    <div class="card-caption">
+                        <h3>Client Layer</h3>
+                        <p>Web Audio API & Native Rust Controller</p>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="demo-card">
+                    <div class="card-media">
+                        <img src="assets/logo_transparent_background.svg" alt="FastAPI Streaming">
+                    </div>
+                    <div class="card-caption">
+                        <h3>FastAPI Streaming</h3>
+                        <p>Asynchronous Range Requests & Pydantic</p>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="demo-card">
+                    <div class="card-media">
+                        <img src="assets/logo_transparent_background.svg" alt="Indexed Search">
+                    </div>
+                    <div class="card-caption">
+                        <h3>Indexed Search & FTS5</h3>
+                        <p>SQLite Full-Text Search with BM25 Ranking</p>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="demo-card">
+                    <div class="card-media">
+                        <img src="assets/logo_transparent_background.svg" alt="Cloudflare Tunnels">
+                    </div>
+                    <div class="card-caption">
+                        <h3>Cloudflare Tunnels</h3>
+                        <p>Zero-Trust Reverse Tunneling via cloudflared</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const carousel = document.querySelector('.carousel-track');
+        carousel.addEventListener('wheel', (event) => {
+            event.preventDefault();
+            carousel.scrollBy({
+                left: (event.deltaY * 0.8),
+                behavior: "auto"
+            });
+        }, { passive: false });
+    </script>
+</body>
+</html>

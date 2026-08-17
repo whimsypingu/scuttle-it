@@ -1,0 +1,139 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #121212;
+    color: #e0e0e0;
+    min-height: 100vh;
+    padding: 40px;
+}
+
+.page-layout {
+    max-width: 1600px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.header-container {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 1rem;
+}
+
+.header-logo {
+    height: 2.8rem;
+    width: auto;
+    filter: brightness(0) invert(1);
+}
+
+h1 {
+    font-size: 2rem;
+    font-weight: 500;
+    margin: 0;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+}
+
+.showcase-section {
+    margin-top: 2rem;
+    margin-bottom: 2.5rem;
+}
+
+.showcase-section h2 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #8b949e;
+    margin-bottom: 1rem;
+}
+
+/* Horizontal Scroll Container */
+.carousel-track {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 12px; /* Space for custom scrollbar */
+    /* scroll-snap-type: x mandatory; */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Custom Minimal Scrollbar */
+.carousel-track::-webkit-scrollbar {
+    height: 6px;
+}
+
+.carousel-track::-webkit-scrollbar-track {
+    background: #161b22;
+    border-radius: 4px;
+}
+
+.carousel-track::-webkit-scrollbar-thumb {
+    background: #30363d;
+    border-radius: 4px;
+}
+
+.carousel-track::-webkit-scrollbar-thumb:hover {
+    background: #484f58;
+}
+
+/* Demo Card Item */
+.demo-card {
+    flex: 0 0 280px; /* Fixed card width in horizontal row */
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    overflow: hidden;
+    /* scroll-snap-align: start; */
+    display: flex;
+    flex-direction: column;
+}
+
+/* .demo-card:hover {
+    border-color: #E50914;
+} */
+
+.card-media {
+    width: 100%;
+    height: auto;
+    background-color: #0d1117;
+    border-bottom: 1px solid #30363d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-media img {
+    /* max-height: 400px;
+    width: auto; */
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    object-position: top center;
+    /*
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+    */
+}
+
+.card-caption {
+    padding: 12px 14px;
+    text-align: left;
+}
+
+.card-caption h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #f0f6fc;
+    margin-bottom: 4px;
+}
+
+.card-caption p {
+    font-size: 0.8rem;
+    color: #8b949e;
+    line-height: 1.4;
+    margin: 0;
+}
