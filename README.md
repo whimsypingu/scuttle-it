@@ -88,8 +88,8 @@ The only cost is electricity for self-hosting, and the resources for your comput
 * A native desktop launcher handles the lifecycle of your server, including accessibility via a Discord webhook, and manages uptime of a Cloudflared tunnel to ensure maximum availability. 
 
 <div align="center">
-    <img src="./docs/assets/desktop_launcher_demo.png" width="600" alt="Desktop launcher demo"></img>
-    <p><em>(5/11/26)</em></p>
+    <img src="./docs/assets/demo/scuttle_dl_ss_idle.png" width="600" alt="Desktop launcher demo"></img>
+    <p><em>(8/17/26)</em></p>
 </div>
 
 <pre><b>**At the cost of being free, this could mean sudden rotations of user-accessible links to the web-client if the tunnel breaks.**</b></pre>
@@ -102,6 +102,13 @@ The only cost is electricity for self-hosting, and the resources for your comput
 * On setup, installs all required software prerequisites and maintains updates of frequently updating critical packages. See [dependencies](#important-external-dependency-disclaimer) here.
 
 * It is recommended to change computer settings so that it stays on even with the screen off when connected to power, to ensure server uptime. This will be in effect until an anti-sleep battery-aware solution is implemented into the desktop launcher.
+
+* An additional options menu provides fields to store a webhook to a Discord server to receive links (recommended for non-persistent Cloudflared tunnels), and to store a tunnel token for a persistent tunnel.
+
+<div align="center">
+    <img src="./docs/assets/demo/scuttle_dl_ss_sidebar.png" width="600" alt="Desktop launcher sidebar"></img>
+    <p><em>(8/17/26)</em></p>
+</div>
 
 
 ---
