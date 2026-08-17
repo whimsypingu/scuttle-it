@@ -6,6 +6,7 @@
     <title>Scuttle</title>
     <link rel="icon" href="assets/logo_transparent_background.ico" />
     <link rel="stylesheet" href="styles.css">
+    <script src="scripts.js" defer></script>
 </head>
 <body>
 
@@ -66,16 +67,5 @@
             </div>
         </section>
     </div>
-
-    <script>
-        const carousel = document.querySelector('.carousel-track');
-        carousel.addEventListener('wheel', (event) => {
-            event.preventDefault();
-            carousel.scrollBy({
-                left: (event.deltaY * 0.8),
-                behavior: "auto"
-            });
-        }, { passive: false });
-    </script>
 </body>
 </html>
