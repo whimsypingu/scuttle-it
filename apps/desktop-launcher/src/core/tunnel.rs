@@ -198,7 +198,7 @@ fn extract_persistent_cloudflared_url(line: &str) -> Option<String> {
 pub fn tunnel_health_subscription(server_status: &ServiceStatus, tunnel_status: &ServiceStatus) -> Subscription<Message> {
     //requires server = RUNNING and tunnel = STARTING | RUNNING with varying ping frequency
     let interval = match (server_status, tunnel_status) {
-        (ServiceStatus::Running, ServiceStatus::Starting) => constants::HEALTH_CHECK_STARTING_INTERVAL,
+        //(ServiceStatus::Running, ServiceStatus::Starting) => constants::HEALTH_CHECK_STARTING_INTERVAL, //should not be pinging while STARTING because it wiull fail
         (ServiceStatus::Running, ServiceStatus::Running) => constants::HEALTH_CHECK_RUNNING_INTERVAL,
         _ => return Subscription::none(), //no timer
     };

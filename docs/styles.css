@@ -1,0 +1,303 @@
+:root {
+    --brand: #E50914;
+    --brand-hover: #fa454b;
+    --brand-visited: #E50914;
+
+    --bg-main: #121212;
+    --bg-surface: #161b22;
+
+    --bg-item: #30363d;
+    --bg-item-hover: #484f58;
+    
+    --text-1: #e0e0e0;
+    --text-2: #a5a9ad;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-1);
+    min-height: 100vh;
+    padding: 40px;
+}
+
+.page-layout {
+    max-width: 1600px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Header */
+.header-container {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 1rem;
+}
+
+.header-container .header-logo {
+    height: 2.8rem;
+    width: auto;
+    filter: brightness(0) invert(1);
+}
+
+.header-container h1 {
+    font-size: 2rem;
+    font-weight: 500;
+    margin: 0;
+    color: white;
+    letter-spacing: -0.02em;
+}
+
+/* Project Summary Section */
+.project-description {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+}
+
+.project-description p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-2);
+}
+
+.project-description a {
+    color: var(--brand);
+    transition: all 0.2s ease;
+}
+.project-description a:hover {
+    color: var(--brand-hover);
+}
+.project-description a:visited {
+    color: var(--brand-visited);
+}
+
+/* Screenshot carousel */
+.screenshot-showcase {
+    width: 100%;
+    margin-top: 2rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.screenshot-showcase h2 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--text-2);
+    margin-bottom: 1rem;
+}
+
+/* Horizontal Scroll Container */
+.carousel-track {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 12px; /* Space for custom scrollbar */
+    /* scroll-snap-type: x mandatory; */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Custom Minimal Scrollbar */
+.carousel-track::-webkit-scrollbar {
+    height: 6px;
+}
+
+.carousel-track::-webkit-scrollbar-track {
+    background: var(--bg-surface);
+    border-radius: 4px;
+}
+
+.carousel-track::-webkit-scrollbar-thumb {
+    background: var(--bg-item);
+    border-radius: 4px;
+}
+
+.carousel-track::-webkit-scrollbar-thumb:hover {
+    background: var(--bg-item-hover);
+}
+
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--bg-item);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color 0.25s ease, width 0.25s ease, border-radius 0.25s ease;
+}
+
+.dot:hover {
+    background-color: var(--text-2);
+}
+
+/* Active indicator converts to a rounded pill shape */
+.dot.active {
+    background-color: var(--brand);
+    width: 22px;
+    border-radius: 4px;
+}
+
+/* Demo Card Item */
+.demo-card {
+    flex: 0 0 280px; /* Fixed card width in horizontal row */
+    background-color: var(--bg-surface);
+    border: 1px solid var(--bg-item);
+    border-radius: 8px;
+    overflow: hidden;
+    /* scroll-snap-align: start; */
+    display: flex;
+    flex-direction: column;
+}
+.demo-card:hover {
+    border-color: var(--brand-hover);
+}
+.demo-card.expanded {
+    border-color: var(--brand);
+}
+
+/* Demo card media */
+.demo-card .card-media {
+    width: 100%;
+    max-height: 160px;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--bg-item);
+    overflow: hidden;
+    transition: all 0.35s ease;
+}
+.demo-card.expanded .card-media {
+    max-height: 800px;
+}
+
+.demo-card .card-media-contents {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transform: translateY(-100px) scale(0.95);
+    filter: blur(4px);
+    transition: all 0.35s ease;
+}
+.demo-card:hover .card-media-contents {
+    transform: translateY(-80px) scale(1);
+    filter: blur(0);
+}
+.demo-card.expanded .card-media-contents {
+    transform: translateY(0px) scale(1);
+    filter: blur(0);
+}
+.card-media-contents img {
+    width: 100%;
+    height: auto;
+}
+
+/* Demo card captions */
+.demo-card .card-caption {
+    padding: 12px 14px;
+    text-align: left;
+}
+
+.demo-card .card-caption h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-1);
+    margin-bottom: 4px;
+}
+
+.demo-card .card-features {
+    list-style: none;
+    color: var(--text-2);
+    padding: 0;
+    margin-top: 8px;
+    transition: all 0.35s ease;
+}
+.demo-card:hover .card-features {
+    color: var(--text-1);
+}
+.demo-card.expanded .card-features {
+    color: var(--text-1);
+}
+
+.demo-card .card-features li {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    position: relative;
+    padding-left: 14px;
+}
+
+/* Custom subtle bullet indicator */
+.demo-card .card-features li::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 0.7em;
+    width: 4px;
+    height: 4px;
+    background-color: var(--text-2);
+    border-radius: 50%;
+    transition: all 0.35s ease;
+}
+.demo-card:hover .card-features li::before {
+    background-color: var(--brand-hover);
+}
+.demo-card.expanded .card-features li::before {
+    background-color: var(--brand);
+}
+
+/* Technical Summary Section */
+.technical-description {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+    color: var(--text-2);
+}
+
+.technical-description h2 {
+    font-size: 1.4rem;
+    font-weight: 500;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+.technical-description h3 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.technical-description p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-2);
+}
+
+.technical-description a {
+    color: var(--brand);
+    transition: all 0.2s ease;
+}
+.technical-description a:hover {
+    color: var(--brand-hover);
+}
+.technical-description a:visited {
+    color: var(--brand-visited);
+}
