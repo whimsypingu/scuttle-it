@@ -1,0 +1,11 @@
+{
+    "name": "Scuttle",
+    "display": "standalone",
+    "icons": [
+        {
+            "src": "/static/defaultMediaSessionLogo.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        }
+    ]
+}
