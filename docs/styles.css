@@ -192,23 +192,42 @@ body {
     width: auto; */
     width: 100%;
     height: auto;
-    transform: translateY(-100px) scale(0.95);
+    /* transform: translateY(-100px) scale(0.95);
     filter: blur(4px);
-    transition: all 0.35s ease;
+    transition: all 0.35s ease; */
     /*
     border-radius: 18px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
     */
 }
-.demo-card:hover .card-media img {
+/* .demo-card:hover .card-media img {
     transform: translateY(-80px) scale(1);
     filter: blur(0);
 }
 .demo-card.expanded .card-media img {
     transform: translateY(0px) scale(1);
     filter: blur(0);
+} */
+
+.demo-card .card-media-contents {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transform: translateY(-100px) scale(0.95);
+    filter: blur(4px);
+    transition: all 0.35s ease;
 }
+.demo-card:hover .card-media-contents {
+    transform: translateY(-80px) scale(1);
+    filter: blur(0);
+}
+.demo-card.expanded .card-media-contents {
+    transform: translateY(0px) scale(1);
+    filter: blur(0);
+}
+
+
 
 .demo-card .card-caption {
     padding: 12px 14px;
