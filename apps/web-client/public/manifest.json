@@ -3,8 +3,13 @@
     "display": "standalone",
     "icons": [
         {
-            "src": "/static/defaultMediaSessionLogo.png",
+            "src": "/static/apple-touch-icon.png",
             "sizes": "180x180",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/defaultMediaSessionLogo.png",
+            "sizes": "192x192 512x512",
             "type": "image/png"
         }
     ]
