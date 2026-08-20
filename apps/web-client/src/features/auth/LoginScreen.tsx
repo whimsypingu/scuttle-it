@@ -13,7 +13,19 @@ export const LoginScreen = () => {
 
     //when not yet auth'ed show a loading screen
     if (isAuthLoading || isAuth) {
-        return <div className="fixed inset-0 bg-background" />;
+        return (
+            <>
+            <div className="fixed inset-0 bg-background">
+                <div className="absolute left-0 right-0 top-0 bg-slate-800/50 border-transparent h-[3px] w-full">
+    				<div className="h-full w-full translate-x-full animate-[shimmer_2.5s_infinite_linear] bg-gradient-to-r from-transparent via-primary/80 to-transparent" />
+                </div>
+
+                <div className="absolute left-0 right-0 bottom-0 bg-slate-800/50 border-transparent h-[3px] w-full">
+    				<div className="h-full w-full translate-x-full animate-[shimmer_2.5s_infinite_linear] bg-gradient-to-r from-transparent via-primary/80 to-transparent" />
+                </div>
+            </div>
+            </>
+        );
     }
 
     const handleSubmit = async () => {
@@ -63,7 +75,7 @@ export const LoginScreen = () => {
                     <button
                         type="submit"
                         disabled={isLoggingIn}
-                        className="w-full py-3 px-4 rounded-xl bg-zinc-300 text-zinc-900 font-medium font-mono hover:bg-zinc-200 active:scale-[0.98] transition-all disabled:opacity-40 disabled:pointer-events-none"
+                        className="w-full py-3 px-4 rounded-xl bg-zinc-400 text-zinc-900 font-sans font-semibold tracking-wide hover:bg-zinc-300 active:scale-[0.98] transition-all disabled:opacity-40 disabled:pointer-events-none"
                     >
                         {(isLoggingIn) ? "Scuttling..." : "Scuttle"}
                     </button>
