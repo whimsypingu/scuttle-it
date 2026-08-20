@@ -22,134 +22,53 @@
 
 			/* shimmer loading animation */
 			#pwa-load-shell {
-				left: 0;
-				right: 0;
-				top: 0;
-				bottom: 0;
+				inset: 0;
 				width: 100%;
 				height: 100;
 			}
 
-			.load-shimmer-track {
-				position: fixed;
-				overflow: hidden;
+			@property --angle {
+				syntax: "<angle>";
+				initial-value: 0deg;
+				inherits: false;
+			}
+
+			@keyframes perimeter-spin {
+				to {
+					--angle: 360deg;
+				}
+			}
+
+			.perimeter-beam {
+				position: absolute;
+				inset: 0;
 				pointer-events: none;
-			}
-			.load-shimmer-bar {
-				width: 100%;
-				height: 100%;
-				animation-duration: 16s;
-				animation-timing-function: linear;
-				animation-iteration-count: infinite;
+				background: conic-gradient(
+					from var(--angle),
+					transparent 0deg,
+					#E50914cc 40deg, /* same as --color-brand */
+					transparent 80deg,
+					transparent 180deg,
+					#E50914cc 220deg,
+					transparent 260deg
+				);
+
+				animation: perimeter-spin 8s linear infinite;
 			}
 
-			@keyframes load-shimmer-sweep-top {
-				0% { transform: translateX(-100%); }
-				50% { transform: translateX(100%); }
-				100% { transform: translateX(300%); }
-			}
-			.load-shimmer-track.top {
-				top: 0;
-				left: 0;
-				right: 0;
-				width: 100%;
-				height: 3px;
-			}
-			.load-shimmer-bar.top {
-				background: linear-gradient(
-					90deg,
-					transparent 0%,
-					#E50914cc 50%,
-					transparent 100%
-				);
-				animation-name: load-shimmer-sweep-top;
-			}
-
-			@keyframes load-shimmer-sweep-right {
-				0% { transform: translateY(-200%); }
-				25% { transform: translateY(-100%); }
-				75% { transform: translateY(100%); }
-				100% { transform: translateY(200%); }
-			}
-			.load-shimmer-track.right {
-				right: 0;
-				top: 3px;
-				bottom: 3px;
-				width: 3px;
-				height: 100%;
-			}
-			.load-shimmer-bar.right {
-				background: linear-gradient(
-					0deg,
-					transparent 0%,
-					#E50914cc 50%,
-					transparent 100%
-				);
-				animation-name: load-shimmer-sweep-right;
-			}
-
-			@keyframes load-shimmer-sweep-bottom {
-				0% { transform: translateX(300%); }
-				50% { transform: translateX(100%); }
-				100% { transform: translateX(-100%); }
-			}
-			.load-shimmer-track.bottom {
-				bottom: 0;
-				left: 0;
-				right: 0;
-				width: 100%;
-				height: 3px;
-			}
-			.load-shimmer-bar.bottom {
-				background: linear-gradient(
-					90deg,
-					transparent 0%,
-					#E50914cc 50%,
-					transparent 100%
-				);
-				animation-name: load-shimmer-sweep-bottom;
-			}
-
-			@keyframes load-shimmer-sweep-left {
-				0% { transform: translateY(400%); }
-				60% { transform: translateY(100%); }
-				100% { transform: translateY(-100%); }
-			}
-			.load-shimmer-track.left {
-				left: 0;
-				top: 3px;
-				bottom: 3px;
-				width: 3px;
-				height: 100%;
-			}
-			.load-shimmer-bar.left {
-				background: linear-gradient(
-					0deg,
-					transparent 0%,
-					#E50914cc 50%,
-					transparent 100%
-				);
-				animation-name: load-shimmer-sweep-left;
+			.beam-cover {
+				position: absolute;
+				inset: 3px;
+				border-radius: 4px;
+				background-color: oklch(0.145 0 0); /* equivalent to --bg-background */
 			}
 		</style>
 	</head>
 	<body>
 		<div id="pwa-load-shell">
-			<div class="load-shimmer-track top">
-				<div class="load-shimmer-bar top"></div>
-			</div>
+			<div class="perimeter-beam"></div>
 
-			<div class="load-shimmer-track right">
-				<div class="load-shimmer-bar right"></div>
-			</div>
-
-			<div class="load-shimmer-track bottom">
-				<div class="load-shimmer-bar bottom"></div>
-			</div>
-
-			<div class="load-shimmer-track left">
-				<div class="load-shimmer-bar left"></div>
-			</div>
+			<div class="beam-cover"></div>
 		</div>
 
 		<div id="root"></div>
