@@ -110,8 +110,19 @@ CREATE INDEX IF NOT EXISTS idx_play_queue_position
 ON play_queue(room_internal_id, position); --index by room id for room based sorting
 
 -- settings
+DROP TABLE settings;
 CREATE TABLE IF NOT EXISTS settings (
     id INTEGER PRIMARY KEY CHECK (id = 1), --ensures only one row
     username TEXT NOT NULL,
-    created_at INTEGER DEFAULT (unixepoch())
+    created_at INTEGER DEFAULT (unixepoch()),
+    password_hash TEXT DEFAULT NULL,
+    password_salt TEXT DEFAULT NULL
+);
+
+
+-- auth
+CREATE TABLE IF NOT EXISTS auth (
+    token_hash TEXT PRIMARY KEY,
+    refreshed_at INTEGER DEFAULT (current_epoch()),
+    expires_at INTEGER NOT NULL (current_epoch() + 432000) --Plus 5 days
 );
