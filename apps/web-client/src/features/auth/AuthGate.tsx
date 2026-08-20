@@ -1,6 +1,7 @@
-import { useAuth } from "@/store/hooks/useAuth";
 import React from "react";
-import { LoginScreen } from "./LoginScreen";
+import { useAuth } from "@/store/hooks/useAuth";
+
+import { LoginScreen } from "@/features/auth/LoginScreen";
 
 
 /**

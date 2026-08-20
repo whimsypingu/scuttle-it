@@ -1,14 +1,13 @@
-import { useAuth } from "@/store/hooks/useAuth";
-import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+
 import { useState } from "react";
+import { useAuth } from "@/store/hooks/useAuth";
 
 
 export const LoginScreen = () => {
     const [password, setPassword] = useState("");
-    const queryClient = useQueryClient();
 
-    const { loginSuccess, login, isLoggingIn } = useAuth();
+    const { login, isLoggingIn } = useAuth();
 
     const handleSubmit = () => {
         if (!password.trim()) return;
