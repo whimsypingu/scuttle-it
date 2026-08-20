@@ -8,9 +8,8 @@ import type { LoginPayload } from "@/store/hooks/hooks.types";
 
 export const LoginScreen = () => {
     const [password, setPassword] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false); //password submit button state handler
 
-    const { isAuth, isAuthLoading, loginAsync, isLoggingIn } = useAuth();
+    const { isAuth, isAuthLoading, login, isLoggingIn } = useAuth();
 
     //when not yet auth'ed show a loading screen
     if (isAuthLoading || isAuth) {
@@ -18,19 +17,11 @@ export const LoginScreen = () => {
     }
 
     const handleSubmit = async () => {
-        if (isSubmitting) return;
-
-        try {
-            setIsSubmitting(true);
-
-            //construct payload and wait for login attempt to complete
-            const payload: LoginPayload = {
-                password,
-            }
-            await loginAsync(payload);
-        } finally {
-            setIsSubmitting(false);
+        //construct payload and wait for login attempt to complete
+        const payload: LoginPayload = {
+            password,
         }
+        login(payload);
     };
 
     return (
