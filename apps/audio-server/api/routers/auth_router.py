@@ -1,6 +1,6 @@
 import traceback
 
-from fastapi import APIRouter, Body, Cookie, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Body, Cookie, Depends, HTTPException, Query, Response, status
 
 from config import settings
 
@@ -8,6 +8,7 @@ from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
 from core.models.payloads import LoginPayload
 from core.models.responses import AuthResponse, LoginResponse
+from fastapi.responses import RedirectResponse
 
 
 AuthRouter = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -70,10 +71,10 @@ async def get_auth_me(
                 detail="No auth token provided"
             )
 
-        isAuth = await db_manager.validate_refresh_cookie_token(auth_token, settings.TTL_AUTH_TOKEN)
+        is_auth = await db_manager.validate_refresh_cookie_token(auth_token, settings.TTL_AUTH_TOKEN)
 
         #remove cookie if not authorized
-        if not isAuth:
+        if not is_auth:
             response.delete_cookie("auth_token", path="/")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -105,44 +106,45 @@ async def get_auth_me(
         )
 
 
+@AuthRouter.get("/j/{auth_token}")
+async def auth_join_room(
+    auth_token: str,
+    room_id: str = Query(..., min_length=1, max_length=4, alias="r"),
+    db_manager: DatabaseManager = Depends(get_db_manager)
+):
+    try:
+        is_auth = await db_manager.validate_cookie_token(auth_token)
 
-# @AudioRouter.get("/stream/{track_id}")
-# async def get_audio_stream(
-#     ctx: DeviceContext = Depends(get_device_context),
-#     room_id: str | None = Query(None, description="Room ID"),
-#     track_id: str = Path(..., min_length=1, description="Track ID"),
-#     db_manager: DatabaseManager = Depends(get_db_manager),
-#     dl_queue: DownloadQueue = Depends(get_dl_queue)
-# ):
-#     try:
-#         if not await db_manager.is_track_downloaded(track_id):
-#             active_room_id = room_id or ctx.room_id #prefer raw room_id embedded into url, for src= requests, otherwise fallback
-#             job = DownloadJob(
-#                 track_id=track_id,
-#                 priority=True,
-#                 room_id=active_room_id
-#             )
-#             await dl_queue.add(job)
-#             return {
-#                 "job_id": job.id
-#             }
-        
-#         file_path = resolve_track_path(track_id) #raises FileNotFoundError on failure
+        #remove cookie if not authorized
+        if not is_auth:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Join link is expired or invalid"
+            )
 
-#         return FileResponse(
-#             path=file_path,
-#             content_disposition_type="inline"
-#         )
+        #prepare 303 redirect to frontend app with room parameter embedded
+        target_url = f"/?r={room_id}"
+        response = RedirectResponse(url=target_url, status_code=status.HTTP_303_SEE_OTHER)
+
+        response.set_cookie(
+            key="auth_token",
+            value=auth_token,
+            max_age=settings.TTL_AUTH_TOKEN,
+            httponly=True,
+            samesite="lax",
+            secure=False,
+            path="/"
+        )
+
+        return response
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail="Crashed"
+        )
     
-#     except FileNotFoundError:
-#         raise HTTPException(
-#             status_code=404, 
-#             detail=f"Track {track_id} not found"
-#         )
-    
-#     except Exception as e:
-#         traceback.print_exc()
-#         raise HTTPException(
-#             status_code=500,
-#             detail="Crashed"
-#         )

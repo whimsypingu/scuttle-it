@@ -3,7 +3,7 @@ import traceback
 import subprocess
 from pathlib import Path as FilePath
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, Response, status
 
 from config import settings
 from api.dependencies import get_db_manager, get_device_context, get_room_manager, require_auth
@@ -74,20 +74,28 @@ async def join_room_endpoint(
 
 @RoomRouter.get("/qr.png")
 async def generate_qr(
-    url: str = Query(..., description="The URL or text to encode")
+    request: Request,
+    room_id: str = Query(..., min_length=1, max_length=4, alias="roomId"),
+    db_manager: DatabaseManager = Depends(get_db_manager),
 ):
     tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False) #rather unfortunate that i did not implement stdout for the binary
     tmp_path = FilePath(tmp.name)
     tmp.close()
 
     try:
+        auth_token = await db_manager.create_cookie_token()
+
+        #build the url, which will then redirect after completing auth
+        base_url = str(request.base_url).rstrip("/")
+        join_url = f"{base_url}/auth/j/{auth_token}?r={room_id}"
+    
         target_image = settings.ASSETS_DIR / "qr_silhouette.png"
         cmd = [
             str(settings.QR_GEN_BIN_PATH),
             "-v", "9", #consider upping the version to a higher supported version for longer qr codes, but 7-L supports 154 chars anyway which is a lot
             "-l", "L",
             "-a", str(target_image),
-            "-m", url,
+            "-m", join_url,
             "-o", str(tmp_path)
         ]
         result = subprocess.run(cmd, capture_output=True)
@@ -100,8 +108,9 @@ async def generate_qr(
         if tmp_path.exists():
             tmp_path.unlink() #clean up tempfile
 
+    #each scan gets a unique auth token so dont cache
     return Response(
         content=image_bytes,
         media_type="image/png",
-        headers={"Cache-Control": "public, max-age=86400, immutable"}
+        headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"}
     )

@@ -19,7 +19,7 @@ export const SyncLogic = () => {
             return;
         }
 
-        const joinCode = params.get("s")?.trim(); //join a room with the ?s=ABCD flag
+        const joinCode = params.get("r")?.trim(); //join a room with the ?r=ABCD flag
         if (joinCode) {
             try {
                 console.log(`[SyncLogic] Joining room: ${joinCode}`);
