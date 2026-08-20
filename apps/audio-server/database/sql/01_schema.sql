@@ -123,5 +123,5 @@ CREATE TABLE IF NOT EXISTS settings (
 CREATE TABLE IF NOT EXISTS auth (
     token_hash TEXT PRIMARY KEY,
     refreshed_at INTEGER NOT NULL DEFAULT (unixepoch()),
-    expires_at INTEGER NOT NULL DEFAULT (unixepoch() + 432000) --Plus 5 days
+    expires_at INTEGER NOT NULL --see config settings
 );

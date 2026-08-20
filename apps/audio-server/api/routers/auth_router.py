@@ -2,6 +2,8 @@ import traceback
 
 from fastapi import APIRouter, Body, Cookie, Depends, HTTPException, Response, status
 
+from config import settings
+
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
 from core.models.payloads import LoginPayload
@@ -27,13 +29,12 @@ async def login(
             )
 
         #attach cookie
-        ttl_seconds = 432000 #5 days
-        auth_token = await db_manager.create_cookie_token(ttl_seconds)
+        auth_token = await db_manager.create_cookie_token(settings.TTL_AUTH_TOKEN)
 
         response.set_cookie(
             key="auth_token",
             value=auth_token,
-            max_age=ttl_seconds,
+            max_age=settings.TTL_AUTH_TOKEN,
             httponly=True,
             samesite="lax",
             secure=False,
@@ -69,7 +70,7 @@ async def get_auth_me(
                 detail="No auth token provided"
             )
 
-        isAuth = await db_manager.validate_refresh_cookie_token(auth_token)
+        isAuth = await db_manager.validate_refresh_cookie_token(auth_token, settings.TTL_AUTH_TOKEN)
 
         #remove cookie if not authorized
         if not isAuth:
@@ -82,7 +83,7 @@ async def get_auth_me(
         response.set_cookie(
             key="auth_token",
             value=auth_token,
-            max_age=432000,
+            max_age=settings.TTL_AUTH_TOKEN,
             httponly=True,
             samesite="lax",
             secure=False,

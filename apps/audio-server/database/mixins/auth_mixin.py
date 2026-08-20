@@ -3,6 +3,8 @@ import hashlib
 import hmac
 import secrets
 
+from config import settings
+
 logger = logging.getLogger(__name__)
 
 
@@ -43,7 +45,7 @@ class AuthMixin:
             logger.error(f"Password validation error: {e}")
             return False
 
-    async def create_cookie_token(self, ttl_seconds: int = 432000) -> str:
+    async def create_cookie_token(self, ttl_seconds: int = settings.TTL_AUTH_TOKEN) -> str:
         """Generates a cryptographically secure cookie token and stores the SHA-256 hash in the auth table"""
         logger.info(f"Creating new authentication token...")
 
@@ -89,7 +91,7 @@ class AuthMixin:
         
 
 
-    async def validate_refresh_cookie_token(self, token: str, ttl_seconds: int = 432000) -> bool:
+    async def validate_refresh_cookie_token(self, token: str, ttl_seconds: int = settings.TTL_AUTH_TOKEN) -> bool:
         """Validates and refreshes the cookie token expiration"""
         logger.info(f"Validating and refreshing authentication token...")
 
