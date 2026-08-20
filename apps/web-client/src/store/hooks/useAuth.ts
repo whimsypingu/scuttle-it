@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { scuttleFetch } from '@/lib/utils';
+import { makeToast } from "@/features/toast/Toast";
 
 
 export const useAuth = () => {
@@ -37,6 +38,7 @@ export const useAuth = () => {
         },
         onError: (err) => {
             console.log("Invalid password");
+            makeToast(`Error: `, `Invalid password`);
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey }); //triggers refresh of /auth/me
