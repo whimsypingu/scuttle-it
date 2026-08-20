@@ -5,12 +5,13 @@ from fastapi import APIRouter, Body, Depends, HTTPException, status
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
 from core.models.payloads import LoginPayload
+from core.models.responses import LoginResponse
 
 
 AuthRouter = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
-@AuthRouter.post("/auth/login")
+@AuthRouter.post("/login")
 async def login(
     payload: LoginPayload = Body(...), #automatically parse JSON body into pydantic model
     db_manager: DatabaseManager = Depends(get_db_manager),
@@ -24,7 +25,9 @@ async def login(
                 detail="Invalid password"
             )
 
-        return True
+        return LoginResponse(
+            success=True
+        )
 
     except Exception as e:
         traceback.print_exc()

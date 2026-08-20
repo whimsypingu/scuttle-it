@@ -2,7 +2,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { scuttleFetch } from '@/lib/utils';
 import { makeToast } from "@/features/toast/Toast";
-import type { LoginPayload } from "./hooks.types";
+
+import type { LoginPayload } from "@/store/hooks/hooks.types";
+import type { LoginResponse } from "@/store/hooks/hooks.responses";
 
 
 export const useAuth = () => {
@@ -37,7 +39,7 @@ export const useAuth = () => {
             if (!response.ok) throw new Error("Invalid password");
 
             const data = await response.json();
-            return data;
+            return data as LoginResponse;
         },
         onError: (err) => {
             console.log("Invalid password");

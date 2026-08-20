@@ -42,3 +42,10 @@ export interface CreateJoinRoomResponse {
     roomId: string;
     isMain: boolean;
 }
+
+/**
+ * useAuth
+ */
+export interface LoginResponse {
+    success: boolean;
+}

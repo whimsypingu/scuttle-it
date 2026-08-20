@@ -42,3 +42,7 @@ class PushAllQueueResponse(QueueResponse):
 class CreateJoinRoomResponse(ScuttleBase):
     room_id: str
     is_main: bool
+
+
+class LoginResponse(ScuttleBase):
+    success: bool
