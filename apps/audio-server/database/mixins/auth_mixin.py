@@ -20,8 +20,12 @@ class AuthMixin:
                 stored_hash, stored_salt = row[0], row[1] #these should be stored as strings representing hex values
 
                 #empty case early return
-                if password is None and stored_hash is None:
+                if not password and not stored_hash:
                     return True
+
+                #guard against fromhex(None) and fallthrough after empty case, where a password is supplied but no salt value. salt and hash must be both None or values
+                if not stored_salt:
+                    return False
 
                 salt_bytes = bytes.fromhex(stored_salt)
                 computed_hash = hashlib.scrypt(

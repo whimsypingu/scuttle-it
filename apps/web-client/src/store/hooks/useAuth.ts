@@ -43,9 +43,10 @@ export const useAuth = () => {
         },
         onError: (err) => {
             console.log("Invalid password");
-            makeToast(`Error: `, `Invalid password`);
+            makeToast("", `Invalid password`);
         },
         onSuccess: (data) => {
+            console.log("Valid password");
             queryClient.invalidateQueries({ queryKey }); //triggers refresh of /auth/me
         },
     });

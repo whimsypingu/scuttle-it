@@ -29,6 +29,9 @@ async def login(
             success=True
         )
 
+    except HTTPException:
+        raise
+
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(
