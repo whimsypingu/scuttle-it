@@ -8,14 +8,29 @@ import type { LoginPayload } from "@/store/hooks/hooks.types";
 
 export const LoginScreen = () => {
     const [password, setPassword] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false); //password submit button state handler
 
-    const { isAuthLoading, login, isLoggingIn } = useAuth();
+    const { isAuth, isAuthLoading, loginAsync, isLoggingIn } = useAuth();
 
-    const handleSubmit = () => {
-        const payload: LoginPayload = {
-            password,
+    //when not yet auth'ed show a loading screen
+    if (isAuthLoading || isAuth) {
+        return <div className="fixed inset-0 bg-background" />;
+    }
+
+    const handleSubmit = async () => {
+        if (isSubmitting) return;
+
+        try {
+            setIsSubmitting(true);
+
+            //construct payload and wait for login attempt to complete
+            const payload: LoginPayload = {
+                password,
+            }
+            await loginAsync(payload);
+        } finally {
+            setIsSubmitting(false);
         }
-        login(payload);
     };
 
     return (
@@ -49,16 +64,17 @@ export const LoginScreen = () => {
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
                             autoFocus
+                            disabled={isLoggingIn}
                             className="w-full px-4 py-3 rounded-xl bg-zinc-950/60 border border-zinc-800/80 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-primary/60 transition-colors font-mono"
                         />
                     </div>
 
                     <button
                         type="submit"
-                        disabled={isLoggingIn || isAuthLoading}
+                        disabled={isLoggingIn}
                         className="w-full py-3 px-4 rounded-xl bg-zinc-300 text-zinc-900 font-medium font-mono hover:bg-zinc-200 active:scale-[0.98] transition-all disabled:opacity-40 disabled:pointer-events-none"
                     >
-                        {(isLoggingIn || isAuthLoading) ? "Scuttling..." : "Scuttle"}
+                        {(isLoggingIn) ? "Scuttling..." : "Scuttle"}
                     </button>
                 </form>
             </div>
