@@ -14,8 +14,8 @@ from sync.pokes import WSPokeFactory
 
 
 #dependencies to get from the server lifespan as defined in /main.py
-def get_db_manager(request: Request) -> DatabaseManager:
-    return request.app.state.db_manager
+def get_db_manager(connection: HTTPConnection) -> DatabaseManager: #use HTTPConnection instead of Request for WebSocket compatibility
+    return connection.app.state.db_manager
 
 def get_room_manager(connection: HTTPConnection) -> RoomManager:
     return connection.app.state.room_manager
