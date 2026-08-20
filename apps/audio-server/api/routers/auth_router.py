@@ -1,6 +1,6 @@
 import traceback
 
-from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
 
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
@@ -13,6 +13,7 @@ AuthRouter = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @AuthRouter.post("/login")
 async def login(
+    response: Response,
     payload: LoginPayload = Body(...), #automatically parse JSON body into pydantic model
     db_manager: DatabaseManager = Depends(get_db_manager),
 ):
@@ -25,6 +26,21 @@ async def login(
                 detail="Invalid password"
             )
 
+        #attach cookie
+        ttl_seconds = 432000 #5 days
+        token = await db_manager.create_cookie_token(ttl_seconds)
+
+        response.set_cookie(
+            key="scuttle_token",
+            value=token,
+            max_age=ttl_seconds,
+            httponly=True,
+            samesite="lax",
+            secure=False,
+            path="/"
+        )
+
+        #result of login attempt
         return LoginResponse(
             success=True
         )

@@ -1,6 +1,7 @@
 import logging
 import hashlib
 import hmac
+import secrets
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,26 @@ class AuthMixin:
         except Exception as e:
             logger.error(f"Password validation error: {e}")
             return False
+
+    async def create_cookie_token(self, ttl_seconds: int = 432000) -> str:
+        """Generates a cryptographically secure cookie token and stores the SHA-256 hash in the auth table"""
+
+        token = secrets.token_urlsafe(32) #alphanumeric token
+        token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest() #hash quickly and store the hex value
+
+        try:
+            async with self.session() as db:
+                await db.execute('''
+                    INSERT INTO auth (token_hash, refreshed_at, expires_at)
+                    VALUES (?, unixepoch(), unixepoch() + ?);
+                ''', (token_hash, ttl_seconds))
+
+            return token
+
+        except Exception:
+            logger.exception(f"Failed to generate cookie token")
+            raise
+            
 
 
 
