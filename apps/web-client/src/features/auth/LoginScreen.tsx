@@ -9,7 +9,7 @@ import type { LoginPayload } from "@/store/hooks/hooks.types";
 export const LoginScreen = () => {
     const [password, setPassword] = useState("");
 
-    const { login, isLoggingIn } = useAuth();
+    const { isAuthLoading, login, isLoggingIn } = useAuth();
 
     const handleSubmit = () => {
         const payload: LoginPayload = {
@@ -55,10 +55,10 @@ export const LoginScreen = () => {
 
                     <button
                         type="submit"
-                        disabled={isLoggingIn}
+                        disabled={isLoggingIn || isAuthLoading}
                         className="w-full py-3 px-4 rounded-xl bg-zinc-300 text-zinc-900 font-medium font-mono hover:bg-zinc-200 active:scale-[0.98] transition-all disabled:opacity-40 disabled:pointer-events-none"
                     >
-                        {isLoggingIn ? "Scuttling..." : "Scuttle"}
+                        {(isLoggingIn || isAuthLoading) ? "Scuttling..." : "Scuttle"}
                     </button>
                 </form>
             </div>

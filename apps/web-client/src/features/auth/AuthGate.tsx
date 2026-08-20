@@ -12,11 +12,13 @@ import { LoginScreen } from "@/features/auth/LoginScreen";
 export const AuthGate = ({ children }: { children: React.ReactNode }) => {
     const { isAuth, isAuthLoading } = useAuth();
 
-    if (!isAuth) {
+    if (!isAuth || isAuthLoading) {
         return (
             <>
-            <LoginScreen />
-            <Toast isExpanded={true} />
+            <div className="relative h-dvh w-full overflow-hidden bg-surface">
+                <LoginScreen />
+                <Toast isExpanded={true} />
+            </div>
             </>
         );
     }
