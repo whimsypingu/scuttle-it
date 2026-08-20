@@ -59,8 +59,8 @@ class AuthMixin:
 
                 #insert new value
                 await db.execute('''
-                    INSERT INTO auth (token_hash, refreshed_at, expires_at)
-                    VALUES (?, unixepoch(), unixepoch() + ?);
+                    INSERT INTO auth (token_hash, expires_at)
+                    VALUES (?, unixepoch() + ?);
                 ''', (token_hash, ttl_seconds))
 
             return token
@@ -101,7 +101,7 @@ class AuthMixin:
             async with self.session() as db:
                 cursor = await db.execute('''
                     UPDATE auth
-                    SET refreshed_at = unixepoch(), expires_at = unixepoch() + ?
+                    SET expires_at = unixepoch() + ?
                     WHERE token_hash = ? AND expires_at > unixepoch();
                 ''', (ttl_seconds, token_hash,))
 
