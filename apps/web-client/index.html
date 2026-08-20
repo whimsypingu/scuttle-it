@@ -19,9 +19,61 @@
 				background-color: oklch(0.145 0 0); /* equivalent to --bg-background */
 				overflow: hidden;
 			}
+
+			/* shimmer loading animation */
+			@keyframes load-shimmer-sweep {
+				0% {
+					transform: translateX(-100%);
+				}
+				100% {
+					transform: translateX(100%);
+				}
+			}
+			
+			#pwa-load-shell {
+				left: 0;
+				right: 0;
+				top: 0;
+				bottom: 0;
+				width: 100%;
+				height: 100;
+			}
+
+			.load-shimmer-track {
+				position: fixed;
+				left: 0;
+				right: 0;
+				width: 100%;
+				height: 3px;
+				background-color: rgba(30, 41, 59, 0.4);
+				overflow: hidden;
+				pointer-events: none;
+			}
+
+			.load-shimmer-bar {
+				width: 100%;
+				height: 100%;
+				background: linear-gradient(
+					90deg,
+					transparent 0%,
+					oklch(0.72 0.19 145 / 0.8) 50%,
+					transparent 100%
+				);
+				animation: load-shimmer-sweep 2.5s linear infinite;
+			}
 		</style>
 	</head>
 	<body>
+		<div id="pwa-load-shell">
+			<div class="load-shimmer-track" style="top: 0px;">
+				<div class="load-shimmer-bar"></div>
+			</div>
+
+			<div class="load-shimmer-track" style="bottom: 0px;">
+				<div class="load-shimmer-bar" style="animation-delay: 1.25s;"></div>
+			</div>
+		</div>
+
 		<div id="root"></div>
 		<script type="module" src="/src/main.tsx"></script>
 	</body>

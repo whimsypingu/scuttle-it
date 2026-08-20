@@ -15,7 +15,7 @@ export const AuthGate = ({ children }: { children: React.ReactNode }) => {
     if (!isAuth || isAuthLoading) {
         return (
             <>
-            <div className="relative h-dvh w-full overflow-hidden bg-background">
+            <div className="relative h-dvh w-full overflow-hidden bg-transparent">
                 <LoginScreen />
                 <Toast isExpanded={true} />
             </div>

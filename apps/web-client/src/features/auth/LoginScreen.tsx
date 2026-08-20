@@ -15,7 +15,7 @@ export const LoginScreen = () => {
     if (isAuthLoading || isAuth) {
         return (
             <>
-            <div className="fixed inset-0 bg-background">
+            {/* <div className="fixed inset-0 bg-background">
                 <div className="absolute left-0 right-0 top-0 bg-slate-800/50 border-transparent h-[3px] w-full">
     				<div className="h-full w-full translate-x-full animate-[shimmer_2.5s_infinite_linear] bg-gradient-to-r from-transparent via-primary/80 to-transparent" />
                 </div>
@@ -23,7 +23,7 @@ export const LoginScreen = () => {
                 <div className="absolute left-0 right-0 bottom-0 bg-slate-800/50 border-transparent h-[3px] w-full">
     				<div className="h-full w-full translate-x-full animate-[shimmer_2.5s_infinite_linear] bg-gradient-to-r from-transparent via-primary/80 to-transparent" />
                 </div>
-            </div>
+            </div> */}
             </>
         );
     }
