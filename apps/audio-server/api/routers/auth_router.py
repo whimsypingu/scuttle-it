@@ -29,7 +29,7 @@ async def login(
                 detail="Invalid password"
             )
 
-        #attach cookie
+        #attach cookie, guarantee this created auth token has a longer ttl from the default of 1hr
         auth_token = await db_manager.create_cookie_token(settings.TTL_AUTH_TOKEN)
 
         response.set_cookie(

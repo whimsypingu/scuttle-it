@@ -85,14 +85,14 @@ async def generate_qr(
     try:
         auth_token = await db_manager.create_cookie_token()
 
-        #build the url, which will then redirect after completing auth
+        #build the url, which will then redirect after completing auth: see apps/audio-server/routers/auth_router.py
         base_url = str(request.base_url).rstrip("/")
         join_url = f"{base_url}/auth/j/{auth_token}?r={room_id}"
     
         target_image = settings.ASSETS_DIR / "qr_silhouette.png"
         cmd = [
             str(settings.QR_GEN_BIN_PATH),
-            "-v", "9", #consider upping the version to a higher supported version for longer qr codes, but 7-L supports 154 chars anyway which is a lot
+            "-v", "12", #higher version (12-L has 368 char limit) required to support auth_token which has 43 characters from token_urlsafe()
             "-l", "L",
             "-a", str(target_image),
             "-m", join_url,

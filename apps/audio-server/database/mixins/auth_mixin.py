@@ -45,7 +45,7 @@ class AuthMixin:
             logger.error(f"Password validation error: {e}")
             return False
 
-    async def create_cookie_token(self, ttl_seconds: int = settings.TTL_AUTH_TOKEN) -> str:
+    async def create_cookie_token(self, ttl_seconds: int = 3600) -> str:
         """Generates a cryptographically secure cookie token and stores the SHA-256 hash in the auth table"""
         logger.info(f"Creating new authentication token...")
 
@@ -61,7 +61,7 @@ class AuthMixin:
                 await db.execute('''
                     INSERT INTO auth (token_hash, expires_at)
                     VALUES (?, unixepoch() + ?);
-                ''', (token_hash, ttl_seconds))
+                ''', (token_hash, ttl_seconds)) #shorter (1hr) creation expiration token, since after creation a validate_refresh adjusts to a longer ttl
 
             return token
 
