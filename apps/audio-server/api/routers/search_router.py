@@ -1,13 +1,13 @@
 import traceback
 
 from fastapi import APIRouter, Depends, Query, HTTPException
-from api.dependencies import get_db_manager, get_device_context, get_dl_queue
+from api.dependencies import get_db_manager, get_device_context, get_dl_queue, require_auth
 from database.database_manager import DatabaseManager
 from core.download.download_queue import DownloadQueue
 from core.models.jobs import DownloadJob
 from core.models.room import DeviceContext
 
-SearchRouter = APIRouter(prefix="/search", tags=["Search"])
+SearchRouter = APIRouter(prefix="/search", tags=["Search"], dependencies=[Depends(require_auth)])
 
 
 @SearchRouter.get("/db-search")

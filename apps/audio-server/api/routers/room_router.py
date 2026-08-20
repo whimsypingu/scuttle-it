@@ -6,7 +6,7 @@ from pathlib import Path as FilePath
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Response, status
 
 from config import settings
-from api.dependencies import get_db_manager, get_device_context, get_room_manager
+from api.dependencies import get_db_manager, get_device_context, get_room_manager, require_auth
 from database.database_manager import DatabaseManager
 from core.room.room_manager import RoomManager
 
@@ -14,7 +14,7 @@ from core.models.room import DeviceContext, Device
 from core.models.responses import CreateJoinRoomResponse
 
 
-RoomRouter = APIRouter(prefix="/room", tags=["Rooms"])
+RoomRouter = APIRouter(prefix="/room", tags=["Rooms"], dependencies=[Depends(require_auth)])
 
 #temporary crash exception
 DefaultCrashException = HTTPException(
