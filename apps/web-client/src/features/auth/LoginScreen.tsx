@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { useAuth } from "@/store/hooks/useAuth";
 
+import type { LoginPayload } from "@/store/hooks/hooks.types";
+
 
 export const LoginScreen = () => {
     const [password, setPassword] = useState("");
@@ -10,8 +12,10 @@ export const LoginScreen = () => {
     const { login, isLoggingIn } = useAuth();
 
     const handleSubmit = () => {
-        if (!password.trim()) return;
-        login(password);
+        const payload: LoginPayload = {
+            password,
+        }
+        login(payload);
     };
 
     return (
@@ -51,7 +55,7 @@ export const LoginScreen = () => {
 
                     <button
                         type="submit"
-                        disabled={isLoggingIn || !password.trim()}
+                        disabled={isLoggingIn}
                         className="w-full py-3 px-4 rounded-xl bg-zinc-300 text-zinc-900 font-medium font-mono hover:bg-zinc-200 active:scale-[0.98] transition-all disabled:opacity-40 disabled:pointer-events-none"
                     >
                         {isLoggingIn ? "Scuttling..." : "Scuttle"}

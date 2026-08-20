@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { scuttleFetch } from '@/lib/utils';
 import { makeToast } from "@/features/toast/Toast";
+import type { LoginPayload } from "./hooks.types";
 
 
 export const useAuth = () => {
@@ -25,11 +26,13 @@ export const useAuth = () => {
     });
 
     const loginMutation = useMutation({
-        mutationFn: async (password: string) => {
+        mutationFn: async (payload: LoginPayload) => {
             const response = await scuttleFetch(`/auth/login`, { 
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ password }),
+                headers: { 
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload),
             });
             if (!response.ok) throw new Error("Invalid password");
 
