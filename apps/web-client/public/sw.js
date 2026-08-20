@@ -6,6 +6,12 @@ const AUDIO_ROUTER_PATH_PREFIX = "/audio/stream";
 const STATIC_CACHE_NAME = "static-cache-v1";
 const STATIC_FILES_PATH_PREFIX = "/static";
 
+const PRECACHE_URLS = [
+    "/",
+    "/index.html",
+    "/manifest.json",
+];
+
 //console logging on desktop
 function swLog(...args) {
     const msg = args.map(a => String(a)).join(" ");
@@ -20,6 +26,10 @@ function swLog(...args) {
 //install event: optional, can pre-cache static assets if needed
 self.addEventListener("install", (event) => {
     swLog("Installing...");
+    
+    event.waitUntil(
+        caches.open(STATIC_CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
+    );
     self.skipWaiting(); //activate immediately
 });
 
@@ -42,16 +52,25 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
     const url = new URL(event.request.url);
 
+    //only intercept / and /index.html
+    if (url.pathname === "/" || url.pathname === "/index.html") {
+        swLog("index.html fetch intercepted");
+        event.respondWith(handleScuttleShellRequest(event.request));
+        return;
+    }
+
     //only intercept /audio/stream requests
     if (url.pathname.startsWith(AUDIO_ROUTER_PATH_PREFIX)) {
         swLog("Audio fetch intercepted");
         const cleanUrl = url.origin + url.pathname; //cleanUrl has a removed ?t= to extract the useful identifier url part as the cache key
         event.respondWith(handleAudioStreamRequest(event.request, cleanUrl));
+        return;
     }
 
     //only intercept /static requests
     if (url.pathname.startsWith(STATIC_FILES_PATH_PREFIX)) {
         event.respondWith(handleStaticFileRequest(event.request));
+        return;
     }
 });
 
@@ -226,4 +245,25 @@ async function handleStaticFileRequest(request) {
     } catch (err) {
         swLog(`Static Network Fetch Failed: ${err}`);
     }
+}
+
+
+// --- INDEX.HTML REQUEST ---
+async function handleScuttleShellRequest(request) {
+    const cache = await caches.open(STATIC_CACHE_NAME);
+
+    const cachedResponse = await cache.match("/index.html");
+    if (cachedResponse) return cachedResponse;
+
+    try {
+        const networkResponse = await fetch(request);
+
+        if (networkResponse && networkResponse.status === 200) {
+            await cache.put(request, networkResponse.clone());
+        }
+
+        return networkResponse;
+    } catch (err) {
+        swLog(`index.html Network Fetch Failed: ${err}`);
+    } 
 }
