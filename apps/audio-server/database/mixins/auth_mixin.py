@@ -45,12 +45,17 @@ class AuthMixin:
 
     async def create_cookie_token(self, ttl_seconds: int = 432000) -> str:
         """Generates a cryptographically secure cookie token and stores the SHA-256 hash in the auth table"""
+        logger.info(f"Creating new authentication token...")
 
         token = secrets.token_urlsafe(32) #alphanumeric token
         token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest() #hash quickly and store the hex value
 
         try:
             async with self.session() as db:
+                #greedy kill stale tokens
+                await db.execute("DELETE FROM auth WHERE expires_at <= unixepoch();")
+
+                #insert new value
                 await db.execute('''
                     INSERT INTO auth (token_hash, refreshed_at, expires_at)
                     VALUES (?, unixepoch(), unixepoch() + ?);
@@ -61,6 +66,51 @@ class AuthMixin:
         except Exception:
             logger.exception(f"Failed to generate cookie token")
             raise
+
+
+    async def validate_cookie_token(self, token: str) -> bool:
+        """Validates a cookie token"""
+
+        token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest() #hash quickly and store the hex value
+
+        try:
+            async with self.session() as db:
+                cursor = await db.execute('''
+                    SELECT token_hash FROM auth
+                    WHERE token_hash = ? AND expires_at > unixepoch();
+                ''', (token_hash,))
+                row = await cursor.fetchone()
+
+                return row is not None
+
+        except Exception:
+            logger.exception(f"Failed to validate cookie token")
+            raise
+        
+
+
+    async def validate_refresh_cookie_token(self, token: str, ttl_seconds: int = 432000) -> bool:
+        """Validates and refreshes the cookie token expiration"""
+        logger.info(f"Validating and refreshing authentication token...")
+
+        token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest() #hash quickly and store the hex value
+
+        try:
+            async with self.session() as db:
+                cursor = await db.execute('''
+                    UPDATE auth
+                    SET refreshed_at = unixepoch(), expires_at = unixepoch() + ?
+                    WHERE token_hash = ? AND expires_at > unixepoch();
+                ''', (ttl_seconds, token_hash,))
+
+                #no rows changed then the token is missing or expired
+                return cursor.rowcount != 0
+
+        except Exception:
+            logger.exception(f"Failed to validate and refresh cookie token")
+            raise
+
+                
             
 
 

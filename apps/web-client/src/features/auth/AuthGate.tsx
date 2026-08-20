@@ -10,9 +10,9 @@ import { LoginScreen } from "@/features/auth/LoginScreen";
  */
 
 export const AuthGate = ({ children }: { children: React.ReactNode }) => {
-    const { loginSuccess, isAuthLoading } = useAuth();
+    const { isAuth, isAuthLoading } = useAuth();
 
-    if (!loginSuccess) {
+    if (!isAuth) {
         return (
             <>
             <LoginScreen />

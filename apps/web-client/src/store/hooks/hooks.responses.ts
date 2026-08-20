@@ -46,6 +46,9 @@ export interface CreateJoinRoomResponse {
 /**
  * useAuth
  */
+export interface AuthResponse {
+    success: boolean;
+}
 export interface LoginResponse {
     success: boolean;
 }

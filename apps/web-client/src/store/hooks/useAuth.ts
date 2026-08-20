@@ -4,7 +4,7 @@ import { scuttleFetch } from '@/lib/utils';
 import { makeToast } from "@/features/toast/Toast";
 
 import type { LoginPayload } from "@/store/hooks/hooks.types";
-import type { LoginResponse } from "@/store/hooks/hooks.responses";
+import type { AuthResponse, LoginResponse } from "@/store/hooks/hooks.responses";
 
 
 export const useAuth = () => {
@@ -12,7 +12,7 @@ export const useAuth = () => {
     const queryKey = ["auth"];
 
     //fetch auth
-    const { data: loginSuccess, isLoading: isAuthLoading, error } = useQuery({
+    const { data, isLoading, error } = useQuery({
         queryKey,
         queryFn: async () => {
             const response = await scuttleFetch(`/auth/me`, { 
@@ -21,7 +21,7 @@ export const useAuth = () => {
             if (!response.ok) throw new Error("Unauthenticated");
             
             const data = await response.json();
-            return data;
+            return data as AuthResponse;
         },
         retry: false,
         staleTime: Infinity, 
@@ -52,8 +52,8 @@ export const useAuth = () => {
     });
 
     return {
-        loginSuccess,
-        isAuthLoading,
+        isAuth: !!data?.success,
+        isAuthLoading: isLoading,
 
         login: loginMutation.mutate,
         isLoggingIn: loginMutation.isPending,

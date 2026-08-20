@@ -44,5 +44,7 @@ class CreateJoinRoomResponse(ScuttleBase):
     is_main: bool
 
 
+class AuthResponse(ScuttleBase):
+    success: bool
 class LoginResponse(ScuttleBase):
     success: bool

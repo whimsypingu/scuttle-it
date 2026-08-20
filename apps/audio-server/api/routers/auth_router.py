@@ -1,11 +1,11 @@
 import traceback
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Body, Cookie, Depends, HTTPException, Response, status
 
 from api.dependencies import get_db_manager
 from database.database_manager import DatabaseManager
 from core.models.payloads import LoginPayload
-from core.models.responses import LoginResponse
+from core.models.responses import AuthResponse, LoginResponse
 
 
 AuthRouter = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -28,11 +28,11 @@ async def login(
 
         #attach cookie
         ttl_seconds = 432000 #5 days
-        token = await db_manager.create_cookie_token(ttl_seconds)
+        auth_token = await db_manager.create_cookie_token(ttl_seconds)
 
         response.set_cookie(
-            key="scuttle_token",
-            value=token,
+            key="auth_token",
+            value=auth_token,
             max_age=ttl_seconds,
             httponly=True,
             samesite="lax",
@@ -55,8 +55,53 @@ async def login(
             detail="Crashed"
         )
 
-        #create and send cookie with token
 
+@AuthRouter.get("/me")
+async def get_auth_me(
+    response: Response,
+    auth_token: str | None = Cookie(None),
+    db_manager: DatabaseManager = Depends(get_db_manager)
+):
+    try:
+        if not auth_token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="No auth token provided"
+            )
+
+        isAuth = await db_manager.validate_refresh_cookie_token(auth_token)
+
+        #remove cookie if not authorized
+        if not isAuth:
+            response.delete_cookie("auth_token", path="/")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Auth token expired"
+            )
+
+        response.set_cookie(
+            key="auth_token",
+            value=auth_token,
+            max_age=432000,
+            httponly=True,
+            samesite="lax",
+            secure=False,
+            path="/"
+        )
+
+        return AuthResponse(
+            success=True
+        )
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail="Crashed"
+        )
 
 
 
