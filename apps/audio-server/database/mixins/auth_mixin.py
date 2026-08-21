@@ -36,7 +36,7 @@ class AuthMixin:
                     salt=salt_bytes,
                     n=settings.PW_HASH_N,
                     r=settings.PW_HASH_R, #https://datatracker.ietf.org/doc/html/rfc7914.html#page-3
-                    p=settings.PW_HASH_R
+                    p=settings.PW_HASH_P
                 ).hex()
 
                 return hmac.compare_digest(computed_hash, stored_hash) #constant time comparison
