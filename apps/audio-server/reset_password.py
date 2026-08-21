@@ -28,33 +28,47 @@ def hash_password(password: str) -> tuple[str, str]:
 
 def main():
     db_path = settings.DATA_DIR / "scuttle.db"
+    if not db_path.exists():
+        print(f"Error: Database not found at {db_path.resolve()}")
+        sys.exit(1)
 
     print(f"=== Scuttle Admin Reset Password ===")
-    print(f"Database located at: {db_path}")
+    print(f"(Press Ctrl+C at any time to cancel)\n")
 
-    #prompt without echo
-    pw1 = getpass.getpass("Enter new password: ")
-    if len(pw1) >= 512:
-        print("Error: Password is too long.")
+    try:
+        #prompt without echo
+        pw1 = getpass.getpass("Enter new password: ")
+        if len(pw1) >= 512:
+            print("Error: Password is too long.")
+            sys.exit(1)
+
+        pw2 = getpass.getpass("Confirm new password: ")
+        if pw1 != pw2:
+            print("Error: Passwords do not match.")
+            sys.exit(1)
+
+        #get the password hash recovery details
+        hashed_pw, salt = hash_password(pw1)
+    
+    except KeyboardInterrupt:
+        print(f"\n\nPassword reset cancelled. No changes were made.")
+        sys.exit(0)
+
+    try:
+        with sqlite3.connect(db_path) as conn:
+            cursor = conn.cursor()
+
+            #update password
+            cursor.execute("UPDATE settings SET password_hash = ?, password_salt = ? WHERE id = 1;", (hashed_pw, salt))
+
+            #clear current existing sessions for security
+            cursor.execute("DELETE FROM auth;")
+
+            conn.commit()
+            
+    except Exception as e:
+        print(f"\nDatabase error: {e}")
         sys.exit(1)
-
-    pw2 = getpass.getpass("Confirm new password: ")
-    if pw1 != pw2:
-        print("Error: Passwords do not match.")
-        sys.exit(1)
-
-    hashed_pw, salt = hash_password(pw1)
-
-    with sqlite3.connect(db_path) as conn:
-        cursor = conn.cursor()
-
-        #update password
-        cursor.execute("UPDATE settings SET password_hash = ?, password_salt = ? WHERE id = 1;", (hashed_pw, salt))
-
-        #clear current existing sessions for security
-        cursor.execute("DELETE FROM auth;")
-
-        conn.commit()
 
     print("+ Password successfully updated.")
     print("+ All active sessions have been invalidated.")
