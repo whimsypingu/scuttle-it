@@ -1,15 +1,18 @@
 #!/bin/bash
 
-echo "Calculating line count..."
-
 IGNORE_DIRS=("bin" "data" "venv" ".venv" "__pycache__" "tests" "dist" "node_modules" "target" "assets" "docs")
 
-EXTENSIONS=("py" "js" "ts") # "html" "css" "rs")
+EXTENSIONS=("py" "js" "ts" "html" "css" "rs")
 declare -A COMMENTS=(
-    [py]='s/^[[:space:]]*#.*$//'
-    [js]='s/^[[:space:]]*\/\/.*$//'
-    [ts]='s/^[[:space:]]*\/\/.*$//'
+    [py]='s/^[[:space:]]*#.*$//'        # #
+    [js]='s/^[[:space:]]*\/\/.*$//'     # //
+    [ts]='s/^[[:space:]]*\/\/.*$//'     # //
+    [html]='s/^[[:space:]]*<!--.*$//'   # <!--
+    [css]='s/^[[:space:]]*\/\*.*$//'    # /*
+    [rs]='s/^[[:space:]]*\/\/.*$//'     # //
 )
+declare -A LINE_COUNTS
+total_lines=0
 
 echo "Pruning ignored folders..."
 
@@ -21,17 +24,20 @@ for dir in "${IGNORE_DIRS[@]}"; do
     find_args+=("-name" "$dir")
 done
 
+echo "Estimating logical lines..."
+
 for ext in "${EXTENSIONS[@]}"; do 
     comment="${COMMENTS[$ext]}"
 
     while IFS= read -r -d '' file; do 
         lines=$(sed \
-            -e 's/^[[:space:]]*//' \
             -e "$comment" \
-            -e '/^$/d' \
+            -e '/^[[:space:]]*$/d' \
             "$file" | wc -l)
 
-        echo "Counted $lines lines in: $file"
+        #echo "Counted $lines lines in: $file"
+
+        LINE_COUNTS[$ext]=$((LINE_COUNTS[$ext] + lines))
         total_lines=$((total_lines + lines))
 
     done < <(
@@ -40,6 +46,12 @@ for ext in "${EXTENSIONS[@]}"; do
     )
 done
 
+echo
 echo "------------------------------------"
+echo "Lines by file type:"
+for ext in "${EXTENSIONS[@]}"; do
+    echo ".$ext: ${LINE_COUNTS[$ext]:-0}"
+done
+echo
 echo "Roughly $total_lines logical lines of code."
 
