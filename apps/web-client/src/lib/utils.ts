@@ -74,8 +74,26 @@ export async function scuttleFetch(input: RequestInfo | URL, init: RequestInit =
     headers.set("Scuttle-Device-ID", deviceId);
     headers.set("Scuttle-Room-ID", roomId);
 
-    return fetch(input, {
+    //handle auth failure here. when a 401 UNAUTHORIZED is received and not on an /auth endpoint, hard refresh the page to return to the login screen
+    const response = await fetch(input, {
         ...init,
         headers,
     });
+
+    if (response.status === 401) {
+        const url = typeof input === "string" //extract the url pathname, wqhether in string or URL or Request object format
+            ? input 
+            : input instanceof URL 
+                ? input.pathname 
+                : input.url;
+
+        const isAuthEndpoint = url.includes("/auth") ;
+
+        if (!isAuthEndpoint) {
+            window.location.href = "/"; //redirect to homepage
+            return new Promise(() => {}); //return hanging promise so downstream code doesnt execute
+        }
+    }
+
+    return response;
 }
