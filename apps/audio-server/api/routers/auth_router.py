@@ -1,10 +1,11 @@
 import traceback
 
+from core.room.room_manager import RoomManager
 from fastapi import APIRouter, Body, Cookie, Depends, HTTPException, Query, Response, status
 
 from config import settings
 
-from api.dependencies import get_db_manager
+from api.dependencies import get_db_manager, get_room_manager
 from database.database_manager import DatabaseManager
 from core.models.payloads import LoginPayload
 from core.models.responses import AuthResponse, LoginResponse
@@ -106,21 +107,23 @@ async def get_auth_me(
         )
 
 
-@AuthRouter.get("/j/{auth_token}")
+@AuthRouter.get("/j/{ticket_id}")
 async def auth_join_room(
-    auth_token: str,
-    room_id: str = Query(..., min_length=1, max_length=4, alias="r"),
+    ticket_id: str,
+    room_manager: RoomManager = Depends(get_room_manager),
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        is_auth = await db_manager.validate_cookie_token(auth_token)
+        room_id = await room_manager.redeem_join_ticket(ticket_id)
 
-        #remove cookie if not authorized
-        if not is_auth:
+        #invalid join ticket
+        if room_id is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Join link is expired or invalid"
             )
+
+        auth_token = await db_manager.create_cookie_token(settings.TTL_AUTH_TOKEN)
 
         #prepare 303 redirect to frontend app with room parameter embedded
         target_url = f"/?r={room_id}"

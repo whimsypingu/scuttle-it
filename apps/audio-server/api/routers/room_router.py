@@ -76,18 +76,18 @@ async def join_room_endpoint(
 async def generate_qr(
     request: Request,
     room_id: str = Query(..., min_length=1, max_length=4, alias="roomId"),
-    db_manager: DatabaseManager = Depends(get_db_manager),
+    room_manager: RoomManager = Depends(get_room_manager),
 ):
     tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False) #rather unfortunate that i did not implement stdout for the binary
     tmp_path = FilePath(tmp.name)
     tmp.close()
 
     try:
-        auth_token = await db_manager.create_cookie_token()
+        ticket_id = await room_manager.create_join_ticket(room_id)
 
-        #build the url, which will then redirect after completing auth: see apps/audio-server/routers/auth_router.py
+        #build the url, which will then redirect after completing auth: see apps/audio-server/routers/auth_router.py, apps/audio-server/core/room/room_manager.py
         base_url = str(request.base_url).rstrip("/")
-        join_url = f"{base_url}/auth/j/{auth_token}?r={room_id}"
+        join_url = f"{base_url}/auth/j/{ticket_id}"
     
         target_image = settings.ASSETS_DIR / "qr_silhouette.png"
         cmd = [

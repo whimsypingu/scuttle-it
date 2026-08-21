@@ -90,7 +90,6 @@ class AuthMixin:
             raise
         
 
-
     async def validate_refresh_cookie_token(self, token: str, ttl_seconds: int = settings.TTL_AUTH_TOKEN) -> bool:
         """Validates and refreshes the cookie token expiration"""
         logger.info(f"Validating and refreshing authentication token...")
@@ -111,3 +110,4 @@ class AuthMixin:
         except Exception:
             logger.exception(f"Failed to validate and refresh cookie token")
             raise
+

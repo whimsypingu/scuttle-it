@@ -1,8 +1,11 @@
 import asyncio
+import hashlib
 import logging
+import secrets
+import time
 from typing import Any
 
-from core.models.room import Device, DeviceContext, Room
+from core.models.room import Device, JoinTicket, Room
 from database.database_manager import DatabaseManager
 from fastapi import WebSocket
 
@@ -25,6 +28,9 @@ class RoomManager:
 
         #running buffer mapping room_id -> last active time
         self.last_active_buffer: dict[str, int] = {}
+
+        #join tickets
+        self.join_tickets: dict[str, JoinTicket] = {}
 
         #atomicity
         self.lock = asyncio.Lock()
@@ -124,6 +130,35 @@ class RoomManager:
         logger.info(f"RoomManager broadcasting to all clients: {message}")
 
 
+    async def create_join_ticket(self, room_id: str) -> str:
+        """Creates a join ticket. Accepts room_id and outputs ticket_id"""
+        ticket_id = secrets.token_urlsafe(32)
+
+        async with self.lock:
+            self.join_tickets = {
+                id: ticket for id, ticket in self.join_tickets.items()
+                if not ticket.is_expired
+            }
+
+            ticket_id_hash = hashlib.sha256(ticket_id.encode("utf-8")).hexdigest() #hash quickly and store the hex value
+            self.join_tickets[ticket_id_hash] = JoinTicket(
+                room_id=room_id,
+                created_at=int(time.time())
+            )
+
+        return ticket_id
+
+    async def redeem_join_ticket(self, ticket_id: str) -> str:
+        """Redeems a join ticket. Accepts ticket_id and outputs room_id"""
+        async with self.lock:
+            ticket_id_hash = hashlib.sha256(ticket_id.encode("utf-8")).hexdigest() #hash quickly and store the hex value
+            ticket = self.join_tickets.pop(ticket_id_hash, None)
+
+            if ticket is None or ticket.is_expired:
+                return None
+
+            return ticket.room_id
+        
 
     async def update_last_active(self, room_id: str, last_active: int):
         """Updates the listened at buffer with the most recent value"""
