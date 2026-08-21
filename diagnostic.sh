@@ -2,11 +2,13 @@
 
 IGNORE_DIRS=("bin" "data" "venv" ".venv" "__pycache__" "tests" "dist" "node_modules" "target" "assets" "docs")
 
-EXTENSIONS=("py" "js" "ts" "html" "css" "rs")
+EXTENSIONS=("py" "js" "jsx" "ts" "tsx" "html" "css" "rs")
 declare -A COMMENTS=(
     [py]='s/^[[:space:]]*#.*$//'        # #
     [js]='s/^[[:space:]]*\/\/.*$//'     # //
+    [jsx]='s/^[[:space:]]*\/\/.*$//'    # //
     [ts]='s/^[[:space:]]*\/\/.*$//'     # //
+    [tsx]='s/^[[:space:]]*\/\/.*$//'    # //
     [html]='s/^[[:space:]]*<!--.*$//'   # <!--
     [css]='s/^[[:space:]]*\/\*.*$//'    # /*
     [rs]='s/^[[:space:]]*\/\/.*$//'     # //
