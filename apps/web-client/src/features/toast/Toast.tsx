@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+
 import { Toaster } from "@/components/ui/sonner";
 
 import { BOTTOM_SHELF, PLAYER_CONFIG } from "@/features/player/player.constants";
@@ -12,6 +14,25 @@ export const Toast = ({ isExpanded }: ToastProps) => {
     const minimumOffset = PLAYER_CONFIG.marginBottom; //minimum required offset
     const liftAmount = BOTTOM_SHELF.totalHeight; //how much to lift the toasts by when the player is closed
 
+    const [isDesktop, setIsDesktop] = useState(
+        () => window.matchMedia("(min-width: 600px)").matches
+    );
+    
+    useEffect(() => {
+        //conditional checks for when viewport is greater than sonner's internal cutoff, at which point toast centering becomes mangled
+        const mediaQuery = window.matchMedia("(min-width: 600px)"); //https://sonner.emilkowal.ski/toaster#api-reference
+
+        const handleChange = (e: MediaQueryListEvent) => {
+            setIsDesktop(e.matches);
+        };
+
+        mediaQuery.addEventListener("change", handleChange);
+
+        return () => {
+            mediaQuery.removeEventListener("change", handleChange);
+        };
+    }, []);
+    
     return (
         <motion.div
             initial={false}
@@ -27,6 +48,7 @@ export const Toast = ({ isExpanded }: ToastProps) => {
             }} // same transition values as GlobalPlayer
             style={{
                 position: "fixed",
+                width: "100%",
                 bottom: 0,
                 left: 0,
                 right: 0,
@@ -34,8 +56,8 @@ export const Toast = ({ isExpanded }: ToastProps) => {
             }} // sandwiches the zIndex of the GlobalPlayer so it hides behind the MiniView but is still above the ExpandedView
         >
             <Toaster 
-                position="bottom-center"
-                offset={0} //ignore the margins on the sides because we handle that within each individual toast for dynamic sizing based on content
+                position={isDesktop ? "bottom-left" : "bottom-center"}
+                offset={{ left: `${minimumOffset}px`, bottom: `0px` }} //ignore the margins on the sides because we handle that within each individual toast for dynamic sizing based on content
                 mobileOffset={0} //return this to { left: `${minimumOffset}px`, right... } for margins. see: https://sonner.emilkowal.ski/toaster#customizing-offsets
                 visibleToasts={1}
             />
@@ -46,14 +68,21 @@ export const Toast = ({ isExpanded }: ToastProps) => {
 // makeToast wrapper
 const makeToastCustom = (msg: string, boldedMsg: string = "") => {
     toast(
-        <div style={toastCustomStyle}>
-            <span style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                display: 'block', //required for ellipsis to work on a span, and appy styling again to inner jsx content
-            }}>
-                <span style={{ fontWeight: 300 }}>{msg}</span><b style={{ fontWeight: 600 }}>{boldedMsg}</b>
+        <div 
+            style={
+                toastCustomStyle
+            }
+        >
+            <span 
+                style={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    display: 'block', //required for ellipsis to work on a span, and appy styling again to inner jsx content
+                }}
+            >
+                <span style={{ fontWeight: 300 }}>{msg}</span>
+                <b style={{ fontWeight: 600 }}>{boldedMsg}</b>
             </span>
         </div>,
         {

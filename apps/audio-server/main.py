@@ -13,6 +13,7 @@ from config import settings #triggers validation here
 
 from api.routers.test_router import TestRouter
 
+from api.routers.auth_router import AuthRouter
 from api.routers.audio_router import AudioRouter
 from api.routers.queue_router import QueueRouter
 from api.routers.track_router import TrackRouter
@@ -117,6 +118,7 @@ app = FastAPI(
 
 app.include_router(TestRouter)
 
+app.include_router(AuthRouter)
 app.include_router(AudioRouter)
 app.include_router(QueueRouter)
 app.include_router(TrackRouter)

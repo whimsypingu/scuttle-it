@@ -4,7 +4,7 @@ logger = logging.getLogger(__name__)
 
 
 class LikeMixin:
-    """Handles database backed play queue"""
+    """Handles liking and unliking tracks"""
 
     async def like(self, track_id: str) -> bool:
         """Like a track"""

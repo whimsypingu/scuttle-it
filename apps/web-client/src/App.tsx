@@ -3,6 +3,8 @@ import { lazy, Suspense, useState } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query';
 import { MainLayout } from '@/features/player/MainLayout';
 
+import { AuthGate } from '@/features/auth/AuthGate';
+
 import { NavBar } from '@/features/player/NavBar';
 import { Toast } from '@/features/toast/Toast';
 
@@ -62,6 +64,7 @@ function App() {
 
 	return (
 		<QueryClientProvider client={queryClient}>
+		<AuthGate>
 			<AudioLogic />
 			<SyncLogic />
 
@@ -91,6 +94,7 @@ function App() {
 					<EditPopup />
 				</div>
 			</EditProvider>
+		</AuthGate>
 		</QueryClientProvider>
 	);
 }

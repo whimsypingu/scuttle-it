@@ -35,6 +35,12 @@ export interface EditProfilePayload {
 }
 
 
+//see: audio-server/core/models/payloads.py
+export interface LoginPayload {
+    password: string;
+}
+
+
 /**
  * useQueue
  * 

@@ -1,10 +1,10 @@
 import traceback
 
 from fastapi import APIRouter, Depends, Query, HTTPException, Response, status
-from api.dependencies import get_db_manager
+from api.dependencies import get_db_manager, require_auth
 from database.database_manager import DatabaseManager
 
-LikeRouter = APIRouter(prefix="/like", tags=["Like"])
+LikeRouter = APIRouter(prefix="/like", tags=["Like"], dependencies=[Depends(require_auth)])
 
 #temporary crash exception
 DefaultCrashException = HTTPException(

@@ -1,12 +1,12 @@
 import traceback
 
 from fastapi import APIRouter, Body, Depends, Path, HTTPException, Query, Response, status
-from api.dependencies import get_db_manager
+from api.dependencies import get_db_manager, require_auth
 from database.database_manager import DatabaseManager
 
 from core.models.payloads import CreatePlaylistPayload, EditPlaylistPayload, ReorderPlaylistPayload
 
-PlaylistRouter = APIRouter(prefix="/playlists", tags=["Playlists"])
+PlaylistRouter = APIRouter(prefix="/playlists", tags=["Playlists"], dependencies=[Depends(require_auth)])
 
 #temporary crash exception
 DefaultCrashException = HTTPException(

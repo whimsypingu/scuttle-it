@@ -1,10 +1,10 @@
 import traceback
 
 from fastapi import APIRouter, Depends, HTTPException
-from api.dependencies import get_dl_queue
+from api.dependencies import get_dl_queue, require_auth
 from core.download.download_queue import DownloadQueue
 
-JobRouter = APIRouter(prefix="/jobs", tags=["Jobs"])
+JobRouter = APIRouter(prefix="/jobs", tags=["Jobs"], dependencies=[Depends(require_auth)])
 
 
 @JobRouter.get("/downloads")

@@ -1,11 +1,11 @@
 import traceback
 
 from fastapi import APIRouter, Depends, Query, HTTPException
-from api.dependencies import get_db_manager, get_device_context
+from api.dependencies import get_db_manager, get_device_context, require_auth
 from database.database_manager import DatabaseManager
 from core.models.room import DeviceContext
 
-SettingsRouter = APIRouter(prefix="/settings", tags=["Settings"])
+SettingsRouter = APIRouter(prefix="/settings", tags=["Settings"], dependencies=[Depends(require_auth)])
 
 #temporary crash exception
 DefaultCrashException = HTTPException(

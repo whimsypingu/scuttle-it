@@ -113,5 +113,14 @@ ON play_queue(room_internal_id, position); --index by room id for room based sor
 CREATE TABLE IF NOT EXISTS settings (
     id INTEGER PRIMARY KEY CHECK (id = 1), --ensures only one row
     username TEXT NOT NULL,
-    created_at INTEGER DEFAULT (unixepoch())
+    created_at INTEGER DEFAULT (unixepoch()),
+    password_hash TEXT NOT NULL DEFAULT "",
+    password_salt TEXT NOT NULL DEFAULT ""
+);
+
+
+-- auth
+CREATE TABLE IF NOT EXISTS auth (
+    token_hash TEXT PRIMARY KEY,
+    expires_at INTEGER NOT NULL --see config settings
 );
