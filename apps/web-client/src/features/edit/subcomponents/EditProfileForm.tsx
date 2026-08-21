@@ -10,6 +10,7 @@ import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
 
 import type { UserStats } from "@/features/profile/profile.types";
 import type { EditProfilePayload } from "@/store/hooks/hooks.types";
+import { useAuth } from "@/store/hooks/useAuth";
 
 
 interface EditProfileFormProps {
@@ -23,7 +24,12 @@ export const EditProfileForm = ({
 }: EditProfileFormProps) => {
     const [usernameInput, setUsernameInput] = useState(stats.username);
 
+    const { logout } = useAuth();
     const { editProfile } = useEditProfile();
+
+    const handleLogout = () => {
+        logout();
+    }
 
     const handleSave = () => {
         if (usernameInput.length > 0 && usernameInput !== stats.username) {
@@ -69,7 +75,15 @@ export const EditProfileForm = ({
             </div>
 
             {/* Save */}
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-between pt-4">
+                <Button
+                    className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
+                    variant="ghost"
+                    onClick={handleLogout}
+                >
+                    Logout
+                </Button>
+
                 <Button
                     className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
                     variant="secondary"

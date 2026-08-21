@@ -102,7 +102,7 @@ class AuthMixin:
                     UPDATE auth
                     SET expires_at = unixepoch() + ?
                     WHERE token_hash = ? AND expires_at > unixepoch();
-                ''', (ttl_seconds, token_hash,))
+                ''', (ttl_seconds, token_hash))
 
                 #no rows changed then the token is missing or expired
                 return cursor.rowcount != 0
@@ -110,4 +110,21 @@ class AuthMixin:
         except Exception:
             logger.exception(f"Failed to validate and refresh cookie token")
             raise
+
+
+    async def delete_cookie_token(self, token: str) -> bool:
+        """Deletes a cookie token"""
+        logger.info(f"Deleting authentication token...")
+
+        token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest() #hash quickly and store the hex value
+
+        try:
+            async with self.session() as db:
+                await db.execute("DELETE FROM auth WHERE token_hash = ?;", (token_hash,))
+                return True
+
+        except Exception:
+            logger.exception(f"Failed to validate and refresh cookie token")
+            raise
+
 

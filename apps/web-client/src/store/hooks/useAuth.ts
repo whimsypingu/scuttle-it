@@ -51,6 +51,21 @@ export const useAuth = () => {
         },
     });
 
+    const logoutMutation = useMutation({
+        mutationFn: async () => {
+            const response = await scuttleFetch(`/auth/logout`, {
+                method: "POST",
+            });
+            if (!response.ok) throw new Error("Logout error");
+
+            const data = await response.json();
+            return data;
+        },
+        onSettled: () => {
+            window.location.href = "/";
+        }
+    });
+
     return {
         isAuth: !!data?.success,
         isAuthLoading: isLoading,
@@ -58,5 +73,7 @@ export const useAuth = () => {
         login: loginMutation.mutate,
         loginAsync: loginMutation.mutateAsync,
         isLoggingIn: loginMutation.isPending,
+
+        logout: logoutMutation.mutate,
     };
 };

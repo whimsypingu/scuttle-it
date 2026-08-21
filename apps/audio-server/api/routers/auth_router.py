@@ -150,4 +150,29 @@ async def auth_join_room(
             status_code=500,
             detail="Crashed"
         )
-    
+
+
+@AuthRouter.post("/logout")
+async def logout(
+    response: Response,
+    auth_token: str | None = Cookie(None),
+    db_manager: DatabaseManager = Depends(get_db_manager),
+):
+    try:
+        #remove cookie from db and frontend
+        if auth_token:
+            await db_manager.delete_cookie_token(auth_token)
+
+        response.delete_cookie("auth_token", path="/")
+        response.status_code = status.HTTP_204_NO_CONTENT
+
+        return response
+
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail="Crashed"
+        )
+
+
