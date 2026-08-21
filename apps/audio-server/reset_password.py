@@ -19,9 +19,9 @@ def hash_password(password: str) -> tuple[str, str]:
     computed_hash = hashlib.scrypt(
         password.encode("utf-8"),
         salt=salt_bytes,
-        n=16384,
-        r=8,
-        p=1
+        n=settings.PW_HASH_N,
+        r=settings.PW_HASH_R,
+        p=settings.PW_HASH_P
     ).hex()
 
     return computed_hash, salt

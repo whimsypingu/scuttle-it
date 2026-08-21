@@ -34,9 +34,9 @@ class AuthMixin:
                 computed_hash = hashlib.scrypt(
                     password.encode("utf-8"),
                     salt=salt_bytes,
-                    n=16384,
-                    r=8, #https://datatracker.ietf.org/doc/html/rfc7914.html#page-3
-                    p=1
+                    n=settings.PW_HASH_N,
+                    r=settings.PW_HASH_R, #https://datatracker.ietf.org/doc/html/rfc7914.html#page-3
+                    p=settings.PW_HASH_R
                 ).hex()
 
                 return hmac.compare_digest(computed_hash, stored_hash) #constant time comparison
