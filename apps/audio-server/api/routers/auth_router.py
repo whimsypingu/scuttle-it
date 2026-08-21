@@ -1,11 +1,11 @@
 import traceback
 
 from core.room.room_manager import RoomManager
-from fastapi import APIRouter, Body, Cookie, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Body, Cookie, Depends, HTTPException, Query, Request, Response, status
 
 from config import settings
 
-from api.dependencies import get_db_manager, get_room_manager
+from api.dependencies import get_db_manager, get_room_manager, is_request_secure
 from database.database_manager import DatabaseManager
 from core.models.payloads import LoginPayload
 from core.models.responses import AuthResponse, LoginResponse
@@ -17,6 +17,7 @@ AuthRouter = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @AuthRouter.post("/login")
 async def login(
+    request: Request,
     response: Response,
     payload: LoginPayload = Body(...), #automatically parse JSON body into pydantic model
     db_manager: DatabaseManager = Depends(get_db_manager),
@@ -39,7 +40,7 @@ async def login(
             max_age=settings.TTL_AUTH_TOKEN,
             httponly=True,
             samesite="lax",
-            secure=False,
+            secure=is_request_secure(request),
             path="/"
         )
 
@@ -61,6 +62,7 @@ async def login(
 
 @AuthRouter.get("/me")
 async def get_auth_me(
+    request: Request,
     response: Response,
     auth_token: str | None = Cookie(None),
     db_manager: DatabaseManager = Depends(get_db_manager)
@@ -88,7 +90,7 @@ async def get_auth_me(
             max_age=settings.TTL_AUTH_TOKEN,
             httponly=True,
             samesite="lax",
-            secure=False,
+            secure=is_request_secure(request),
             path="/"
         )
 
@@ -109,6 +111,7 @@ async def get_auth_me(
 
 @AuthRouter.get("/j/{ticket_id}")
 async def auth_join_room(
+    request: Request,
     ticket_id: str,
     room_manager: RoomManager = Depends(get_room_manager),
     db_manager: DatabaseManager = Depends(get_db_manager)
@@ -135,7 +138,7 @@ async def auth_join_room(
             max_age=settings.TTL_AUTH_TOKEN,
             httponly=True,
             samesite="lax",
-            secure=False,
+            secure=is_request_secure(request),
             path="/"
         )
 

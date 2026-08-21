@@ -88,3 +88,17 @@ async def track_update_all_broadcast(
     await room_manager.broadcast_all(
         WSPokeFactory.track_update()
     )
+
+
+#helper function to determine secure context
+def is_request_secure(
+    request: Request
+):
+    if request.url.scheme == "https": #direct check
+        return True
+
+    forwarded_proto = request.headers.get("x-forwarded-proto", "").lower() #https://developers.cloudflare.com/fundamentals/reference/http-headers/
+    if forwarded_proto == "https":
+        return True
+
+    return False

@@ -58,10 +58,12 @@ export const useAuth = () => {
             });
             if (!response.ok) throw new Error("Logout error");
 
-            const data = await response.json();
-            return data;
+            return true;
         },
         onSettled: () => {
+            console.log("LOGOUT SETTLED");
+            // queryClient.clear();
+            // window.location.replace("/");
             window.location.href = "/";
         }
     });

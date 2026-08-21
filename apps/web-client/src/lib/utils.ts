@@ -91,7 +91,6 @@ export async function scuttleFetch(input: RequestInfo | URL, init: RequestInit =
 
         if (!isAuthEndpoint) {
             window.location.href = "/"; //redirect to homepage
-            return new Promise(() => {}); //return hanging promise so downstream code doesnt execute
         }
     }
 
