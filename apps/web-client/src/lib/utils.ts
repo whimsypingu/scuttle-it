@@ -98,3 +98,16 @@ export async function scuttleFetch(input: RequestInfo | URL, init: RequestInit =
 
     return response;
 }
+
+
+/**
+ * Convenient detection helper, designed specifically for use in apps/web-client/src/features/player/NavBar.tsx when adjusting navbar sizing for iPhone
+ * @returns boolean
+ */
+export const isPWA = (): boolean => {
+    if (typeof window === "undefined") return false;
+    return (
+        window.matchMedia("(display-mode: standalone)").matches ||
+        (window.navigator as unknown as { standalone?: boolean }).standalone === true
+    );
+};

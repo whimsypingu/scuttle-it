@@ -1,6 +1,7 @@
 import { Home, Library, Search, User } from 'lucide-react';
 
 import type { NavItemConfig } from '@/features/player/player.types';
+import { isPWA } from '@/lib/utils';
 
 //player sizing and location
 export const PLAYER_CONFIG = {
@@ -19,8 +20,16 @@ export const QUEUE_CONFIG = {
 }
 
 //navbar sizing
-export const NAV_CONFIG = {
-    height: 32,
+export const NAV_CONFIG = isPWA() ? {
+    height: 48, //total height
+    paddingTop: 2, //optional lifted padding (for device-based padding in a pwa, as recommended by a friend n.w.)
+    bottomPadding: 14, 
+    iconSize: 18,
+} : {
+    height: 36,
+    paddingTop: 0,
+    paddingBottom: 0,
+    iconSize: 18,
 };
 
 // Helper to calculate the total "dead zone" at the bottom of the screen

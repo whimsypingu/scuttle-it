@@ -35,9 +35,13 @@ const NavItem = ({ icon: IconComponent, active, onClick }: NavItemProps) => (
             h-full flex-grow
             transition-colors ${active ? 'text-white' : 'text-zinc-500 active:text-zinc-300'}
         `}
+        style={{ paddingBottom: `${NAV_CONFIG.bottomPadding}px` }}
         onClick={onClick}
     >
-        <div className="h-[50%] aspect-square [&>svg]:w-full [&>svg]:h-full">
+        <div 
+            className="h-[50%] aspect-square [&>svg]:w-full [&>svg]:h-full"
+            style={{ height: `${NAV_CONFIG.iconSize}px` }}
+        >
             <IconComponent strokeWidth={active ? 2.5 : 2} />
         </div>
     </button>
