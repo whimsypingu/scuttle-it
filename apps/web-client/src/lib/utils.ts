@@ -3,6 +3,7 @@ import { twMerge } from "tailwind-merge"
 
 import { generateUUID } from "@/lib/generate";
 import { set, get } from "idb-keyval";
+import { destroyWebSocket } from "@/store/sync/websocket";
 
 
 //tailwind boilerplate idk what ts is
@@ -90,6 +91,7 @@ export async function scuttleFetch(input: RequestInfo | URL, init: RequestInit =
         const isAuthEndpoint = url.includes("/auth") ;
 
         if (!isAuthEndpoint) {
+            destroyWebSocket();
             window.location.href = "/"; //redirect to homepage
         }
     }

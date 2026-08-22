@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { scuttleFetch } from '@/lib/utils';
 import { makeToast } from "@/features/toast/Toast";
+import { destroyWebSocket } from "@/store/sync/websocket";
 
 import type { LoginPayload } from "@/store/hooks/hooks.types";
 import type { AuthResponse, LoginResponse } from "@/store/hooks/hooks.responses";
@@ -61,9 +62,7 @@ export const useAuth = () => {
             return true;
         },
         onSettled: () => {
-            console.log("LOGOUT SETTLED");
-            // queryClient.clear();
-            // window.location.replace("/");
+            destroyWebSocket();
             window.location.href = "/";
         }
     });
