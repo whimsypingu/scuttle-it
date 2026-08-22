@@ -55,3 +55,12 @@ class Room(ScuttleBase):
             next_main = next(iter(self.devices.values()))
             next_main.is_main = True
         return removed
+
+class JoinTicket(ScuttleBase):
+    room_id: str
+    created_at: int
+    ttl: int = 60
+
+    @property
+    def is_expired(self) -> bool:
+        return int(time.time()) > (self.created_at + self.ttl)

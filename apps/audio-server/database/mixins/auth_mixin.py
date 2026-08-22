@@ -34,9 +34,9 @@ class AuthMixin:
                 computed_hash = hashlib.scrypt(
                     password.encode("utf-8"),
                     salt=salt_bytes,
-                    n=16384,
-                    r=8, #https://datatracker.ietf.org/doc/html/rfc7914.html#page-3
-                    p=1
+                    n=settings.PW_HASH_N,
+                    r=settings.PW_HASH_R, #https://datatracker.ietf.org/doc/html/rfc7914.html#page-3
+                    p=settings.PW_HASH_P
                 ).hex()
 
                 return hmac.compare_digest(computed_hash, stored_hash) #constant time comparison
@@ -90,7 +90,6 @@ class AuthMixin:
             raise
         
 
-
     async def validate_refresh_cookie_token(self, token: str, ttl_seconds: int = settings.TTL_AUTH_TOKEN) -> bool:
         """Validates and refreshes the cookie token expiration"""
         logger.info(f"Validating and refreshing authentication token...")
@@ -103,7 +102,7 @@ class AuthMixin:
                     UPDATE auth
                     SET expires_at = unixepoch() + ?
                     WHERE token_hash = ? AND expires_at > unixepoch();
-                ''', (ttl_seconds, token_hash,))
+                ''', (ttl_seconds, token_hash))
 
                 #no rows changed then the token is missing or expired
                 return cursor.rowcount != 0
@@ -111,3 +110,21 @@ class AuthMixin:
         except Exception:
             logger.exception(f"Failed to validate and refresh cookie token")
             raise
+
+
+    async def delete_cookie_token(self, token: str) -> bool:
+        """Deletes a cookie token"""
+        logger.info(f"Deleting authentication token...")
+
+        token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest() #hash quickly and store the hex value
+
+        try:
+            async with self.session() as db:
+                await db.execute("DELETE FROM auth WHERE token_hash = ?;", (token_hash,))
+                return True
+
+        except Exception:
+            logger.exception(f"Failed to validate and refresh cookie token")
+            raise
+
+

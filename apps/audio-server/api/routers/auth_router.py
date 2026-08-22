@@ -1,10 +1,11 @@
 import traceback
 
-from fastapi import APIRouter, Body, Cookie, Depends, HTTPException, Query, Response, status
+from core.room.room_manager import RoomManager
+from fastapi import APIRouter, Body, Cookie, Depends, HTTPException, Query, Request, Response, status
 
 from config import settings
 
-from api.dependencies import get_db_manager
+from api.dependencies import get_db_manager, get_room_manager, is_request_secure
 from database.database_manager import DatabaseManager
 from core.models.payloads import LoginPayload
 from core.models.responses import AuthResponse, LoginResponse
@@ -16,6 +17,7 @@ AuthRouter = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @AuthRouter.post("/login")
 async def login(
+    request: Request,
     response: Response,
     payload: LoginPayload = Body(...), #automatically parse JSON body into pydantic model
     db_manager: DatabaseManager = Depends(get_db_manager),
@@ -38,7 +40,7 @@ async def login(
             max_age=settings.TTL_AUTH_TOKEN,
             httponly=True,
             samesite="lax",
-            secure=False,
+            secure=is_request_secure(request),
             path="/"
         )
 
@@ -60,6 +62,7 @@ async def login(
 
 @AuthRouter.get("/me")
 async def get_auth_me(
+    request: Request,
     response: Response,
     auth_token: str | None = Cookie(None),
     db_manager: DatabaseManager = Depends(get_db_manager)
@@ -87,7 +90,7 @@ async def get_auth_me(
             max_age=settings.TTL_AUTH_TOKEN,
             httponly=True,
             samesite="lax",
-            secure=False,
+            secure=is_request_secure(request),
             path="/"
         )
 
@@ -106,21 +109,24 @@ async def get_auth_me(
         )
 
 
-@AuthRouter.get("/j/{auth_token}")
+@AuthRouter.get("/j/{ticket_id}")
 async def auth_join_room(
-    auth_token: str,
-    room_id: str = Query(..., min_length=1, max_length=4, alias="r"),
+    request: Request,
+    ticket_id: str,
+    room_manager: RoomManager = Depends(get_room_manager),
     db_manager: DatabaseManager = Depends(get_db_manager)
 ):
     try:
-        is_auth = await db_manager.validate_cookie_token(auth_token)
+        room_id = await room_manager.redeem_join_ticket(ticket_id)
 
-        #remove cookie if not authorized
-        if not is_auth:
+        #invalid join ticket
+        if room_id is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Join link is expired or invalid"
             )
+
+        auth_token = await db_manager.create_cookie_token(settings.TTL_AUTH_TOKEN)
 
         #prepare 303 redirect to frontend app with room parameter embedded
         target_url = f"/?r={room_id}"
@@ -132,7 +138,7 @@ async def auth_join_room(
             max_age=settings.TTL_AUTH_TOKEN,
             httponly=True,
             samesite="lax",
-            secure=False,
+            secure=is_request_secure(request),
             path="/"
         )
 
@@ -147,4 +153,29 @@ async def auth_join_room(
             status_code=500,
             detail="Crashed"
         )
-    
+
+
+@AuthRouter.post("/logout")
+async def logout(
+    response: Response,
+    auth_token: str | None = Cookie(None),
+    db_manager: DatabaseManager = Depends(get_db_manager),
+):
+    try:
+        #remove cookie from db and frontend
+        if auth_token:
+            await db_manager.delete_cookie_token(auth_token)
+
+        response.delete_cookie("auth_token", path="/")
+        response.status_code = status.HTTP_204_NO_CONTENT
+
+        return response
+
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail="Crashed"
+        )
+
+

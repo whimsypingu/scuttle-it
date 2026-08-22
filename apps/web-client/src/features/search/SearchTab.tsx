@@ -205,7 +205,7 @@ export const SearchTab = ({
 // ];
 
 const GENRES = [
-    { name: 'Coming soon...', color: '#E13300' },
+    { name: 'Stealing radios...', color: '#E13300' },
 ];
 
 const MockBrowserCategories = () => {

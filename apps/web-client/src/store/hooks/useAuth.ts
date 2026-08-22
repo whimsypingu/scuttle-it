@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { scuttleFetch } from '@/lib/utils';
 import { makeToast } from "@/features/toast/Toast";
+import { destroyWebSocket } from "@/store/sync/websocket";
 
 import type { LoginPayload } from "@/store/hooks/hooks.types";
 import type { AuthResponse, LoginResponse } from "@/store/hooks/hooks.responses";
@@ -51,6 +52,21 @@ export const useAuth = () => {
         },
     });
 
+    const logoutMutation = useMutation({
+        mutationFn: async () => {
+            const response = await scuttleFetch(`/auth/logout`, {
+                method: "POST",
+            });
+            if (!response.ok) throw new Error("Logout error");
+
+            return true;
+        },
+        onSettled: () => {
+            destroyWebSocket();
+            window.location.href = "/";
+        }
+    });
+
     return {
         isAuth: !!data?.success,
         isAuthLoading: isLoading,
@@ -58,5 +74,7 @@ export const useAuth = () => {
         login: loginMutation.mutate,
         loginAsync: loginMutation.mutateAsync,
         isLoggingIn: loginMutation.isPending,
+
+        logout: logoutMutation.mutate,
     };
 };

@@ -127,7 +127,7 @@ export const HomeTab = ({
                                                         data: p,
                                                     });
                                                 }}
-                                                actions={["shufflePlay", "play", "unpin", "edit"]}
+                                                actions={["shufflePushSwipe", "pushSwipe", "unpin", "edit"]}
                                             />
                                         ))}
                                     </div>
