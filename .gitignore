@@ -34,3 +34,6 @@ bundle-analysis.html
 # --- Launcher ---
 target/
 .install_done
+
+# --- Diagnostics ---
+diagnostic.sh
