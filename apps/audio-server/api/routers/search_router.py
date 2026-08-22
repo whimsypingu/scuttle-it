@@ -41,6 +41,7 @@ async def search_youtube(
         job = DownloadJob(
             query=q,
             query_limit=query_limit,
+            priority=True,
             room_id=ctx.room_id
         )
         await dl_queue.add(job)
