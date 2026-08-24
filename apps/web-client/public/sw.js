@@ -5,9 +5,9 @@ const AUDIO_ROUTER_PATH_PREFIX = "/audio/stream";
 
 const STATIC_CACHE_NAME = "static-cache-v1";
 const STATIC_FILES_PATH_PREFIX = "/static";
+const ASSET_FILES_PATH_PREFIX = "/assets";
 
 const PRECACHE_URLS = [
-    "/",
     "/index.html",
     "/manifest.json",
 ];
@@ -53,7 +53,12 @@ self.addEventListener("fetch", (event) => {
     const url = new URL(event.request.url);
 
     //only intercept / and /index.html
-    if (url.pathname === "/" || url.pathname === "/index.html") {
+    isIndex = 
+        url.pathname === "/" ||
+        url.pathname === "/index.html" ||
+        event.request.mode === "navigate"; //available in sw: https://developer.mozilla.org/en-US/docs/Web/API/Request/mode
+
+    if (isIndex) {
         swLog("index.html fetch intercepted");
         event.respondWith(handleScuttleShellRequest(event.request));
         return;
@@ -67,8 +72,13 @@ self.addEventListener("fetch", (event) => {
         return;
     }
 
-    //only intercept /static requests
-    if (url.pathname.startsWith(STATIC_FILES_PATH_PREFIX)) {
+    //only intercept static files
+    const isStatic = 
+        url.pathname.startsWith(STATIC_FILES_PATH_PREFIX) ||
+        url.pathname.startsWith(ASSET_FILES_PATH_PREFIX) ||
+        url.pathname === "/manifest.json";
+
+    if (isStatic) {
         event.respondWith(handleStaticFileRequest(event.request));
         return;
     }
