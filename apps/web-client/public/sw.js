@@ -7,6 +7,8 @@ const STATIC_CACHE_NAME = "static-cache-v1";
 const STATIC_FILES_PATH_PREFIX = "/static";
 const ASSET_FILES_PATH_PREFIX = "/assets";
 
+const CURRENT_CACHES = [AUDIO_CACHE_NAME, STATIC_CACHE_NAME];
+
 const PRECACHE_URLS = [
     "/index.html",
     "/manifest.json",
@@ -26,6 +28,7 @@ function swLog(...args) {
 //install event: optional, can pre-cache static assets if needed
 self.addEventListener("install", (event) => {
     swLog("Installing...");
+    console.log("[SW] Install event triggered");
     
     event.waitUntil(
         caches.open(STATIC_CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
@@ -40,7 +43,14 @@ self.addEventListener("activate", (event) => {
         (async () => {
             //delete old caches, might be killing too much
             const keys = await caches.keys();
-            await Promise.all(keys.map(key => caches.delete(key)));
+            await Promise.all(
+                keys.map((key) => {
+                    if (!CURRENT_CACHES.includes(key)) {
+                        swLog(`Clearing old cache: ${key}`);
+                        return caches.delete(key);
+                    }
+                })
+            );
             swLog("Cache reset on activation");
         })()
     );
