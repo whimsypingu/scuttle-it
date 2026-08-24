@@ -1,8 +1,9 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 
 import { QueryClientProvider } from '@tanstack/react-query';
 import { MainLayout } from '@/features/player/MainLayout';
 
+import { OfflineProvider } from '@/features/offline/OfflineProvider';
 import { AuthGate } from '@/features/auth/AuthGate';
 
 import { NavBar } from '@/features/player/NavBar';
@@ -18,12 +19,24 @@ import { EditProvider } from '@/features/edit/EditProvider';
 
 import { NAV_ITEMS } from '@/features/player/player.constants';
 
-const GlobalPlayer = lazy(() => import('@/features/player/GlobalPlayer').then(m => ({ default: m.GlobalPlayer })));
+const loadGlobalPlayer = () => import('@/features/player/GlobalPlayer').then(m => ({ default: m.GlobalPlayer }));
+const loadHomeTab = () => import('@/features/home/HomeTab').then(m => ({ default: m.HomeTab }));
+const loadSearchTab = () => import('@/features/search/SearchTab').then(m => ({ default: m.SearchTab }));
+const loadLibraryTab = () => import('@/features/library/LibraryTab').then(m => ({ default: m.LibraryTab }));
+const loadProfileTab = () => import('@/features/profile/ProfileTab').then(m => ({ default: m.ProfileTab }));
 
-const HomeTab = lazy(() => import('@/features/home/HomeTab').then(m => ({ default: m.HomeTab })));
-const SearchTab = lazy(() => import('@/features/search/SearchTab').then(m => ({ default: m.SearchTab })));
-const LibraryTab = lazy(() => import('@/features/library/LibraryTab').then(m => ({ default: m.LibraryTab })));
-const ProfileTab = lazy(() => import('@/features/profile/ProfileTab').then(m => ({ default: m.ProfileTab })));
+const GlobalPlayer = lazy(loadGlobalPlayer);
+const HomeTab = lazy(loadHomeTab);
+const SearchTab = lazy(loadSearchTab);
+const LibraryTab = lazy(loadLibraryTab);
+const ProfileTab = lazy(loadProfileTab);
+
+// const GlobalPlayer = lazy(() => import('@/features/player/GlobalPlayer').then(m => ({ default: m.GlobalPlayer })));
+
+// const HomeTab = lazy(() => import('@/features/home/HomeTab').then(m => ({ default: m.HomeTab })));
+// const SearchTab = lazy(() => import('@/features/search/SearchTab').then(m => ({ default: m.SearchTab })));
+// const LibraryTab = lazy(() => import('@/features/library/LibraryTab').then(m => ({ default: m.LibraryTab })));
+// const ProfileTab = lazy(() => import('@/features/profile/ProfileTab').then(m => ({ default: m.ProfileTab })));
 
 
 function App() {
@@ -61,9 +74,34 @@ function App() {
 			</Suspense>
 		);
 	};
+	
+	// preload all tab chunks into browser and sw cache after first paint
+	useEffect(() => {
+		const preloadAllTabs = async () => {
+			if ('serviceWorker' in navigator) {
+				await navigator.serviceWorker.ready;
+			}
+
+			console.log("PRELOAD ALL TABS TRIGGERED");
+			loadGlobalPlayer();
+			loadHomeTab();
+			loadSearchTab();
+			loadLibraryTab();
+			loadProfileTab();
+		};
+
+		//does not work on safari so workaround with setTimeout: https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback
+		if ('requestIdleCallback' in window) {
+			window.requestIdleCallback(preloadAllTabs);
+		} else {
+			setTimeout(preloadAllTabs, 200);
+		}
+	}, []);
+
 
 	return (
 		<QueryClientProvider client={queryClient}>
+		<OfflineProvider>
 		<AuthGate>
 			<AudioLogic />
 			<SyncLogic />
@@ -95,6 +133,7 @@ function App() {
 				</div>
 			</EditProvider>
 		</AuthGate>
+		</OfflineProvider>
 		</QueryClientProvider>
 	);
 }
