@@ -9,10 +9,11 @@ const ASSET_FILES_PATH_PREFIX = "/assets";
 
 const CURRENT_CACHES = [AUDIO_CACHE_NAME, STATIC_CACHE_NAME];
 
-const PRECACHE_URLS = [
-    "/index.html",
-    "/manifest.json",
-];
+// const PRECACHE_URLS = [
+//     "/index.html",
+//     "/manifest.json",
+//     "/static/defaultMediaSessionLogo.png",
+// ];
 
 //console logging on desktop
 function swLog(...args) {
@@ -30,9 +31,9 @@ self.addEventListener("install", (event) => {
     swLog("Installing...");
     console.log("[SW] Install event triggered");
     
-    event.waitUntil(
-        caches.open(STATIC_CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
-    );
+    // event.waitUntil(
+    //     caches.open(STATIC_CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
+    // );
     self.skipWaiting(); //activate immediately
 });
 
@@ -99,6 +100,18 @@ self.addEventListener("message", (event) => {
     if (!event.data || !event.data.type) return;
 
     switch (event.data.type) {
+        case "INITIAL_STATIC_PRECACHE":
+            const urls = event.data.payload || [];
+            event.waitUntil(
+                caches.open(STATIC_CACHE_NAME).then((cache) => {
+                    return cache.addAll(urls).then(() => {
+                        swLog(`Successfully precached ${urls.length} static assets.`);
+                    });
+                })
+            );
+
+            break;
+
         case "UPDATE_PREFETCH_QUEUE":
             if (prefetchDebounce) {
                 clearTimeout(prefetchDebounce);
