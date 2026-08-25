@@ -55,7 +55,7 @@ self.addEventListener("fetch", (event) => {
     const url = new URL(event.request.url);
 
     //only intercept / and /index.html
-    isIndex = 
+    const isIndex = 
         url.pathname === "/" ||
         url.pathname === "/index.html" ||
         event.request.mode === "navigate"; //available in sw: https://developer.mozilla.org/en-US/docs/Web/API/Request/mode
@@ -280,18 +280,41 @@ async function handleStaticFileRequest(request) {
 async function handleScuttleShellRequest(request) {
     const cache = await caches.open(STATIC_CACHE_NAME);
 
-    const cachedResponse = await cache.match("/index.html");
-    if (cachedResponse) return cachedResponse;
-
+    //try network fetch first when online, at least for dev
     try {
         const networkResponse = await fetch(request);
 
         if (networkResponse && networkResponse.status === 200) {
-            await cache.put(request, networkResponse.clone());
+            await cache.put("/index.html", networkResponse.clone()); //store under /index.html
+            return networkResponse;
         }
-
-        return networkResponse;
     } catch (err) {
         swLog(`index.html Network Fetch Failed: ${err}`);
     } 
+
+    //offline fallback try /index.html, /, and request with no query parameters
+    const cachedResponse = 
+        (await cache.match("/index.html")) ||
+        (await cache.match("/")) ||
+        (await cache.match(request, { ignoreSearch: true }));
+    if (cachedResponse) return cachedResponse;
+
+    //absolute guard to never return undefined
+    return new Response(
+        `
+        <!DOCTYPE html>
+        <html>
+            <head><title>Offline</title></head>
+            <body style="text-align: center;">
+                <h2>Scuttle Offline</h2>
+                <p>Unable to load the application shell.</p>
+            </body>
+        </html>
+        `,
+        {
+            status: 503,
+            statusText: "Service Unavailable",
+            headers: { "Content-Type": "text/html" },
+        }
+    );
 }
