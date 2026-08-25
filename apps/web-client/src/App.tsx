@@ -1,6 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 
-// import { QueryClientProvider } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { queryClient, persister } from '@/store/queryClient';
 
@@ -32,14 +31,6 @@ const HomeTab = lazy(loadHomeTab);
 const SearchTab = lazy(loadSearchTab);
 const LibraryTab = lazy(loadLibraryTab);
 const ProfileTab = lazy(loadProfileTab);
-
-// const GlobalPlayer = lazy(() => import('@/features/player/GlobalPlayer').then(m => ({ default: m.GlobalPlayer })));
-
-// const HomeTab = lazy(() => import('@/features/home/HomeTab').then(m => ({ default: m.HomeTab })));
-// const SearchTab = lazy(() => import('@/features/search/SearchTab').then(m => ({ default: m.SearchTab })));
-// const LibraryTab = lazy(() => import('@/features/library/LibraryTab').then(m => ({ default: m.LibraryTab })));
-// const ProfileTab = lazy(() => import('@/features/profile/ProfileTab').then(m => ({ default: m.ProfileTab })));
-
 
 function App() {
 	const [isPlayerExpanded, setIsPlayerExpanded] = useState(false);
@@ -102,7 +93,6 @@ function App() {
 
 
 	return (
-		// <QueryClientProvider client={queryClient}>
 		<PersistQueryClientProvider
 			client={queryClient}
 			persistOptions={{
@@ -145,7 +135,6 @@ function App() {
 		</AuthGate>
 		</OfflineProvider>
 		</PersistQueryClientProvider>
-		// </QueryClientProvider>
 	);
 }
 
