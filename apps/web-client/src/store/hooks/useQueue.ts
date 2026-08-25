@@ -9,6 +9,7 @@ import { getTrackDisplayMetadata, trackBaseToQueueTrack } from "@/track/track.ut
 import type { QueueTrack } from "@/track/track.types";
 import type { PopMutationProps, PushAllPlaylistMutationProps, PushMutationProps, PushNextMutationProps, ReorderMutationProps, SetAllPlaylistMutationProps, SetFirstMutationProps } from "@/store/hooks/hooks.types";
 import type { SetFirstQueueResponse, SetAllQueueResponse, PushQueueResponse, PushNextQueueResponse, PopQueueResponse, ShuffleQueueResponse, ReorderQueueResponse, PushAllQueueResponse } from "./hooks.responses";
+import { isTrackCached } from "@/features/audio/audio.utils";
 
 
 export const useQueue = () => {
@@ -59,11 +60,22 @@ export const useQueue = () => {
 
             return { rollbackQueue }; //return context for rollback
         },
-        onError: (err, variables, context) => {
-            if (context?.rollbackQueue) {
-                queryClient.setQueryData(queryKey, context.rollbackQueue);
+        onError: async (err, variables, context) => {
+            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+
+            const isCached = await isTrackCached(variables.track.id);
+            console.log("IS_CACHED: ", isCached, titleDisplay);
+            if (isCached) {
+                makeToast("Offline: ", titleDisplay);
+            } else {
+
+                //uncached and unreachable
+                if (context?.rollbackQueue) {
+                    queryClient.setQueryData(queryKey, context.rollbackQueue);
+                }
+                console.log("Optimistic setFirst queue failed, rolling back.");
+                makeToast("Unavailable offline: ", titleDisplay);
             }
-            console.log("Optimistic setFirst queue failed, rolling back.");
         },
         onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue); //immediately swap the optimistic -1 queueId for DB-assigned queueId
