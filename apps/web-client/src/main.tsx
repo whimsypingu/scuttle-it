@@ -58,16 +58,18 @@ if ("serviceWorker" in navigator) {
                 ])
             );
 
-            console.log("PRECACHE URLS");
-            console.log(precacheUrls);
+            // //debug
+            // console.log("PRECACHE URLS");
+            // console.log(precacheUrls);
 
+            //wait for sw to be ready and then start precaching all assets, post lazy load in apps/web-client/src/App.tsx
             const readyRegistration = await navigator.serviceWorker.ready;
             const targetWorker = navigator.serviceWorker.controller || readyRegistration.active;
 
             if (targetWorker) {
                 targetWorker.postMessage({
                     type: "INITIAL_STATIC_PRECACHE",
-                    payload: precacheUrls,
+                    urls: precacheUrls,
                 });
             }
 

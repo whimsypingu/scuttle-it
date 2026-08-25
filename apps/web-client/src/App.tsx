@@ -82,7 +82,7 @@ function App() {
 				await navigator.serviceWorker.ready;
 			}
 
-			console.log("PRELOAD ALL TABS TRIGGERED");
+			console.log("[App.tsx] Preloading all tabs in the background for offline caching.");
 			loadGlobalPlayer();
 			loadHomeTab();
 			loadSearchTab();

@@ -3,17 +3,11 @@ const DEVICE_ID_KEY = "scuttle_device_id"; //see src/lib/utils.ts
 const AUDIO_CACHE_NAME = "audio-cache-v1";
 const AUDIO_ROUTER_PATH_PREFIX = "/audio/stream";
 
-const STATIC_CACHE_NAME = "static-cache-v1";
+const STATIC_CACHE_NAME = "static-cache-v4";
 const STATIC_FILES_PATH_PREFIX = "/static";
 const ASSET_FILES_PATH_PREFIX = "/assets";
 
 const CURRENT_CACHES = [AUDIO_CACHE_NAME, STATIC_CACHE_NAME];
-
-// const PRECACHE_URLS = [
-//     "/index.html",
-//     "/manifest.json",
-//     "/static/defaultMediaSessionLogo.png",
-// ];
 
 //console logging on desktop
 function swLog(...args) {
@@ -31,9 +25,6 @@ self.addEventListener("install", (event) => {
     swLog("Installing...");
     console.log("[SW] Install event triggered");
     
-    // event.waitUntil(
-    //     caches.open(STATIC_CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
-    // );
     self.skipWaiting(); //activate immediately
 });
 
@@ -42,7 +33,7 @@ self.addEventListener("activate", (event) => {
 
     event.waitUntil(
         (async () => {
-            //delete old caches, might be killing too much
+            //delete old caches - change vX to refresh with new cache
             const keys = await caches.keys();
             await Promise.all(
                 keys.map((key) => {
@@ -100,19 +91,22 @@ self.addEventListener("message", (event) => {
     if (!event.data || !event.data.type) return;
 
     switch (event.data.type) {
-        case "INITIAL_STATIC_PRECACHE":
-            const urls = event.data.payload || [];
-            event.waitUntil(
-                caches.open(STATIC_CACHE_NAME).then((cache) => {
-                    return cache.addAll(urls).then(() => {
-                        swLog(`Successfully precached ${urls.length} static assets.`);
-                    });
-                })
-            );
+        case "INITIAL_STATIC_PRECACHE": {
+            const urls = event.data.urls || []; //see: apps/web-client/src/main.tsx
+            event.waitUntil((async () => {
+                try {
+                    const cache = await caches.open(STATIC_CACHE_NAME);
+                    await cache.addAll(urls);
+                    swLog(`Successfully precached ${urls.length} static assets.`);
+                } catch (err) {
+                    swLog(`Static asset precache failed: ${err.message}`);
+                }
+            })());
 
             break;
+        }
 
-        case "UPDATE_PREFETCH_QUEUE":
+        case "UPDATE_PREFETCH_QUEUE": {
             if (prefetchDebounce) {
                 clearTimeout(prefetchDebounce);
             }
@@ -129,6 +123,7 @@ self.addEventListener("message", (event) => {
             }, 1000);
 
             break;
+        }
         
         default:
             swLog(`Unknown Service Worker message type received: ${event.data.type}`);
