@@ -44,11 +44,11 @@ async function getAudioCacheName(): Promise<string | null> {
     try {
         const keys = await caches.keys();
 
-        console.log("getAudioCacheName(): ", keys);
-
         const activeKey = keys.find((key) => key.startsWith(AUDIO_CACHE_PREFIX));
 
-        console.log("getAudioCacheName(): ", activeKey);
+        // //debug
+        // console.log("getAudioCacheName(): ", keys);
+        // console.log("getAudioCacheName(): ", activeKey);
 
         if (activeKey) {
             audioCacheName = activeKey; //store in memory

@@ -63,18 +63,18 @@ export const useQueue = () => {
         onError: async (err, variables, context) => {
             const { titleDisplay } = getTrackDisplayMetadata(variables.track);
 
+            //check if cached, and play anyway and overwrite local tanstack if available
             const isCached = await isTrackCached(variables.track.id);
-            console.log("IS_CACHED: ", isCached, titleDisplay);
+
             if (isCached) {
                 makeToast("Offline: ", titleDisplay);
             } else {
-
-                //uncached and unreachable
+                //uncached and unreachable, rollback
                 if (context?.rollbackQueue) {
                     queryClient.setQueryData(queryKey, context.rollbackQueue);
                 }
                 console.log("Optimistic setFirst queue failed, rolling back.");
-                makeToast("Unavailable offline: ", titleDisplay);
+                makeToast("Unavailable: ", titleDisplay);
             }
         },
         onSuccess: (data, variables) => {
@@ -138,9 +138,10 @@ export const useQueue = () => {
             return { rollbackQueue };
         },
         onError: (err, variables, context) => {
-            if (context?.rollbackQueue) {
-                queryClient.setQueryData(queryKey, context.rollbackQueue);
-            }
+            //do not rollback this operation, regardless of online or not
+            // if (context?.rollbackQueue) {
+            //     queryClient.setQueryData(queryKey, context.rollbackQueue);
+            // }
             console.log("Optimistic reorder queue failed, rolling back.");
         },
         onSuccess: (data) => {
@@ -174,11 +175,22 @@ export const useQueue = () => {
 
             return { rollbackQueue };
         },
-        onError: (err, variables, context) => {
-            if (context?.rollbackQueue) {
-                queryClient.setQueryData(queryKey, context.rollbackQueue);
+        onError: async (err, variables, context) => {
+            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+
+            //check if cached, and push anyway and overwrite local tanstack if available
+            const isCached = await isTrackCached(variables.track.id);
+
+            if (isCached) {
+                makeToast("Offline: ", titleDisplay);
+            } else {
+                //uncached and unreachable, rollback
+                if (context?.rollbackQueue) {
+                    queryClient.setQueryData(queryKey, context.rollbackQueue);
+                }
+                console.log("Optimistic push queue failed, rolling back.");
+                makeToast("Unavailable: ", titleDisplay);
             }
-            console.log("Optimistic push queue failed, rolling back.");
         },
         onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue);
@@ -219,11 +231,22 @@ export const useQueue = () => {
 
             return { rollbackQueue };
         },
-        onError: (err, variables, context) => {
-            if (context?.rollbackQueue) {
-                queryClient.setQueryData(queryKey, context.rollbackQueue);
+        onError: async (err, variables, context) => {
+            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+
+            //check if cached, and push anyway and overwrite local tanstack if available
+            const isCached = await isTrackCached(variables.track.id);
+
+            if (isCached) {
+                makeToast("Offline: ", titleDisplay);
+            } else {
+                //uncached and unreachable, rollback
+                if (context?.rollbackQueue) {
+                    queryClient.setQueryData(queryKey, context.rollbackQueue);
+                }
+                console.log("Optimistic push to next position in queue failed, rolling back.");
+                makeToast("Unavailable: ", titleDisplay);
             }
-            console.log("Optimistic push to next position in queue failed, rolling back.");
         },
         onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue);
@@ -259,9 +282,10 @@ export const useQueue = () => {
             return { rollbackQueue };
         },
         onError: (err, variables, context) => {
-            if (context?.rollbackQueue) {
-                queryClient.setQueryData(queryKey, context.rollbackQueue);
-            }
+            //do not revert failed network pops
+            // if (context?.rollbackQueue) {
+            //     queryClient.setQueryData(queryKey, context.rollbackQueue);
+            // }
             console.log("Optimistic pop queue failed, rolling back.");
         },
         onSuccess: (data, variables) => {
