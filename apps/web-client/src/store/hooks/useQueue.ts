@@ -51,7 +51,7 @@ export const useQueue = () => {
             //play audio and update the local cached queue optimistically
 			if (variables.track.downloaded) {
                 const tempQueueId = -(Date.now());
-                const tempQueueTrack = trackBaseToQueueTrack(variables.track, tempQueueId); //typecast to a QueueTrack with -1 default queueId field
+                const tempQueueTrack = trackBaseToQueueTrack(variables.track, tempQueueId); //typecast to a QueueTrack with essentially unique default queueId field
 
                 queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
                     return [tempQueueTrack, ...(old?.slice(1) || [])];
@@ -80,7 +80,7 @@ export const useQueue = () => {
             }
         },
         onSuccess: (data, variables, context) => {
-            queryClient.setQueryData(queryKey, data.queue); //immediately swap the optimistic -1 queueId for DB-assigned queueId
+            queryClient.setQueryData(queryKey, data.queue); //immediately swap the optimistic queueId for DB-assigned queueId
 
             if (data.downloadRequired) {
                 makeToast("Downloading: ", context?.titleDisplay);
@@ -173,7 +173,7 @@ export const useQueue = () => {
             //optimistically update queue if available immediately
             if (variables.track.downloaded) {
                 const tempQueueId = -(Date.now());
-                const tempQueueTrack = trackBaseToQueueTrack(variables.track, tempQueueId); //typecast to a QueueTrack with -1 default queueId field
+                const tempQueueTrack = trackBaseToQueueTrack(variables.track, tempQueueId); //typecast to a QueueTrack with essentially unique default queueId field
 
                 queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
                     return [...(old || []), tempQueueTrack];
@@ -225,7 +225,7 @@ export const useQueue = () => {
             const rollbackQueue = queryClient.getQueryData(queryKey);
 
             const tempQueueId = -(Date.now());
-            const tempQueueTrack = trackBaseToQueueTrack(variables.track, tempQueueId); //typecast to a QueueTrack with -1 default queueId field -- could cause problems
+            const tempQueueTrack = trackBaseToQueueTrack(variables.track, tempQueueId); //typecast to a QueueTrack with essentially unique default queueId field -- could cause problems
 
             queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
                 if (!old || old.length === 0) {
