@@ -46,45 +46,50 @@ export const useQueue = () => {
             await queryClient.cancelQueries({ queryKey }); // cancel outgoing refetches so they dont rewrite optimistic changes
 
             const rollbackQueue = queryClient.getQueryData(queryKey); //get the rollback state
+            const isCached = await isTrackCached(variables.track.id); //only play if cached and ready
 
             //play audio and update the local cached queue optimistically
 			if (variables.track.downloaded) {
-				audioEngine.playTrack({ trackId: variables.track.id, forceRestart: true });
-
-                const tempQueueTrack = trackBaseToQueueTrack(variables.track, -1); //typecast to a QueueTrack with -1 default queueId field
+                const tempQueueId = -(Date.now());
+                const tempQueueTrack = trackBaseToQueueTrack(variables.track, tempQueueId); //typecast to a QueueTrack with -1 default queueId field
 
                 queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
                     return [tempQueueTrack, ...(old?.slice(1) || [])];
                 });
+
+                //only trigger instant audio playback if stream is on disk
+                if (isCached) {
+                    audioEngine.playTrack({ trackId: variables.track.id, forceRestart: true });
+                }
 			}
 
-            return { rollbackQueue }; //return context for rollback
+            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+            return { rollbackQueue, titleDisplay, isCached }; //return context for rollback
         },
         onError: async (err, variables, context) => {
-            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
-
             //check if cached, and play anyway and overwrite local tanstack if available
-            const isCached = await isTrackCached(variables.track.id);
-
-            if (isCached) {
-                makeToast("Offline: ", titleDisplay);
+            if (context?.isCached) {
+                makeToast("Offline: ", context?.titleDisplay);
             } else {
                 //uncached and unreachable, rollback
                 if (context?.rollbackQueue) {
                     queryClient.setQueryData(queryKey, context.rollbackQueue);
                 }
                 console.log("Optimistic setFirst queue failed, rolling back.");
-                makeToast("Unavailable: ", titleDisplay);
+                makeToast("Unavailable: ", context?.titleDisplay);
             }
         },
-        onSuccess: (data, variables) => {
+        onSuccess: (data, variables, context) => {
             queryClient.setQueryData(queryKey, data.queue); //immediately swap the optimistic -1 queueId for DB-assigned queueId
 
-            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
             if (data.downloadRequired) {
-                makeToast("Downloading: ", titleDisplay);
+                makeToast("Downloading: ", context?.titleDisplay);
             } else {
-                makeToast("Playing: ", titleDisplay);
+                //play audio after successful server confirmation and not yet already playing from cached onMutate (prevents invalid audio from playing)
+                if (!context?.isCached) {
+                    audioEngine.playTrack({ trackId: variables.track.id, forceRestart: true });
+                }
+                makeToast("Playing: ", context?.titleDisplay);
             }
         },
     });
@@ -143,6 +148,7 @@ export const useQueue = () => {
             //     queryClient.setQueryData(queryKey, context.rollbackQueue);
             // }
             console.log("Optimistic reorder queue failed, rolling back.");
+            makeToast("Offline");
         },
         onSuccess: (data) => {
             queryClient.setQueryData(queryKey, data.queue);
@@ -166,40 +172,39 @@ export const useQueue = () => {
 
             //optimistically update queue if available immediately
             if (variables.track.downloaded) {
-                const tempQueueTrack = trackBaseToQueueTrack(variables.track, -1); //typecast to a QueueTrack with -1 default queueId field
+                const tempQueueId = -(Date.now());
+                const tempQueueTrack = trackBaseToQueueTrack(variables.track, tempQueueId); //typecast to a QueueTrack with -1 default queueId field
 
                 queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
                     return [...(old || []), tempQueueTrack];
                 });
             }
 
-            return { rollbackQueue };
+            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+            return { rollbackQueue, titleDisplay };
         },
         onError: async (err, variables, context) => {
-            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
-
             //check if cached, and push anyway and overwrite local tanstack if available
             const isCached = await isTrackCached(variables.track.id);
 
             if (isCached) {
-                makeToast("Offline: ", titleDisplay);
+                makeToast("Offline: ", context?.titleDisplay);
             } else {
                 //uncached and unreachable, rollback
                 if (context?.rollbackQueue) {
                     queryClient.setQueryData(queryKey, context.rollbackQueue);
                 }
                 console.log("Optimistic push queue failed, rolling back.");
-                makeToast("Unavailable: ", titleDisplay);
+                makeToast("Unavailable: ", context?.titleDisplay);
             }
         },
-        onSuccess: (data, variables) => {
+        onSuccess: (data, variables, context) => {
             queryClient.setQueryData(queryKey, data.queue);
 
-            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
             if (data.downloadRequired) {
-                makeToast("Downloading: ", titleDisplay);
+                makeToast("Downloading: ", context?.titleDisplay);
             } else {
-                makeToast("Queued: ", titleDisplay);
+                makeToast("Queued: ", context?.titleDisplay);
             }
         },
     });
@@ -219,7 +224,8 @@ export const useQueue = () => {
             await queryClient.cancelQueries({ queryKey });
             const rollbackQueue = queryClient.getQueryData(queryKey);
 
-            const tempQueueTrack = trackBaseToQueueTrack(variables.track, -1); //typecast to a QueueTrack with -1 default queueId field -- could cause problems
+            const tempQueueId = -(Date.now());
+            const tempQueueTrack = trackBaseToQueueTrack(variables.track, tempQueueId); //typecast to a QueueTrack with -1 default queueId field -- could cause problems
 
             queryClient.setQueryData(queryKey, (old: QueueTrack[] | undefined) => {
                 if (!old || old.length === 0) {
@@ -229,33 +235,32 @@ export const useQueue = () => {
                 return [old[0], tempQueueTrack, ...old.slice(1)];
             });
 
-            return { rollbackQueue };
+            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
+            return { rollbackQueue, titleDisplay };
         },
         onError: async (err, variables, context) => {
-            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
 
             //check if cached, and push anyway and overwrite local tanstack if available
             const isCached = await isTrackCached(variables.track.id);
 
             if (isCached) {
-                makeToast("Offline: ", titleDisplay);
+                makeToast("Offline: ", context?.titleDisplay);
             } else {
                 //uncached and unreachable, rollback
                 if (context?.rollbackQueue) {
                     queryClient.setQueryData(queryKey, context.rollbackQueue);
                 }
                 console.log("Optimistic push to next position in queue failed, rolling back.");
-                makeToast("Unavailable: ", titleDisplay);
+                makeToast("Unavailable: ", context?.titleDisplay);
             }
         },
-        onSuccess: (data, variables) => {
+        onSuccess: (data, variables, context) => {
             queryClient.setQueryData(queryKey, data.queue);
 
-            const { titleDisplay } = getTrackDisplayMetadata(variables.track);
             if (data.downloadRequired) {
-                makeToast("Downloading: ", titleDisplay);
+                makeToast("Downloading: ", context?.titleDisplay);
             } else {
-                makeToast("Next: ", titleDisplay);
+                makeToast("Next: ", context?.titleDisplay);
             }
         },
     });
@@ -287,6 +292,7 @@ export const useQueue = () => {
             //     queryClient.setQueryData(queryKey, context.rollbackQueue);
             // }
             console.log("Optimistic pop queue failed, rolling back.");
+            makeToast("Offline");
         },
         onSuccess: (data, variables) => {
             queryClient.setQueryData(queryKey, data.queue);
