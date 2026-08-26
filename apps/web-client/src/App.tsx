@@ -93,6 +93,7 @@ function App() {
 
 
 	return (
+		<OfflineProvider>
 		<PersistQueryClientProvider
 			client={queryClient}
 			persistOptions={{
@@ -101,7 +102,6 @@ function App() {
 				buster: "persister-v1", //dev
 			}}
 		>
-		<OfflineProvider>
 		<AuthGate>
 			<AudioLogic />
 			<SyncLogic />
@@ -133,8 +133,8 @@ function App() {
 				</div>
 			</EditProvider>
 		</AuthGate>
-		</OfflineProvider>
 		</PersistQueryClientProvider>
+		</OfflineProvider>
 	);
 }
 

@@ -23,15 +23,19 @@ export const OfflineProvider = ({ children }: { children: React.ReactNode }) => 
     const [isOffline, setIsOffline] = useState<boolean>(() => !navigator.onLine); //!navigator.onLine);
 
     useEffect(() => {
-        const handleOnline = () => setIsOffline(false);
-        const handleOffline = () => setIsOffline(true);
+        const handleOnline = () => setIsOffline((prev) => (prev ? false : prev)); //do not replace if the value hasn't actually changed
+        const handleOffline = () => setIsOffline((prev) => (!prev ? true : prev));
 
         window.addEventListener("online", handleOnline);
         window.addEventListener("offline", handleOffline);
+        window.addEventListener("scuttle:online", handleOnline);
+        window.addEventListener("scuttle:offline", handleOffline);
 
         return () => {
             window.removeEventListener("online", handleOnline);
             window.removeEventListener("offline", handleOffline);
+            window.removeEventListener("scuttle:online", handleOnline);
+            window.removeEventListener("scuttle:offline", handleOffline);
         };
     }, []);
 

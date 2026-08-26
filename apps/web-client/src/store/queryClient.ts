@@ -1,8 +1,17 @@
 import { get, set, del } from 'idb-keyval';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryCache, QueryClient } from '@tanstack/react-query';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 
 export const queryClient = new QueryClient({
+    queryCache: new QueryCache({
+        onSuccess: () => {
+            window.dispatchEvent(new Event("scuttle:online"));
+        },
+        onError: (err) => {
+            console.log(`[queryClient] onError triggered: ${err}`);
+            window.dispatchEvent(new Event("scuttle:offline"));
+        }
+    }),
     defaultOptions: {
         queries: {
             staleTime: 1000 * 60 * 5, //5 minutes staleness
