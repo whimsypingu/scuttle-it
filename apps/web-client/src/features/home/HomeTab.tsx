@@ -79,13 +79,13 @@ export const HomeTab = ({
                     >
                         {/* HEADER */}
                         <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4 flex flex-col">
-                            <div className="flex flex-row items-end">
+                            <div className="flex flex-row items-center">
                                 <div className="flex-1">
                                     <h1 className="tab-heading">Home</h1>
                                 </div>
 
                                 {isOffline && (
-                                    <div className="h-[70%] aspect-square flex items-center justify-center">
+                                    <div className="h-[50%] aspect-square flex items-center justify-center">
                                         <CellSignalXIcon className="w-full h-full animate-pulse" />
                                     </div>
                                 )}
