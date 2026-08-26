@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { PlusIcon } from "@phosphor-icons/react";
+import { PlusIcon, CellSignalXIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
+import { useOffline } from "@/features/offline/OfflineProvider";
 import { usePlaylists } from "@/store/hooks/usePlaylists";
 import { useEditTarget } from "@/features/edit/EditProvider";
 
@@ -18,7 +19,7 @@ import type { ActiveEditTarget } from "@/features/edit/edit.types";
 export const LibraryTab = ({
     tabResetSignal
 }: LibraryTabProps) => {
-
+    const { isOffline } = useOffline();
     const { playlists } = usePlaylists();
     
     const [selectedPlaylist, setSelectedPlaylist] = useState<SummaryPlaylist | null>(null);
@@ -62,10 +63,16 @@ export const LibraryTab = ({
                     >
                         {/* HEADER */}
                         <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4 flex flex-col">
-                            <div className="flex items-center justify-between mb-2">
-                                <h1 className="tab-heading truncate pr-4">
-                                    Library
-                                </h1>
+                            <div className="flex flex-row items-end mb-2">
+                                <div className="flex-1">
+                                    <h1 className="tab-heading">Library</h1>
+                                </div>
+
+                                {isOffline && (
+                                    <div className="h-[70%] aspect-square flex items-center justify-center">
+                                        <CellSignalXIcon className="w-full h-full animate-pulse" />
+                                    </div>
+                                )}
                             </div>
                 
                             {/* ABOUT / METADATA SECTION */}
