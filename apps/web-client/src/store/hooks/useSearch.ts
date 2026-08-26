@@ -17,11 +17,12 @@ export const useSearch = (query: string) => {
                 method: "GET" 
             });
             if (!response.ok) throw new Error("Search failed");
-            
+
             const data = await response.json();
             return data.results as TrackBase[];
         },
         staleTime: 1000 * 30,
+        enabled: query.trim().length >= 1, //only execute query if input has actual cahracters
     });
 
     const ytSearch = useMutation({
