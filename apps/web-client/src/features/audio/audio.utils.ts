@@ -33,7 +33,7 @@ const AUDIO_CACHE_PREFIX = "audio-cache-v"; //dynamic finder, see: /public/sw.js
 let audioCacheName: string | null = null;
 
 //finds and remembers the active audio cache name matching the prefix.
-async function getAudioCacheName(): Promise<string | null> {
+export async function getAudioCacheName(): Promise<string | null> {
     if (!("caches" in window)) return null;
 
     //return memoized key if already resolved
@@ -61,6 +61,10 @@ async function getAudioCacheName(): Promise<string | null> {
     return null;
 }
 
+export function resetAudioCacheName(): void {
+    audioCacheName = null;
+}
+
 export async function isTrackCached(trackId: string): Promise<boolean> {
     if (!trackId || !("caches" in window)) return false;
 
@@ -74,7 +78,7 @@ export async function isTrackCached(trackId: string): Promise<boolean> {
 
         return !!response && (response.ok || response.status === 206);
     } catch (err) {
-        audioCacheName = null; //clear memory referencein case stale or wrong cache
+        resetAudioCacheName(); //clear memory referencein case stale or wrong cache
         console.warn(`[audio.utils] Error checking cache for track ${trackId}:`, err);
         return false;
     }
