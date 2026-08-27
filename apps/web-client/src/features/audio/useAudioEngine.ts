@@ -111,7 +111,7 @@ export const usePrefetchSync = () => {
 
             console.log("[usePrefetchSync] Sent prefetch window to Service Worker:", prefetchWindow.length);
 
-            savePrefetchWindowMetadata(prefetchWindow)
+            savePrefetchWindowMetadata(prefetchWindow) //fire and forget this async call so it runs in the background
                 .then(() => {
                     console.log("[usePrefetchSync] Synced metadata.");
                 })

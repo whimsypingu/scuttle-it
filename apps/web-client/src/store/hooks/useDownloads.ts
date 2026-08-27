@@ -1,8 +1,9 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import { scuttleFetch } from '@/lib/utils';
 import { getCachedTrackMetadata } from '@/features/offline/offline.utils';
+import type { Sortmode } from './hooks.types';
 
 
 export const useDownloadsContent = (limit: number = 30) => {
@@ -53,6 +54,8 @@ export const useDownloadsContent = (limit: number = 30) => {
 
 
 export const useLocalCacheContent = () => {
+    const [sortmode, setSortmode] = useState<Sortmode>(0);
+
     const queryKey = ["tracks", "local"];
 
     const getLocalCache = useQuery({
@@ -76,6 +79,8 @@ export const useLocalCacheContent = () => {
     return {
         tracks: getLocalCache.data ?? [],
         playlistId: "local",
+        sortmode,
+        setSortmode,
         totalCount,
         totalDuration,
         fetchNextPage: async () => {},
