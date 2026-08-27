@@ -9,7 +9,6 @@ import { formatReadableTime } from '@/features/audio/audio.utils';
 import { BOTTOM_SHELF } from '@/features/player/player.constants';
 
 import type { SystemPlaylist } from '@/features/home/home.types';
-import { PlaylistInfo } from '@/playlist/PlaylistInfo';
 
 
 interface LocalCacheHomeContentViewProps {
@@ -67,10 +66,21 @@ export const LocalCacheHomeContentView = ({
                         {data.description}
                     </p>
 
-                    <PlaylistInfo 
-                        playlist={data}
-                        scrollContext={scrollContext}
-                    />
+                    <div className="flex gap-4">
+                        <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] text-zinc-600 uppercase font-medium">Tracks</span>
+                            <span className="text-xs text-white/70">
+                                {scrollContext.totalCount}
+                            </span>
+                        </div>
+
+                        <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] text-zinc-600 uppercase font-medium">Duration</span>
+                            <span className="text-xs text-white/70">
+                                {formatReadableTime(scrollContext.totalDuration)}
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
