@@ -1,6 +1,7 @@
 import { DownloadedHomeContentView } from "@/features/home/subcomponents/DownloadedHomeContent";
 import { LikedHomeContentView } from "@/features/home/subcomponents/LikedHomeContent";
 import { RecentsHomeContentView } from "@/features/home/subcomponents/RecentsHomeContent";
+import { LocalCacheHomeContentView } from "@/features/home/subcomponents/LocalCacheHomeContent";
 
 import type { HomeContent } from "@/features/home/home.types";
 
@@ -43,6 +44,19 @@ export const HOME_CONTENTS: HomeContent[] = [
             tagline: "Listening history",
             description: "Your 100 most recently listened tracks.",
             component: RecentsHomeContentView,
+        }
+    },
+    {
+        type: "systemPlaylist",
+        color: "#f97316", // Orange
+        name: "Offline",
+        description: "Available anywhere.",
+        data: {
+            id: "local-cache",
+            name: "Locally Cached",
+            tagline: "Saved",
+            description: "At least you have this left.",
+            component: LocalCacheHomeContentView,
         }
     }
 ]

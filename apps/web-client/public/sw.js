@@ -1,9 +1,9 @@
 const DEVICE_ID_KEY = "scuttle_device_id"; //see src/lib/utils.ts
 
-const AUDIO_CACHE_NAME = "audio-cache-v1";
+const AUDIO_CACHE_NAME = "audio-cache-v3";
 const AUDIO_ROUTER_PATH_PREFIX = "/audio/stream";
 
-const STATIC_CACHE_NAME = "static-cache-v4";
+const STATIC_CACHE_NAME = "static-cache-v5";
 const STATIC_FILES_PATH_PREFIX = "/static";
 const ASSET_FILES_PATH_PREFIX = "/assets";
 
