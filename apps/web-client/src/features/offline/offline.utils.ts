@@ -1,8 +1,9 @@
 import { set, get, update } from "idb-keyval";
 
-import type { TrackId, TrackBase, QueueTrack, PlaylistTrack } from "@/track/track.types";
 import { queueTrackToTrackBase, trackBaseToPlaylistTrack } from "@/track/track.utils";
 import { getAudioCacheName, resetAudioCacheName } from "@/features/audio/audio.utils";
+
+import type { TrackId, TrackBase, QueueTrack, PlaylistTrack } from "@/track/track.types";
 
 
 const OFFLINE_CACHE_KEY = "SCUTTLE_OFFLINE_TRACKS_CACHE"
