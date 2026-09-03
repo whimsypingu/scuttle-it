@@ -25,8 +25,7 @@ export const useAuth = () => {
             return data as AuthResponse;
         },
         retry: false,
-        // staleTime: Infinity, //maybe it is persisting across loads and holding true values when no cookies are set?
-        staleTime: 1000 * 60 * 5, //5min
+        staleTime: 1000 * 60 * 30, //30 min purely for checking periodically and syncing frontend jic
         refetchOnWindowFocus: true,
     });
 

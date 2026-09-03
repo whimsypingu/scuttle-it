@@ -73,12 +73,7 @@ async def get_auth_me(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={"detail": "No auth token provided"}
             )
-            err_response.delete_cookie("auth_token", path="/")
             return err_response
-            # raise HTTPException(
-            #     status_code=status.HTTP_401_UNAUTHORIZED,
-            #     detail="No auth token provided"
-            # )
 
         is_auth = await db_manager.validate_refresh_cookie_token(auth_token, settings.TTL_AUTH_TOKEN)
 
@@ -90,10 +85,6 @@ async def get_auth_me(
             )
             err_response.delete_cookie("auth_token", path="/")
             return err_response
-            # raise HTTPException(
-            #     status_code=status.HTTP_401_UNAUTHORIZED,
-            #     detail="Auth token expired"
-            # )
 
         response.set_cookie(
             key="auth_token",
@@ -108,9 +99,6 @@ async def get_auth_me(
         return AuthResponse(
             success=True
         )
-
-    except HTTPException:
-        raise
 
     except Exception as e:
         traceback.print_exc()

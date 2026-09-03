@@ -20,7 +20,7 @@ export const AuthGate = ({ children }: { children: React.ReactNode }) => {
             const shell = document.getElementById("pwa-load-shell");
             shell?.remove();
 
-            console.log(`[AuthGate] Removed shell animation from DOM.`, isAuth, isAuthLoading, isOffline);
+            console.log(`[AuthGate] Removed shell animation from DOM.`); //debugging: add this: , isAuth, isAuthLoading, isOffline);
         }
     }, [isAuth, isAuthLoading, isOffline]);
 
