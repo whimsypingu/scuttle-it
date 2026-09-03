@@ -25,7 +25,9 @@ export const useAuth = () => {
             return data as AuthResponse;
         },
         retry: false,
-        staleTime: Infinity, 
+        // staleTime: Infinity, //maybe it is persisting across loads and holding true values when no cookies are set?
+        staleTime: 1000 * 60 * 5, //5min
+        refetchOnWindowFocus: true,
     });
 
     const loginMutation = useMutation({
@@ -63,6 +65,7 @@ export const useAuth = () => {
         },
         onSettled: () => {
             destroyWebSocket();
+            queryClient.setQueryData(queryKey, null); //clear auth cache directly
             window.location.href = "/";
         }
     });

@@ -9,7 +9,27 @@ export const queryClient = new QueryClient({
         },
         onError: (err) => {
             console.log(`[queryClient] onError triggered: ${err}`);
-            window.dispatchEvent(new Event("scuttle:offline"));
+
+            //ignore auth errors and http errors
+            const isAuthError = 
+                (err instanceof Response && (err.status === 401 || err.status === 403)) ||
+                err.message?.includes("401") ||
+                err.message?.includes("403");
+
+            if (isAuthError) {
+                return; //do not dispatch offline signal when authentication issue
+            }
+
+            //network outage or fetch failure
+            const isNetworkError = 
+                !navigator.onLine ||
+                err.name === "TypeError" ||
+                err.message?.toLowerCase().includes("failed to fetch") ||
+                err.message?.toLowerCase().includes("networkerror");
+
+            if (isNetworkError) {
+                window.dispatchEvent(new Event("scuttle:offline"));
+            }
         }
     }),
     defaultOptions: {

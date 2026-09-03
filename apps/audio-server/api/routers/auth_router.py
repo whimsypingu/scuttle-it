@@ -9,7 +9,7 @@ from api.dependencies import get_db_manager, get_room_manager, is_request_secure
 from database.database_manager import DatabaseManager
 from core.models.payloads import LoginPayload
 from core.models.responses import AuthResponse, LoginResponse
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 
 AuthRouter = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -69,20 +69,31 @@ async def get_auth_me(
 ):
     try:
         if not auth_token:
-            raise HTTPException(
+            err_response = JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="No auth token provided"
+                content={"detail": "No auth token provided"}
             )
+            err_response.delete_cookie("auth_token", path="/")
+            return err_response
+            # raise HTTPException(
+            #     status_code=status.HTTP_401_UNAUTHORIZED,
+            #     detail="No auth token provided"
+            # )
 
         is_auth = await db_manager.validate_refresh_cookie_token(auth_token, settings.TTL_AUTH_TOKEN)
 
         #remove cookie if not authorized
         if not is_auth:
-            response.delete_cookie("auth_token", path="/")
-            raise HTTPException(
+            err_response = JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Auth token expired"
+                content={"detail": "Auth token expired"}
             )
+            err_response.delete_cookie("auth_token", path="/")
+            return err_response
+            # raise HTTPException(
+            #     status_code=status.HTTP_401_UNAUTHORIZED,
+            #     detail="Auth token expired"
+            # )
 
         response.set_cookie(
             key="auth_token",
