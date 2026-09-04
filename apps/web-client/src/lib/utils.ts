@@ -88,7 +88,7 @@ export async function scuttleFetch(input: RequestInfo | URL, init: RequestInit =
                 ? input.pathname 
                 : input.url;
 
-        const isAuthEndpoint = url.includes("/auth") ;
+        const isAuthEndpoint = url.includes("/auth");
 
         if (!isAuthEndpoint) {
             destroyWebSocket();

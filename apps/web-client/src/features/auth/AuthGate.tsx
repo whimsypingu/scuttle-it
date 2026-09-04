@@ -16,16 +16,16 @@ export const AuthGate = ({ children }: { children: React.ReactNode }) => {
 
     //clean up fallback shell from /index.html once authenticated
     useEffect(() => {
-        if ((isAuth && !isAuthLoading) || isOffline) {
+        if (isAuth) { //(isAuth && !isAuthLoading) || isOffline) {
             const shell = document.getElementById("pwa-load-shell");
             shell?.remove();
 
             console.log(`[AuthGate] Removed shell animation from DOM.`, isAuth, isAuthLoading, isOffline); //debugging: add this: , isAuth, isAuthLoading, isOffline);
         }
-    }, [isAuth, isAuthLoading, isOffline]);
+    }, [isAuth]); //[isAuth, isAuthLoading, isOffline]);
 
     //paint the login screen, which should not remove the fallback shell animation yet
-    if ((!isAuth || isAuthLoading) && !isOffline) {
+    if (!isAuth) { //(!isAuth || isAuthLoading) && !isOffline) {
         return (
             <>
             <div className="relative h-dvh w-full overflow-hidden bg-transparent">

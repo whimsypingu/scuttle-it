@@ -98,7 +98,7 @@ function App() {
 			client={queryClient}
 			persistOptions={{
 				persister,
-				dehydrateOptions,
+				// dehydrateOptions,
 				maxAge: 1000 * 60 * 60 * 24 * 7, //7 days cache validity
 				buster: "persister-v1", //dev
 			}}
