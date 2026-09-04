@@ -51,9 +51,10 @@ export const persister = createAsyncStoragePersister({
     },
 });
 
-export const dehydrateOptions: DehydrateOptions = {
-    shouldDehydrateQuery: (query) => {
-        if (query.queryKey[0] === "auth") return false; //never write auth state to local storage
-        return query.state.status === "success"; //persist queries that succeeded
-    }
-}
+//deprecated, for now
+// export const dehydrateOptions: DehydrateOptions = {
+//     shouldDehydrateQuery: (query) => {
+//         if (query.queryKey[0] === "auth") return false; //never write auth state to local storage
+//         return query.state.status === "success"; //persist queries that succeeded
+//     }
+// }

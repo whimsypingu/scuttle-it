@@ -3,7 +3,6 @@ import { useAuth } from "@/store/hooks/useAuth";
 
 import { Toast } from '@/features/toast/Toast';
 import { LoginScreen } from "@/features/auth/LoginScreen";
-import { useOffline } from "@/features/offline/OfflineProvider";
 
 
 /**
@@ -12,20 +11,19 @@ import { useOffline } from "@/features/offline/OfflineProvider";
 
 export const AuthGate = ({ children }: { children: React.ReactNode }) => {
     const { isAuth, isAuthLoading } = useAuth();
-    const { isOffline, setIsOffline } = useOffline();
 
     //clean up fallback shell from /index.html once authenticated
     useEffect(() => {
-        if (isAuth) { //(isAuth && !isAuthLoading) || isOffline) {
+        if (isAuth) {
             const shell = document.getElementById("pwa-load-shell");
             shell?.remove();
 
-            console.log(`[AuthGate] Removed shell animation from DOM.`, isAuth, isAuthLoading, isOffline); //debugging: add this: , isAuth, isAuthLoading, isOffline);
+            console.log(`[AuthGate] Removed shell animation from DOM.`, isAuth); //debugging: add this: , isAuth, isAuthLoading, isOffline);
         }
-    }, [isAuth]); //[isAuth, isAuthLoading, isOffline]);
+    }, [isAuth]);
 
     //paint the login screen, which should not remove the fallback shell animation yet
-    if (!isAuth) { //(!isAuth || isAuthLoading) && !isOffline) {
+    if (!isAuth) {
         return (
             <>
             <div className="relative h-dvh w-full overflow-hidden bg-transparent">

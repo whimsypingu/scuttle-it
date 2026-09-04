@@ -4,6 +4,7 @@ import { twMerge } from "tailwind-merge"
 import { generateUUID } from "@/lib/generate";
 import { set, get } from "idb-keyval";
 import { destroyWebSocket } from "@/store/sync/websocket";
+import { queryClient, persister } from "@/store/queryClient";
 
 
 //tailwind boilerplate idk what ts is
@@ -92,6 +93,13 @@ export async function scuttleFetch(input: RequestInfo | URL, init: RequestInit =
 
         if (!isAuthEndpoint) {
             destroyWebSocket();
+
+            //clear persisted auth data as well to prevent any stale data from being stored in an unauthed situation if we somehow get there
+            if (persister?.removeClient) {
+                await persister.removeClient();
+            }
+            queryClient.clear();
+
             window.location.href = "/"; //redirect to homepage
         }
     }

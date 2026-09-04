@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
+import { persister } from "@/store/queryClient";
 import { scuttleFetch } from '@/lib/utils';
 import { makeToast } from "@/features/toast/Toast";
 import { destroyWebSocket } from "@/store/sync/websocket";
@@ -64,10 +65,15 @@ export const useAuth = () => {
 
             return true;
         },
-        onSettled: () => {
+        onSettled: async () => {
             destroyWebSocket();
 
-            queryClient.setQueryData(queryKey, { success: false }); //clear auth cache directly
+            //clear persisted auth data as well to prevent any stale data from being stored in a logout situation
+            if (persister?.removeClient) {
+                await persister.removeClient();
+            }
+            queryClient.clear();
+
             window.location.href = "/";
         }
     });
