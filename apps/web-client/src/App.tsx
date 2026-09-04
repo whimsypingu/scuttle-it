@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { queryClient, persister } from '@/store/queryClient';
+import { queryClient, persister, dehydrateOptions } from '@/store/queryClient';
 
 import { MainLayout } from '@/features/player/MainLayout';
 
@@ -98,12 +98,7 @@ function App() {
 			client={queryClient}
 			persistOptions={{
 				persister,
-				dehydrateOptions: {
-					shouldDehydrateQuery: (query) => {
-						if (query.queryKey[0] === "auth") return false;
-						return query.state.status === "success";
-					}
-				},
+				dehydrateOptions,
 				maxAge: 1000 * 60 * 60 * 24 * 7, //7 days cache validity
 				buster: "persister-v1", //dev
 			}}

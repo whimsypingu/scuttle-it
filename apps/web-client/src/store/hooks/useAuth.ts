@@ -19,7 +19,7 @@ export const useAuth = () => {
             const response = await scuttleFetch(`/auth/me`, { 
                 method: "GET",
             });
-            console.log(response);
+            // console.log(response);
             if (!response.ok) throw new Error("Unauthenticated");
             
             const data = await response.json();
@@ -67,14 +67,14 @@ export const useAuth = () => {
             destroyWebSocket();
 
             queryClient.clear();
-            window.location.replace("/");
+            window.location.href = "/";
+            // window.location.replace("/");
             // queryClient.setQueryData(queryKey, { success: false }); //clear auth cache directly
-            // window.location.href = "/";
         }
     });
 
     return {
-        isAuth: !isError && data?.success === true,
+        isAuth: !isError && data?.success === true, //explicit check
         isAuthLoading: isLoading,
 
         login: loginMutation.mutate,

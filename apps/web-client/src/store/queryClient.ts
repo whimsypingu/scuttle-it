@@ -2,6 +2,8 @@ import { get, set, del } from 'idb-keyval';
 import { QueryCache, QueryClient } from '@tanstack/react-query';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 
+import type { DehydrateOptions } from '@tanstack/react-query';
+
 export const queryClient = new QueryClient({
     queryCache: new QueryCache({
         onSuccess: () => {
@@ -48,3 +50,10 @@ export const persister = createAsyncStoragePersister({
         removeItem: (key) => del(key),
     },
 });
+
+export const dehydrateOptions: DehydrateOptions = {
+    shouldDehydrateQuery: (query) => {
+        if (query.queryKey[0] === "auth") return false; //never write auth state to local storage
+        return query.state.status === "success"; //persist queries that succeeded
+    }
+}
