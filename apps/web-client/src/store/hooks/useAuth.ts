@@ -13,12 +13,13 @@ export const useAuth = () => {
     const queryKey = ["auth"];
 
     //fetch auth
-    const { data, isLoading, error } = useQuery({
+    const { data, isLoading, isError } = useQuery({
         queryKey,
         queryFn: async () => {
             const response = await scuttleFetch(`/auth/me`, { 
                 method: "GET",
             });
+            console.log(response);
             if (!response.ok) throw new Error("Unauthenticated");
             
             const data = await response.json();
@@ -64,13 +65,16 @@ export const useAuth = () => {
         },
         onSettled: () => {
             destroyWebSocket();
-            queryClient.setQueryData(queryKey, null); //clear auth cache directly
-            window.location.href = "/";
+
+            queryClient.clear();
+            window.location.replace("/");
+            // queryClient.setQueryData(queryKey, { success: false }); //clear auth cache directly
+            // window.location.href = "/";
         }
     });
 
     return {
-        isAuth: !!data?.success,
+        isAuth: !isError && data?.success === true,
         isAuthLoading: isLoading,
 
         login: loginMutation.mutate,
