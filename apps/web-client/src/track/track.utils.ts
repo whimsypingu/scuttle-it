@@ -98,6 +98,15 @@ export const trackBaseToQueueTrack = (
 });
 
 
+//conver a QueueTrack to a TrackBase object, removing the queueId and position fields
+export const queueTrackToTrackBase = (
+    queueTrack: QueueTrack,
+): TrackBase => {
+    const { queueId, position, ...trackBase } = queueTrack;
+    return trackBase;
+};
+
+
 // extract the original title and artists
 export const getTrackSourceMetadata = (track?: TrackBase): { title: string, artists: string } => {
     if (!track) { //handle null tracks

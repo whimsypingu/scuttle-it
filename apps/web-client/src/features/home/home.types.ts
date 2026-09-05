@@ -7,7 +7,7 @@ export interface HomeTabProps {
 }
 
 
-export type SystemPlaylistId = "downloads" | "likes" | "recents";
+export type SystemPlaylistId = "downloads" | "likes" | "recents" | "local-cache";
 
 export interface SystemPlaylist extends PlaylistBase {
     id: SystemPlaylistId;

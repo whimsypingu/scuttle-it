@@ -1,16 +1,13 @@
 const DEVICE_ID_KEY = "scuttle_device_id"; //see src/lib/utils.ts
 
-const AUDIO_CACHE_NAME = "audio-cache-v1";
+const AUDIO_CACHE_NAME = "audio-cache-v3";
 const AUDIO_ROUTER_PATH_PREFIX = "/audio/stream";
 
-const STATIC_CACHE_NAME = "static-cache-v1";
+const STATIC_CACHE_NAME = "static-cache-v5";
 const STATIC_FILES_PATH_PREFIX = "/static";
+const ASSET_FILES_PATH_PREFIX = "/assets";
 
-const PRECACHE_URLS = [
-    "/",
-    "/index.html",
-    "/manifest.json",
-];
+const CURRENT_CACHES = [AUDIO_CACHE_NAME, STATIC_CACHE_NAME];
 
 //console logging on desktop
 function swLog(...args) {
@@ -26,10 +23,8 @@ function swLog(...args) {
 //install event: optional, can pre-cache static assets if needed
 self.addEventListener("install", (event) => {
     swLog("Installing...");
+    console.log("[SW] Install event triggered");
     
-    event.waitUntil(
-        caches.open(STATIC_CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
-    );
     self.skipWaiting(); //activate immediately
 });
 
@@ -38,9 +33,16 @@ self.addEventListener("activate", (event) => {
 
     event.waitUntil(
         (async () => {
-            //delete old caches, might be killing too much
+            //delete old caches - change vX to refresh with new cache
             const keys = await caches.keys();
-            await Promise.all(keys.map(key => caches.delete(key)));
+            await Promise.all(
+                keys.map((key) => {
+                    if (!CURRENT_CACHES.includes(key)) {
+                        swLog(`Clearing old cache: ${key}`);
+                        return caches.delete(key);
+                    }
+                })
+            );
             swLog("Cache reset on activation");
         })()
     );
@@ -53,7 +55,12 @@ self.addEventListener("fetch", (event) => {
     const url = new URL(event.request.url);
 
     //only intercept / and /index.html
-    if (url.pathname === "/" || url.pathname === "/index.html") {
+    const isIndex = 
+        url.pathname === "/" ||
+        url.pathname === "/index.html" ||
+        event.request.mode === "navigate"; //available in sw: https://developer.mozilla.org/en-US/docs/Web/API/Request/mode
+
+    if (isIndex) {
         swLog("index.html fetch intercepted");
         event.respondWith(handleScuttleShellRequest(event.request));
         return;
@@ -67,8 +74,13 @@ self.addEventListener("fetch", (event) => {
         return;
     }
 
-    //only intercept /static requests
-    if (url.pathname.startsWith(STATIC_FILES_PATH_PREFIX)) {
+    //only intercept static files
+    const isStatic = 
+        url.pathname.startsWith(STATIC_FILES_PATH_PREFIX) ||
+        url.pathname.startsWith(ASSET_FILES_PATH_PREFIX) ||
+        url.pathname === "/manifest.json";
+
+    if (isStatic) {
         event.respondWith(handleStaticFileRequest(event.request));
         return;
     }
@@ -79,7 +91,22 @@ self.addEventListener("message", (event) => {
     if (!event.data || !event.data.type) return;
 
     switch (event.data.type) {
-        case "UPDATE_PREFETCH_QUEUE":
+        case "INITIAL_STATIC_PRECACHE": {
+            const urls = event.data.urls || []; //see: apps/web-client/src/main.tsx
+            event.waitUntil((async () => {
+                try {
+                    const cache = await caches.open(STATIC_CACHE_NAME);
+                    await cache.addAll(urls);
+                    swLog(`Successfully precached ${urls.length} static assets.`);
+                } catch (err) {
+                    swLog(`Static asset precache failed: ${err.message}`);
+                }
+            })());
+
+            break;
+        }
+
+        case "UPDATE_PREFETCH_QUEUE": {
             if (prefetchDebounce) {
                 clearTimeout(prefetchDebounce);
             }
@@ -96,6 +123,7 @@ self.addEventListener("message", (event) => {
             }, 1000);
 
             break;
+        }
         
         default:
             swLog(`Unknown Service Worker message type received: ${event.data.type}`);
@@ -252,18 +280,41 @@ async function handleStaticFileRequest(request) {
 async function handleScuttleShellRequest(request) {
     const cache = await caches.open(STATIC_CACHE_NAME);
 
-    const cachedResponse = await cache.match("/index.html");
-    if (cachedResponse) return cachedResponse;
-
+    //try network fetch first when online, at least for dev
     try {
         const networkResponse = await fetch(request);
 
         if (networkResponse && networkResponse.status === 200) {
-            await cache.put(request, networkResponse.clone());
+            await cache.put("/index.html", networkResponse.clone()); //store under /index.html
+            return networkResponse;
         }
-
-        return networkResponse;
     } catch (err) {
         swLog(`index.html Network Fetch Failed: ${err}`);
     } 
+
+    //offline fallback try /index.html, /, and request with no query parameters
+    const cachedResponse = 
+        (await cache.match("/index.html")) ||
+        (await cache.match("/")) ||
+        (await cache.match(request, { ignoreSearch: true }));
+    if (cachedResponse) return cachedResponse;
+
+    //absolute guard to never return undefined
+    return new Response(
+        `
+        <!DOCTYPE html>
+        <html>
+            <head><title>Offline</title></head>
+            <body style="text-align: center;">
+                <h2>Scuttle Offline</h2>
+                <p>Unable to load the application shell.</p>
+            </body>
+        </html>
+        `,
+        {
+            status: 503,
+            statusText: "Service Unavailable",
+            headers: { "Content-Type": "text/html" },
+        }
+    );
 }

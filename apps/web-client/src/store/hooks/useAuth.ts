@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
+import { persister } from "@/store/queryClient";
 import { scuttleFetch } from '@/lib/utils';
 import { makeToast } from "@/features/toast/Toast";
 import { destroyWebSocket } from "@/store/sync/websocket";
@@ -13,7 +14,7 @@ export const useAuth = () => {
     const queryKey = ["auth"];
 
     //fetch auth
-    const { data, isLoading, error } = useQuery({
+    const { data, isLoading, isError } = useQuery({
         queryKey,
         queryFn: async () => {
             const response = await scuttleFetch(`/auth/me`, { 
@@ -25,7 +26,10 @@ export const useAuth = () => {
             return data as AuthResponse;
         },
         retry: false,
-        staleTime: Infinity, 
+        staleTime: 1000 * 60 * 30, //30 min purely for checking periodically and syncing frontend jic
+        networkMode: "offlineFirst",
+        gcTime: Infinity,
+        refetchOnWindowFocus: true,
     });
 
     const loginMutation = useMutation({
@@ -61,14 +65,21 @@ export const useAuth = () => {
 
             return true;
         },
-        onSettled: () => {
+        onSettled: async () => {
             destroyWebSocket();
+
+            //clear persisted auth data as well to prevent any stale data from being stored in a logout situation
+            if (persister?.removeClient) {
+                await persister.removeClient();
+            }
+            queryClient.clear();
+
             window.location.href = "/";
         }
     });
 
     return {
-        isAuth: !!data?.success,
+        isAuth: data?.success === true, //explicit check
         isAuthLoading: isLoading,
 
         login: loginMutation.mutate,

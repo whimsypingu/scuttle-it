@@ -1,6 +1,8 @@
+import { CellSignalXIcon } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
+import { useOffline } from "@/features/offline/OfflineProvider";
 import { usePins } from "@/store/hooks/usePlaylists";
 
 import { PlaylistContentView } from "@/features/library/subcomponents/PlaylistContent";
@@ -17,6 +19,7 @@ export const HomeTab = ({
 }: HomeTabProps) => {
     const [selectedHomeContent, setSelectedHomeContent] = useState<HomeContent | null>(null);
 
+    const { isOffline } = useOffline();
     const { playlists } = usePins();
 
     // Reset when the signal changes
@@ -76,7 +79,17 @@ export const HomeTab = ({
                     >
                         {/* HEADER */}
                         <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md py-4 flex flex-col">
-                            <h1 className="tab-heading">Home</h1>
+                            <div className="flex flex-row items-center">
+                                <div className="flex-1">
+                                    <h1 className="tab-heading">Home</h1>
+                                </div>
+
+                                {isOffline && (
+                                    <div className="h-[50%] aspect-square flex items-center justify-center">
+                                        <CellSignalXIcon className="w-full h-full animate-pulse" />
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* CONTENT AREA */}

@@ -9,7 +9,7 @@ export default defineConfig({
 	plugins: [
 		react(),
 		tailwindcss(),
-		visualizer({ open: true, filename: "bundle-analysis.html", template: "treemap", gzipSize: true, brotliSize: true })
+		visualizer({ open: true, filename: "bundle-analysis.html", template: "treemap", gzipSize: true, brotliSize: true }),
 	],
 	build: {
 		sourcemap: true,

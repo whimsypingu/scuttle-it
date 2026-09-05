@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { audioEngine } from "@/features/audio/audioEngine"
 import { useQueue } from "@/store/hooks/useQueue";
+import { savePrefetchWindowMetadata } from "../offline/offline.utils";
 
 
 //building react-style hooks to hook into the custom audioEngine, to trigger things when certain audio actions happen
@@ -108,7 +109,15 @@ export const usePrefetchSync = () => {
                 tracks: prefetchWindow
             });
 
-            console.log("Sent prefetch window to Service Worker:", prefetchWindow.length);
+            console.log("[usePrefetchSync] Sent prefetch window to Service Worker:", prefetchWindow.length);
+
+            savePrefetchWindowMetadata(prefetchWindow)
+                .then(() => {
+                    console.log("[usePrefetchSync] Synced metadata.");
+                })
+                .catch((err) => {
+                    console.warn("[usePrefetchSync] Failed to sync prefetch metadata:", err);
+                });
         }
     };
 
