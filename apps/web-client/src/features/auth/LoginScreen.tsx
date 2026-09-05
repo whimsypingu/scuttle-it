@@ -57,10 +57,11 @@ export const LoginScreen = () => {
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            onFocus={() => setPassword("")}
                             placeholder="••••••••"
                             autoFocus
                             disabled={isLoggingIn}
-                            className="w-full px-4 py-3 rounded-xl bg-zinc-950/60 border border-zinc-800/80 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-primary/60 transition-colors font-mono"
+                            className="w-full px-4 py-3 rounded-xl bg-zinc-950/60 border border-zinc-800/80 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-primary/60 transition-colors font-mono tracking-[0.25em] placeholder:tracking-normal"
                         />
                     </div>
 
