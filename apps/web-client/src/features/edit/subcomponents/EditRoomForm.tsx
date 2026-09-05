@@ -34,8 +34,6 @@ export const EditRoomForm = ({
         onSave();
     }
 
-    const joinUrl = encodeURIComponent(`${window.location.origin}/?s=${roomId}`);
-
     return (
         <div className="flex flex-col h-full">
             <div className="h-full custom-scrollbar overflow-y-auto flex flex-col gap-4">
@@ -63,7 +61,7 @@ export const EditRoomForm = ({
                 {/* QR code */}
                 <div className="flex px-4 py-4 items-center justify-center">
                     <img
-                        src={`/room/qr.png?url=${joinUrl}`}
+                        src={`/room/qr.png?roomId=${roomId}`}
                         alt={`QR Code for room ${roomId}`}
                         className="w-full aspect-square rounded-lg bg-white p-1"
                         loading="lazy"

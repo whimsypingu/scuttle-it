@@ -2,7 +2,7 @@ import traceback
 
 from fastapi import APIRouter, Body, Depends, Path, Query, HTTPException
 
-from api.dependencies import get_db_manager, get_device_context, get_dl_queue, queue_update_room_broadcast, set_room_active
+from api.dependencies import get_db_manager, get_device_context, get_dl_queue, queue_update_room_broadcast, set_room_active, require_auth
 from database.database_manager import DatabaseManager
 from core.download.download_queue import DownloadQueue
 from core.models.jobs import DownloadJob
@@ -11,7 +11,7 @@ from core.models.room import DeviceContext
 from core.models.responses import PopQueueResponse, PushAllQueueResponse, PushNextQueueResponse, PushQueueResponse, QueueResponse, SetAllQueueResponse, SetFirstQueueResponse, ShuffleQueueResponse
 from core.models.payloads import ReorderQueuePayload
 
-QueueRouter = APIRouter(prefix="/queue", tags=["Queue"], dependencies=[Depends(set_room_active)])
+QueueRouter = APIRouter(prefix="/queue", tags=["Queue"], dependencies=[Depends(set_room_active), Depends(require_auth)])
 
 #temporary crash exception
 DefaultCrashException = HTTPException(

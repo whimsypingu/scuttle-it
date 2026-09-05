@@ -3,6 +3,7 @@ import { twMerge } from "tailwind-merge"
 
 import { generateUUID } from "@/lib/generate";
 import { set, get } from "idb-keyval";
+import { destroyWebSocket } from "@/store/sync/websocket";
 
 
 //tailwind boilerplate idk what ts is
@@ -74,8 +75,39 @@ export async function scuttleFetch(input: RequestInfo | URL, init: RequestInit =
     headers.set("Scuttle-Device-ID", deviceId);
     headers.set("Scuttle-Room-ID", roomId);
 
-    return fetch(input, {
+    //handle auth failure here. when a 401 UNAUTHORIZED is received and not on an /auth endpoint, hard refresh the page to return to the login screen
+    const response = await fetch(input, {
         ...init,
         headers,
     });
+
+    if (response.status === 401) {
+        const url = typeof input === "string" //extract the url pathname, wqhether in string or URL or Request object format
+            ? input 
+            : input instanceof URL 
+                ? input.pathname 
+                : input.url;
+
+        const isAuthEndpoint = url.includes("/auth") ;
+
+        if (!isAuthEndpoint) {
+            destroyWebSocket();
+            window.location.href = "/"; //redirect to homepage
+        }
+    }
+
+    return response;
 }
+
+
+/**
+ * Convenient detection helper, designed specifically for use in apps/web-client/src/features/player/NavBar.tsx when adjusting navbar sizing for iPhone
+ * @returns boolean
+ */
+export const isPWA = (): boolean => {
+    if (typeof window === "undefined") return false;
+    return (
+        window.matchMedia("(display-mode: standalone)").matches ||
+        (window.navigator as unknown as { standalone?: boolean }).standalone === true
+    );
+};

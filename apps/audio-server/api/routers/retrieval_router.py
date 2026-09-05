@@ -1,13 +1,13 @@
 import traceback
 
 from fastapi import APIRouter, Depends, Path, Query, HTTPException
-from api.dependencies import get_db_manager, get_stats_manager
+from api.dependencies import get_db_manager, get_stats_manager, require_auth
 from database.database_manager import DatabaseManager
 from core.stats.stats_manager import StatsManager
 
 from core.models.responses import RetrievalResponse
 
-RetrievalRouter = APIRouter(prefix="/retrieve", tags=["Retrieval"])
+RetrievalRouter = APIRouter(prefix="/retrieve", tags=["Retrieval"], dependencies=[Depends(require_auth)])
 
 
 @RetrievalRouter.get("/downloads", response_model=RetrievalResponse)

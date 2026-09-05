@@ -52,3 +52,7 @@ class ReorderPlaylistPayload(ScuttleBase):
 
 class EditProfilePayload(ScuttleBase):
     username: str
+
+
+class LoginPayload(ScuttleBase):
+    password: str

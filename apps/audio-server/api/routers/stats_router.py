@@ -1,14 +1,14 @@
 import traceback
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
-from api.dependencies import get_db_manager, get_stats_manager
+from api.dependencies import get_db_manager, get_stats_manager, require_auth
 from core.stats.stats_manager import StatsManager
 from database.database_manager import DatabaseManager
 
 from core.models.responses import StatsResponse
 from core.models.payloads import IncrementListenDurationPayload, EditProfilePayload
 
-StatsRouter = APIRouter(prefix="/stats", tags=["Stats"])
+StatsRouter = APIRouter(prefix="/stats", tags=["Stats"], dependencies=[Depends(require_auth)])
 
 #temporary crash exception
 DefaultCrashException = HTTPException(

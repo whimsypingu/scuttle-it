@@ -18,12 +18,14 @@ from database.mixins.edit_mixin import EditMixin
 from database.mixins.like_mixin import LikeMixin
 from database.mixins.stats_mixin import StatsMixin
 from database.mixins.room_mixin import RoomMixin
+from database.mixins.auth_mixin import AuthMixin
 
 
 logger = logging.getLogger(__name__)
 
 
 class DatabaseManager(
+    AuthMixin,
     SeedMixin, 
     MaintenanceMixin, 
     RegisterMixin, 
@@ -35,7 +37,7 @@ class DatabaseManager(
     EditMixin,
     LikeMixin,
     StatsMixin,
-    RoomMixin
+    RoomMixin,
 ):
     def __init__(
         self,

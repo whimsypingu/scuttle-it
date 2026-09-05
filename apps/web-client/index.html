@@ -3,10 +3,74 @@
 	<head>
 		<meta charset="UTF-8" />
 		<link rel="icon" href="/static/logo_transparent_background.ico" />
+	    <link rel="manifest" href="manifest.json" />
+		<link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
+		<meta name="theme-color" content="#000000" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
 		<title>Scuttle</title>
+
+		<style>
+			/* direct css for no runtime imports */
+			html, body {
+				margin: 0;
+				padding: 0;
+				width: 100%;
+				height: 100%;
+				background-color: oklch(0.145 0 0); /* equivalent to --bg-background */
+				overflow: hidden;
+			}
+
+			/* shimmer loading animation */
+			#pwa-load-shell {
+				inset: 0;
+				width: 100%;
+				height: 100;
+			}
+
+			@property --angle {
+				syntax: "<angle>";
+				initial-value: 0deg;
+				inherits: false;
+			}
+
+			@keyframes perimeter-spin {
+				to {
+					--angle: 360deg;
+				}
+			}
+
+			.perimeter-beam {
+				position: absolute;
+				inset: 0;
+				pointer-events: none;
+				background: conic-gradient(
+					from var(--angle),
+					transparent 0deg,
+					#E50914cc 40deg, /* same as --color-brand */
+					transparent 80deg,
+					transparent 180deg,
+					#E50914cc 220deg,
+					transparent 260deg
+				);
+
+				animation: perimeter-spin 8s linear infinite;
+			}
+
+			.beam-cover {
+				position: absolute;
+				inset: 3px;
+				border-radius: 4px;
+				background-color: oklch(0.145 0 0); /* equivalent to --bg-background */
+			}
+		</style>
 	</head>
 	<body>
+		<div id="pwa-load-shell">
+			<div class="perimeter-beam"></div>
+
+			<div class="beam-cover"></div>
+		</div>
+
 		<div id="root"></div>
 		<script type="module" src="/src/main.tsx"></script>
 	</body>

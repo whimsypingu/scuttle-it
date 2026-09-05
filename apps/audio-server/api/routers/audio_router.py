@@ -3,7 +3,7 @@ import traceback
 from fastapi import APIRouter, Depends, Path, HTTPException, Query
 from fastapi.responses import FileResponse
 
-from api.dependencies import get_db_manager, get_device_context, get_dl_queue
+from api.dependencies import get_db_manager, get_device_context, get_dl_queue, require_auth
 from database.database_manager import DatabaseManager
 from core.download.download_queue import DownloadQueue
 from core.models.jobs import DownloadJob
@@ -11,7 +11,7 @@ from core.models.room import DeviceContext
 
 from core.audio.utils import resolve_track_path
 
-AudioRouter = APIRouter(prefix="/audio", tags=["Audio"])
+AudioRouter = APIRouter(prefix="/audio", tags=["Audio"], dependencies=[Depends(require_auth)])
 
 
 @AudioRouter.get("/stream/{track_id}")

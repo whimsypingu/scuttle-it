@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
     DEFAULT_ROOM_ID: str = "000"
+    TTL_AUTH_TOKEN: int = 432000 #5 days
+    PW_HASH_N: int = 16384 #password hashing parameters
+    PW_HASH_R: int = 8 #https://datatracker.ietf.org/doc/html/rfc7914.html#page-3
+    PW_HASH_P: int = 1
 
     # --- ENV PATH VALIDATION ---
     BIN_DIR: DirectoryPath #validates that this directory actually exists
