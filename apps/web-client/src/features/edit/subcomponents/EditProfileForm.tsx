@@ -11,6 +11,7 @@ import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
 import type { UserStats } from "@/features/profile/profile.types";
 import type { EditProfilePayload } from "@/store/hooks/hooks.types";
 import { useAuth } from "@/store/hooks/useAuth";
+import { useOffline } from "@/features/offline/OfflineProvider";
 
 
 interface EditProfileFormProps {
@@ -26,6 +27,7 @@ export const EditProfileForm = ({
 
     const { logout } = useAuth();
     const { editProfile } = useEditProfile();
+    const { isOffline } = useOffline();
 
     const handleLogout = () => {
         logout();
@@ -49,12 +51,20 @@ export const EditProfileForm = ({
                     <label className="text-sm font-medium text-muted-foreground w-18 shrink-0">
                         Username
                     </label>
-                    <Input
-                        value={usernameInput}
-                        onChange={(e) => setUsernameInput(e.target.value)}
-                        placeholder={stats.username}
-                        className="text-md"
-                    />
+                    {isOffline ? (
+                        <div className="flex flex-row items-baseline gap-3 select-all px-3">
+                            <span className="text-md font-normal text-foreground">
+                                {stats.username}
+                            </span>
+                        </div>
+                    ) : (
+                        <Input
+                            value={usernameInput}
+                            onChange={(e) => setUsernameInput(e.target.value)}
+                            placeholder={stats.username}
+                            className="text-md"
+                        />
+                    )}
                 </div>
 
                 {/* Created Date Section */}
@@ -75,23 +85,25 @@ export const EditProfileForm = ({
             </div>
 
             {/* Save */}
-            <div className="flex justify-between pt-4">
-                <Button
-                    className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
-                    variant="ghost"
-                    onClick={handleLogout}
-                >
-                    Logout
-                </Button>
+            {!isOffline && (
+                <div className="flex justify-between pt-4">
+                    <Button
+                        className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
+                        variant="ghost"
+                        onClick={handleLogout}
+                    >
+                        Logout
+                    </Button>
 
-                <Button
-                    className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
-                    variant="secondary"
-                    onClick={handleSave}
-                >
-                    Save
-                </Button>
-            </div>
+                    <Button
+                        className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
+                        variant="secondary"
+                        onClick={handleSave}
+                    >
+                        Save
+                    </Button>
+                </div>
+            )}
         </div>
     );
 };
