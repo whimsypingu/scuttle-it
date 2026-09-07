@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useEditProfile } from "@/store/hooks/useEdit";
+import { useAuth } from "@/store/hooks/useAuth";
+import { useOffline } from "@/features/offline/OfflineProvider";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,8 +12,6 @@ import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
 
 import type { UserStats } from "@/features/profile/profile.types";
 import type { EditProfilePayload } from "@/store/hooks/hooks.types";
-import { useAuth } from "@/store/hooks/useAuth";
-import { useOffline } from "@/features/offline/OfflineProvider";
 
 
 interface EditProfileFormProps {
@@ -52,18 +52,22 @@ export const EditProfileForm = ({
                         Username
                     </label>
                     {isOffline ? (
+                        <>
                         <div className="flex flex-row items-baseline gap-3 select-all px-3">
                             <span className="text-md font-normal text-foreground">
                                 {stats.username}
                             </span>
                         </div>
+                        </>
                     ) : (
+                        <>
                         <Input
                             value={usernameInput}
                             onChange={(e) => setUsernameInput(e.target.value)}
                             placeholder={stats.username}
                             className="text-md"
                         />
+                        </>
                     )}
                 </div>
 
@@ -86,6 +90,7 @@ export const EditProfileForm = ({
 
             {/* Save */}
             {!isOffline && (
+                <>
                 <div className="flex justify-between pt-4">
                     <Button
                         className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
@@ -103,6 +108,7 @@ export const EditProfileForm = ({
                         Save
                     </Button>
                 </div>
+                </>
             )}
         </div>
     );
