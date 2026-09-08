@@ -187,9 +187,13 @@ export interface PlayPauseTrackOptions {
 }
 
 
-//payloads to send
-export interface FlushListenDurationPayload {
+//listen duration telemetry
+export interface ListenLogEntry {
     trackId: string;
     timestamp: number;
     listenDuration: number;
+}
+
+export interface ListenLogsPayload {
+    logs: ListenLogEntry[];
 }

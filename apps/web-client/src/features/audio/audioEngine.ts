@@ -1,6 +1,7 @@
+import { get, set } from "idb-keyval";
 import { scuttleFetch } from "@/lib/utils";
 
-import type { AudioStrategyCallback, AudioStrategyEvent, AudioStrategy, FlushListenDurationPayload, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions, AudioEngineCallback, AudioEngineEvent, EngineOnlyEventListeners, EngineOnlyEvent, EngineOnlyEventMap } from "@/features/audio/audio.types";
+import type { AudioStrategyCallback, AudioStrategyEvent, AudioStrategy, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions, AudioEngineCallback, AudioEngineEvent, EngineOnlyEventListeners, EngineOnlyEvent, EngineOnlyEventMap, ListenLogEntry, ListenLogsPayload } from "@/features/audio/audio.types";
 
 
 class AudioEngine implements IAudioEngine  {
@@ -11,6 +12,9 @@ class AudioEngine implements IAudioEngine  {
     private currentTrackId: string | null = null;
     private listenDuration = 0; //seconds, floating point value
     private previousTime = 0; //delta tracking helper variable
+
+    private LISTEN_LOGS_STORAGE_KEY = "pending_listen_logs"; //idb key
+    private LISTEN_LOGS_QUEUE_THRESHOLD = 10; //batch flush to server once this many logs accumulate
     
     private isMain = true; //flag for whether audio should even play or not on this device
     private listeners: EngineOnlyEventListeners = {
@@ -90,20 +94,49 @@ class AudioEngine implements IAudioEngine  {
         );
         this.listenDuration = 0; //reset internal buffer, use the passed parameter as snapshot data
 
-        const payload: FlushListenDurationPayload = {
+        const newEntry: ListenLogEntry = {
             trackId,
             timestamp: Math.floor(Date.now() / 1000), //traditional unix timestamp in seconds
             listenDuration,
         };
 
         try {
-            await scuttleFetch(`/stats/increment/listen-duration`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
+            const listenLogsQueue: ListenLogEntry[] = (await get(this.LISTEN_LOGS_STORAGE_KEY)) || [];
+            listenLogsQueue.push(newEntry);
+
+            //persist the mutated array
+            await set(this.LISTEN_LOGS_STORAGE_KEY, listenLogsQueue);
+
+            if (listenLogsQueue.length >= this.LISTEN_LOGS_QUEUE_THRESHOLD) {
+                if (!navigator.onLine) {
+                    return; //skip based on simple offline detection mode
+                }
+
+                //attempt network flush with current batch snapshot
+                try {
+                    const payload: ListenLogsPayload = {
+                        logs: listenLogsQueue,
+                    };
+
+                    await scuttleFetch(`/stats/increment/listen-duration/batch`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload),
+                        keepalive: true, //prevent request cancellations
+                    });
+
+                    //clear idb logs after a successful network request
+                    await set(this.LISTEN_LOGS_STORAGE_KEY, []);
+                    console.log(
+                        `%c[Tracker Flush Success] Flushed ${listenLogsQueue.length} logs to server! `, 
+                        'color: #0b9466; font-weight: bold;'
+                    );
+                } catch (err) {
+                    console.error("Background stat batch flush failed, retained in IndexedDB:", err);
+                }
+            }
         } catch (err) {
-            console.error("Background stat flush failed:", err);
+            console.error("Failed to update listen duration queue data into IndexedDB:", err);
         }
     }
 

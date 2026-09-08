@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, useDragControls } from 'framer-motion';
+import { usePlayerState, PlayerStateProvider } from "@/features/player/PlayerStateProvider";
 
 import { ExpandedView } from '@/features/player/ExpandedView';
 import { MiniView } from '@/features/player/MiniView';
@@ -9,10 +10,13 @@ import { PLAYER_CONFIG, NAV_CONFIG } from '@/features/player/player.constants';
 import type { GlobalPlayerProps } from '@/features/player/player.types';
 
 
-export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) => {
+const GlobalPlayerContent = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) => {
+    const { isScrubbing } = usePlayerState();
 
     // This function handles the opening and closing of the player
     const onDragEnd = (_: any, info: any) => {
+        if (isScrubbing) return; //ignore if the user is scrubbing
+
         const swipeThreshold = 50; // px
         const velocityThreshold = 500; // px/s
 
@@ -58,7 +62,7 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
                 z-[50]
             `}
             onClick={() => !isExpanded && setIsExpanded(true)}
-            drag={"y"} // enable vertical dragging
+            drag={isScrubbing ? false : "y"} // enable vertical dragging
             dragControls={dragControls}
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={0.05}
@@ -76,10 +80,14 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
                     onExpand={() => setIsExpanded(true)}
                 />
             )}
-
-
         </motion.div>
-
         </>
     );
 };
+
+//export player content wrapped in the PlayerState context
+export const GlobalPlayer = (props: GlobalPlayerProps) => (
+    <PlayerStateProvider>
+        <GlobalPlayerContent {...props} />
+    </PlayerStateProvider>
+)

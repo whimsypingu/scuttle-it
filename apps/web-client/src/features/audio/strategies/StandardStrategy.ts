@@ -66,10 +66,10 @@ export class StandardStrategy implements AudioStrategy {
     }
 
     async load(trackId: string): Promise<void> {
-        const fullUrl = `/audio/stream/${trackId}?t=${Date.now()}`;
+        const basePath = `/audio/stream/${trackId}`;
 
         //prevent reloading if the same track is already set
-        if (this.currentTrackId === trackId && this.audioEl.src.includes(fullUrl)) {
+        if (this.currentTrackId === trackId && this.audioEl.src.includes(basePath)) {
             console.log("[StandardStrategy] Track already loaded, skipping.");
 
             if (this.audioEl.ended) {
@@ -78,6 +78,9 @@ export class StandardStrategy implements AudioStrategy {
 
             return;
         }
+
+        //generate cache-busting fingerprinted url when loading a fresh track
+        const fullUrl = `${basePath}?t=${Date.now()}`;
 
         this.currentTrackId = trackId;
         this.audioEl.src = fullUrl;

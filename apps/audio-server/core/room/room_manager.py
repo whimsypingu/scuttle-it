@@ -97,6 +97,8 @@ class RoomManager:
         exclude_device_ids = exclude or []
         failed_device_ids: list[str] = []
 
+        sent_count = 0
+
         for device_id, device in room.devices.items():
             #skip over nonexistent websockets
             if not device.websocket:
@@ -108,6 +110,7 @@ class RoomManager:
 
             try:
                 await device.websocket.send_json(message)
+                sent_count += 1
             except Exception:
                 failed_device_ids.append(device_id)
 
@@ -115,7 +118,7 @@ class RoomManager:
         for failed_device_id in failed_device_ids:
             self.disconnect_websocket(room_id, failed_device_id)
 
-        logger.info(f"RoomManager broadcasting to room {room_id}: {message}")
+        logger.info(f"RoomManager broadcasting to room {room_id} ({sent_count} devices reached): {message}")
 
 
     async def broadcast_all(

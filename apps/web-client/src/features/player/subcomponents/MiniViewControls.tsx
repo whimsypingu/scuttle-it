@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAudioPlayback, useAudioTime } from "@/features/audio/useAudioEngine";
 import { useQueue } from "@/store/hooks/useQueue";
+import { usePlayerState } from "@/features/player/PlayerStateProvider";
 
 import { PlayIcon, PauseIcon, WaveformIcon } from "@phosphor-icons/react";
 
@@ -56,27 +57,27 @@ export const MiniViewSlider = () => {
     const { time, duration } = useAudioTime();
 
     //local state for the slider
-    const [isDragging, setIsDragging] = useState(false);
+    const { isScrubbing, setIsScrubbing } = usePlayerState();
     const [localValue, setLocalValue] = useState(0); //time displayed
 
     //sync local value with engine time  only when NOT dragging
     useEffect(() => {
-        if (!isDragging) {
+        if (!isScrubbing) {
             setLocalValue(time);
         }
-    }, [time, isDragging]);
+    }, [time, isScrubbing]);
 
     const handleValueChange = (val: number[]) => { //do this while dragging the slider
         console.debug(`Scrubbing value: ${val[0]}`)
-        setIsDragging(true);
+        setIsScrubbing(true);
         setLocalValue(val[0]);        
     }
 
     const handleValueCommit = () => { //do this when slider is released
-        if (!isDragging) return; //prevent double firing
+        if (!isScrubbing) return; //prevent double firing
         console.log(`Committing scrubbed value: ${localValue}`)
         audioEngine.seek(localValue);
-        setIsDragging(false);
+        setIsScrubbing(false);
     }
 
     return (
