@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { useEditPlaylist } from "@/store/hooks/useEdit";
+import { useOffline } from "@/features/offline/OfflineProvider";
 
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { HoldToDeleteButton } from "@/components/ui/hold-delete";
 
 import { MIN_BUTTON_WIDTH } from "@/features/edit/edit.constants";
 
 import type { SummaryPlaylist } from "@/playlist/playlist.types";
 import type { EditPlaylistPayload } from "@/store/hooks/hooks.types";
-import { HoldToDeleteButton } from "@/components/ui/hold-delete";
 
 
 interface EditPlaylistFormProps {
@@ -22,6 +23,8 @@ export const EditPlaylistForm = ({
 }: EditPlaylistFormProps) => {
     const [nameInput, setNameInput] = useState<string>(playlist.name);
     const [descriptionInput, setDescriptionInput] = useState<string>(playlist.description ?? "");
+
+    const { isOffline } = useOffline();
 
     //edit hook with extra playlist details
     const { playlistDetails, isLoading, editPlaylist, deletePlaylist } = useEditPlaylist(playlist); //provides support for future details like created timestamp etc
@@ -53,6 +56,7 @@ export const EditPlaylistForm = ({
                         value={nameInput}
                         onChange={(e) => setNameInput(e.target.value)}
                         placeholder={playlist.name}
+                        disabled={isOffline}
                         className="text-md focus-visible:ring-1"
                     />
                 </div>
@@ -66,26 +70,35 @@ export const EditPlaylistForm = ({
                         value={descriptionInput}
                         onChange={(e) => setDescriptionInput(e.target.value)}
                         placeholder={"Write a little about this playlist..."}
+                        disabled={isOffline}
                         className="text-md focus-visible:ring-1"
                     />
                 </div>
 
                 {/* Delete Button */}
-                <div className="flex justify-end pt-2 pb-1">
-                    <HoldToDeleteButton onDelete={handleDelete} />
-                </div>
+                {!isOffline && (
+                    <>
+                    <div className="flex justify-end pt-2 pb-1">
+                        <HoldToDeleteButton onDelete={handleDelete} />
+                    </div>
+                    </>
+                )}
             </div>
 
             {/* Save */}
-            <div className="flex justify-end pt-4">
-                <Button
-                    className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
-                    variant="secondary"
-                    onClick={handleSave}
-                >
-                    Save
-                </Button>
-            </div>
+            {!isOffline && (
+                <>
+                <div className="flex justify-end pt-4">
+                    <Button
+                        className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
+                        variant="secondary"
+                        onClick={handleSave}
+                    >
+                        Save
+                    </Button>
+                </div>
+                </>
+            )}
         </div>
     );
 };

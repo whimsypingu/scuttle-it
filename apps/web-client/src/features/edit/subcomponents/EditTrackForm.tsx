@@ -189,9 +189,9 @@ export const EditTrackForm = ({
                     />
                 </div>
 
+                {/* PLAYLIST MEMBERSHIP */}
                 {!isOffline && (
                     <>
-                    {/* PLAYLIST MEMBERSHIP */}
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-medium text-muted-foreground">
                             Playlists
@@ -209,9 +209,9 @@ export const EditTrackForm = ({
                     {renderSourceContent()}
                 </div>
 
+                {/* Delete Button */}
                 {!isOffline && (
                     <>
-                    {/* Delete Button */}
                     <div className="flex justify-end pt-2 pb-1">
                         <HoldToDeleteButton onDelete={handleDelete} />
                     </div>

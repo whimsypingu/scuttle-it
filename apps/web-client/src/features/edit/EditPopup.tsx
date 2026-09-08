@@ -82,7 +82,7 @@ export const EditPopup = () => {
                     <DialogTitle>
                         {config?.title ?? "Edit"}
 
-                        {isOffline && (" - Offline")}
+                        {isOffline && (" (Offline)")}
                     </DialogTitle>
 
                     <DialogDescription>
