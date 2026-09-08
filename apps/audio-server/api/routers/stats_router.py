@@ -7,7 +7,7 @@ from core.stats.stats_manager import StatsManager
 from database.database_manager import DatabaseManager
 
 from core.models.responses import StatsResponse
-from core.models.payloads import IncrementListenDurationPayload, EditProfilePayload, ListenLogsPayload
+from core.models.payloads import EditProfilePayload, ListenLogsPayload
 
 StatsRouter = APIRouter(prefix="/stats", tags=["Stats"], dependencies=[Depends(require_auth)])
 
@@ -17,25 +17,6 @@ DefaultCrashException = HTTPException(
     detail="Crashed"
 )
 
-
-@StatsRouter.post("/increment/listen-duration")
-async def increment_listen_duration(
-    payload: IncrementListenDurationPayload = Body(...),
-    stats_manager: StatsManager = Depends(get_stats_manager)
-):
-    try:
-        await stats_manager.increment_listened_duration(
-            payload.track_id,
-            payload.listen_duration,
-        )
-        await stats_manager.updated_listened_at(
-            payload.track_id,
-            payload.timestamp,
-        )
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
-    except Exception as e:
-        traceback.print_exc()
-        raise DefaultCrashException
 
 @StatsRouter.post("/increment/listen-duration/batch")
 async def increment_listen_duration_batched(

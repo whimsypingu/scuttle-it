@@ -3,11 +3,6 @@ from core.models.base import ScuttleBase
 
 #incoming pydantic objects
 
-class IncrementListenDurationPayload(ScuttleBase):
-    track_id: str
-    timestamp: int
-    listen_duration: float
-
 class ListenLog(ScuttleBase):
     track_id: str
     timestamp: int
