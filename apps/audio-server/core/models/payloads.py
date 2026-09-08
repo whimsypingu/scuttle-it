@@ -8,6 +8,14 @@ class IncrementListenDurationPayload(ScuttleBase):
     timestamp: int
     listen_duration: float
 
+class ListenLog(ScuttleBase):
+    track_id: str
+    timestamp: int
+    listen_duration: float
+
+class ListenLogsPayload(ScuttleBase):
+    logs: list[ListenLog]
+
 
 class ReorderQueuePayload(ScuttleBase):
     source_queue_id: int

@@ -1,3 +1,4 @@
+from collections import defaultdict
 import traceback
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
@@ -6,7 +7,7 @@ from core.stats.stats_manager import StatsManager
 from database.database_manager import DatabaseManager
 
 from core.models.responses import StatsResponse
-from core.models.payloads import IncrementListenDurationPayload, EditProfilePayload
+from core.models.payloads import IncrementListenDurationPayload, EditProfilePayload, ListenLogsPayload
 
 StatsRouter = APIRouter(prefix="/stats", tags=["Stats"], dependencies=[Depends(require_auth)])
 
@@ -31,6 +32,35 @@ async def increment_listen_duration(
             payload.track_id,
             payload.timestamp,
         )
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    except Exception as e:
+        traceback.print_exc()
+        raise DefaultCrashException
+
+@StatsRouter.post("/increment/listen-duration/batch")
+async def increment_listen_duration_batched(
+    payload: ListenLogsPayload = Body(...),
+    stats_manager: StatsManager = Depends(get_stats_manager)
+):
+    try:
+        #aggregate right here
+        total_durations = defaultdict(float)
+        last_timestamps = defaultdict(int)
+
+        for log in payload.logs:
+            total_durations[log.track_id] += log.listen_duration
+            last_timestamps[log.track_id] = max(last_timestamps[log.track_id], log.timestamp)
+
+        for track_id in total_durations.keys():
+            await stats_manager.increment_listened_duration(
+                track_id,
+                total_durations[track_id],
+            )
+            await stats_manager.updated_listened_at(
+                track_id,
+                last_timestamps[track_id],
+            )
+
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception as e:
         traceback.print_exc()
