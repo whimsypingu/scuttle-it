@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useEditTrack } from "@/store/hooks/useEdit";
 import { usePlaylists } from "@/store/hooks/usePlaylists";
+import { useOffline } from "@/features/offline/OfflineProvider";
 
 import { LinkIcon, NotchesIcon } from "@phosphor-icons/react";
 
@@ -30,6 +31,8 @@ export const EditTrackForm = ({
     const [titleInput, setTitleInput] = useState("");
     //const [artists, setArtists] = useState<string[]>(track.artists.map(a => a.nameDisplay ?? a.name)); //EMERGENCY: use this with shadcn badges? to make artists selectable in the future
     const [artistInput, setArtistInput] = useState("");
+
+    const { isOffline } = useOffline();
 
     const { title, artists } = getTrackSourceMetadata(track); //source data
     const { link } = getTrackSourceLink(track);
@@ -167,6 +170,7 @@ export const EditTrackForm = ({
                         value={titleInput}
                         onChange={(e) => setTitleInput(e.target.value)}
                         placeholder={titleDisplay}
+                        disabled={isOffline}
                         className="text-md focus-visible:ring-1"
                     />
                 </div>
@@ -180,17 +184,22 @@ export const EditTrackForm = ({
                         value={artistInput}
                         onChange={(e) => setArtistInput(e.target.value)}
                         placeholder={artistDisplay}
+                        disabled={isOffline}
                         className="text-md focus-visible:ring-1"
                     />
                 </div>
 
                 {/* PLAYLIST MEMBERSHIP */}
-                <div className="flex flex-col gap-1">
-                    <label className="text-sm font-medium text-muted-foreground">
-                        Playlists
-                    </label>
-                    {renderPlaylistContent()}
-                </div>
+                {!isOffline && (
+                    <>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-medium text-muted-foreground">
+                            Playlists
+                        </label>
+                        {renderPlaylistContent()}
+                    </div>
+                    </>
+                )}
 
                 {/* Source Section */}
                 <div className="flex flex-col gap-1">
@@ -201,21 +210,30 @@ export const EditTrackForm = ({
                 </div>
 
                 {/* Delete Button */}
-                <div className="flex justify-end pt-2 pb-1">
-                    <HoldToDeleteButton onDelete={handleDelete} />
-                </div>
+                {!isOffline && (
+                    <>
+                    <div className="flex justify-end pt-2 pb-1">
+                        <HoldToDeleteButton onDelete={handleDelete} />
+                    </div>
+                    </>
+                )}
             </div>
 
+
             {/* Save */}
-            <div className="flex justify-end pt-4">
-                <Button
-                    className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
-                    variant="secondary"
-                    onClick={handleSave}
-                >
-                    Save
-                </Button>
-            </div>
+            {!isOffline && (
+                <>
+                <div className="flex justify-end pt-4">
+                    <Button
+                        className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
+                        variant="secondary"
+                        onClick={handleSave}
+                    >
+                        Save
+                    </Button>
+                </div>
+                </>
+            )}
         </div>
     );
 };
