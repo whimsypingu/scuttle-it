@@ -108,6 +108,10 @@ class AudioEngine implements IAudioEngine  {
             await set(this.LISTEN_LOGS_STORAGE_KEY, listenLogsQueue);
 
             if (listenLogsQueue.length >= this.LISTEN_LOGS_QUEUE_THRESHOLD) {
+                if (!navigator.onLine) {
+                    return; //skip based on simple offline detection mode
+                }
+
                 //attempt network flush with current batch snapshot
                 try {
                     const payload: ListenLogsPayload = {
