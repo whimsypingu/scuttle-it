@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { usePlaylistsMutations } from "@/store/hooks/usePlaylists";
+import { useOffline } from "@/features/offline/OfflineProvider";
 
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,8 @@ export const CreatePlaylistForm = ({
 }: CreatePlaylistFormProps) => {
     const [nameInput, setNameInput] = useState("");
     const [descriptionInput, setDescriptionInput] = useState("");
+
+    const { isOffline } = useOffline();
 
     //edit hook
     const { createPlaylist } = usePlaylistsMutations();
@@ -47,6 +50,7 @@ export const CreatePlaylistForm = ({
                         value={nameInput}
                         onChange={(e) => setNameInput(e.target.value)}
                         placeholder={"Give this playlist a name..."}
+                        disabled={isOffline}
                         className="text-md focus-visible:ring-1"
                     />
                 </div>
@@ -60,21 +64,26 @@ export const CreatePlaylistForm = ({
                         value={descriptionInput}
                         onChange={(e) => setDescriptionInput(e.target.value)}
                         placeholder={"Write a little about this playlist..."}
+                        disabled={isOffline}
                         className="text-md focus-visible:ring-1"
                     />
                 </div>
             </div>
 
             {/* Save */}
-            <div className="flex justify-end pt-4">
-                <Button
-                    className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
-                    variant="secondary"
-                    onClick={handleSave}
-                >
-                    Create
-                </Button>
-            </div>
+            {!isOffline && (
+                <>
+                <div className="flex justify-end pt-4">
+                    <Button
+                        className={`min-w-[${MIN_BUTTON_WIDTH}px]`}
+                        variant="secondary"
+                        onClick={handleSave}
+                    >
+                        Create
+                    </Button>
+                </div>
+                </>
+            )}
         </div>
     );
 };
