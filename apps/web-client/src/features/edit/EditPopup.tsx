@@ -1,4 +1,5 @@
 import { useEditTarget } from "@/features/edit/EditProvider";
+import { useOffline } from "@/features/offline/OfflineProvider";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -14,6 +15,7 @@ import { EDIT_CONFIG } from "@/features/edit/edit.constants";
 
 export const EditPopup = () => {
     const { editTarget, setEditTarget } = useEditTarget(); //access our custom Provider
+    const { isOffline } = useOffline();
 
     const isOpen = !!editTarget; //check for non-null editTarget
 
@@ -79,6 +81,8 @@ export const EditPopup = () => {
                 <DialogHeader>
                     <DialogTitle>
                         {config?.title ?? "Edit"}
+
+                        {isOffline && (" - Offline")}
                     </DialogTitle>
 
                     <DialogDescription>
