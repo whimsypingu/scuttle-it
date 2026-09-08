@@ -1,7 +1,7 @@
+import { get, set } from "idb-keyval";
 import { scuttleFetch } from "@/lib/utils";
 
-import type { AudioStrategyCallback, AudioStrategyEvent, AudioStrategy, FlushListenDurationPayload, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions, AudioEngineCallback, AudioEngineEvent, EngineOnlyEventListeners, EngineOnlyEvent, EngineOnlyEventMap, ListenLogEntry, ListenLogsPayload } from "@/features/audio/audio.types";
-import { get, set } from "idb-keyval";
+import type { AudioStrategyCallback, AudioStrategyEvent, AudioStrategy, IAudioEngine, PlayPauseTrackOptions, PlayTrackOptions, AudioEngineCallback, AudioEngineEvent, EngineOnlyEventListeners, EngineOnlyEvent, EngineOnlyEventMap, ListenLogEntry, ListenLogsPayload } from "@/features/audio/audio.types";
 
 
 class AudioEngine implements IAudioEngine  {
@@ -134,22 +134,6 @@ class AudioEngine implements IAudioEngine  {
         } catch (err) {
             console.error("Failed to update listen duration queue data into IndexedDB:", err);
         }
-
-        // const payload: FlushListenDurationPayload = {
-        //     trackId,
-        //     timestamp: Math.floor(Date.now() / 1000), //traditional unix timestamp in seconds
-        //     listenDuration,
-        // };
-
-        // try {
-        //     await scuttleFetch(`/stats/increment/listen-duration`, {
-        //         method: "POST",
-        //         headers: { "Content-Type": "application/json" },
-        //         body: JSON.stringify(payload)
-        //     });
-        // } catch (err) {
-        //     console.error("Background stat flush failed:", err);
-        // }
     }
 
 

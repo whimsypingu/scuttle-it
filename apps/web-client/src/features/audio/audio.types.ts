@@ -197,10 +197,3 @@ export interface ListenLogEntry {
 export interface ListenLogsPayload {
     logs: ListenLogEntry[];
 }
-
-//payloads to send
-export interface FlushListenDurationPayload {
-    trackId: string;
-    timestamp: number;
-    listenDuration: number;
-}
