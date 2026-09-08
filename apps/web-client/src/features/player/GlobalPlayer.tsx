@@ -7,12 +7,16 @@ import { MiniView } from '@/features/player/MiniView';
 import { PLAYER_CONFIG, NAV_CONFIG } from '@/features/player/player.constants';
 
 import type { GlobalPlayerProps } from '@/features/player/player.types';
+import { PlayerStateProvider, usePlayerState } from './PlayerStateProvider';
 
 
-export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) => {
+const GlobalPlayerContent = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) => {
+    const { isScrubbing } = usePlayerState();
 
     // This function handles the opening and closing of the player
     const onDragEnd = (_: any, info: any) => {
+        if (isScrubbing) return; //ignore if the user is scrubbing
+
         const swipeThreshold = 50; // px
         const velocityThreshold = 500; // px/s
 
@@ -76,10 +80,14 @@ export const GlobalPlayer = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
                     onExpand={() => setIsExpanded(true)}
                 />
             )}
-
-
         </motion.div>
-
         </>
     );
 };
+
+//export player content wrapped in the PlayerState context
+export const GlobalPlayer = (props: GlobalPlayerProps) => (
+    <PlayerStateProvider>
+        <GlobalPlayerContent {...props} />
+    </PlayerStateProvider>
+)

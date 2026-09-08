@@ -34,11 +34,20 @@ export interface GlobalPlayerProps {
     setIsExpanded: (value: boolean) => void;
 }
 
+export interface PlayerStateContextValue {
+    isScrubbing: boolean;
+    setIsScrubbing: (value: boolean) => void;
+}
+
 export interface MiniViewProps {
+    // isScrubbing: boolean;
+    // setIsScrubbing: (value: boolean) => void;
     onExpand: () => void; // what do when expanded
 }
 
 export interface ExpandedViewProps {
+    // isScrubbing: boolean;
+    // setIsScrubbing: (value: boolean) => void;
     isCompact: boolean;
     setIsCompact: (value: boolean) => void;
     onClose: () => void; //what to do when closed

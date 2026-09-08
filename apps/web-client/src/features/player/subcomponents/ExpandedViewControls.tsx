@@ -14,6 +14,7 @@ import { PLAYER_CONFIG } from '@/features/player/player.constants';
 import { useSettings } from "@/store/hooks/useSettings";
 import { cycleLoopmode } from "@/settings/settings.utils";
 import { LOOPMODE_CONFIG } from "@/settings/settings.constants";
+import { usePlayerState } from "../PlayerStateProvider";
 
 
 //used inside the ExpandedViewControls major subcomponent
@@ -165,27 +166,27 @@ export const ExpandedViewControls = () => {
     const { time, duration } = useAudioTime();
 
     //local state for the slider
-    const [isDragging, setIsDragging] = useState(false);
+    const { isScrubbing, setIsScrubbing } = usePlayerState();
     const [localValue, setLocalValue] = useState(0); //time displayed
 
     //sync local value with engine time  only when NOT dragging
     useEffect(() => {
-        if (!isDragging) {
+        if (!isScrubbing) {
             setLocalValue(time);
         }
-    }, [time, isDragging]);
+    }, [time, isScrubbing]);
 
     const handleValueChange = (val: number[]) => { //do this while dragging the slider
         console.debug(`Scrubbing value: ${val[0]}`)
-        setIsDragging(true);
+        setIsScrubbing(true);
         setLocalValue(val[0]);
     }
 
     const handleValueCommit = () => { //do this when slider is released
-        if (!isDragging) return; //prevent double firing
+        if (!isScrubbing) return; //prevent double firing
         console.log(`Committing scrubbed value: ${localValue}`)
         audioEngine.seek(localValue);
-        setIsDragging(false);
+        setIsScrubbing(false);
     }
 
     return (
@@ -194,13 +195,15 @@ export const ExpandedViewControls = () => {
             layout
             layoutId="control-block"
             className={`flex flex-col gap-1 w-full cursor-pointer`}
-            onPointerDownCapture={(e) => e.stopPropagation()} /* capture scrubbing */
+            onClick={(e) => e.stopPropagation()}
+            // onPointerDownCapture={(e) => e.stopPropagation()} /* capture scrubbing */
         >
             {/* SLIDER */}
             <Slider 
                 value={[localValue]} 
                 max={duration} 
                 step={0.1}
+                onClick={(e) => e.stopPropagation()}
                 onValueChange={handleValueChange}
                 onValueCommit={handleValueCommit}
                 onPointerUp={handleValueCommit} //fallback for when swipe goes out of bounds
