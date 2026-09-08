@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, useDragControls } from 'framer-motion';
+import { usePlayerState, PlayerStateProvider } from "@/features/player/PlayerStateProvider";
 
 import { ExpandedView } from '@/features/player/ExpandedView';
 import { MiniView } from '@/features/player/MiniView';
@@ -7,7 +8,6 @@ import { MiniView } from '@/features/player/MiniView';
 import { PLAYER_CONFIG, NAV_CONFIG } from '@/features/player/player.constants';
 
 import type { GlobalPlayerProps } from '@/features/player/player.types';
-import { PlayerStateProvider, usePlayerState } from './PlayerStateProvider';
 
 
 const GlobalPlayerContent = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) => {
@@ -62,7 +62,7 @@ const GlobalPlayerContent = ({ isExpanded, setIsExpanded }: GlobalPlayerProps) =
                 z-[50]
             `}
             onClick={() => !isExpanded && setIsExpanded(true)}
-            drag={"y"} // enable vertical dragging
+            drag={isScrubbing ? false : "y"} // enable vertical dragging
             dragControls={dragControls}
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={0.05}

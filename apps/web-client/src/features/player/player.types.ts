@@ -40,14 +40,10 @@ export interface PlayerStateContextValue {
 }
 
 export interface MiniViewProps {
-    // isScrubbing: boolean;
-    // setIsScrubbing: (value: boolean) => void;
     onExpand: () => void; // what do when expanded
 }
 
 export interface ExpandedViewProps {
-    // isScrubbing: boolean;
-    // setIsScrubbing: (value: boolean) => void;
     isCompact: boolean;
     setIsCompact: (value: boolean) => void;
     onClose: () => void; //what to do when closed

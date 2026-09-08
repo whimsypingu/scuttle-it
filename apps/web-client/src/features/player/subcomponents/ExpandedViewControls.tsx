@@ -3,6 +3,7 @@ import { motion } from "framer-motion"
 import { useEffect, useState } from "react";
 import { useQueue } from "@/store/hooks/useQueue";
 import { useAudioPlayback, useAudioTime } from "@/features/audio/useAudioEngine";
+import { usePlayerState } from "@/features/player/PlayerStateProvider";
 
 import { formatTime } from "@/features/audio/audio.utils";
 import { audioEngine } from "@/features/audio/audioEngine";
@@ -14,7 +15,6 @@ import { PLAYER_CONFIG } from '@/features/player/player.constants';
 import { useSettings } from "@/store/hooks/useSettings";
 import { cycleLoopmode } from "@/settings/settings.utils";
 import { LOOPMODE_CONFIG } from "@/settings/settings.constants";
-import { usePlayerState } from "../PlayerStateProvider";
 
 
 //used inside the ExpandedViewControls major subcomponent
