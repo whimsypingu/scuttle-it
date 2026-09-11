@@ -1,6 +1,8 @@
 import logging
 import asyncio
+import random
 import time
+from core.musicbrainz.exceptions import MusicBrainzClientError, MusicBrainzServerError
 import httpx
 # from pathlib import Path
 
@@ -35,6 +37,8 @@ class MusicBrainzClient():
         self._lock = asyncio.Lock()
 
         self.minimum_wait = 1.1
+        self.retry_limit = 5
+        self.maximum_wait = 3
 
         for key, value in overrides.items():
             if hasattr(self, key):
@@ -59,21 +63,50 @@ class MusicBrainzClient():
         logger.info(f"Querying {self.base_url}/{endpoint}...")
 
         async with self._lock:
+
             params = self.default_params | (params or {})
 
-            #calculate time since last request
-            elapsed = time.time() - self._last_call
+            start = time.time()
+            next_wait = None
 
-            if elapsed < self.minimum_wait:
-                await asyncio.sleep(self.minimum_wait)
+            while time.time() < start + self.maximum_wait:
 
-            #network request
-            response = await self.client.get(f"{self.base_url}/{endpoint}", params=params)
+                if next_wait is None:
+                    #calculate time since last request
+                    elapsed = time.time() - self._last_call
 
-            self._last_call = time.time()
+                    if elapsed < self.minimum_wait:
+                        await asyncio.sleep(self.minimum_wait)
+                else:
+                    await asyncio.sleep(next_wait)
 
-            response.raise_for_status()
-            return response.json()
+                try:
+                    #network request
+                    response = await self.client.get(f"{self.base_url}/{endpoint}", params=params)
+
+                    self._last_call = time.time()
+
+                    if response.status_code == 200:
+                        return response.json()
+
+                    elif response.status_code == 503: #see: https://musicbrainz.org/doc/MusicBrainz_API/Rate_Limiting
+                        retry_after_header = response.headers.get("Retry-After")
+                        if retry_after_header is not None:
+                            try:
+                                next_wait = float(retry_after_header)
+                            except ValueError:
+                                next_wait = None
+                        else:
+                            next_wait = None
+                        continue
+
+                    else:
+                        response.raise_for_status()
+
+                except httpx.HTTPStatusError as e:
+                    raise MusicBrainzServerError() from e
+                except Exception as e:
+                    raise MusicBrainzClientError() from e
 
 
     async def match_record(self, track: TrackBase, score_threshold=0.95) -> bool:
