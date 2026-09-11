@@ -46,4 +46,20 @@ async def test_track_match_record(mb: MusicBrainzClient, sample_track: TrackBase
     o2 = await mb.match_record(t2)
     assert o2 is True
 
-    print(t2.model_dump_json(indent=2))
+    # print(t2.model_dump_json(indent=2))
+
+
+async def test_bad_track_match_record(mb: MusicBrainzClient):
+    t1 = TrackBase(
+        id="track_id_4",
+        title="hurdygurdydurrr",
+        duration=100.0,
+        artists=[
+            ArtistBase(
+                id="artist_id_4",
+                name="small chungus",
+            ),
+        ]
+    )
+    o1 = await mb.match_record(t1)
+    assert o1 is False
