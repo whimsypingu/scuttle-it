@@ -47,10 +47,10 @@ class RegisterMixin:
                         INSERT INTO artists (id, name, name_display)
                         VALUES (?, ?, ?)
                         ON CONFLICT(id) DO UPDATE SET
-                            name = excluded.name,
-                            name_display = COALESCE(excluded.name_display, artists.name_display)
+                            name = COALESCE(artists.name, excluded.name),
+                            name_display = COALESCE(artists.name_display, excluded.name_display)
                         RETURNING internal_id;
-                    ''', (artist.id, artist.name, artist.name_display))
+                    ''', (artist.id, artist.name, artist.name_display)) #prioritize keeping original data if possible
                     row = await cursor.fetchone()
                     if not row:
                         logger.error(f"Failed to get internal_id for artist: {artist}")
