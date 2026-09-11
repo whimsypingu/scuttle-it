@@ -14,4 +14,9 @@ For specific files:
 python -m pytest apps/audio-server/tests/TEST_FILE_NAME.py
 ```
 
+To see logs:
+```bash
+python -m pytest apps/audio-server/tests/TEST_FILE_NAME.py -o log_cli=true --log-cli-level=DEBUG
+```
+
 Files that start with `test_` are marked for testing via pytest. Other files that start with `benchmark_` are meant for identifying weaknesses and diagnosing them.
