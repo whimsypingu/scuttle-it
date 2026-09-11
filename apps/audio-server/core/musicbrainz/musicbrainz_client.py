@@ -50,6 +50,20 @@ class MusicBrainzClient():
 
 
     async def _get(self, endpoint: str, params: dict = None):
+        """
+        Queries MusicBrainz servers, using retry mechanism based on response headers.
+
+        Args:
+            endpoint (str): MusicBrainz entity to search ("recordings", "artists", etc)
+            params (dict): Custom parameter overrides. Defaults to internal default_params.
+
+        Returns:
+            response.json
+
+        Raises:
+            MusicBrainzServerError: If the MusicBrainz server returns a non-503 failure status response.
+            MusicBrainzClientError: If any other issue happens (timing out, etc)
+        """
         logger.info(f"Querying {self.base_url}/{endpoint}...")
 
         async with self._lock:
@@ -93,7 +107,7 @@ class MusicBrainzClient():
             raise MusicBrainzClientError() #possibly due to rate limiting fall-thru
 
 
-    async def match_record(self, track: TrackBase, score_threshold=0.95) -> bool:
+    async def match_record(self, track: TrackBase, score_threshold: float = 0.95) -> bool:
         """
         Takes a TrackBase and tries to search and retrieve a match. If found, edits in place and returns True.
 
