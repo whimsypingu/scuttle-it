@@ -25,10 +25,6 @@ class MusicBrainzClient():
             "fmt": "json",
         }
 
-        # self._last_call = time.time()
-        self._lock = asyncio.Lock()
-
-        # self.minimum_wait = 1.1
         self.maximum_total_wait = 3
 
         for key, value in overrides.items():
@@ -36,6 +32,9 @@ class MusicBrainzClient():
                 setattr(self, key, value)
             else:
                 logger.warning(f"MusicBrainzClient ignored unknown override: {key}")
+
+
+        self._lock = asyncio.Lock()
 
         #declare after headers are set and possibly overwritten
         self.client = httpx.AsyncClient(
@@ -62,22 +61,11 @@ class MusicBrainzClient():
 
             while time.time() < start + self.maximum_total_wait:
 
-                # if next_wait is None:
-                #     #calculate time since last request
-                #     elapsed = time.time() - self._last_call
-
-                #     if elapsed < self.minimum_wait:
-                #         await asyncio.sleep(self.minimum_wait)
-                # else:
-                #     await asyncio.sleep(next_wait)
-
                 await asyncio.sleep(next_wait)
 
                 try:
                     #network request
                     response = await self.client.get(f"{self.base_url}/{endpoint}", params=params)
-
-                    # self._last_call = time.time()
 
                     if response.status_code == 200:
                         return response.json()
