@@ -1,19 +1,11 @@
 import logging
 import asyncio
-import random
 import time
-from core.musicbrainz.exceptions import MusicBrainzClientError, MusicBrainzServerError
 import httpx
-# from pathlib import Path
-
-# from config import settings
 
 from core.models.track import TrackBase
 from core.models.artist import ArtistBase
-
-#from core.youtube.metadata_parser.parser import YouTubeParser
-
-#from core.youtube.exceptions import YtdlpDownloadError, YtdlpMetadataError, YtdlpSearchError, YtdlpTimeoutError, YtdlpUpdateError
+from core.musicbrainz.exceptions import MusicBrainzClientError, MusicBrainzServerError
 
 logger = logging.getLogger(__name__)
 
@@ -33,12 +25,11 @@ class MusicBrainzClient():
             "fmt": "json",
         }
 
-        self._last_call = time.time()
+        # self._last_call = time.time()
         self._lock = asyncio.Lock()
 
-        self.minimum_wait = 1.1
-        self.retry_limit = 5
-        self.maximum_wait = 3
+        # self.minimum_wait = 1.1
+        self.maximum_total_wait = 3
 
         for key, value in overrides.items():
             if hasattr(self, key):
@@ -67,37 +58,40 @@ class MusicBrainzClient():
             params = self.default_params | (params or {})
 
             start = time.time()
-            next_wait = None
+            next_wait = 0
 
-            while time.time() < start + self.maximum_wait:
+            while time.time() < start + self.maximum_total_wait:
 
-                if next_wait is None:
-                    #calculate time since last request
-                    elapsed = time.time() - self._last_call
+                # if next_wait is None:
+                #     #calculate time since last request
+                #     elapsed = time.time() - self._last_call
 
-                    if elapsed < self.minimum_wait:
-                        await asyncio.sleep(self.minimum_wait)
-                else:
-                    await asyncio.sleep(next_wait)
+                #     if elapsed < self.minimum_wait:
+                #         await asyncio.sleep(self.minimum_wait)
+                # else:
+                #     await asyncio.sleep(next_wait)
+
+                await asyncio.sleep(next_wait)
 
                 try:
                     #network request
                     response = await self.client.get(f"{self.base_url}/{endpoint}", params=params)
 
-                    self._last_call = time.time()
+                    # self._last_call = time.time()
 
                     if response.status_code == 200:
                         return response.json()
 
+                    #when MB rejects the request, check to see if we can retry by setting next_wait to the Retry-After header in the response
                     elif response.status_code == 503: #see: https://musicbrainz.org/doc/MusicBrainz_API/Rate_Limiting
                         retry_after_header = response.headers.get("Retry-After")
                         if retry_after_header is not None:
                             try:
                                 next_wait = float(retry_after_header)
                             except ValueError:
-                                next_wait = None
+                                next_wait = 0
                         else:
-                            next_wait = None
+                            next_wait = 0
                         continue
 
                     else:
@@ -107,6 +101,8 @@ class MusicBrainzClient():
                     raise MusicBrainzServerError() from e
                 except Exception as e:
                     raise MusicBrainzClientError() from e
+
+            raise MusicBrainzClientError() #possibly due to rate limiting fall-thru
 
 
     async def match_record(self, track: TrackBase, score_threshold=0.95) -> bool:
