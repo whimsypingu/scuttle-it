@@ -1,6 +1,8 @@
 import logging
 import time
 
+from config import settings
+
 from database.mixins.mixin_utils import row_to_trackbase
 
 from core.models.artist import ArtistBase
