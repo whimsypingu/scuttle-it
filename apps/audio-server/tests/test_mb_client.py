@@ -63,3 +63,22 @@ async def test_bad_track_match_record(mb: MusicBrainzClient):
     )
     o1 = await mb.match_record(t1)
     assert o1 is False
+
+
+async def test_post_adapter_track_match_record(mb: MusicBrainzClient):
+    t1 = TrackBase(
+        id="track_id_5", 
+        title="See You Again",
+        duration=100.0,
+        artists=[
+            ArtistBase(
+                name="Tyler, The Creator"
+            ),
+            ArtistBase(
+                name="Kali Uchis"
+            )
+        ]
+    )
+    o1 = await mb.match_record(t1)
+    print(t1.model_dump_json(indent=2))
+    print(o1)
