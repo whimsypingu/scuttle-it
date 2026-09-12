@@ -132,7 +132,10 @@ class DownloadWorker:
 
                 estimated_title_display = job.title_display if job.title_display else download_result.display
                 if job.artist_display:
-                    artist_payload = [EditArtistPayload(name_display=job.artist_display)]
+                    artist_payload = [
+                        EditArtistPayload(name_display=a)
+                        for a in job.artist_display.split("\x1f") 
+                    ]
                 else:
                     artist_payload = [
                         EditArtistPayload(name_display=artist.display)

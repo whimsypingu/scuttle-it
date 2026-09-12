@@ -36,7 +36,7 @@ class DownloadJob(JobBase):
 
     playlist_ids: list[str] | None = None #list of playlist IDs, if instantiating
     title_display: str | None = None #optional title display deterministic
-    artist_display: str | None = None #optional artist display deterministic
+    artist_display: str | None = None #optional artist display deterministic, separated by \x1f UNIT_SEP
 
     @model_validator(mode="after")
     def validate_constraints(self) -> "DownloadJob":

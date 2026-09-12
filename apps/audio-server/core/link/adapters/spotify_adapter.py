@@ -25,6 +25,8 @@ class SpotifyAdapter:
         self._track_pattern = re.compile(r'"title":"([^"]+)".*?"artists":\s*(\[.*?\]).*?"duration":(\d+)', re.DOTALL)
         self._playlist_pattern = re.compile(r'"title":"([^"]+)".*?"subtitle":"([^"]+)".*?"duration":(\d+)', re.DOTALL)
 
+        self.UNIT_SEP = "\x1f"
+
 
     def _clean(self, text):
         text = text.replace("\xa0", " ") #non-breaking spaces
@@ -60,7 +62,7 @@ class SpotifyAdapter:
 
                 #try catch block will catch any errors
                 title = m.group(1)
-                artists = ", ".join([a.get("name") for a in json.loads(m.group(2))])
+                artists = self.UNIT_SEP.join([a.get("name") for a in json.loads(m.group(2))])
                 target_duration = round(int(m.group(3)) / 1000) if m.group(3).isdigit() else None
                 return (self._clean(title), self._clean(artists), target_duration)
             except Exception as e:
@@ -111,8 +113,10 @@ class SpotifyAdapter:
                         description = self._clean(artist) #spotify embed links don't contain the actual description, so we will just use the user instead
                     else:
                         target_duration = round(int(duration) / 1000) if duration.isdigit() else None
+
+                        # print(repr(artist)) #spotify uses ,&nbsp; to delim artists in html, but after fetching it becomes \xa0
                         queries.append(
-                            (self._clean(title), self._clean(artist), target_duration)
+                            (self._clean(title), self._clean(artist.replace(",\xa0", self.UNIT_SEP)), target_duration)
                         )
 
                 if name is None: #for whatever reason if somehow a playlist name is not extracted raise an error

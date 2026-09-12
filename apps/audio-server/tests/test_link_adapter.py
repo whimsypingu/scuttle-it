@@ -32,7 +32,7 @@ def test_youtube_adapter_extract_playlist_id(la: LinkAdapter):
 @pytest.mark.asyncio
 async def test_youtube_adapter_expand_jobs(la: LinkAdapter):
     u1 = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&feature=shared" #first track in a playlist, should be handled like just a track
-    j1, p1 = await la.expand_jobs(u1)
+    j1, p1 = await la.expand_jobs(u1, "000")
     assert len(j1) == 1
     for job in j1:
         assert job.track_id == "dQw4w9WgXcQ"
@@ -40,7 +40,7 @@ async def test_youtube_adapter_expand_jobs(la: LinkAdapter):
     assert p1 is None #payload is None for no create playlist
 
     u2 = "https://www.youtube.com/playlist?list=PLbpi6ZahtOH75Gj-P-YZYV6hSY5SHQKeV" #20 years 20 breakthrough videos
-    j2, p2 = await la.expand_jobs(u2)
+    j2, p2 = await la.expand_jobs(u2, "000")
     assert len(j2) == 20
     for job in j2:
         assert job.track_id is not None
@@ -62,7 +62,7 @@ def test_spotify_adapter_extract_playlist_id(la: LinkAdapter):
 @pytest.mark.asyncio
 async def test_spotify_adapter_expand_jobs(la: LinkAdapter):
     u1 = "https://open.spotify.com/track/4PTG3Z6ehGkBFwjybzWkR8" #rickroll
-    j1, p1 = await la.expand_jobs(u1)
+    j1, p1 = await la.expand_jobs(u1, "000")
     assert len(j1) == 1 #single track
     for job in j1:
         assert job.query is not None
@@ -70,7 +70,7 @@ async def test_spotify_adapter_expand_jobs(la: LinkAdapter):
     assert p1 is None #payload is None for no create playlist
 
     u2 = "https://open.spotify.com/playlist/37i9dQZEVXbMDoHDwVN2tF" #daily top 50 global
-    j2, p2 = await la.expand_jobs(u2)
+    j2, p2 = await la.expand_jobs(u2, "000")
     assert len(j2) == 50
     for job in j2:
         assert job.query is not None # each track becomes a valid query
@@ -79,3 +79,12 @@ async def test_spotify_adapter_expand_jobs(la: LinkAdapter):
     assert p2 is not None
     assert p2.playlist_id == "37i9dQZEVXbMDoHDwVN2tF"
     assert p2.name is not None
+
+    u3 = "https://open.spotify.com/track/7KA4W4McWYRpgf0fWsJZWB" #select track
+    j3, p3 = await la.expand_jobs(u3, "000")
+    assert len(j3) == 1 #single track
+    for job in j3:
+        assert job.query is not None
+        assert job.priority is True
+        # print(repr(job.artist_display))
+    assert p3 is None #payload is None for no create playlist
