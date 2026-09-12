@@ -1,10 +1,12 @@
 import logging
 
-from core.models.playlist import PlaylistDetails
+from config import settings
+
 from database.mixins.mixin_utils import row_to_playlist_details, row_to_playlist_track, row_to_track_details, row_to_trackbase
 
 from core.models.artist import ArtistBase
 from core.models.track import PlaylistTrack, TrackBase, TrackDetails
+from core.models.playlist import PlaylistDetails
 
 logger = logging.getLogger(__name__)
 
@@ -41,9 +43,6 @@ class RetrievalMixin:
         """Retrieve a sublist of tracks from the Downloads table"""
         logger.info(f"Retrieving tracks from Downloads with offset {offset} and limit {limit}")
 
-        UNIT_SEP = "\x1f"
-        RECORD_SEP = "\x1e"
-
         query = f'''
             WITH downloaded_subset_tracks AS (
                 -- Get track subset
@@ -63,11 +62,11 @@ class RetrievalMixin:
 
                 -- ArtistBase fields
                 GROUP_CONCAT(
-                    a.internal_id || '{UNIT_SEP}' ||
-                    COALESCE(a.id, '') || '{UNIT_SEP}' ||
-                    a.name || '{UNIT_SEP}' ||
+                    a.internal_id || '{settings.UNIT_SEP}' ||
+                    COALESCE(a.id, '') || '{settings.UNIT_SEP}' ||
+                    a.name || '{settings.UNIT_SEP}' ||
                     COALESCE(a.name_display, ''), 
-                    '{RECORD_SEP}'
+                    '{settings.RECORD_SEP}'
                 ) AS artist_blob
             FROM downloaded_subset_tracks d
             JOIN tracks t ON t.internal_id = d.track_internal_id
@@ -127,9 +126,6 @@ class RetrievalMixin:
             1: "liked_at DESC",
         }
 
-        UNIT_SEP = "\x1f"
-        RECORD_SEP = "\x1e"
-
         query = f'''
             WITH liked_subset_tracks AS (
                 -- Get track subset
@@ -149,11 +145,11 @@ class RetrievalMixin:
 
                 -- ArtistBase fields
                 GROUP_CONCAT(
-                    a.internal_id || '{UNIT_SEP}' ||
-                    COALESCE(a.id, '') || '{UNIT_SEP}' ||
-                    a.name || '{UNIT_SEP}' ||
+                    a.internal_id || '{settings.UNIT_SEP}' ||
+                    COALESCE(a.id, '') || '{settings.UNIT_SEP}' ||
+                    a.name || '{settings.UNIT_SEP}' ||
                     COALESCE(a.name_display, ''), 
-                    '{RECORD_SEP}'
+                    '{settings.RECORD_SEP}'
                 ) AS artist_blob,
 
                 l.liked_at AS added_at,
@@ -226,9 +222,6 @@ class RetrievalMixin:
         if offset + limit > MAX_TOTAL_RECORDS:
             limit = MAX_TOTAL_RECORDS - offset
 
-        UNIT_SEP = "\x1f"
-        RECORD_SEP = "\x1e"
-
         query = f'''
             WITH recently_played_subset_tracks AS (
                 -- Get track subset
@@ -249,11 +242,11 @@ class RetrievalMixin:
 
                 -- ArtistBase fields
                 GROUP_CONCAT(
-                    a.internal_id || '{UNIT_SEP}' ||
-                    COALESCE(a.id, '') || '{UNIT_SEP}' ||
-                    a.name || '{UNIT_SEP}' ||
+                    a.internal_id || '{settings.UNIT_SEP}' ||
+                    COALESCE(a.id, '') || '{settings.UNIT_SEP}' ||
+                    a.name || '{settings.UNIT_SEP}' ||
                     COALESCE(a.name_display, ''), 
-                    '{RECORD_SEP}'
+                    '{settings.RECORD_SEP}'
                 ) AS artist_blob
             FROM recently_played_subset_tracks t
             JOIN track_artists ta ON ta.track_internal_id = t.internal_id
@@ -315,9 +308,6 @@ class RetrievalMixin:
             1: "added_at DESC",
         }
 
-        UNIT_SEP = "\x1f"
-        RECORD_SEP = "\x1e"
-
         query = f'''
             WITH playlist_subset_tracks AS (
                 -- Get track subset
@@ -339,11 +329,11 @@ class RetrievalMixin:
 
                 -- ArtistBase fields
                 GROUP_CONCAT(
-                    a.internal_id || '{UNIT_SEP}' ||
-                    COALESCE(a.id, '') || '{UNIT_SEP}' ||
-                    a.name || '{UNIT_SEP}' ||
+                    a.internal_id || '{settings.UNIT_SEP}' ||
+                    COALESCE(a.id, '') || '{settings.UNIT_SEP}' ||
+                    a.name || '{settings.UNIT_SEP}' ||
                     COALESCE(a.name_display, ''), 
-                    '{RECORD_SEP}'
+                    '{settings.RECORD_SEP}'
                 ) AS artist_blob,
                 
                 s.added_at,
@@ -376,9 +366,6 @@ class RetrievalMixin:
         """Retrieve details about a track"""
         logger.info(f"Retrieving details about track_id: {track_id}")
 
-        UNIT_SEP = "\x1f"
-        RECORD_SEP = "\x1e"
-
         query = f'''
             SELECT
                 -- TrackBase fields
@@ -395,20 +382,20 @@ class RetrievalMixin:
 
                 -- ArtistBase fields
                 GROUP_CONCAT(
-                    a.internal_id || '{UNIT_SEP}' ||
-                    COALESCE(a.id, '') || '{UNIT_SEP}' ||
-                    a.name || '{UNIT_SEP}' ||
+                    a.internal_id || '{settings.UNIT_SEP}' ||
+                    COALESCE(a.id, '') || '{settings.UNIT_SEP}' ||
+                    a.name || '{settings.UNIT_SEP}' ||
                     COALESCE(a.name_display, ''), 
-                    '{RECORD_SEP}'
+                    '{settings.RECORD_SEP}'
                 ) AS artist_blob,
 
                 -- PlaylistBase fields (Isolated subquery to prevent duplicates)
                 (
                     SELECT GROUP_CONCAT(
-                        p.internal_id || '{UNIT_SEP}' ||
-                        COALESCE(p.id, '') || '{UNIT_SEP}' ||
+                        p.internal_id || '{settings.UNIT_SEP}' ||
+                        COALESCE(p.id, '') || '{settings.UNIT_SEP}' ||
                         p.name,
-                        '{RECORD_SEP}'
+                        '{settings.RECORD_SEP}'
                     )
                     FROM playlist_tracks pt
                     JOIN playlists p ON pt.playlist_internal_id = p.internal_id

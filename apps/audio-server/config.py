@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     PW_HASH_N: int = 16384 #password hashing parameters
     PW_HASH_R: int = 8 #https://datatracker.ietf.org/doc/html/rfc7914.html#page-3
     PW_HASH_P: int = 1
+    UNIT_SEP: str = "\x1f"
+    RECORD_SEP: str = "\x1e"
 
     # --- ENV PATH VALIDATION ---
     BIN_DIR: DirectoryPath #validates that this directory actually exists
