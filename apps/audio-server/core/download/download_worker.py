@@ -1,5 +1,7 @@
 import logging
 
+from config import settings
+
 from core.audio.utils import delete_track_file
 
 from core.models.payloads import EditArtistPayload, EditTrackPayload
@@ -134,7 +136,7 @@ class DownloadWorker:
                 if job.artist_display:
                     artist_payload = [
                         EditArtistPayload(name_display=a)
-                        for a in job.artist_display.split("\x1f") 
+                        for a in job.artist_display.split(settings.UNIT_SEP) 
                     ]
                 else:
                     artist_payload = [

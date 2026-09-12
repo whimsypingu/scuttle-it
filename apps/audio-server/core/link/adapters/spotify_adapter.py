@@ -3,6 +3,8 @@ import logging
 import re
 import httpx
 
+from config import settings
+
 from core.models.jobs import DownloadJob
 from core.models.payloads import CreatePlaylistPayload
 
@@ -24,8 +26,6 @@ class SpotifyAdapter:
         self._id_pattern = re.compile(r'^[a-zA-Z0-9]{22}$') #https://community.spotify.com/t5/Spotify-for-Developers/API-What-defines-a-valid-Spotify-ID/td-p/5069603 nobody replied?
         self._track_pattern = re.compile(r'"title":"([^"]+)".*?"artists":\s*(\[.*?\]).*?"duration":(\d+)', re.DOTALL)
         self._playlist_pattern = re.compile(r'"title":"([^"]+)".*?"subtitle":"([^"]+)".*?"duration":(\d+)', re.DOTALL)
-
-        self.UNIT_SEP = "\x1f"
 
 
     def _clean(self, text):
@@ -62,7 +62,7 @@ class SpotifyAdapter:
 
                 #try catch block will catch any errors
                 title = m.group(1)
-                artists = self.UNIT_SEP.join([a.get("name") for a in json.loads(m.group(2))])
+                artists = (settings.UNIT_SEP).join([a.get("name") for a in json.loads(m.group(2))])
                 target_duration = round(int(m.group(3)) / 1000) if m.group(3).isdigit() else None
                 return (self._clean(title), self._clean(artists), target_duration)
             except Exception as e:
@@ -116,7 +116,7 @@ class SpotifyAdapter:
 
                         # print(repr(artist)) #spotify uses ,&nbsp; to delim artists in html, but after fetching it becomes \xa0
                         queries.append(
-                            (self._clean(title), self._clean(artist.replace(",\xa0", self.UNIT_SEP)), target_duration)
+                            (self._clean(title), self._clean(artist.replace(",\xa0", settings.UNIT_SEP)), target_duration)
                         )
 
                 if name is None: #for whatever reason if somehow a playlist name is not extracted raise an error

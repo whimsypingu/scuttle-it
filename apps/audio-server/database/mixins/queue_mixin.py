@@ -1,6 +1,8 @@
 import logging
 import random
 
+from config import settings
+
 from database.mixins.mixin_utils import row_to_trackbase
 
 from core.models.track import QueueTrack
@@ -465,10 +467,6 @@ class PlayQueueMixin:
 
     async def get_play_queue(self, room_id) -> list[QueueTrack]:
         """Retrieve the full play queue with all metadata"""
-
-        UNIT_SEP = "\x1f"
-        RECORD_SEP = "\x1e"
-
         query = f'''
             SELECT
                 -- TrackBase fields
@@ -481,11 +479,11 @@ class PlayQueueMixin:
 
                 -- ArtistBase fields
                 GROUP_CONCAT(
-                    a.internal_id || '{UNIT_SEP}' ||
-                    COALESCE(a.id, '') || '{UNIT_SEP}' ||
-                    a.name || '{UNIT_SEP}' ||
+                    a.internal_id || '{settings.UNIT_SEP}' ||
+                    COALESCE(a.id, '') || '{settings.UNIT_SEP}' ||
+                    a.name || '{settings.UNIT_SEP}' ||
                     COALESCE(a.name_display, ''), 
-                    '{RECORD_SEP}'
+                    '{settings.RECORD_SEP}'
                 ) AS artist_blob,
 
                 -- Position

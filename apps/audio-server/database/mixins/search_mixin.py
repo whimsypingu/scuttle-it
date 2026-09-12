@@ -51,9 +51,6 @@ class SearchMixin:
         internal_scan_limit = 1000 #how many to ensure we catch all relevant downloads to reduce the number of JOIN operations
         results_limit = 30
 
-        UNIT_SEP = "\x1f"
-        RECORD_SEP = "\x1e"
-
         query = f'''
             WITH candidates AS (
                 -- FTS lookup and scoring
@@ -97,11 +94,11 @@ class SearchMixin:
 
                 -- ArtistBase fields
                 GROUP_CONCAT(
-                    a.internal_id || '{UNIT_SEP}' ||
-                    COALESCE(a.id, '') || '{UNIT_SEP}' ||
-                    a.name || '{UNIT_SEP}' ||
+                    a.internal_id || '{settings.UNIT_SEP}' ||
+                    COALESCE(a.id, '') || '{settings.UNIT_SEP}' ||
+                    a.name || '{settings.UNIT_SEP}' ||
                     COALESCE(a.name_display, ''), 
-                    '{RECORD_SEP}'
+                    '{settings.RECORD_SEP}'
                 ) AS artist_blob,
 
                 r.final_rank

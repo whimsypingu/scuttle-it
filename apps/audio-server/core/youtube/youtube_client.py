@@ -156,7 +156,6 @@ class YouTubeClient():
 
         url = f"https://www.youtube.com/watch?v={youtube_id}"
 
-        UNIT_SEP = "\x1f"
         cmd = [
             str(self.python_bin),
             "-m",
@@ -178,7 +177,7 @@ class YouTubeClient():
             "--extractor-args", "youtube:player_client=default,-android_sdkless",
             "--js-runtimes", f"deno:{str(self.js_runtime_bin)}", #jsruntime
             "--ffmpeg-location", str(self.ffmpeg_dir), #explicitly provide ffmpeg location
-            "--print", f"after_move:%(id)s{UNIT_SEP}%(title)s{UNIT_SEP}%(uploader)s{UNIT_SEP}%(duration)s", #complete print after download
+            "--print", f"after_move:%(id)s{settings.UNIT_SEP}%(title)s{settings.UNIT_SEP}%(uploader)s{settings.UNIT_SEP}%(duration)s", #complete print after download
             url
         ]
 
@@ -191,12 +190,12 @@ class YouTubeClient():
 
             #parse
             lines = out.strip().splitlines()
-            metadata_line = next((l for l in reversed(lines) if UNIT_SEP in l), None)
+            metadata_line = next((l for l in reversed(lines) if settings.UNIT_SEP in l), None)
 
             if not metadata_line:
                 raise YtdlpMetadataError(f"Could not find metadata line in yt-dlp output: {out}")
 
-            parts = metadata_line.split(UNIT_SEP)
+            parts = metadata_line.split(settings.UNIT_SEP)
             if len(parts) != 4:
                 raise YtdlpMetadataError(f"Invalid line format from yt-dlp search output: {metadata_line}")
 
@@ -250,7 +249,6 @@ class YouTubeClient():
         Search YouTube using yt-dlp for the query, and return limit number of TrackBase objects
         """
 
-        UNIT_SEP = "\x1f"
         cmd = [
             str(self.python_bin),
             "-m",
@@ -262,7 +260,7 @@ class YouTubeClient():
             "--skip-download",
             "--no-cache-dir", #prevents using stale cached DASH fragments
             "--js-runtimes", f"deno:{str(self.js_runtime_bin)}", #jsruntime
-            "--print", f"%(id)s{UNIT_SEP}%(title)s{UNIT_SEP}%(uploader)s{UNIT_SEP}%(duration)s"
+            "--print", f"%(id)s{settings.UNIT_SEP}%(title)s{settings.UNIT_SEP}%(uploader)s{settings.UNIT_SEP}%(duration)s"
         ]
         
         logger.info(f"Starting search: {q}")
@@ -279,7 +277,7 @@ class YouTubeClient():
             
             results = []
             for metadata_line in lines:
-                parts = metadata_line.split(UNIT_SEP)
+                parts = metadata_line.split(settings.UNIT_SEP)
                 if len(parts) != 4:
                     raise YtdlpMetadataError(f"Invalid line format from yt-dlp search output: {metadata_line}")
                 

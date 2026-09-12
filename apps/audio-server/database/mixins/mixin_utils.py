@@ -1,6 +1,8 @@
 import sqlite3
 import random
 
+from config import settings
+
 from core.models.artist import ArtistBase
 from core.models.playlist import PlaylistBase, PlaylistDetails, SummaryPlaylist
 from core.models.track import PlaylistTrack, TrackBase, TrackDetails
@@ -10,13 +12,10 @@ from core.models.track import PlaylistTrack, TrackBase, TrackDetails
 def row_to_trackbase(
     row: sqlite3.Row
 ) -> TrackBase:
-    UNIT_SEP = "\x1f"
-    RECORD_SEP = "\x1e"
-
     #parse the artist blob back into ArtistBase objects
     artists = []
-    for packet in row["artist_blob"].split(RECORD_SEP):
-        parts = packet.split(UNIT_SEP)
+    for packet in row["artist_blob"].split(settings.RECORD_SEP):
+        parts = packet.split(settings.UNIT_SEP)
 
         #explicit part handling
         a_internal_id = int(parts[0])
@@ -58,14 +57,11 @@ def row_to_track_details(
 ) -> TrackDetails:
     trackbase = row_to_trackbase(row)
 
-    UNIT_SEP = "\x1f"
-    RECORD_SEP = "\x1e"
-
     #parse the playlist blob back into PlaylistBase objects
     playlists = []
     if row["playlist_blob"]: #only if this track is in any playlists
-        for packet in row["playlist_blob"].split(RECORD_SEP):
-            parts = packet.split(UNIT_SEP)
+        for packet in row["playlist_blob"].split(settings.RECORD_SEP):
+            parts = packet.split(settings.UNIT_SEP)
 
             #explicit part handling
             p_internal_id = int(parts[0])
