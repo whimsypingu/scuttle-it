@@ -35,6 +35,7 @@ from core.download.download_queue import DownloadQueue
 from core.download.download_worker import DownloadWorker
 from core.stats.stats_manager import StatsManager
 from core.link.link_adapter import LinkAdapter
+from core.musicbrainz.musicbrainz_client import MusicBrainzClient
 
 logging.basicConfig(
     level=logging.INFO,
@@ -66,6 +67,9 @@ async def lifespan(app: FastAPI):
     link_adapter = LinkAdapter()
     app.state.link_adapter = link_adapter
 
+    mb_client = MusicBrainzClient()
+    app.state.mb_client = mb_client
+
     #global
     dl_queue = DownloadQueue()
     app.state.dl_queue = dl_queue
@@ -84,6 +88,7 @@ async def lifespan(app: FastAPI):
             room_manager=room_manager,
             stats_manager=stats_manager,
             link_adapter=link_adapter,
+            mb_client=mb_client,
         )
         workers.append(dl_worker)
 
@@ -108,6 +113,7 @@ async def lifespan(app: FastAPI):
         w.stop()
     stats_manager.stop()
     room_manager.stop()
+    await mb_client.close()
 
 
 app = FastAPI(

@@ -67,7 +67,7 @@ class SpotifyAdapter:
                 m = self._track_pattern.search(response.text)
 
                 #try catch block will catch any errors
-                title = m.group(1)
+                title = self._title_strip(m.group(1))
                 artists = (settings.UNIT_SEP).join([a.get("name") for a in json.loads(m.group(2))])
                 target_duration = round(int(m.group(3)) / 1000) if m.group(3).isdigit() else None
                 return (self._clean(title), self._clean(artists), target_duration)
