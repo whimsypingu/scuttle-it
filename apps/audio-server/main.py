@@ -81,14 +81,15 @@ async def lifespan(app: FastAPI):
     for i in range(2):
         dl_worker = DownloadWorker(
             worker_id=f"Worker-{i+1}",
-            dl_queue=dl_queue,
-            audio_processor=audio_processor,
+            # dl_queue=dl_queue,
+            # audio_processor=audio_processor,
             yt_client=YouTubeClient(),
-            db_manager=db_manager,
-            room_manager=room_manager,
-            stats_manager=stats_manager,
-            link_adapter=link_adapter,
-            mb_client=mb_client,
+            app_state=app.state,
+            # db_manager=db_manager,
+            # room_manager=room_manager,
+            # stats_manager=stats_manager,
+            # link_adapter=link_adapter,
+            # mb_client=mb_client,
         )
         workers.append(dl_worker)
 

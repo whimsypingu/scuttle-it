@@ -15,6 +15,7 @@ from core.audio.processor import AudioProcessor
 from database.database_manager import DatabaseManager
 from core.musicbrainz.musicbrainz_client import MusicBrainzClient
 
+from fastapi.datastructures import State
 from sync.pokes import WSPokeFactory
 from core.room.room_manager import RoomManager
 
@@ -28,25 +29,27 @@ class DownloadWorker:
     def __init__(
         self,
         worker_id: str,
-        dl_queue: DownloadQueue,
-        audio_processor: AudioProcessor,
+        # dl_queue: DownloadQueue,
+        # audio_processor: AudioProcessor,
         yt_client: YouTubeClient,
-        db_manager: DatabaseManager,
-        room_manager: RoomManager,
-        stats_manager: StatsManager,
-        link_adapter: LinkAdapter,
-        mb_client: MusicBrainzClient,
+        app_state: State,
+        # db_manager: DatabaseManager,
+        # room_manager: RoomManager,
+        # stats_manager: StatsManager,
+        # link_adapter: LinkAdapter,
+        # mb_client: MusicBrainzClient,
     ):
         self.worker_id = worker_id
 
-        self.dl_queue = dl_queue
-        self.audio_processor = audio_processor
         self.yt_client = yt_client
-        self.db_manager = db_manager
-        self.room_manager = room_manager
-        self.stats_manager = stats_manager
-        self.link_adapter = link_adapter
-        self.mb_client = mb_client
+
+        self.dl_queue: DownloadQueue = app_state.dl_queue
+        self.audio_processor: AudioProcessor = app_state.audio_processor
+        self.db_manager: DatabaseManager = app_state.db_manager
+        self.room_manager: RoomManager = app_state.room_manager
+        self.stats_manager: StatsManager = app_state.stats_manager
+        self.link_adapter: LinkAdapter = app_state.link_adapter
+        self.mb_client: MusicBrainzClient = app_state.mb_client
 
         self.is_running = True
         self.current_job = None
