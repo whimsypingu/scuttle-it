@@ -1,11 +1,12 @@
 import logging
 
+from fastapi.datastructures import State
+
 from config import settings
 
 from core.audio.utils import delete_track_file
 
 from core.models.artist import ArtistBase
-from core.models.payloads import EditArtistPayload, EditTrackPayload
 
 from core.download.download_queue import DownloadQueue
 from core.link.link_adapter import LinkAdapter
@@ -15,7 +16,6 @@ from core.audio.processor import AudioProcessor
 from database.database_manager import DatabaseManager
 from core.musicbrainz.musicbrainz_client import MusicBrainzClient
 
-from fastapi.datastructures import State
 from sync.pokes import WSPokeFactory
 from core.room.room_manager import RoomManager
 
@@ -29,15 +29,8 @@ class DownloadWorker:
     def __init__(
         self,
         worker_id: str,
-        # dl_queue: DownloadQueue,
-        # audio_processor: AudioProcessor,
         yt_client: YouTubeClient,
         app_state: State,
-        # db_manager: DatabaseManager,
-        # room_manager: RoomManager,
-        # stats_manager: StatsManager,
-        # link_adapter: LinkAdapter,
-        # mb_client: MusicBrainzClient,
     ):
         self.worker_id = worker_id
 
@@ -90,10 +83,6 @@ class DownloadWorker:
                         raise DownloadWorkerJobError() #exit job with failure
                         
                     search_id = search_results[0].id
-
-                    # if job.target_duration is None:
-                    #     for sr in search_results:
-                    #         await self.db_manager.register_track(sr)
 
                     if job.target_duration is not None: #special attempt to get a result close to the target duration if specified
                         smallest_delta = float("inf")
@@ -153,32 +142,11 @@ class DownloadWorker:
                     ]
 
                 record_matched = await self.mb_client.match_record(download_result)
-                logger.info(f"RECORD MATCHED: \n{download_result.model_dump_json(indent=2)}")
+                if record_matched:
+                    logger.info(f"RECORD MATCHED: \n{download_result.model_dump_json(indent=2)}")
 
                 await self.db_manager.register_track(download_result)
                 await self.db_manager.register_download(download_result.id)
-
-                # estimated_title_display = job.title_display if job.title_display else download_result.display
-                # if job.artist_display:
-                #     artist_payload = [
-                #         EditArtistPayload(name_display=a)
-                #         for a in job.artist_display.split(settings.UNIT_SEP) 
-                #     ]
-                # else:
-                #     artist_payload = [
-                #         EditArtistPayload(name_display=artist.display)
-                #         for artist in download_result.artists
-                #     ]
-
-                # await self.db_manager.edit_track(
-                #     download_result.id, 
-                #     EditTrackPayload(
-                #         title_display=estimated_title_display,
-                #         duration=clean_duration,
-                #         artists=artist_payload,
-                #         playlist_ids=job.playlist_ids,
-                #     )
-                # )
 
                 #play queue modification
                 if job.to_queue:

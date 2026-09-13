@@ -49,47 +49,32 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    db_manager = DatabaseManager()
-    app.state.db_manager = db_manager
-
-    stats_manager = StatsManager(
-        flush_interval=300, #how frequently to flush stats
-        db_manager=db_manager,
-    )
-    app.state.stats_manager = stats_manager
-
-    room_manager = RoomManager(
-        flush_interval=3*60*60, #flush every few hours
-        db_manager=db_manager,
-    )
-    app.state.room_manager = room_manager
-
-    link_adapter = LinkAdapter()
-    app.state.link_adapter = link_adapter
-
-    mb_client = MusicBrainzClient()
-    app.state.mb_client = mb_client
 
     #global
-    dl_queue = DownloadQueue()
-    app.state.dl_queue = dl_queue
+    app.state.db_manager = DatabaseManager()
 
-    audio_processor = AudioProcessor()
-    app.state.audio_processor = audio_processor
+    app.state.stats_manager = StatsManager(
+        flush_interval=300, #how frequently to flush stats
+        db_manager=app.state.db_manager,
+    )
+
+    app.state.room_manager = RoomManager(
+        flush_interval=3*60*60, #flush every few hours
+        db_manager=app.state.db_manager,
+    )
+
+    app.state.dl_queue = DownloadQueue()
+    app.state.audio_processor = AudioProcessor()
+    app.state.link_adapter = LinkAdapter()
+    app.state.mb_client = MusicBrainzClient()
+
 
     workers = []
     for i in range(2):
         dl_worker = DownloadWorker(
             worker_id=f"Worker-{i+1}",
-            # dl_queue=dl_queue,
-            # audio_processor=audio_processor,
             yt_client=YouTubeClient(),
             app_state=app.state,
-            # db_manager=db_manager,
-            # room_manager=room_manager,
-            # stats_manager=stats_manager,
-            # link_adapter=link_adapter,
-            # mb_client=mb_client,
         )
         workers.append(dl_worker)
 
@@ -97,24 +82,24 @@ async def lifespan(app: FastAPI):
         asyncio.create_task(dl_worker.run())
 
     #poll every interval seconds to flush stats into the database
-    asyncio.create_task(stats_manager.run())
+    asyncio.create_task(app.state.stats_manager.run())
 
     #poll every interval to flush and cleanup room activity into database
-    asyncio.create_task(room_manager.run())
+    asyncio.create_task(app.state.room_manager.run())
 
-    await db_manager.build_from_directory()
-    await db_manager.build_search_index()
-    await db_manager.normalize_play_queue_positions()
-    await db_manager.cleanup_artists()
+    await app.state.db_manager.build_from_directory()
+    await app.state.db_manager.build_search_index()
+    await app.state.db_manager.normalize_play_queue_positions()
+    await app.state.db_manager.cleanup_artists()
 
     yield
 
     #shutdown
     for w in workers:
         w.stop()
-    stats_manager.stop()
-    room_manager.stop()
-    await mb_client.close()
+    app.state.stats_manager.stop()
+    app.state.room_manager.stop()
+    await app.state.mb_client.close()
 
 
 app = FastAPI(
