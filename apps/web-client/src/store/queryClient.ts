@@ -39,6 +39,10 @@ export const queryClient = new QueryClient({
             staleTime: 1000 * 60 * 5, //5 minutes staleness
             refetchOnWindowFocus: true,
             gcTime: 1000 * 60 * 60 * 24, //24 hrs: https://tanstack.com/query/latest/docs/framework/react/plugins/persistQueryClient
+            networkMode: "always",
+        },
+        mutations: {
+            networkMode: "always",
         }
     }
 });
