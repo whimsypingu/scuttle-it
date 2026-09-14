@@ -56,3 +56,22 @@ async def search_youtube(
             detail="Crashed"
         )
 
+
+@SearchRouter.get("/artist-search")
+async def search_artists(
+    q: str = Query(..., min_length=1, description="Artist search query"),
+    db_manager: DatabaseManager = Depends(get_db_manager)
+):
+    try:
+        results = await db_manager.search_artists(q)
+        return {
+            "count": len(results),
+            "results": results
+        }
+    
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail="Crashed"
+        )

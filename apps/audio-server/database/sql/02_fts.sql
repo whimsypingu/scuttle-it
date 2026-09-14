@@ -1,9 +1,10 @@
 -- fts5 view
+DROP VIEW IF EXISTS track_artist_search_view;
 CREATE VIEW IF NOT EXISTS track_artist_search_view AS
 SELECT 
     t.internal_id as internal_id,
-    t.title as title,
-    GROUP_CONCAT(a.name, ' ') as names
+    COALESCE(t.title_display, t.title) as title,
+    GROUP_CONCAT(COALESCE(a.name_display, a.name), ' ') as names
 FROM tracks t
 JOIN track_artists ta ON t.internal_id = ta.track_internal_id
 JOIN artists a ON ta.artist_internal_id = a.internal_id

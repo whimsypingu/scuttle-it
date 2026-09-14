@@ -82,6 +82,18 @@ def row_to_track_details(
     )
 
 
+#artists
+def row_to_artistbase(
+    row: sqlite3.Row
+) -> ArtistBase:
+    return ArtistBase(
+        internal_id=row["internal_id"],
+        id=row["id"],
+        name=row["name"],
+        name_display=row["name_display"]
+    )
+
+
 #playlists
 def row_to_playlistbase(
     row: sqlite3.Row
