@@ -4,16 +4,18 @@ import { queryClient } from "@/store/queryClient";
 
 import { scuttleFetch } from '@/lib/utils';
 
-import type { TrackBase } from "@/track/track.types";
+import type { ArtistBase, TrackBase } from "@/track/track.types";
 import type { YTSearchMutationProps } from "@/store/hooks/hooks.types";
 import type { DownloadJob } from "@/job/job.types";
 
 
 export const useSearch = (query: string) => {
+    const normalizedQuery = query.trim();
+
     const dbSearch = useQuery({
-        queryKey: ["search", "database", query],
+        queryKey: ["search", "database", normalizedQuery],
         queryFn: async () => {
-            const response = await scuttleFetch(`/search/db-search?q=${encodeURIComponent(query)}`, { 
+            const response = await scuttleFetch(`/search/db-search?q=${encodeURIComponent(normalizedQuery)}`, { 
                 method: "GET" 
             });
             if (!response.ok) throw new Error("Search failed");
@@ -22,12 +24,13 @@ export const useSearch = (query: string) => {
             return data.results as TrackBase[];
         },
         staleTime: 1000 * 30,
-        enabled: query.trim().length >= 1, //only execute query if input has actual cahracters
+        gcTime: 1000 * 60 * 2,
+        enabled: normalizedQuery.length >= 1, //only execute query if input has actual cahracters
     });
 
     const ytSearch = useMutation({
         mutationFn: async ({ q, limit = 1 }: YTSearchMutationProps) => {
-            const response = await scuttleFetch(`/search/yt-search?q=${encodeURIComponent(q)}&query_limit=${limit}`, { 
+            const response = await scuttleFetch(`/search/yt-search?q=${encodeURIComponent(q.trim())}&query_limit=${limit}`, { 
                 method: "POST" 
             });
             if (!response.ok) throw new Error("YouTube request failed");
@@ -58,5 +61,32 @@ export const useSearch = (query: string) => {
 
         triggerYoutubeSearch: ytSearch.mutate,
         youtubeJobId: ytSearch.data,
+    };
+};
+
+
+export const useArtistSearch = (query: string) => {
+    const normalizedQuery = query.trim();
+
+    const artistSearch = useQuery({
+        queryKey: ["search", "artist", query],
+        queryFn: async () => {
+            const response = await scuttleFetch(`/search/artist-search?q=${encodeURIComponent(normalizedQuery)}`, { 
+                method: "GET" 
+            });
+            if (!response.ok) throw new Error("Search failed");
+
+            const data = await response.json();
+            return data.results as ArtistBase[];
+        },
+        staleTime: 1000 * 30,
+        gcTime: 1000 * 60 * 2,
+        enabled: normalizedQuery.length >= 1, //only execute query if input has actual cahracters
+    });
+
+    return {
+        artistResults: artistSearch.data ?? [],
+        isArtistLoading: artistSearch.isLoading,
+        isError: artistSearch.isError,
     };
 };
