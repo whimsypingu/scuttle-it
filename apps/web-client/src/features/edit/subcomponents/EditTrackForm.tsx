@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useEditTrack } from "@/store/hooks/useEdit";
 import { usePlaylists } from "@/store/hooks/usePlaylists";
 import { useOffline } from "@/features/offline/OfflineProvider";
@@ -14,9 +14,11 @@ import { getTrackDisplayMetadata, getTrackSourceMetadata, getTrackSourceLink } f
 
 import { MIN_BUTTON_WIDTH, SOURCE_ICON_SIZE } from "@/features/edit/edit.constants";
 
-import type { TrackBase } from "@/track/track.types";
+import type { ArtistBase, TrackBase } from "@/track/track.types";
 import type { PlaylistId } from "@/playlist/playlist.types";
 import type { EditArtistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
+import { Combobox, ComboboxChip, ComboboxChips, ComboboxChipsInput, ComboboxContent, ComboboxEmpty, ComboboxItem, ComboboxList, ComboboxValue, useComboboxAnchor } from "@/components/ui/combobox";
+import { useArtistSearch } from "@/store/hooks/useSearch";
 
 
 interface EditTrackFormProps {
@@ -38,6 +40,11 @@ export const EditTrackForm = ({
     const { link } = getTrackSourceLink(track);
 
     const { titleDisplay, artistDisplay } = getTrackDisplayMetadata(track); //placeholders
+
+    //combobox
+    const anchor = useComboboxAnchor();
+    const [selectedArtists, setSelectedArtists] = useState<ArtistBase[]>(track.artists);
+    const { artistResults } = useArtistSearch(artistInput);
 
     //all possible playlists
     const { playlists } = usePlaylists();
@@ -82,7 +89,7 @@ export const EditTrackForm = ({
                         onClick={() => handlePlaylistToggle(p.id)}
                     >
                         <Checkbox 
-                            id={p.id}
+                            id={p.id} 
                             checked={selectedPlaylistIds.has(p.id)}
                         />
 
@@ -180,13 +187,61 @@ export const EditTrackForm = ({
                     <label className="text-sm font-medium text-muted-foreground">
                         Artist
                     </label>
-                    <Textarea
+                    {/* <Textarea
                         value={artistInput}
                         onChange={(e) => setArtistInput(e.target.value)}
                         placeholder={artistDisplay}
                         disabled={isOffline}
                         className="text-md focus-visible:ring-1"
-                    />
+                    /> */}
+                    
+                    <Combobox
+                        multiple
+                        autoHighlight
+                        items={artistResults}
+                        
+                        defaultValue={track.artists}
+                        value={selectedArtists}
+                        onValueChange={(newArtists: ArtistBase[]) => setSelectedArtists(newArtists)}
+
+                        inputValue={artistInput}
+                        onInputValueChange={(newInput: string) => setArtistInput(newInput)}
+                    >
+                        <ComboboxChips ref={anchor} className="w-full max-w-sm flex-wrap p-1.5 gap-1.5 min-h-[42px]">
+                            <ComboboxValue>
+                                {(values: ArtistBase[]) => (
+                                    <React.Fragment>
+                                        {values.map((value) => (
+                                            <ComboboxChip key={value.name} className="px-2 py-0.5 text-xs font-medium">{value.name}</ComboboxChip>
+                                        ))}
+                                        <ComboboxChipsInput className="text-sm py-1 px-1 min-w-[100px]" placeholder="Add framework..." />
+                                    </React.Fragment>
+                                )}
+                            </ComboboxValue>
+                        </ComboboxChips>
+
+                        <ComboboxContent
+                            anchor={anchor}
+                            className="z-50 min-w-[var(--anchor-width)] w-[var(--anchor-width)] rounded-md border bg-popover text-popover-foreground shadow-md outline-none"
+                        >
+                            <ComboboxEmpty className="p-3 text-center text-xs text-muted-foreground">
+                                No items found.
+                            </ComboboxEmpty>
+
+                            <ComboboxList className="max-h-56 overflow-y-auto p-1 space-y-0.5">
+                                {(item: ArtistBase) => (
+                                    <ComboboxItem 
+                                        key={item.name} 
+                                        value={item}
+                                        className="flex items-center justify-between px-3 py-2 text-sm rounded-sm cursor-pointer hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                                    >
+                                        {item.name}
+                                    </ComboboxItem>
+                                )}
+                            </ComboboxList>
+        
+                        </ComboboxContent>
+                    </Combobox>
                 </div>
 
                 {/* PLAYLIST MEMBERSHIP */}

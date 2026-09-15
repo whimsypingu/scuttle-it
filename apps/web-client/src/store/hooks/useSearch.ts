@@ -69,7 +69,7 @@ export const useArtistSearch = (query: string) => {
     const normalizedQuery = query.trim();
 
     const artistSearch = useQuery({
-        queryKey: ["search", "artist", query],
+        queryKey: ["search", "artist", normalizedQuery],
         queryFn: async () => {
             const response = await scuttleFetch(`/search/artist-search?q=${encodeURIComponent(normalizedQuery)}`, { 
                 method: "GET" 
