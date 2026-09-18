@@ -62,7 +62,7 @@ export const EditTrackForm = ({
     const [selectedArtists, setSelectedArtists] = useState<ArtistBase[]>(track.artists);
 
     const selectedArtistIds = useMemo(() => {
-        return new Set(selectedArtists.map((a) => a.id));
+        return new Set(selectedArtists.map(a => a.id));
     }, [selectedArtists]);
 
     const { artistResults } = useArtistSearch(debouncedQuery);
@@ -72,11 +72,12 @@ export const EditTrackForm = ({
         if (!trimmed) return [];
 
         //filter out selected results
-        const unselectedResults = artistResults.filter((a) => !selectedArtistIds.has(a.id));
+        const unselectedResults = artistResults.filter(a => !selectedArtistIds.has(a.id));
 
         const customArtist: ArtistBase = {
-            id: "",
+            id: `temp-${Date.now()}`, //unnecessary to use generateUUID (?)
             name: trimmed,
+            nameDisplay: trimmed,
         };
 
         return [...unselectedResults, customArtist];
@@ -139,17 +140,26 @@ export const EditTrackForm = ({
     };
 
     const handleSave = () => { //use temp edit payload strategy -- migrate to artist selection in the future
-        const artistPayload: EditArtistPayload = {
-            nameDisplay: artistInput || undefined,
-        };
+        const artistPayload: EditArtistPayload[] = selectedArtists.map((a) => {
+            const isCustom = a.id.startsWith("temp-");
 
-        const originalIds = trackDetails?.playlists.map(p => p.id) ?? [];
-        const hasPlaylistChanges = selectedPlaylistIds.size !== originalIds.length || originalIds.some(id => !selectedPlaylistIds.has(id));
+            return {
+                id: isCustom ? undefined : a.id,
+                nameDisplay: a.nameDisplay,
+            }
+        });
+
+        const originalPlaylistIds = trackDetails?.playlists.map(p => p.id) ?? [];
+        const hasPlaylistChanges = selectedPlaylistIds.size !== originalPlaylistIds.length || originalPlaylistIds.some(id => !selectedPlaylistIds.has(id));
+
+        const originalArtistIds = track.artists.map(a => a.id) ?? []; //realistically this should always be >=1
+        const hasArtistChanges = selectedArtistIds.size !== originalArtistIds.length || originalArtistIds.some(id => !selectedArtistIds.has(id));
+        const hasValidArtists = selectedArtistIds.size > 0;
 
         //finalized payload
         const payload: EditTrackPayload = {
             titleDisplay: titleInput || undefined,
-            artists: artistInput ? [artistPayload] : undefined,
+            artists: (hasArtistChanges && hasValidArtists) ? artistPayload : undefined,
             playlistIds: hasPlaylistChanges ? [...selectedPlaylistIds] : undefined,
         };
         editTrack(payload);

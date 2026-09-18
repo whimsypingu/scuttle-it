@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from core.models.payloads import EditTrackPayload, EditPlaylistPayload
 
@@ -40,10 +41,18 @@ class EditMixin:
                     await db.execute("DELETE FROM track_artists WHERE track_internal_id = ?;", (track_internal_id,))
 
                     for artist in payload.artists:
-                        cursor = await db.execute("INSERT INTO artists (name, name_display) VALUES (?, ?) RETURNING internal_id;", (artist.name_display, artist.name_display))
+                        artist_id = artist.id or str(uuid.uuid4()) #generate a new artist id if a completely new entry
+                        cursor = await db.execute('''
+                            INSERT INTO artists (id, name, name_display) 
+                            VALUES (?, ?, ?) 
+                            ON CONFLICT(id) DO UPDATE SET
+                                name = COALESCE(artists.name, excluded.name),
+                                name_display = excluded.name_display
+                            RETURNING internal_id;
+                        ''', (artist_id, artist.name_display, artist.name_display))
                         row = await cursor.fetchone()
                         if not row:
-                            logger.error(f"Failed to get internal_id for edit_artist: {artist.name_display}")
+                            logger.error(f"Failed to get internal_id for edit_artist: {artist}")
                             raise ValueError("Failed to retrieve internal_id after insert edit_artist")
                         artist_internal_id = row[0]
 
