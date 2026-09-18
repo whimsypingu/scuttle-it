@@ -93,27 +93,21 @@ export const EditTrackForm = ({
 
         return (
             <div className="flex flex-col px-1">
-                {playlists.length > 0 ? (
-                    playlists.map((p, index) => (
-                        <div 
-                            className={`flex flex-row items-center gap-2 px-1 py-2 cursor-pointer transition-colors ${index == 0 ? "border-t" : ""} border-b`}
-                            onClick={() => handlePlaylistToggle(p.id)}
-                        >
-                            <Checkbox 
-                                id={p.id} 
-                                checked={selectedPlaylistIds.has(p.id)}
-                            />
+                {playlists.map((p, index) => (
+                    <div 
+                        className={`flex flex-row items-center gap-2 px-1 py-2 cursor-pointer transition-colors ${index == 0 ? "border-t" : ""} border-b`}
+                        onClick={() => handlePlaylistToggle(p.id)}
+                    >
+                        <Checkbox 
+                            id={p.id} 
+                            checked={selectedPlaylistIds.has(p.id)}
+                        />
 
-                            <label className="text-sm font-medium text-muted-foreground">
-                                {p.name}
-                            </label>
-                        </div>
-                    ))
-                ) : (
-                    <div className="flex items-center justify-center py-2 text-sm text-muted-foreground">
-                        No playlists.
+                        <label className="text-sm font-medium text-muted-foreground">
+                            {p.name}
+                        </label>
                     </div>
-                )}
+                ))}
             </div>
         );
     };
@@ -212,7 +206,7 @@ export const EditTrackForm = ({
                 </div>
 
                 {/* PLAYLIST MEMBERSHIP */}
-                {!isOffline && (
+                {!isOffline && playlists.length > 0 && (
                     <>
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-medium text-muted-foreground">
