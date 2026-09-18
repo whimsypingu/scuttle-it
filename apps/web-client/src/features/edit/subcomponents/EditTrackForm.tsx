@@ -60,19 +60,27 @@ export const EditTrackForm = ({
     //combobox
     const anchor = useComboboxAnchor();
     const [selectedArtists, setSelectedArtists] = useState<ArtistBase[]>(track.artists);
+
+    const selectedArtistIds = useMemo(() => {
+        return new Set(selectedArtists.map((a) => a.id));
+    }, [selectedArtists]);
+
     const { artistResults } = useArtistSearch(debouncedQuery);
 
     const allArtistResults = useMemo(() => {
         const trimmed = artistInput.trim();
         if (!trimmed) return [];
-        
+
+        //filter out selected results
+        const unselectedResults = artistResults.filter((a) => !selectedArtistIds.has(a.id));
+
         const customArtist: ArtistBase = {
-            id: `custom-${trimmed.toLowerCase()}`,
+            id: "",
             name: trimmed,
         };
 
-        return [...artistResults, customArtist];
-    }, [artistResults, artistInput]);
+        return [...unselectedResults, customArtist];
+    }, [artistResults, artistInput, selectedArtistIds]);
 
     //all possible playlists
     const { playlists } = usePlaylists();
