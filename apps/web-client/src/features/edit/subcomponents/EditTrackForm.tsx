@@ -32,6 +32,24 @@ export const EditTrackForm = ({
 }: EditTrackFormProps) => {
     const [titleInput, setTitleInput] = useState("");
     const [artistInput, setArtistInput] = useState("");
+    const [debouncedQuery, setDebouncedQuery] = useState("");
+
+    // debounce effect on search input - see: apps/web-client/features/search/SearchTab.tsx
+    useEffect(() => {
+        if (!artistInput.trim()) {
+            setDebouncedQuery("");
+            return;
+        }
+
+        const handler = setTimeout(() => {
+            setDebouncedQuery(artistInput);
+        }, 500); //ms delay to set the debounced query value
+
+        // cancel the timer if the user types again within the delay
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [artistInput]);
 
     const { isOffline } = useOffline();
 
@@ -42,11 +60,11 @@ export const EditTrackForm = ({
     //combobox
     const anchor = useComboboxAnchor();
     const [selectedArtists, setSelectedArtists] = useState<ArtistBase[]>(track.artists);
-    const { artistResults } = useArtistSearch(artistInput);
+    const { artistResults } = useArtistSearch(debouncedQuery);
 
-    const allArtistResults = useMemo(() => {        
+    const allArtistResults = useMemo(() => {
         const trimmed = artistInput.trim();
-        if (!trimmed) return;
+        if (!trimmed) return [];
         
         const customArtist: ArtistBase = {
             id: `custom-${trimmed.toLowerCase()}`,
