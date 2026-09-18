@@ -146,6 +146,7 @@ function ComboboxContent({
 }
 
 function ComboboxList({ className, ...props }: ComboboxPrimitive.List.Props) {
+  //for mobile, remove the keyboard when scrolling
   const dismissKeyboard = () => {
     if (document.activeElement instanceof HTMLElement && document.activeElement.tagName === "INPUT") {
       document.activeElement.blur();

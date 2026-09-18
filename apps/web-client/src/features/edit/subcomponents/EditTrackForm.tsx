@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useEditTrack } from "@/store/hooks/useEdit";
 import { usePlaylists } from "@/store/hooks/usePlaylists";
 import { useOffline } from "@/features/offline/OfflineProvider";
@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { HoldToDeleteButton } from "@/components/ui/hold-delete";
 
-import { getTrackDisplayMetadata, getTrackSourceMetadata, getTrackSourceLink } from "@/track/track.utils";
+import { getTrackDisplayMetadata, getTrackApproxSourceMetadata, getTrackSourceLink, getArtistKey } from "@/track/track.utils";
 
 import { MIN_BUTTON_WIDTH, SOURCE_ICON_SIZE } from "@/features/edit/edit.constants";
 
@@ -36,7 +36,7 @@ export const EditTrackForm = ({
 
     const { isOffline } = useOffline();
 
-    const { title, artists } = getTrackSourceMetadata(track); //source data
+    const { title, artists } = getTrackApproxSourceMetadata(track); //source data
     const { link } = getTrackSourceLink(track);
 
     const { titleDisplay, artistDisplay } = getTrackDisplayMetadata(track); //placeholders
@@ -45,6 +45,42 @@ export const EditTrackForm = ({
     const anchor = useComboboxAnchor();
     const [selectedArtists, setSelectedArtists] = useState<ArtistBase[]>(track.artists);
     const { artistResults } = useArtistSearch(artistInput);
+
+    const allArtistResults = useMemo(() => {
+        console.log("useMemo triggered with:", { artistInput, artistResultsLength: artistResults.length, artistResults });
+        
+        const trimmed = artistInput.trim();
+        
+        const list = [...artistResults];
+
+        if (trimmed) {
+            const customArtist: ArtistBase = {
+                id: `custom-${trimmed.toLowerCase()}`,
+                name: trimmed,
+            };
+            list.push(customArtist);
+        }
+
+        // 2. Deduplicate using a Map based on your unique key helper
+        const seenKeys = new Set<string>();
+        const uniqueList: ArtistBase[] = [];
+
+        for (const item of list) {
+            const key = getArtistKey(item);
+            if (!seenKeys.has(key)) {
+                seenKeys.add(key);
+                uniqueList.push(item);
+            }
+        }
+
+        return uniqueList;
+        // const customArtist: ArtistBase = {
+        //     id: "",
+        //     name: artistInput,
+        // };
+
+        // return [...artistResults, customArtist];
+    }, [artistResults, artistInput]);
 
     //all possible playlists
     const { playlists } = usePlaylists();
@@ -198,7 +234,7 @@ export const EditTrackForm = ({
                     <Combobox
                         multiple
                         autoHighlight
-                        items={artistResults}
+                        items={allArtistResults}
                         
                         defaultValue={track.artists}
                         value={selectedArtists}
@@ -212,9 +248,11 @@ export const EditTrackForm = ({
                                 {(values: ArtistBase[]) => (
                                     <React.Fragment>
                                         {values.map((value) => (
-                                            <ComboboxChip key={value.name} className="px-2 py-0.5 text-xs font-medium">{value.name}</ComboboxChip>
+                                            <ComboboxChip key={getArtistKey(value)} className="px-2 py-0.5 text-xs font-medium">
+                                                {value.nameDisplay || value.name}
+                                            </ComboboxChip>
                                         ))}
-                                        <ComboboxChipsInput className="text-sm py-1 px-1 min-w-[100px]" placeholder="Add framework..." />
+                                        <ComboboxChipsInput className="text-sm py-1 px-1 min-w-[100px]" placeholder="Add artist..." />
                                     </React.Fragment>
                                 )}
                             </ComboboxValue>
@@ -224,18 +262,14 @@ export const EditTrackForm = ({
                             anchor={anchor}
                             className="z-50 min-w-[var(--anchor-width)] w-[var(--anchor-width)] rounded-md border bg-popover text-popover-foreground shadow-md outline-none"
                         >
-                            <ComboboxEmpty className="p-3 text-center text-xs text-muted-foreground">
-                                No items found.
-                            </ComboboxEmpty>
-
                             <ComboboxList className="max-h-56 overflow-y-auto p-1 space-y-0.5">
                                 {(item: ArtistBase) => (
                                     <ComboboxItem 
-                                        key={item.name} 
+                                        key={getArtistKey(item)} 
                                         value={item}
                                         className="flex items-center justify-between px-3 py-2 text-sm rounded-sm cursor-pointer hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
                                     >
-                                        {item.name}
+                                        {item.nameDisplay || item.name}
                                     </ComboboxItem>
                                 )}
                             </ComboboxList>
