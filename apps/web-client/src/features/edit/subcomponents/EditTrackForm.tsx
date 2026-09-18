@@ -2,11 +2,13 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useEditTrack } from "@/store/hooks/useEdit";
 import { usePlaylists } from "@/store/hooks/usePlaylists";
 import { useOffline } from "@/features/offline/OfflineProvider";
+import { useArtistSearch } from "@/store/hooks/useSearch";
 
 import { LinkIcon, NotchesIcon } from "@phosphor-icons/react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
+import { Combobox, ComboboxChip, ComboboxChips, ComboboxChipsInput, ComboboxContent, ComboboxItem, ComboboxList, ComboboxValue, useComboboxAnchor } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
 import { HoldToDeleteButton } from "@/components/ui/hold-delete";
 
@@ -17,9 +19,6 @@ import { MIN_BUTTON_WIDTH, SOURCE_ICON_SIZE } from "@/features/edit/edit.constan
 import type { ArtistBase, TrackBase } from "@/track/track.types";
 import type { PlaylistId } from "@/playlist/playlist.types";
 import type { EditArtistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
-import { Combobox, ComboboxChip, ComboboxChips, ComboboxChipsInput, ComboboxContent, ComboboxEmpty, ComboboxItem, ComboboxList, ComboboxValue, useComboboxAnchor } from "@/components/ui/combobox";
-import { useArtistSearch } from "@/store/hooks/useSearch";
-import { values } from "idb-keyval";
 
 
 interface EditTrackFormProps {
@@ -32,14 +31,13 @@ export const EditTrackForm = ({
     onSave 
 }: EditTrackFormProps) => {
     const [titleInput, setTitleInput] = useState("");
-    //const [artists, setArtists] = useState<string[]>(track.artists.map(a => a.nameDisplay ?? a.name)); //EMERGENCY: use this with shadcn badges? to make artists selectable in the future
     const [artistInput, setArtistInput] = useState("");
 
     const { isOffline } = useOffline();
 
     const { link } = getTrackSourceLink(track);
 
-    const { titleDisplay, artistDisplay } = getTrackDisplayMetadata(track); //placeholders
+    const { titleDisplay } = getTrackDisplayMetadata(track); //placeholders
 
     //combobox
     const anchor = useComboboxAnchor();
@@ -95,52 +93,27 @@ export const EditTrackForm = ({
 
         return (
             <div className="flex flex-col px-1">
-                {playlists.map((p, index) => (
-                    <div 
-                        className={`flex flex-row items-center gap-2 px-1 py-2 cursor-pointer transition-colors ${index == 0 ? "border-t" : ""} border-b`}
-                        onClick={() => handlePlaylistToggle(p.id)}
-                    >
-                        <Checkbox 
-                            id={p.id} 
-                            checked={selectedPlaylistIds.has(p.id)}
-                        />
+                {playlists.length > 0 ? (
+                    playlists.map((p, index) => (
+                        <div 
+                            className={`flex flex-row items-center gap-2 px-1 py-2 cursor-pointer transition-colors ${index == 0 ? "border-t" : ""} border-b`}
+                            onClick={() => handlePlaylistToggle(p.id)}
+                        >
+                            <Checkbox 
+                                id={p.id} 
+                                checked={selectedPlaylistIds.has(p.id)}
+                            />
 
-                        <label className="text-sm font-medium text-muted-foreground">
-                            {p.name}
-                        </label>
-                    </div>
-                ))}
-            </div>
-        );
-    };
-
-    //draw the ui subcomponent for the source data
-    const renderSourceContent = () => {
-        return (
-            <div className="flex flex-col px-1">
-                <div className="flex flex-row items-center gap-2 px-1 py-1">
-                    <div className="shrink-0">
-                        <NotchesIcon size={SOURCE_ICON_SIZE} />
-                    </div>
-                    <label className="flex-1 text-xs font-medium text-muted-foreground">
-                        {track.title}
-                    </label>
-                </div>
-
-                <a 
-                    href={link}
-                    target="_blank" //open in new tab
-                    rel="noopener noreferrer nofollow" //security, privacy, and seo
-                >
-                    <div className="flex flex-row items-center gap-2 px-1 py-1 active:scale-[0.98]">
-                        <div className="shrink-0">
-                            <LinkIcon size={SOURCE_ICON_SIZE} />
+                            <label className="text-sm font-medium text-muted-foreground">
+                                {p.name}
+                            </label>
                         </div>
-                        <label className="flex-1 text-xs font-medium underline underline-offset-4 text-muted-foreground">
-                            {link}
-                        </label>
+                    ))
+                ) : (
+                    <div className="flex items-center justify-center py-2 text-sm text-muted-foreground">
+                        No playlists.
                     </div>
-                </a>
+                )}
             </div>
         );
     };
@@ -190,13 +163,6 @@ export const EditTrackForm = ({
                     <label className="text-sm font-medium text-muted-foreground">
                         Artist
                     </label>
-                    {/* <Textarea
-                        value={artistInput}
-                        onChange={(e) => setArtistInput(e.target.value)}
-                        placeholder={artistDisplay}
-                        disabled={isOffline}
-                        className="text-md focus-visible:ring-1"
-                    /> */}
                     
                     <Combobox
                         multiple
@@ -262,7 +228,32 @@ export const EditTrackForm = ({
                     <label className="text-sm font-medium text-muted-foreground">
                         Source
                     </label>
-                    {renderSourceContent()}
+
+                    <div className="flex flex-col px-1">
+                        <div className="flex flex-row items-center gap-2 px-1 py-1">
+                            <div className="shrink-0">
+                                <NotchesIcon size={SOURCE_ICON_SIZE} />
+                            </div>
+                            <label className="flex-1 text-xs font-medium text-muted-foreground">
+                                {track.title}
+                            </label>
+                        </div>
+
+                        <a 
+                            href={link}
+                            target="_blank" //open in new tab
+                            rel="noopener noreferrer nofollow" //security, privacy, and seo
+                        >
+                            <div className="flex flex-row items-center gap-2 px-1 py-1 active:scale-[0.98]">
+                                <div className="shrink-0">
+                                    <LinkIcon size={SOURCE_ICON_SIZE} />
+                                </div>
+                                <label className="flex-1 text-xs font-medium underline underline-offset-4 text-muted-foreground">
+                                    {link}
+                                </label>
+                            </div>
+                        </a>
+                    </div>
                 </div>
 
                 {/* Delete Button */}
