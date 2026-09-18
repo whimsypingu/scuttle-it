@@ -1,5 +1,6 @@
 import logging
 import sqlite3
+import uuid
 
 from core.models.track import TrackBase
 
@@ -42,7 +43,8 @@ class RegisterMixin:
                 track_internal_id = row[0]
                 
                 #insert artists
-                for artist in track.artists:                
+                for artist in track.artists:
+                    artist_id = artist.id or str(uuid.uuid4()) #generate a new artist id if a completely new entry
                     cursor = await db.execute('''
                         INSERT INTO artists (id, name, name_display)
                         VALUES (?, ?, ?)
@@ -50,7 +52,7 @@ class RegisterMixin:
                             name = COALESCE(artists.name, excluded.name),
                             name_display = COALESCE(artists.name_display, excluded.name_display)
                         RETURNING internal_id;
-                    ''', (artist.id, artist.name, artist.name_display)) #prioritize keeping original data if possible
+                    ''', (artist_id, artist.name, artist.name_display)) #prioritize keeping original data if possible
                     row = await cursor.fetchone()
                     if not row:
                         logger.error(f"Failed to get internal_id for artist: {artist}")

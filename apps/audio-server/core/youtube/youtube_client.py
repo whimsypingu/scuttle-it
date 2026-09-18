@@ -211,6 +211,7 @@ class YouTubeClient():
             download_result = TrackBase(
                 id=f"{self.yt_prefix}{raw_id}",
                 title=raw_title,
+                title_display=raw_title,
                 duration=int(raw_duration),
                 artists=[ArtistBase(
                     name=raw_uploader
@@ -226,6 +227,8 @@ class YouTubeClient():
                     name=parsed_artist,
                     name_display=parsed_artist
                 ) for parsed_artist in parsed_artists]
+
+            download_result.title = f"{raw_title} | {raw_uploader}"
             
             return download_result, output_path
 

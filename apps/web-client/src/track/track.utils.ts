@@ -107,19 +107,6 @@ export const queueTrackToTrackBase = (
 };
 
 
-// extract the original title and artists - approximate because artist data in particular may change to better reflect metadata later
-export const getTrackApproxSourceMetadata = (track?: TrackBase): { title: string, artists: string } => {
-    if (!track) { //handle null tracks
-        return { title: "---", artists: "---" };
-    }
-
-    const title = track.title || "---";
-    const artists = track.artists?.map(a => a.name).join(", ") || "---";
-
-    return { title, artists };
-}
-
-
 export const getTrackSourceLink = (track?: TrackBase): { link: string } => {
     if (!track) {
         return { link: "---" };
@@ -142,10 +129,4 @@ export const getTrackDisplayMetadata = (track?: TrackBase): { titleDisplay: stri
     const artistDisplay = track.artists?.map(a => a.nameDisplay || a.name).join(", ") || "---";
 
     return { titleDisplay, artistDisplay };
-}
-
-
-// extract a unique identifier for artists
-export const getArtistKey = (artist: ArtistBase): string => {
-    return artist.id || artist.nameDisplay || artist.name;
 }

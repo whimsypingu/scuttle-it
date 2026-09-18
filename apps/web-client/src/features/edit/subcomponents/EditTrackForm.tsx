@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { HoldToDeleteButton } from "@/components/ui/hold-delete";
 
-import { getTrackDisplayMetadata, getTrackApproxSourceMetadata, getTrackSourceLink, getArtistKey } from "@/track/track.utils";
+import { getTrackDisplayMetadata, getTrackSourceLink } from "@/track/track.utils";
 
 import { MIN_BUTTON_WIDTH, SOURCE_ICON_SIZE } from "@/features/edit/edit.constants";
 
@@ -19,6 +19,7 @@ import type { PlaylistId } from "@/playlist/playlist.types";
 import type { EditArtistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
 import { Combobox, ComboboxChip, ComboboxChips, ComboboxChipsInput, ComboboxContent, ComboboxEmpty, ComboboxItem, ComboboxList, ComboboxValue, useComboboxAnchor } from "@/components/ui/combobox";
 import { useArtistSearch } from "@/store/hooks/useSearch";
+import { values } from "idb-keyval";
 
 
 interface EditTrackFormProps {
@@ -36,7 +37,6 @@ export const EditTrackForm = ({
 
     const { isOffline } = useOffline();
 
-    const { title, artists } = getTrackApproxSourceMetadata(track); //source data
     const { link } = getTrackSourceLink(track);
 
     const { titleDisplay, artistDisplay } = getTrackDisplayMetadata(track); //placeholders
@@ -46,40 +46,16 @@ export const EditTrackForm = ({
     const [selectedArtists, setSelectedArtists] = useState<ArtistBase[]>(track.artists);
     const { artistResults } = useArtistSearch(artistInput);
 
-    const allArtistResults = useMemo(() => {
-        console.log("useMemo triggered with:", { artistInput, artistResultsLength: artistResults.length, artistResults });
-        
+    const allArtistResults = useMemo(() => {        
         const trimmed = artistInput.trim();
+        if (!trimmed) return;
         
-        const list = [...artistResults];
+        const customArtist: ArtistBase = {
+            id: `custom-${trimmed.toLowerCase()}`,
+            name: trimmed,
+        };
 
-        if (trimmed) {
-            const customArtist: ArtistBase = {
-                id: `custom-${trimmed.toLowerCase()}`,
-                name: trimmed,
-            };
-            list.push(customArtist);
-        }
-
-        // 2. Deduplicate using a Map based on your unique key helper
-        const seenKeys = new Set<string>();
-        const uniqueList: ArtistBase[] = [];
-
-        for (const item of list) {
-            const key = getArtistKey(item);
-            if (!seenKeys.has(key)) {
-                seenKeys.add(key);
-                uniqueList.push(item);
-            }
-        }
-
-        return uniqueList;
-        // const customArtist: ArtistBase = {
-        //     id: "",
-        //     name: artistInput,
-        // };
-
-        // return [...artistResults, customArtist];
+        return [...artistResults, customArtist];
     }, [artistResults, artistInput]);
 
     //all possible playlists
@@ -147,16 +123,7 @@ export const EditTrackForm = ({
                         <NotchesIcon size={SOURCE_ICON_SIZE} />
                     </div>
                     <label className="flex-1 text-xs font-medium text-muted-foreground">
-                        {title}
-                    </label>
-                </div>
-
-                <div className="flex flex-row items-center gap-2 px-1 py-1">
-                    <div className="shrink-0">
-                        <NotchesIcon size={SOURCE_ICON_SIZE} />
-                    </div>
-                    <label className="flex-1 text-xs font-medium text-muted-foreground">
-                        {artists}
+                        {track.title}
                     </label>
                 </div>
 
@@ -248,7 +215,7 @@ export const EditTrackForm = ({
                                 {(values: ArtistBase[]) => (
                                     <React.Fragment>
                                         {values.map((value) => (
-                                            <ComboboxChip key={getArtistKey(value)} className="px-2 py-0.5 text-xs font-medium">
+                                            <ComboboxChip key={value.id} className="px-2 py-0.5 text-xs font-medium">
                                                 {value.nameDisplay || value.name}
                                             </ComboboxChip>
                                         ))}
@@ -265,7 +232,7 @@ export const EditTrackForm = ({
                             <ComboboxList className="max-h-56 overflow-y-auto p-1 space-y-0.5">
                                 {(item: ArtistBase) => (
                                     <ComboboxItem 
-                                        key={getArtistKey(item)} 
+                                        key={item.id} 
                                         value={item}
                                         className="flex items-center justify-between px-3 py-2 text-sm rounded-sm cursor-pointer hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
                                     >
