@@ -9,6 +9,12 @@ from core.models.responses import RetrievalResponse
 
 RetrievalRouter = APIRouter(prefix="/retrieve", tags=["Retrieval"], dependencies=[Depends(require_auth)])
 
+#temporary crash exception
+DefaultCrashException = HTTPException(
+    status_code=500,
+    detail="Crashed"
+)
+
 
 @RetrievalRouter.get("/downloads", response_model=RetrievalResponse)
 async def retrieve_downloads_endpoint(
@@ -30,10 +36,7 @@ async def retrieve_downloads_endpoint(
     
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )
+        raise DefaultCrashException
 
 
 @RetrievalRouter.get("/likes", response_model=RetrievalResponse)
@@ -57,10 +60,7 @@ async def retrieve_likes_endpoint(
     
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )
+        raise DefaultCrashException
 
 
 
@@ -86,10 +86,7 @@ async def retrieve_recently_played_endpoint(
     
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )    
+        raise DefaultCrashException
 
 
 @RetrievalRouter.get("/playlist/{playlist_id}", response_model=RetrievalResponse)
@@ -114,10 +111,7 @@ async def retrieve_playlist_endpoint(
     
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )
+        raise DefaultCrashException
 
 
 @RetrievalRouter.get("/track/{track_id}")
@@ -131,10 +125,7 @@ async def retrieve_track_details_endpoint(
     
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )
+        raise DefaultCrashException
 
 
 @RetrievalRouter.get("/playlist/{playlist_id}")
@@ -148,7 +139,4 @@ async def retrieve_playlist_details_endpoint(
     
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )
+        raise DefaultCrashException

@@ -6,6 +6,12 @@ from core.download.download_queue import DownloadQueue
 
 JobRouter = APIRouter(prefix="/jobs", tags=["Jobs"], dependencies=[Depends(require_auth)])
 
+#temporary crash exception
+DefaultCrashException = HTTPException(
+    status_code=500,
+    detail="Crashed"
+)
+
 
 @JobRouter.get("/downloads")
 async def search_and_download_jobs_endpoint(
@@ -19,8 +25,4 @@ async def search_and_download_jobs_endpoint(
     
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )
-
+        raise DefaultCrashException

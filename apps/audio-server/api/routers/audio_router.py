@@ -13,6 +13,11 @@ from core.audio.utils import resolve_track_path
 
 AudioRouter = APIRouter(prefix="/audio", tags=["Audio"], dependencies=[Depends(require_auth)])
 
+#temporary crash exception
+DefaultCrashException = HTTPException(
+    status_code=500,
+    detail="Crashed"
+)
 
 @AudioRouter.get("/stream/{track_id}")
 async def get_audio_stream(
@@ -50,7 +55,4 @@ async def get_audio_stream(
     
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )
+        raise DefaultCrashException

@@ -11,8 +11,13 @@ from core.models.payloads import LoginPayload
 from core.models.responses import AuthResponse, LoginResponse
 from fastapi.responses import JSONResponse, RedirectResponse
 
-
 AuthRouter = APIRouter(prefix="/auth", tags=["Authentication"])
+
+#temporary crash exception
+DefaultCrashException = HTTPException(
+    status_code=500,
+    detail="Crashed"
+)
 
 
 @AuthRouter.post("/login")
@@ -54,10 +59,7 @@ async def login(
 
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )
+        raise DefaultCrashException
 
 
 @AuthRouter.get("/me")
@@ -102,10 +104,7 @@ async def get_auth_me(
 
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )
+        raise DefaultCrashException
 
 
 @AuthRouter.get("/j/{ticket_id}")
@@ -148,10 +147,7 @@ async def auth_join_room(
 
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )
+        raise DefaultCrashException
 
 
 @AuthRouter.post("/logout")
@@ -172,9 +168,6 @@ async def logout(
 
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )
+        raise DefaultCrashException
 
 

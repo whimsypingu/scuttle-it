@@ -9,6 +9,12 @@ from core.models.room import DeviceContext
 
 SearchRouter = APIRouter(prefix="/search", tags=["Search"], dependencies=[Depends(require_auth)])
 
+#temporary crash exception
+DefaultCrashException = HTTPException(
+    status_code=500,
+    detail="Crashed"
+)
+
 
 @SearchRouter.get("/db-search")
 async def search_database(
@@ -24,10 +30,7 @@ async def search_database(
     
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )
+        raise DefaultCrashException
 
 
 @SearchRouter.post("/yt-search")
@@ -51,10 +54,7 @@ async def search_youtube(
     
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )
+        raise DefaultCrashException
 
 
 @SearchRouter.get("/artist-search")
@@ -71,7 +71,4 @@ async def search_artists(
     
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(
-            status_code=500,
-            detail="Crashed"
-        )
+        raise DefaultCrashException
