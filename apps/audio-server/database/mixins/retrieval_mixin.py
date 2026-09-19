@@ -2,9 +2,9 @@ import logging
 
 from config import settings
 
-from database.mixins.mixin_utils import row_to_playlist_details, row_to_playlist_track, row_to_track_details, row_to_trackbase
+from database.mixins.mixin_utils import row_to_playlist_details, row_to_playlist_track, row_to_track_details, row_to_trackbase, row_to_artist_details
 
-from core.models.artist import ArtistBase
+from core.models.artist import ArtistBase, ArtistDetails
 from core.models.track import PlaylistTrack, TrackBase, TrackDetails
 from core.models.playlist import PlaylistDetails
 
@@ -362,6 +362,7 @@ class RetrievalMixin:
 
 
 
+    #DETAILS
     async def retrieve_track_details(self, track_id: str) -> TrackDetails:
         """Retrieve details about a track"""
         logger.info(f"Retrieving details about track_id: {track_id}")
@@ -402,7 +403,6 @@ class RetrievalMixin:
                     WHERE pt.track_internal_id = t.internal_id
                 ) AS playlist_blob
 
-
             FROM tracks t
 
             -- Join artists
@@ -425,6 +425,37 @@ class RetrievalMixin:
                     return row_to_track_details(row)
         except Exception:
             logger.exception("Failed to retrieve track details")
+            raise
+
+
+    async def retrieve_artist_details(self, artist_id: str) -> ArtistDetails:
+        """Retrieve details about an artist"""
+        logger.info(f"Retrieving details about artist_id: {artist_id}")
+
+        query = f'''
+            SELECT
+                -- ArtistBase fields
+                a.internal_id,
+                a.id,
+                a.name,
+                a.name_display,
+
+                a.enriched_at
+            
+            FROM artists a
+
+            WHERE a.id = ?
+
+            LIMIT 1;
+        '''
+
+        try: 
+            async with self.session() as db:
+                async with db.execute(query, (artist_id,)) as cursor:
+                    row = await cursor.fetchone()
+                    return row_to_artist_details(row)
+        except Exception:
+            logger.exception("Failed to retrieve artist details")
             raise
         
 
@@ -456,9 +487,3 @@ class RetrievalMixin:
         except Exception:
             logger.exception("Failed to retrieve playlist details")
             raise
-        
-
-
-
-
-

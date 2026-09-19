@@ -142,8 +142,10 @@ class DownloadWorker:
                     ]
 
                 record_matched = await self.mb_client.match_record(download_result)
-                if record_matched:
-                    logger.info(f"RECORD MATCHED: \n{download_result.model_dump_json(indent=2)}")
+                # if record_matched:
+                #     for artist in download_result.artists:
+                #         enriched = await self.mb_client.enrich_artist(artist)
+                #     logger.info(f"RECORD MATCHED: \n{download_result.model_dump_json(indent=2)}")
 
                 await self.db_manager.register_track(download_result)
                 await self.db_manager.register_download(download_result.id)

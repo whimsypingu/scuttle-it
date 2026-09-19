@@ -3,7 +3,7 @@ import random
 
 from config import settings
 
-from core.models.artist import ArtistBase
+from core.models.artist import ArtistBase, ArtistDetails
 from core.models.playlist import PlaylistBase, PlaylistDetails, SummaryPlaylist
 from core.models.track import PlaylistTrack, TrackBase, TrackDetails
 
@@ -91,6 +91,17 @@ def row_to_artistbase(
         id=row["id"],
         name=row["name"],
         name_display=row["name_display"]
+    )
+
+def row_to_artist_details(
+    row: sqlite3.Row
+) -> ArtistDetails:
+    artistbase = row_to_artistbase(row)
+
+    #put in other fields
+    return ArtistDetails(
+        **artistbase.model_dump(),
+        enriched_at=row["enriched_at"]
     )
 
 
