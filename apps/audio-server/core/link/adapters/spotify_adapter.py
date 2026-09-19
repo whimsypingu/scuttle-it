@@ -121,7 +121,7 @@ class SpotifyAdapter:
                         target_duration = round(int(duration) / 1000) if duration.isdigit() else None
 
                         # print(repr(artist)) #spotify uses ,&nbsp; to delim artists in html, but after fetching it becomes \xa0
-                        cleaned_title = self._clean(self._title_strip_pattern(title))
+                        cleaned_title = self._clean(self._title_strip(title))
                         cleaned_artist = self._clean(artist.replace(",\xa0", settings.UNIT_SEP))
                         queries.append(
                             (cleaned_title, cleaned_artist, target_duration)
