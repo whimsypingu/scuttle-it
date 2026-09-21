@@ -118,6 +118,7 @@ class DownloadWorker:
                 try:
                     await self.audio_processor.clean(file_path)
                     clean_duration = await self.audio_processor.get_duration(file_path)
+                    download_result.duration = clean_duration
                 except Exception as e:
                     try:
                         delete_track_file(search_id)
