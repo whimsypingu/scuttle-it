@@ -15,6 +15,8 @@ class MusicBrainzClient():
         self,
         **overrides
     ):
+        self.mb_prefix: str = "MB__"
+
         self.base_url = "https://musicbrainz.org/ws/2"
         self.headers = {
             "User-Agent": "ScuttleMusicSearch/0.1.0 ( https://github.com/whimsypingu/scuttle-it )",
@@ -111,8 +113,6 @@ class MusicBrainzClient():
         """
         Takes a TrackBase and tries to search and retrieve a match. If found, edits in place and returns True.
 
-        Still needs some kind of modifier logic for forcing a merge or overwrite on artist data ~~
-
         score_threshold: 0.95 (clamped between 0 and 1)
         """
         title = track.display
@@ -155,7 +155,7 @@ class MusicBrainzClient():
                 a = ac["artist"]
 
                 new_artists.append(ArtistBase(
-                    id=a["id"],
+                    id=f"{self.mb_prefix}{a['id']}",
                     name=a["name"],
                 ))
 
@@ -166,6 +166,14 @@ class MusicBrainzClient():
 
         except Exception as e:
             logger.info(f"Failed to parse record: {e}")
+
+        return False
+
+
+    async def enrich_artist(self, artist: ArtistBase) -> list[TrackBase]:
+        """
+        Takes an ArtistBase and tries to retrieve corresponding artists. If found, edits in place and returns True.
+        """
 
         return False
 
