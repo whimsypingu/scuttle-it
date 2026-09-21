@@ -94,10 +94,6 @@ class DownloadWorker:
                                 smallest_delta = current_delta
                                 search_id = sr.id
 
-                    for sr in search_results:
-                        if sr.id != search_id:
-                            await self.db_manager.register_track(sr)
-   
                 else:
                     search_id = job.track_id
 
