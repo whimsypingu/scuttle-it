@@ -113,7 +113,12 @@ export const getTrackSourceLink = (track?: TrackBase): { link: string } => {
     }
     
     //currently default to youtube link
-    const link = `https://youtube.com/watch?v=${track.id}`;
+    let link = `https://youtube.com/watch?v=${track.id}`;
+
+    //explicit yt id correction
+    if (track.id.startsWith("YT__")) {
+        link = `https://youtube.com/watch?v=${track.id.slice(4)}`;
+    }
 
     return { link };
 }

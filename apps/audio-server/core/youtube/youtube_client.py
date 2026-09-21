@@ -22,7 +22,7 @@ class YouTubeClient():
         self.data_dir: Path = settings.DATA_DIR / "audio"
         self.data_dir.mkdir(parents=True, exist_ok=True)
 
-        self.yt_prefix: str = "" # "YT___"
+        self.yt_prefix: str = "YT__"
         
         self.dl_format_filter: str = "bestaudio/best"
         self.dl_format: str = "m4a" #reduces size while maintaining quality and compatibility with most browsers for scrubbing
@@ -150,6 +150,7 @@ class YouTubeClient():
             YtdlpMetadataError: If the metadata returned by yt-dlp cannot be parsed.
             YtdlpDownloadError: If yt-dlp exits with a non-zero code, or any other error.
         """
+        youtube_id = youtube_id.removeprefix(self.yt_prefix) #prefix strip beforehand to ensure we are dealing with exclusively the yt id
 
         output_path = self.data_dir / f"{self.yt_prefix}{youtube_id}.{self.dl_format}"
         temp_path = self.data_dir / f"{self.yt_prefix}{youtube_id}.{self.dl_temp_format}"
