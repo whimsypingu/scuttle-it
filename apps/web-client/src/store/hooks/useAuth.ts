@@ -26,7 +26,7 @@ export const useAuth = () => {
             return data as AuthResponse;
         },
         retry: false,
-        staleTime: 1000 * 60 * 30, //30 min purely for checking periodically and syncing frontend jic
+        staleTime: Infinity, //shorter times cause auth to stale out and force re-logins
         networkMode: "offlineFirst",
         gcTime: Infinity,
         refetchOnWindowFocus: true,
