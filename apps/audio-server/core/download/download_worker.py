@@ -20,7 +20,7 @@ from sync.pokes import WSPokeFactory
 from core.room.room_manager import RoomManager
 
 from core.download.exceptions import DownloadWorkerJobExpanded, DownloadWorkerJobError
-from core.youtube.exceptions import YtdlpDownloadError, YtdlpTimeoutError
+from core.youtube.exceptions import YtdlpDownloadError, YtdlpMetadataError, YtdlpSearchError, YtdlpTimeoutError
 
 logger = logging.getLogger(__name__)
 
@@ -101,7 +101,7 @@ class DownloadWorker:
                 try:
                     try:
                         download_result, file_path = await self.yt_client.download_by_youtube_id(search_id, parse=True)
-                    except (YtdlpDownloadError, YtdlpTimeoutError) as e:
+                    except (YtdlpDownloadError, YtdlpTimeoutError, YtdlpMetadataError, YtdlpSearchError) as e:
                         logger.warning("Download failed. Updating ytdlp and retrying...")
                         await self.yt_client.update()
             
