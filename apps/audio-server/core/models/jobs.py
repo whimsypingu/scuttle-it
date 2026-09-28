@@ -5,6 +5,7 @@ from pydantic import Field, model_validator
 
 from config import settings
 from core.models.base import ScuttleBase
+from core.models.track import TrackBase
 
 
 class JobStatus(str, Enum):
@@ -52,3 +53,25 @@ class DownloadJob(JobBase):
     def identifier(self) -> str:
         """Returns whichever identifier is available, which validator ensures."""
         return self.track_id or self.query
+
+
+class EnrichJob(JobBase):
+    artist_id: str | None = None
+    track: TrackBase | None = None
+    
+    query_limit: int = Field(default=3, ge=1, le=10) #number of results to retrieve per query for analysis
+
+    @model_validator(mode="after")
+    def validate_constraints(self) -> "EnrichJob":
+        #mutual exclusivity check (either artist_id or track, but not both or neither)
+        if not self.artist_id and not self.track:
+            raise ValueError("EnrichJob must have either an artist_id or a track.")        
+        if self.artist_id and self.track:
+            raise ValueError("EnrichJob cannot have both an artist_id and a track.")
+        
+        return self
+    
+    @property
+    def identifier(self) -> str:
+        """Returns whichever identifier is available, which validator ensures."""
+        return self.artist_id or self.track
