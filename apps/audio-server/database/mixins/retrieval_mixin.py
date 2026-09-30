@@ -362,6 +362,60 @@ class RetrievalMixin:
 
 
 
+    #ARTIST TRACKS
+    async def retrieve_artist_tracks(self, artist_id: str) -> list[TrackBase]:
+        """Retrieve a sublist of tracks from the Tracks table"""
+        logger.info(f"Retrieving artist tracks")
+
+        query = f'''
+            WITH artist_subset_tracks AS (
+                -- Get track subset
+                SELECT ta.track_internal_id
+                FROM track_artists ta
+                JOIN artists a ON ta.artist_internal_id = a.internal_id
+                WHERE a.id = :artist_id
+            )
+            SELECT
+                -- TrackBase fields
+                t.internal_id,
+                t.id,
+                t.title,
+                t.title_display,
+                t.duration,
+                CASE WHEN d.track_internal_id IS NOT NULL THEN 1 ELSE 0 END AS downloaded,
+
+                -- ArtistBase fields
+                GROUP_CONCAT(
+                    a.internal_id || '{settings.UNIT_SEP}' ||
+                    COALESCE(a.id, '') || '{settings.UNIT_SEP}' ||
+                    a.name || '{settings.UNIT_SEP}' ||
+                    COALESCE(a.name_display, ''), 
+                    '{settings.RECORD_SEP}'
+                ) AS artist_blob
+            FROM artist_subset_tracks s
+            JOIN tracks t ON t.internal_id = s.track_internal_id
+            JOIN track_artists ta ON ta.track_internal_id = t.internal_id
+            JOIN artists a ON ta.artist_internal_id = a.internal_id
+            LEFT JOIN downloads d ON d.track_internal_id = t.internal_id
+            GROUP BY t.internal_id
+            ORDER BY t.listened_duration DESC;
+        '''
+
+        try: 
+            async with self.session() as db:
+                params = {"artist_id": artist_id} #sql safety
+                async with db.execute(query, params) as cursor:
+                    rows = await cursor.fetchall()
+                    return [
+                        row_to_trackbase(row) for row in rows
+                    ]
+
+        except Exception:
+            logger.exception("Failed to retrieve artist tracks contents")
+            raise
+
+
+
     #DETAILS
     async def retrieve_track_details(self, track_id: str) -> TrackDetails:
         """Retrieve details about a track"""
