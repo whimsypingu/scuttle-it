@@ -6,6 +6,8 @@ import httpx
 
 from core.models.track import TrackBase
 from core.models.artist import ArtistBase
+from core.models.jobs import EnrichJob
+
 from core.musicbrainz.exceptions import MusicBrainzClientError, MusicBrainzServerError
 
 logger = logging.getLogger(__name__)
@@ -180,7 +182,7 @@ class MusicBrainzClient():
         return False
 
 
-    async def enrich_artist(self, artist: ArtistBase, limit: int = 200) -> list[TrackBase]:
+    async def enrich_artist(self, artist: ArtistBase, limit: int = 200) -> list[EnrichJob]:
         """
         Takes an ArtistBase and tries to retrieve corresponding artists. If found, edits in place and returns True.
         """
@@ -198,7 +200,7 @@ class MusicBrainzClient():
 
         exclusions = (
             '-status:"pseudo-release" -status:withdrawn -status:expunged -status:cancelled '
-            '-primarytype:bradcast -primarytype:other '
+            '-primarytype:broadcast -primarytype:other '
             '-secondarytype:"mixtape/street" -secondarytype:"dj-mix" -secondarytype:remix '
             '-secondarytype:live -secondarytype:interview -secondarytype:spokenword'
         )
@@ -281,8 +283,12 @@ class MusicBrainzClient():
                 total_retrieved += retrieved_count
                 limit -= retrieved_count
                 iteration += 1
-    
-            return list(result_set.values())
+
+            return [
+                EnrichJob(
+                    track=track
+                ) for track in result_set.values()
+            ]
 
         except Exception as e:
             logger.info(f"Failed to extract enriched artist data: {e}")
