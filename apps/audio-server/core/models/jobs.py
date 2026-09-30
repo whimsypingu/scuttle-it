@@ -56,8 +56,8 @@ class DownloadJob(JobBase):
 
 
 class EnrichJob(JobBase):
-    artist_id: str | None = None
     track: TrackBase | None = None
+    artist_id: str | None = None
     
     query_limit: int = Field(default=3, ge=1, le=10) #number of results to retrieve per query for analysis
 

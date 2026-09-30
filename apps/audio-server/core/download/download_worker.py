@@ -7,6 +7,7 @@ from config import settings
 from core.audio.utils import delete_track_file
 
 from core.models.artist import ArtistBase
+from core.models.payloads import EditTrackPayload
 
 from core.download.download_queue import DownloadQueue
 from core.link.link_adapter import LinkAdapter
@@ -146,6 +147,15 @@ class DownloadWorker:
 
                 await self.db_manager.register_track(download_result)
                 await self.db_manager.register_download(download_result.id)
+
+                #playlist inclusion
+                if job.playlist_ids:
+                    await self.db_manager.edit_track(
+                        download_result.id,
+                        EditTrackPayload(
+                            playlist_ids=job.playlist_ids
+                        )
+                    )
 
                 #play queue modification
                 if job.to_queue:

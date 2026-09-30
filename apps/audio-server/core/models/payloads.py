@@ -25,7 +25,7 @@ class EditArtistPayload(ScuttleBase):
     
 #see: apps/web-client/src/store/hooks/hooks.types.ts
 class EditTrackPayload(ScuttleBase):
-    id: str | None = None #optional external source ID to identify which artist to edit
+    id: str | None = None #optional external source ID to identify which track to edit
     title_display: str | None = None
     duration: float | None = None
 
