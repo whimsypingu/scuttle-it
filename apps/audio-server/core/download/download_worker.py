@@ -8,8 +8,10 @@ from core.audio.utils import delete_track_file
 
 from core.models.artist import ArtistBase
 from core.models.payloads import EditTrackPayload
+from core.models.jobs import EnrichJob
 
 from core.download.download_queue import DownloadQueue
+from core.enrich.enrich_queue import EnrichQueue
 from core.link.link_adapter import LinkAdapter
 from core.youtube.youtube_client import YouTubeClient
 from core.stats.stats_manager import StatsManager
@@ -38,6 +40,7 @@ class DownloadWorker:
         self.yt_client = yt_client
 
         self.dl_queue: DownloadQueue = app_state.dl_queue
+        self.enr_queue: EnrichQueue = app_state.enr_queue
         self.audio_processor: AudioProcessor = app_state.audio_processor
         self.db_manager: DatabaseManager = app_state.db_manager
         self.room_manager: RoomManager = app_state.room_manager
@@ -139,11 +142,17 @@ class DownloadWorker:
                         for a in job.artist_display.split(settings.UNIT_SEP)
                     ]
 
+                #enrich
                 record_matched = await self.mb_client.match_record(download_result)
-                # if record_matched:
-                #     for artist in download_result.artists:
-                #         enriched = await self.mb_client.enrich_artist(artist)
-                #     logger.info(f"RECORD MATCHED: \n{download_result.model_dump_json(indent=2)}")
+                if record_matched:
+                    for artist in download_result.artists:
+                        await self.enr_queue.add(
+                            EnrichJob(
+                                artist_id=artist.id
+                            )
+                        )
+                    ####### ENRICHING
+                    logger.info(f"RECORD MATCHED: \n{download_result.model_dump_json(indent=2)}")
 
                 await self.db_manager.register_track(download_result)
                 await self.db_manager.register_download(download_result.id)

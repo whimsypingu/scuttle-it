@@ -75,3 +75,9 @@ class EnrichJob(JobBase):
     def identifier(self) -> str:
         """Returns whichever identifier is available, which validator ensures."""
         return self.artist_id or self.track
+
+    @property
+    def target_duration(self) -> int | None:
+        if self.track:
+            return self.track.duration
+        return None
