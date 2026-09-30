@@ -33,6 +33,8 @@ from database.database_manager import DatabaseManager
 from core.room.room_manager import RoomManager
 from core.download.download_queue import DownloadQueue
 from core.download.download_worker import DownloadWorker
+from core.enrich.enrich_queue import EnrichQueue
+from core.enrich.enrich_worker import EnrichWorker
 from core.stats.stats_manager import StatsManager
 from core.link.link_adapter import LinkAdapter
 from core.musicbrainz.musicbrainz_client import MusicBrainzClient
@@ -64,6 +66,7 @@ async def lifespan(app: FastAPI):
     )
 
     app.state.dl_queue = DownloadQueue()
+    app.state.enr_queue = EnrichQueue()
     app.state.audio_processor = AudioProcessor()
     app.state.link_adapter = LinkAdapter()
     app.state.mb_client = MusicBrainzClient()
@@ -72,7 +75,7 @@ async def lifespan(app: FastAPI):
     workers = []
     for i in range(2):
         dl_worker = DownloadWorker(
-            worker_id=f"Worker-{i+1}",
+            worker_id=f"DL-Worker-{i+1}",
             yt_client=YouTubeClient(),
             app_state=app.state,
         )
@@ -80,6 +83,18 @@ async def lifespan(app: FastAPI):
 
         #start working in the background
         asyncio.create_task(dl_worker.run())
+
+    enr_shared_yt_client = YouTubeClient()
+    for i in range(1):
+        enr_worker = EnrichWorker(
+            worker_id=f"Enr-Worker-{i+1}",
+            yt_client=enr_shared_yt_client,
+            app_state=app.state,
+        )
+        workers.append(enr_worker)
+
+        #start working in the background
+        asyncio.create_task(enr_worker.run())
 
     #poll every interval seconds to flush stats into the database
     asyncio.create_task(app.state.stats_manager.run())
