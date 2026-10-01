@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     PW_HASH_P: int = 1
     UNIT_SEP: str = "\x1f"
     RECORD_SEP: str = "\x1e"
+    YT_PREFIX: str = "YT__"
+    MB_PREFIX: str = "MB__"
 
     # --- ENV PATH VALIDATION ---
     BIN_DIR: DirectoryPath #validates that this directory actually exists

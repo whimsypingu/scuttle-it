@@ -4,9 +4,10 @@ import time
 import re
 import httpx
 
+from config import settings
+
 from core.models.track import TrackBase
 from core.models.artist import ArtistBase
-from core.models.jobs import EnrichJob
 
 from core.musicbrainz.exceptions import MusicBrainzClientError, MusicBrainzServerError
 
@@ -18,7 +19,7 @@ class MusicBrainzClient():
         self,
         **overrides
     ):
-        self.mb_prefix: str = "MB__"
+        self.mb_prefix: str = settings.MB_PREFIX
 
         self.base_url = "https://musicbrainz.org/ws/2"
         self.headers = {
@@ -182,7 +183,7 @@ class MusicBrainzClient():
         return False
 
 
-    async def enrich_artist(self, artist: ArtistBase, limit: int = 200) -> list[EnrichJob]:
+    async def enrich_artist(self, artist: ArtistBase, limit: int = 200) -> list[TrackBase]:
         """
         Takes an ArtistBase and tries to retrieve corresponding artists. If found, edits in place and returns True.
         """
@@ -284,11 +285,7 @@ class MusicBrainzClient():
                 limit -= retrieved_count
                 iteration += 1
 
-            return [
-                EnrichJob(
-                    track=track
-                ) for track in result_set.values()
-            ]
+            return list(result_set.values())
 
         except Exception as e:
             logger.info(f"Failed to extract enriched artist data: {e}")
