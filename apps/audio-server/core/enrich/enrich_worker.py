@@ -54,64 +54,32 @@ class EnrichWorker:
                 
                 logger.info(f"[{self.worker_id}] Processing: {job.identifier}")
 
-                #determine whether to expand into individual track queries
-                if job.artist_id:
+                self.lsh.reset()
 
+                # if artist.enriched_at < N:
+                #     continue
+
+                try:
                     artist = await self.db_manager.retrieve_artist_details(job.artist_id)
- 
-                    # if artist.enriched_at < N:
-                    #     continue
 
                     artist_tracks = await self.db_manager.retrieve_artist_tracks(artist.id)
                     for track in artist_tracks:
                         self.lsh.insert(track.display)
+                except Exception as e:
+                    pass
 
-                    #extract further tracks and only add them if they are not rough duplicates
-                    generated_jobs = await self.mb_client.enrich_artist(artist)
-                    for j in generated_jobs:
-                        if j.track and not self.lsh.match(j.track.display):
-                            await self.enr_queue.add(j)
+                #extract further tracks and only add them if they are not rough duplicates
+                generated_tracks = await self.mb_client.enrich_artist(artist)
+                for track in generated_tracks:
+                    if not self.lsh.match(track.display):
+                        await self.db_manager.register_track(track)
 
-                    raise EnrichWorkerJobExpanded() #exit job handling here with a successful custom exception
-
-                #take a track and replace the id
-                else:
-                    q = f"{job.track.display} by {' '.join(a.display for a in job.track.artists)}"
-                    search_results = await self.yt_client.search_by_query(q=q, limit=3)
-
-                    if len(search_results) <= 0:
-                        raise EnrichWorkerJobError() #exit job with failure
-                        
-                    search_id = search_results[0].id
-
-                    if job.target_duration is not None: #special attempt to get a result close to the target duration if specified
-                        smallest_delta = float("inf")
-                        for sr in search_results:
-                            # await self.db_manager.register_track(sr)
-
-                            current_delta = abs(sr.duration - job.target_duration)
-                            if current_delta < smallest_delta:
-                                smallest_delta = current_delta
-                                search_id = sr.id
-
-                    track = job.track
-                    track.id = search_id
-
-                    await self.db_manager.register_track(track)
-                    await self.db_manager.build_search_index()
+                await self.db_manager.build_search_index()
 
                 #status
                 await self.enr_queue.complete_job(job.id, success=True)
 
                 logger.info(f"[{self.worker_id}] Successfully finished {job.identifier}")
-
-            #playlist caught, expanded into new download jobs per song
-            except EnrichWorkerJobExpanded as e:
-                await self.enr_queue.complete_job(job.id, success=True)
-                await self.room_manager.broadcast_all(
-                    WSPokeFactory.download_job_status_update(job)
-                )
-                logger.info(f"[{self.worker_id}] Successfully expanded jobs from {job.identifier}")
 
             #fall through error
             except Exception as e:

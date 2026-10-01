@@ -45,4 +45,6 @@ class MinhashLSH:
                 return True
 
         return False
-        
+
+    def reset(self):
+        self.lsh = [set() for _ in range(self.buckets)]

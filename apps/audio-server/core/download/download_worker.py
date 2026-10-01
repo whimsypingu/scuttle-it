@@ -67,10 +67,18 @@ class DownloadWorker:
                 logger.info(f"[{self.worker_id}] Processing: {job.identifier}")
 
                 #determine the id to download
-                if job.query:
+                search_id = job.track_id
+                search_query = job.query
 
+                unregister_track_details = None #indicates whether to remove an entry if a new one will be created
+
+                if search_id and search_id.startswith(settings.MB_PREFIX):
+                    unregister_track_details = await self.db_manager.retrieve_track_details(search_id)
+                    search_query = unregister_track_details.full_display
+
+                if search_query:
                     #try extracting and parsing any possible links
-                    generated_jobs, generated_payload = await self.link_adapter.expand_jobs(url=job.query, room_id=job.room_id)
+                    generated_jobs, generated_payload = await self.link_adapter.expand_jobs(url=search_query, room_id=job.room_id)
 
                     if generated_jobs or generated_payload is not None:
                         if generated_payload is not None:
@@ -81,13 +89,12 @@ class DownloadWorker:
                         raise DownloadWorkerJobExpanded() #exit job handling here with a successful custom exception
 
                     #processing a single search query happens here
-                    search_results = await self.yt_client.search_by_query(q=job.query, limit=job.query_limit)
+                    search_results = await self.yt_client.search_by_query(q=search_query, limit=job.query_limit)
 
                     if len(search_results) <= 0:
                         raise DownloadWorkerJobError() #exit job with failure
                         
                     search_id = search_results[0].id
-
                     if job.target_duration is not None: #special attempt to get a result close to the target duration if specified
                         smallest_delta = float("inf")
                         for sr in search_results:
@@ -97,9 +104,6 @@ class DownloadWorker:
                             if current_delta < smallest_delta:
                                 smallest_delta = current_delta
                                 search_id = sr.id
-
-                else:
-                    search_id = job.track_id
 
                 #perform the download, with an update fallback and retry on failure, and delete corrupted files on failure
                 try:
@@ -142,17 +146,14 @@ class DownloadWorker:
                         for a in job.artist_display.split(settings.UNIT_SEP)
                     ]
 
-                #enrich
+                #metadata matching
                 record_matched = await self.mb_client.match_record(download_result)
-                if record_matched:
-                    for artist in download_result.artists:
-                        await self.enr_queue.add(
-                            EnrichJob(
-                                artist_id=artist.id
-                            )
-                        )
-                    ####### ENRICHING
-                    logger.info(f"RECORD MATCHED: \n{download_result.model_dump_json(indent=2)}")
+
+                if unregister_track_details:
+                    await self.db_manager.unregister_track(unregister_track_details.id)
+
+                    download_result.title_display = unregister_track_details.display
+                    download_result.artists = unregister_track_details.artists
 
                 await self.db_manager.register_track(download_result)
                 await self.db_manager.register_download(download_result.id)
@@ -172,6 +173,17 @@ class DownloadWorker:
                         await self.db_manager.push_next_play_queue(download_result.id, job.room_id) #push to front of the play queue
                     else:
                         await self.db_manager.push_play_queue(download_result.id, job.room_id) #push to end of the play queue
+
+                #enrich
+                if record_matched:
+                    for artist in download_result.artists:
+                        await self.enr_queue.add(
+                            EnrichJob(
+                                artist_id=artist.id
+                            )
+                        )
+                    ####### ENRICHING
+                    logger.info(f"RECORD MATCHED: \n{download_result.model_dump_json(indent=2)}")
 
                 await self.db_manager.build_search_index()
 

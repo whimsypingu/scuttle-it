@@ -18,6 +18,10 @@ class TrackBase(ScuttleBase):
     def display(self) -> str:
         return self.title_display or self.title
 
+    @property
+    def full_display(self) -> str:
+        return f"{self.display} by {' '.join(a.display for a in self.artists)}"
+
 
 class PlaylistTrack(TrackBase):
     added_at: int

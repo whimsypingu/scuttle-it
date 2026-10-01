@@ -56,28 +56,18 @@ class DownloadJob(JobBase):
 
 
 class EnrichJob(JobBase):
-    track: TrackBase | None = None
     artist_id: str | None = None
     
     query_limit: int = Field(default=3, ge=1, le=10) #number of results to retrieve per query for analysis
 
     @model_validator(mode="after")
     def validate_constraints(self) -> "EnrichJob":
-        #mutual exclusivity check (either artist_id or track, but not both or neither)
-        if not self.artist_id and not self.track:
-            raise ValueError("EnrichJob must have either an artist_id or a track.")        
-        if self.artist_id and self.track:
-            raise ValueError("EnrichJob cannot have both an artist_id and a track.")
+        if not self.artist_id:
+            raise ValueError("EnrichJob must have an artist_id.")
         
         return self
     
     @property
     def identifier(self) -> str:
         """Returns whichever identifier is available, which validator ensures."""
-        return self.artist_id or self.track
-
-    @property
-    def target_duration(self) -> int | None:
-        if self.track:
-            return self.track.duration
-        return None
+        return self.artist_id
