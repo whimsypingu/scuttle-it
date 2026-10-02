@@ -31,7 +31,7 @@ class EditMixin:
                 if fields:
                     await db.execute(f"UPDATE artists SET {", ".join(fields)} WHERE id = ?;", (*params, artist_id))
 
-                logger.info(f"Successfully edited artist with original artits_id: {artist_id} | {payload.name_display}")
+                logger.info(f"Successfully edited artist with original artist_id: {artist_id} | {payload.name_display}")
                 return True
         
         except Exception:
