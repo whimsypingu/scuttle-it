@@ -29,7 +29,7 @@ export const useSearch = (query: string) => {
     });
 
     const ytSearch = useMutation({
-        mutationFn: async ({ q, limit = 1 }: YTSearchMutationProps) => {
+        mutationFn: async ({ q, limit = 3 }: YTSearchMutationProps) => {
             const response = await scuttleFetch(`/search/yt-search?q=${encodeURIComponent(q.trim())}&query_limit=${limit}`, { 
                 method: "POST" 
             });
