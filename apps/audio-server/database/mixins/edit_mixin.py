@@ -1,6 +1,8 @@
 import logging
 import uuid
 
+from config import settings
+
 from core.models.payloads import EditArtistPayload, EditTrackPayload, EditPlaylistPayload
 
 logger = logging.getLogger(__name__)
@@ -69,7 +71,7 @@ class EditMixin:
                     await db.execute("DELETE FROM track_artists WHERE track_internal_id = ?;", (track_internal_id,))
 
                     for artist in payload.artists:
-                        artist_id = artist.id or f"SCUT__{str(uuid.uuid4())}" #generate a new artist id if a completely new entry
+                        artist_id = artist.id or f"{settings.SCUT_PREFIX}{str(uuid.uuid4())}" #generate a new artist id if a completely new entry
                         cursor = await db.execute('''
                             INSERT INTO artists (id, name, name_display) 
                             VALUES (?, ?, ?) 

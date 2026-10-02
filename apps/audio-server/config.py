@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     PW_HASH_P: int = 1
     UNIT_SEP: str = "\x1f"
     RECORD_SEP: str = "\x1e"
+
+    SCUT_PREFIX: str = "SCUT__"
     YT_PREFIX: str = "YT__"
     MB_PREFIX: str = "MB__"
 

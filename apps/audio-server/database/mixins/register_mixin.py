@@ -2,6 +2,8 @@ import logging
 import sqlite3
 import uuid
 
+from config import settings
+
 from core.models.track import TrackBase
 
 logger = logging.getLogger(__name__)
@@ -44,7 +46,7 @@ class RegisterMixin:
                 
                 #insert artists
                 for artist in track.artists:
-                    artist_id = artist.id or f"SCUT__{str(uuid.uuid4())}" #generate a new artist id if a completely new entry
+                    artist_id = artist.id or f"{settings.SCUT_PREFIX}{str(uuid.uuid4())}" #generate a new artist id if a completely new entry
                     cursor = await db.execute('''
                         INSERT INTO artists (id, name, name_display)
                         VALUES (?, ?, ?)
