@@ -1,13 +1,41 @@
 import logging
 import uuid
 
-from core.models.payloads import EditTrackPayload, EditPlaylistPayload
+from core.models.payloads import EditArtistPayload, EditTrackPayload, EditPlaylistPayload
 
 logger = logging.getLogger(__name__)
 
 
 class EditMixin:
     """Handles editing database records"""
+
+    async def edit_artist(self, artist_id: str, payload: EditArtistPayload) -> bool:
+        """Edit artist data"""
+        logger.info(f"Editing artist_id {artist_id}")
+        
+        try:
+            async with self.session() as db:
+                #artist field edits
+                fields = []
+                params = []
+                
+                if payload.name_display is not None:
+                    fields.append("name_display = ?")
+                    params.append(payload.name_display)
+                if payload.enriched_at is not None:
+                    fields.append("enriched_at = ?")
+                    params.append(payload.enriched_at)
+                
+                if fields:
+                    await db.execute(f"UPDATE artists SET {", ".join(fields)} WHERE id = ?;", (*params, artist_id))
+
+                logger.info(f"Successfully edited artist with original artits_id: {artist_id} | {payload.name_display}")
+                return True
+        
+        except Exception:
+            logger.exception(f"Critical failure during artist edit for original artist_id: {artist_id}")
+            raise
+
 
     async def edit_track(self, track_id: str, payload: EditTrackPayload) -> bool:
         """Edit track data"""
