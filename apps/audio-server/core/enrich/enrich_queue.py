@@ -13,6 +13,8 @@ class EnrichQueue:
         self._processing: dict[str, EnrichJob] = {} #mapping for current jobs via {id: job}
         self._completed: deque[EnrichJob] = deque(maxlen=history_limit)
 
+        self.ENRICH_EXPIRE_TIME = 10 * 24 * 60 * 60 #10 days
+
         self._lock = asyncio.Lock()
 
         #doorbell to wake up the worker loop

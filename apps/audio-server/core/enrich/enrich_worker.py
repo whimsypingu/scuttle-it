@@ -1,5 +1,6 @@
 import logging
 
+from core.models.payloads import EditArtistPayload
 from fastapi.datastructures import State
 
 from core.enrich.enrich_queue import EnrichQueue
@@ -8,14 +9,13 @@ from core.youtube.youtube_client import YouTubeClient
 from core.stats.stats_manager import StatsManager
 from database.database_manager import DatabaseManager
 from core.musicbrainz.musicbrainz_client import MusicBrainzClient
-
-from sync.pokes import WSPokeFactory
 from core.room.room_manager import RoomManager
 
 from core.enrich.deduplication.minhash_lsh import MinhashLSH
 
-from core.enrich.exceptions import EnrichWorkerJobExpanded, EnrichWorkerJobError
-from core.youtube.exceptions import YtdlpTimeoutError
+from core.utils import current_timestamp
+
+from core.enrich.exceptions import EnrichWorkerJobSkipped
 
 logger = logging.getLogger(__name__)
 
@@ -56,17 +56,15 @@ class EnrichWorker:
 
                 self.lsh.reset()
 
-                # if artist.enriched_at < N:
-                #     continue
+                #handling a new artist that has no existing entry yet shouldn't happen in the first place
+                artist = await self.db_manager.retrieve_artist_details(job.artist_id)
 
-                try:
-                    artist = await self.db_manager.retrieve_artist_details(job.artist_id)
+                if (current_timestamp() - artist.enriched_at) < self.enr_queue.ENRICH_EXPIRE_TIME:
+                    raise EnrichWorkerJobSkipped()
 
-                    artist_tracks = await self.db_manager.retrieve_artist_tracks(artist.id)
-                    for track in artist_tracks:
-                        self.lsh.insert(track.display)
-                except Exception as e:
-                    pass
+                artist_tracks = await self.db_manager.retrieve_artist_tracks(artist.id)
+                for track in artist_tracks:
+                    self.lsh.insert(track.display)
 
                 #extract further tracks and only add them if they are not rough duplicates
                 generated_tracks = await self.mb_client.enrich_artist(artist)
@@ -75,11 +73,22 @@ class EnrichWorker:
                         await self.db_manager.register_track(track)
 
                 await self.db_manager.build_search_index()
+                await self.db_manager.edit_artist(
+                    job.artist_id, 
+                    EditArtistPayload(
+                        enriched_at=current_timestamp()
+                    )
+                )
 
                 #status
                 await self.enr_queue.complete_job(job.id, success=True)
 
                 logger.info(f"[{self.worker_id}] Successfully finished {job.identifier}")
+
+            #skipped artist enrichment
+            except EnrichWorkerJobSkipped as e:
+                await self.enr_queue.complete_job(job.id, success=True)
+                logger.info(f"[{self.worker_id}] Skipped enrichment: {job.identifier}")
 
             #fall through error
             except Exception as e:

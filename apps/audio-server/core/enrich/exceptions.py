@@ -2,8 +2,8 @@ class WorkerSignal(Exception):
     """Base class for controlling execution flow inside the EnrichWorker."""
     pass
 
-class EnrichWorkerJobExpanded(WorkerSignal):
-    """Raised when a parent job (like an artist) is successfully broken into sub-jobs."""
+class EnrichWorkerJobSkipped(WorkerSignal):
+    """Raised when a parent job is successfully skipped."""
     pass
 
 class EnrichWorkerJobError(WorkerSignal):
