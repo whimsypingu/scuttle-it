@@ -1,9 +1,9 @@
-import time
-
 from pydantic import ConfigDict, Field
 from fastapi import WebSocket
 
 from core.models.base import ScuttleBase
+
+from core.utils import current_timestamp
 
 
 class DeviceContext(ScuttleBase):
@@ -11,13 +11,10 @@ class DeviceContext(ScuttleBase):
     room_id: str
 
 
-def _current_timestamp_int() -> int:
-    return int(time.time())
-
 class Device(ScuttleBase):
     id: str
     is_main: bool = False
-    last_seen: int = Field(default_factory=_current_timestamp_int)
+    last_seen: int = Field(default_factory=current_timestamp)
     websocket: WebSocket | None = Field(default=None, exclude=True) #remove from json
 
     model_config = ConfigDict(
@@ -25,7 +22,7 @@ class Device(ScuttleBase):
     )
 
     def touch(self) -> None:
-        self.last_seen = _current_timestamp_int()
+        self.last_seen = current_timestamp()
 
 class Room(ScuttleBase):
     internal_id: int | None = None #not in use
@@ -63,4 +60,4 @@ class JoinTicket(ScuttleBase):
 
     @property
     def is_expired(self) -> bool:
-        return int(time.time()) > (self.created_at + self.ttl)
+        return current_timestamp() > (self.created_at + self.ttl)

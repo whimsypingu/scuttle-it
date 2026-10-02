@@ -1,8 +1,9 @@
 import logging
 import sqlite3
-import time
 
 from database.mixins.mixin_utils import generate_room_id
+
+from core.utils import current_timestamp
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +100,7 @@ class RoomMixin:
         """Clean up and remove all rooms that are expired"""
         logger.info(f"Cleaning up rooms...")
 
-        cutoff_ts = int(time.time()) - self.ROOM_EXPIRE_TIME
+        cutoff_ts = current_timestamp() - self.ROOM_EXPIRE_TIME
 
         try:
             async with self.session() as db:

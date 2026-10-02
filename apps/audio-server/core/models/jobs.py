@@ -4,8 +4,11 @@ from enum import Enum
 from pydantic import Field, model_validator
 
 from config import settings
+
 from core.models.base import ScuttleBase
 from core.models.track import TrackBase
+
+from core.utils import current_timestamp
 
 
 class JobStatus(str, Enum):
@@ -19,7 +22,7 @@ class JobBase(ScuttleBase):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
 
     #cast to int to drop fp microseconds and have simple int based field for date
-    created_at: int = Field(default_factory=lambda: int(time.time()))
+    created_at: int = Field(default_factory=lambda: current_timestamp())
 
     status: JobStatus = JobStatus.PENDING
 
