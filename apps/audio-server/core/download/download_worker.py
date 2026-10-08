@@ -92,15 +92,18 @@ class DownloadWorker:
                         raise DownloadWorkerJobExpanded() #exit job handling here with a successful custom exception
 
                     #processing a single search query happens here
+                    search_results_lyrics = await self.yt_client.search_by_query(q=f"{search_query.strip()} lyrics", limit=job.query_limit) #process lyrics version and prioritize
                     search_results = await self.yt_client.search_by_query(q=search_query, limit=job.query_limit)
 
-                    if len(search_results) <= 0:
+                    full_search_results = search_results_lyrics.sort(key=lambda t: t.duration) + search_results
+
+                    if len(full_search_results) <= 0 :
                         raise DownloadWorkerJobError() #exit job with failure
                         
-                    search_id = search_results[0].id
+                    search_id = full_search_results[0].id
                     if target_duration is not None: #special attempt to get a result close to the target duration if specified
                         smallest_delta = float("inf")
-                        for sr in search_results:
+                        for sr in full_search_results:
                             # await self.db_manager.register_track(sr)
 
                             current_delta = abs(sr.duration - target_duration)
