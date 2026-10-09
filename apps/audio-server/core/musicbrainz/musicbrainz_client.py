@@ -2,6 +2,7 @@ import logging
 import asyncio
 import time
 import re
+import unicodedata
 import httpx
 
 from config import settings
@@ -49,7 +50,7 @@ class MusicBrainzClient():
             follow_redirects=True,
         )
 
-        self._special_chars_pattern = re.compile(r'[()\[\]/]')
+        self._special_chars_pattern = re.compile(r'[()\[\]/<>]|-[^-]+-') #existence of (, ), [, ], /, <, > or a -SUB STRING- pattern
 
         logger.info(f"MusicBrainzClient ready.")
 
@@ -58,7 +59,8 @@ class MusicBrainzClient():
 
 
     def _contains_special_chars(self, text):
-        return bool(re.search(self._special_chars_pattern, text))
+        norm_text = unicodedata.normalize("NKFC", text)
+        return bool(self._special_chars_pattern.search(norm_text))
 
     def _normalize_text(self, text):
         return text.lower()
