@@ -4,7 +4,7 @@ class MinhashLSH:
     def __init__(
         self,
         buckets: int = 8,
-        bucket_size: int = 32,
+        bucket_size: int = 32, 
     ):
         self.buckets = buckets
         self.bucket_size = bucket_size

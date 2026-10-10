@@ -70,6 +70,7 @@ class EnrichWorker:
                 generated_tracks = await self.mb_client.enrich_artist(artist)
                 for track in generated_tracks:
                     if not self.lsh.match(track.display):
+                        self.lsh.insert(track.display)
                         await self.db_manager.register_track(track)
 
                 await self.db_manager.build_search_index()
