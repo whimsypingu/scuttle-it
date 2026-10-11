@@ -95,7 +95,11 @@ class DownloadWorker:
                     search_results_lyrics = await self.yt_client.search_by_query(q=f"{search_query.strip()} lyrics", limit=job.query_limit) #process lyrics version and prioritize
                     search_results = await self.yt_client.search_by_query(q=search_query, limit=job.query_limit)
 
-                    full_search_results = search_results_lyrics.sort(key=lambda t: t.duration) + search_results
+                    logger.info(search_results_lyrics)
+                    logger.info(search_results)
+
+                    sorted_search_results_lyrics = sorted(search_results_lyrics or [], key=lambda t: t.duration)
+                    full_search_results = sorted_search_results_lyrics + (search_results or [])
 
                     if len(full_search_results) <= 0 :
                         raise DownloadWorkerJobError() #exit job with failure

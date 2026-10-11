@@ -59,7 +59,7 @@ class MusicBrainzClient():
 
 
     def _contains_special_chars(self, text):
-        norm_text = unicodedata.normalize("NKFC", text)
+        norm_text = unicodedata.normalize("NFKC", text)
         return bool(self._special_chars_pattern.search(norm_text))
 
     def _normalize_text(self, text):
