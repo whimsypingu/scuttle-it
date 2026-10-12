@@ -95,10 +95,7 @@ class DownloadWorker:
                     search_results_lyrics = await self.yt_client.search_by_query(q=f"{search_query.strip()} lyrics", limit=job.query_limit) #process lyrics version and prioritize
                     search_results = await self.yt_client.search_by_query(q=search_query, limit=job.query_limit)
 
-                    logger.info(search_results_lyrics)
-                    logger.info(search_results)
-
-                    sorted_search_results_lyrics = sorted(search_results_lyrics or [], key=lambda t: t.duration)
+                    sorted_search_results_lyrics = sorted(search_results_lyrics or [], key=lambda t: t.duration) #better algorithm or heuristic for selecting track in the future, perhaps pinging back from mb matching
                     full_search_results = sorted_search_results_lyrics + (search_results or [])
 
                     if len(full_search_results) <= 0 :
