@@ -32,15 +32,3 @@ export const VerifiedArtistBadge = ({
         />
     );
 };
-
-// const VerifiedBadge = ({ id, className = "inline-block shrink-0" }: VerifiedBadgeProps) => {
-//     if (!isOfficialArtist(id)) return null;
-
-//     return (
-//         <SealCheckIcon 
-//             weight="fill" 
-//             className={className} 
-//             aria-label="Verified Official Metadata" 
-//         />
-//     );
-// };
