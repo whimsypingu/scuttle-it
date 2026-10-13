@@ -234,10 +234,10 @@ export const EditTrackForm = ({
                                     <ComboboxItem 
                                         key={item.id} 
                                         value={item}
-                                        className="px-3 py-2 text-sm rounded-sm cursor-pointer hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                                        className="flex items-center justify-start gap-1.5 px-3 py-2 text-sm rounded-sm cursor-pointer hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
                                     >
                                         <span>{item.nameDisplay || item.name}</span>
-                                        <VerifiedArtistBadge artist={item} size={10} />
+                                        <VerifiedArtistBadge artist={item} size={12} />
                                     </ComboboxItem>
                                 )}
                             </ComboboxList>

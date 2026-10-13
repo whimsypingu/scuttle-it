@@ -28,6 +28,12 @@ export const VerifiedArtistBadge = ({
             weight="fill"
             size={size}
             className={className}
+            style={{  //override any svg specific styling in parent classes
+                width: `${size}px`, 
+                height: `${size}px`, 
+                minWidth: `${size}px`, 
+                minHeight: `${size}px` 
+            }}
             aria-label="Verified Official Metadata"
         />
     );
