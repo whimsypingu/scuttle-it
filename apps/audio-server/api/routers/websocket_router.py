@@ -7,6 +7,7 @@ from core.room.room_manager import RoomManager
 
 WebsocketRouter = APIRouter(prefix="/websocket", tags=["Websocket"])
 
+
 @WebsocketRouter.websocket("")
 async def websocket_endpoint(
     ws: WebSocket,

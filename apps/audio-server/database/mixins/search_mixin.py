@@ -1,7 +1,9 @@
 import logging
 import time
 
-from database.mixins.mixin_utils import row_to_trackbase
+from config import settings
+
+from database.mixins.mixin_utils import row_to_artistbase, row_to_trackbase
 
 from core.models.artist import ArtistBase
 from core.models.track import TrackBase
@@ -12,7 +14,7 @@ logger = logging.getLogger(__name__)
 class SearchMixin:
     """Handles database search"""
 
-    async def build_search_index(self) -> True:
+    async def build_search_index(self) -> bool:
         """Manually synchronize the FTS5 index with the current state of the Tracks and Artists tables."""
         logger.info("Synchronizing search index with database...")
         start_time = time.perf_counter()
@@ -50,9 +52,6 @@ class SearchMixin:
 
         internal_scan_limit = 1000 #how many to ensure we catch all relevant downloads to reduce the number of JOIN operations
         results_limit = 30
-
-        UNIT_SEP = "\x1f"
-        RECORD_SEP = "\x1e"
 
         query = f'''
             WITH candidates AS (
@@ -97,11 +96,11 @@ class SearchMixin:
 
                 -- ArtistBase fields
                 GROUP_CONCAT(
-                    a.internal_id || '{UNIT_SEP}' ||
-                    COALESCE(a.id, '') || '{UNIT_SEP}' ||
-                    a.name || '{UNIT_SEP}' ||
+                    a.internal_id || '{settings.UNIT_SEP}' ||
+                    COALESCE(a.id, '') || '{settings.UNIT_SEP}' ||
+                    a.name || '{settings.UNIT_SEP}' ||
                     COALESCE(a.name_display, ''), 
-                    '{RECORD_SEP}'
+                    '{settings.RECORD_SEP}'
                 ) AS artist_blob,
 
                 r.final_rank
@@ -124,4 +123,52 @@ class SearchMixin:
                 
         except Exception:
             logger.exception(f"Failed to search query: {q}")
+            raise
+
+
+    async def search_artists(self, q: str) -> list[ArtistBase]:
+        """
+        Search for artists with priority ranking for most frequent number of tracks.
+        Consider prioritizing by listen duration.
+        """
+        if not q:
+            return []
+
+        like_query = f"{q}%"
+        
+        results_limit = 30
+
+        query = f'''
+            SELECT
+                a.internal_id,
+                COALESCE(a.id, '') AS id,
+                a.name,
+                COALESCE(a.name_display, '') AS name_display,
+                COUNT(ta.track_internal_id) AS track_count
+            FROM artists a
+            JOIN track_artists ta ON ta.artist_internal_id = a.internal_id
+            WHERE COALESCE(name_display, name) LIKE ? COLLATE NOCASE
+            GROUP BY a.internal_id
+            ORDER BY track_count DESC
+            LIMIT {results_limit};
+        '''
+
+        explain_query = f"EXPLAIN QUERY PLAN {query}"
+
+        try:
+            async with self.session() as db:
+                async with db.execute(explain_query, (like_query,)) as cursor:
+                    plan_rows = await cursor.fetchall()
+                    # SQLite EXPLAIN QUERY PLAN returns columns: selectid, order, from, detail
+                    plan_str = "\n".join([row["detail"] for row in plan_rows])
+                    logger.warning(f"Query plan for search_artists('{q}'):\n{plan_str}")
+
+                async with db.execute(query, (like_query,)) as cursor:
+                    rows = await cursor.fetchall()
+                    return [
+                        row_to_artistbase(row) for row in rows
+                    ]
+                
+        except Exception:
+            logger.exception(f"Failed to search artists for query: {q}")
             raise

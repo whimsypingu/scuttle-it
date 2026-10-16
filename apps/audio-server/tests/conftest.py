@@ -7,6 +7,7 @@ from core.models.track import TrackBase
 from database.database_manager import DatabaseManager
 from core.youtube.youtube_client import YouTubeClient
 from core.link.link_adapter import LinkAdapter
+from core.musicbrainz.musicbrainz_client import MusicBrainzClient
 
 @pytest.fixture
 def sample_artist():
@@ -17,7 +18,7 @@ def sample_artist():
     )
 
 @pytest.fixture
-def sample_track():
+def sample_track(sample_artist):
     return TrackBase(
         id="track_id_1",
         title="never gonna give you up",
@@ -63,3 +64,10 @@ async def la():
     adapter = LinkAdapter()
 
     yield adapter
+
+
+@pytest_asyncio.fixture
+async def mb():
+    client = MusicBrainzClient()
+
+    yield client

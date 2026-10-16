@@ -4,7 +4,11 @@ from enum import Enum
 from pydantic import Field, model_validator
 
 from config import settings
+
 from core.models.base import ScuttleBase
+from core.models.track import TrackBase
+
+from core.utils import current_timestamp
 
 
 class JobStatus(str, Enum):
@@ -18,7 +22,7 @@ class JobBase(ScuttleBase):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
 
     #cast to int to drop fp microseconds and have simple int based field for date
-    created_at: int = Field(default_factory=lambda: int(time.time()))
+    created_at: int = Field(default_factory=lambda: current_timestamp())
 
     status: JobStatus = JobStatus.PENDING
 
@@ -36,7 +40,7 @@ class DownloadJob(JobBase):
 
     playlist_ids: list[str] | None = None #list of playlist IDs, if instantiating
     title_display: str | None = None #optional title display deterministic
-    artist_display: str | None = None #optional artist display deterministic
+    artist_display: str | None = None #optional artist display deterministic, separated by \x1f UNIT_SEP
 
     @model_validator(mode="after")
     def validate_constraints(self) -> "DownloadJob":
@@ -52,3 +56,21 @@ class DownloadJob(JobBase):
     def identifier(self) -> str:
         """Returns whichever identifier is available, which validator ensures."""
         return self.track_id or self.query
+
+
+class EnrichJob(JobBase):
+    artist_id: str | None = None
+    
+    query_limit: int = Field(default=3, ge=1, le=10) #number of results to retrieve per query for analysis
+
+    @model_validator(mode="after")
+    def validate_constraints(self) -> "EnrichJob":
+        if not self.artist_id:
+            raise ValueError("EnrichJob must have an artist_id.")
+        
+        return self
+    
+    @property
+    def identifier(self) -> str:
+        """Returns whichever identifier is available, which validator ensures."""
+        return self.artist_id

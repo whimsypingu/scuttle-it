@@ -2,12 +2,13 @@ import asyncio
 import hashlib
 import logging
 import secrets
-import time
 from typing import Any
 
 from core.models.room import Device, JoinTicket, Room
 from database.database_manager import DatabaseManager
 from fastapi import WebSocket
+
+from core.utils import current_timestamp
 
 logger = logging.getLogger(__name__)
 
@@ -146,7 +147,7 @@ class RoomManager:
             ticket_id_hash = hashlib.sha256(ticket_id.encode("utf-8")).hexdigest() #hash quickly and store the hex value
             self.join_tickets[ticket_id_hash] = JoinTicket(
                 room_id=room_id,
-                created_at=int(time.time())
+                created_at=current_timestamp()
             )
 
         return ticket_id

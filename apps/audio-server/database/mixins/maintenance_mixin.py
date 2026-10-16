@@ -35,3 +35,28 @@ class MaintenanceMixin:
         except Exception:
             logger.exception(f"Failed to normalize Play Queue positions")
             raise
+
+
+    async def cleanup_artists(self) -> int:
+        """Remove unassociated artist entries"""
+        logger.info(f"Cleaning up artists...")
+
+        try:
+            async with self.session() as db:
+                cursor = await db.execute(f'''
+                    DELETE FROM artists
+                    WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM track_artists ta
+                        WHERE ta.artist_internal_id = artists.internal_id
+                    )
+                ''')
+
+                delete_count = cursor.rowcount
+
+                logger.info(f"Successfully cleaned up {delete_count} artist entries")
+                return delete_count
+
+        except Exception:
+            logger.exception(f"Failed to clean up artists")
+            raise

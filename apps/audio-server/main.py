@@ -33,8 +33,11 @@ from database.database_manager import DatabaseManager
 from core.room.room_manager import RoomManager
 from core.download.download_queue import DownloadQueue
 from core.download.download_worker import DownloadWorker
+from core.enrich.enrich_queue import EnrichQueue
+from core.enrich.enrich_worker import EnrichWorker
 from core.stats.stats_manager import StatsManager
 from core.link.link_adapter import LinkAdapter
+from core.musicbrainz.musicbrainz_client import MusicBrainzClient
 
 logging.basicConfig(
     level=logging.INFO,
@@ -48,65 +51,70 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    db_manager = DatabaseManager()
-    app.state.db_manager = db_manager
-
-    stats_manager = StatsManager(
-        flush_interval=300, #how frequently to flush stats
-        db_manager=db_manager,
-    )
-    app.state.stats_manager = stats_manager
-
-    room_manager = RoomManager(
-        flush_interval=3*60*60, #flush every few hours
-        db_manager=db_manager,
-    )
-    app.state.room_manager = room_manager
-
-    link_adapter = LinkAdapter()
-    app.state.link_adapter = link_adapter
 
     #global
-    dl_queue = DownloadQueue()
-    app.state.dl_queue = dl_queue
+    app.state.db_manager = DatabaseManager()
 
-    audio_processor = AudioProcessor()
-    app.state.audio_processor = audio_processor
+    app.state.stats_manager = StatsManager(
+        flush_interval=300, #how frequently to flush stats
+        db_manager=app.state.db_manager,
+    )
+
+    app.state.room_manager = RoomManager(
+        flush_interval=3*60*60, #flush every few hours
+        db_manager=app.state.db_manager,
+    )
+
+    app.state.dl_queue = DownloadQueue()
+    app.state.enr_queue = EnrichQueue()
+    app.state.audio_processor = AudioProcessor()
+    app.state.link_adapter = LinkAdapter()
+    app.state.mb_client = MusicBrainzClient()
+
 
     workers = []
     for i in range(2):
         dl_worker = DownloadWorker(
-            worker_id=f"Worker-{i+1}",
-            dl_queue=dl_queue,
-            audio_processor=audio_processor,
+            worker_id=f"DL-Worker-{i+1}",
             yt_client=YouTubeClient(),
-            db_manager=db_manager,
-            room_manager=room_manager,
-            stats_manager=stats_manager,
-            link_adapter=link_adapter,
+            app_state=app.state,
         )
         workers.append(dl_worker)
 
         #start working in the background
         asyncio.create_task(dl_worker.run())
 
+    enr_shared_yt_client = YouTubeClient()
+    for i in range(1):
+        enr_worker = EnrichWorker(
+            worker_id=f"Enr-Worker-{i+1}",
+            yt_client=enr_shared_yt_client,
+            app_state=app.state,
+        )
+        workers.append(enr_worker)
+
+        #start working in the background
+        asyncio.create_task(enr_worker.run())
+
     #poll every interval seconds to flush stats into the database
-    asyncio.create_task(stats_manager.run())
+    asyncio.create_task(app.state.stats_manager.run())
 
     #poll every interval to flush and cleanup room activity into database
-    asyncio.create_task(room_manager.run())
+    asyncio.create_task(app.state.room_manager.run())
 
-    await db_manager.build_from_directory()
-    await db_manager.build_search_index()
-    await db_manager.normalize_play_queue_positions()
+    await app.state.db_manager.build_from_directory()
+    await app.state.db_manager.build_search_index()
+    await app.state.db_manager.normalize_play_queue_positions()
+    await app.state.db_manager.cleanup_artists()
 
     yield
 
     #shutdown
     for w in workers:
         w.stop()
-    stats_manager.stop()
-    room_manager.stop()
+    app.state.stats_manager.stop()
+    app.state.room_manager.stop()
+    await app.state.mb_client.close()
 
 
 app = FastAPI(

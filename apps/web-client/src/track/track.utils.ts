@@ -5,7 +5,7 @@ import { useLikesMutations } from '@/store/hooks/useLikes';
 
 import { makeToast } from '@/features/toast/Toast';
 
-import type { PlaylistTrack, QueueId, QueueTrack, TrackActionProps, TrackBase } from '@/track/track.types';
+import type { ArtistBase, PlaylistTrack, QueueId, QueueTrack, TrackActionProps, TrackBase } from '@/track/track.types';
 
 
 export const useTrackActionHandler = () => {
@@ -107,26 +107,18 @@ export const queueTrackToTrackBase = (
 };
 
 
-// extract the original title and artists
-export const getTrackSourceMetadata = (track?: TrackBase): { title: string, artists: string } => {
-    if (!track) { //handle null tracks
-        return { title: "---", artists: "---" };
-    }
-
-    const title = track.title ?? "---";
-    const artists = track.artists?.map(a => a.name).join(", ") ?? "---";
-
-    return { title, artists };
-}
-
-
 export const getTrackSourceLink = (track?: TrackBase): { link: string } => {
     if (!track) {
         return { link: "---" };
     }
     
     //currently default to youtube link
-    const link = `https://youtube.com/watch?v=${track.id}`;
+    let link = `https://youtube.com/watch?v=${track.id}`;
+
+    //explicit yt id correction
+    if (track.id.startsWith("YT__")) {
+        link = `https://youtube.com/watch?v=${track.id.slice(4)}`;
+    }
 
     return { link };
 }
@@ -138,8 +130,8 @@ export const getTrackDisplayMetadata = (track?: TrackBase): { titleDisplay: stri
         return { titleDisplay: "---", artistDisplay: "---" };
     }
 
-    const titleDisplay = track.titleDisplay ?? track.title ?? "---";
-    const artistDisplay = track.artists?.map(a => a.nameDisplay ?? a.name).join(", ") ?? "---";
+    const titleDisplay = track.titleDisplay || track.title || "---";
+    const artistDisplay = track.artists?.map(a => a.nameDisplay || a.name).join(", ") || "---";
 
     return { titleDisplay, artistDisplay };
 }

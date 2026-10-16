@@ -10,6 +10,8 @@ from core.room.room_manager import RoomManager
 from core.stats.stats_manager import StatsManager
 from core.models.room import DeviceContext
 
+from core.utils import current_timestamp
+
 from sync.pokes import WSPokeFactory
 
 
@@ -62,7 +64,7 @@ async def set_room_active(
     room_manager: RoomManager = Depends(get_room_manager)
 ):
     if ctx.room_id:
-        last_active_ts = int(time.time())
+        last_active_ts = current_timestamp()
         await room_manager.update_last_active(ctx.room_id, last_active_ts)
 
 async def queue_update_room_broadcast(

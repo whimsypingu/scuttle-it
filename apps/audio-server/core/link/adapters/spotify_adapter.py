@@ -3,6 +3,8 @@ import logging
 import re
 import httpx
 
+from config import settings
+
 from core.models.jobs import DownloadJob
 from core.models.payloads import CreatePlaylistPayload
 
@@ -25,6 +27,8 @@ class SpotifyAdapter:
         self._track_pattern = re.compile(r'"title":"([^"]+)".*?"artists":\s*(\[.*?\]).*?"duration":(\d+)', re.DOTALL)
         self._playlist_pattern = re.compile(r'"title":"([^"]+)".*?"subtitle":"([^"]+)".*?"duration":(\d+)', re.DOTALL)
 
+        self._title_strip_pattern = re.compile(r'\s*[\(\[][^()\[\]]*[\)\]]') #matches ( or [ followed by anything non-greedy up to ) or ]
+
 
     def _clean(self, text):
         text = text.replace("\xa0", " ") #non-breaking spaces
@@ -32,6 +36,10 @@ class SpotifyAdapter:
             text = json.loads(f'"{text}"') #resolve characters like \\u0026 to & etc
         except Exception:
             pass
+        return text.strip()
+
+    def _title_strip(self, text):
+        text = re.sub(self._title_strip_pattern, "", text)
         return text.strip()
 
     def extract_id(self, parsed_url: str) -> tuple[str | None, str | None]:
@@ -59,8 +67,8 @@ class SpotifyAdapter:
                 m = self._track_pattern.search(response.text)
 
                 #try catch block will catch any errors
-                title = m.group(1)
-                artists = ", ".join([a.get("name") for a in json.loads(m.group(2))])
+                title = self._title_strip(m.group(1))
+                artists = (settings.UNIT_SEP).join([a.get("name") for a in json.loads(m.group(2))])
                 target_duration = round(int(m.group(3)) / 1000) if m.group(3).isdigit() else None
                 return (self._clean(title), self._clean(artists), target_duration)
             except Exception as e:
@@ -111,8 +119,12 @@ class SpotifyAdapter:
                         description = self._clean(artist) #spotify embed links don't contain the actual description, so we will just use the user instead
                     else:
                         target_duration = round(int(duration) / 1000) if duration.isdigit() else None
+
+                        # print(repr(artist)) #spotify uses ,&nbsp; to delim artists in html, but after fetching it becomes \xa0
+                        cleaned_title = self._clean(self._title_strip(title))
+                        cleaned_artist = self._clean(artist.replace(",\xa0", settings.UNIT_SEP))
                         queries.append(
-                            (self._clean(title), self._clean(artist), target_duration)
+                            (cleaned_title, cleaned_artist, target_duration)
                         )
 
                 if name is None: #for whatever reason if somehow a playlist name is not extracted raise an error

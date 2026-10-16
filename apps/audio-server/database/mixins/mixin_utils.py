@@ -1,7 +1,9 @@
 import sqlite3
 import random
 
-from core.models.artist import ArtistBase
+from config import settings
+
+from core.models.artist import ArtistBase, ArtistDetails
 from core.models.playlist import PlaylistBase, PlaylistDetails, SummaryPlaylist
 from core.models.track import PlaylistTrack, TrackBase, TrackDetails
 
@@ -10,13 +12,10 @@ from core.models.track import PlaylistTrack, TrackBase, TrackDetails
 def row_to_trackbase(
     row: sqlite3.Row
 ) -> TrackBase:
-    UNIT_SEP = "\x1f"
-    RECORD_SEP = "\x1e"
-
     #parse the artist blob back into ArtistBase objects
     artists = []
-    for packet in row["artist_blob"].split(RECORD_SEP):
-        parts = packet.split(UNIT_SEP)
+    for packet in row["artist_blob"].split(settings.RECORD_SEP):
+        parts = packet.split(settings.UNIT_SEP)
 
         #explicit part handling
         a_internal_id = int(parts[0])
@@ -58,14 +57,11 @@ def row_to_track_details(
 ) -> TrackDetails:
     trackbase = row_to_trackbase(row)
 
-    UNIT_SEP = "\x1f"
-    RECORD_SEP = "\x1e"
-
     #parse the playlist blob back into PlaylistBase objects
     playlists = []
     if row["playlist_blob"]: #only if this track is in any playlists
-        for packet in row["playlist_blob"].split(RECORD_SEP):
-            parts = packet.split(UNIT_SEP)
+        for packet in row["playlist_blob"].split(settings.RECORD_SEP):
+            parts = packet.split(settings.UNIT_SEP)
 
             #explicit part handling
             p_internal_id = int(parts[0])
@@ -83,6 +79,29 @@ def row_to_track_details(
         listened_duration=row["listened_duration"],
         listened_at=row["listened_at"],
         playlists=playlists
+    )
+
+
+#artists
+def row_to_artistbase(
+    row: sqlite3.Row
+) -> ArtistBase:
+    return ArtistBase(
+        internal_id=row["internal_id"],
+        id=row["id"],
+        name=row["name"],
+        name_display=row["name_display"]
+    )
+
+def row_to_artist_details(
+    row: sqlite3.Row
+) -> ArtistDetails:
+    artistbase = row_to_artistbase(row)
+
+    #put in other fields
+    return ArtistDetails(
+        **artistbase.model_dump(),
+        enriched_at=row["enriched_at"]
     )
 
 

@@ -1,15 +1,23 @@
 import logging
 
+from fastapi.datastructures import State
+
+from config import settings
+
 from core.audio.utils import delete_track_file
 
-from core.models.payloads import EditArtistPayload, EditTrackPayload
+from core.models.artist import ArtistBase
+from core.models.payloads import EditTrackPayload
+from core.models.jobs import EnrichJob
 
 from core.download.download_queue import DownloadQueue
+from core.enrich.enrich_queue import EnrichQueue
 from core.link.link_adapter import LinkAdapter
 from core.youtube.youtube_client import YouTubeClient
 from core.stats.stats_manager import StatsManager
 from core.audio.processor import AudioProcessor
 from database.database_manager import DatabaseManager
+from core.musicbrainz.musicbrainz_client import MusicBrainzClient
 
 from sync.pokes import WSPokeFactory
 from core.room.room_manager import RoomManager
@@ -24,23 +32,21 @@ class DownloadWorker:
     def __init__(
         self,
         worker_id: str,
-        dl_queue: DownloadQueue,
-        audio_processor: AudioProcessor,
         yt_client: YouTubeClient,
-        db_manager: DatabaseManager,
-        room_manager: RoomManager,
-        stats_manager: StatsManager,
-        link_adapter: LinkAdapter
+        app_state: State,
     ):
         self.worker_id = worker_id
 
-        self.dl_queue = dl_queue
-        self.audio_processor = audio_processor
         self.yt_client = yt_client
-        self.db_manager = db_manager
-        self.room_manager = room_manager
-        self.stats_manager = stats_manager
-        self.link_adapter = link_adapter
+
+        self.dl_queue: DownloadQueue = app_state.dl_queue
+        self.enr_queue: EnrichQueue = app_state.enr_queue
+        self.audio_processor: AudioProcessor = app_state.audio_processor
+        self.db_manager: DatabaseManager = app_state.db_manager
+        self.room_manager: RoomManager = app_state.room_manager
+        self.stats_manager: StatsManager = app_state.stats_manager
+        self.link_adapter: LinkAdapter = app_state.link_adapter
+        self.mb_client: MusicBrainzClient = app_state.mb_client
 
         self.is_running = True
         self.current_job = None
@@ -60,11 +66,22 @@ class DownloadWorker:
                 )
                 logger.info(f"[{self.worker_id}] Processing: {job.identifier}")
 
-                #determine the id to download
-                if job.query:
+                #variables to hold the data needed for optimally accurate downloading
+                search_id = job.track_id
+                search_query = job.query
+                target_duration = job.target_duration
 
+                unregister_track_details = None #indicates whether to remove an entry if a new one will be created
+
+                if search_id and search_id.startswith(settings.MB_PREFIX): #--maybe this can become a list of prefixes that are enrichable?
+                    unregister_track_details = await self.db_manager.retrieve_track_details(search_id)
+
+                    search_query = unregister_track_details.full_display
+                    target_duration = unregister_track_details.duration
+
+                if search_query:
                     #try extracting and parsing any possible links
-                    generated_jobs, generated_payload = await self.link_adapter.expand_jobs(url=job.query, room_id=job.room_id)
+                    generated_jobs, generated_payload = await self.link_adapter.expand_jobs(url=search_query, room_id=job.room_id)
 
                     if generated_jobs or generated_payload is not None:
                         if generated_payload is not None:
@@ -75,28 +92,25 @@ class DownloadWorker:
                         raise DownloadWorkerJobExpanded() #exit job handling here with a successful custom exception
 
                     #processing a single search query happens here
-                    search_results = await self.yt_client.search_by_query(q=job.query, limit=job.query_limit)
+                    search_results_lyrics = await self.yt_client.search_by_query(q=f"{search_query.strip()} lyrics", limit=job.query_limit) #process lyrics version and prioritize
+                    search_results = await self.yt_client.search_by_query(q=search_query, limit=job.query_limit)
 
-                    if len(search_results) <= 0:
+                    sorted_search_results_lyrics = sorted(search_results_lyrics or [], key=lambda t: t.duration) #better algorithm or heuristic for selecting track in the future, perhaps pinging back from mb matching
+                    full_search_results = sorted_search_results_lyrics + (search_results or [])
+
+                    if len(full_search_results) <= 0 :
                         raise DownloadWorkerJobError() #exit job with failure
                         
-                    search_id = search_results[0].id
-
-                    if job.target_duration is None:
-                        for sr in search_results:
-                            await self.db_manager.register_track(sr)
-
-                    else: #special attempt to get a result close to the target duration if specified
+                    search_id = full_search_results[0].id
+                    if target_duration is not None: #special attempt to get a result close to the target duration if specified
                         smallest_delta = float("inf")
-                        for sr in search_results:
-                            await self.db_manager.register_track(sr)
+                        for sr in full_search_results:
+                            # await self.db_manager.register_track(sr)
 
-                            current_delta = abs(sr.duration - job.target_duration)
+                            current_delta = abs(sr.duration - target_duration)
                             if current_delta < smallest_delta:
                                 smallest_delta = current_delta
                                 search_id = sr.id
-                else:
-                    search_id = job.track_id
 
                 #perform the download, with an update fallback and retry on failure, and delete corrupted files on failure
                 try:
@@ -119,6 +133,7 @@ class DownloadWorker:
                 try:
                     await self.audio_processor.clean(file_path)
                     clean_duration = await self.audio_processor.get_duration(file_path)
+                    download_result.duration = clean_duration
                 except Exception as e:
                     try:
                         delete_track_file(search_id)
@@ -126,28 +141,38 @@ class DownloadWorker:
                         pass
                     raise e
                 
-                #edit the track details
+                #edit the track details with explicit values if supplied
+                if job.title_display:
+                    download_result.title_display = job.title_display
+
+                if job.artist_display:
+                    download_result.artists = [
+                        ArtistBase(
+                            name=a
+                        )
+                        for a in job.artist_display.split(settings.UNIT_SEP)
+                    ]
+
+                #metadata matching
+                record_matched = await self.mb_client.match_record(download_result)
+
+                if unregister_track_details:
+                    await self.db_manager.unregister_track(unregister_track_details.id)
+
+                    download_result.title_display = unregister_track_details.display
+                    download_result.artists = unregister_track_details.artists
+
                 await self.db_manager.register_track(download_result)
                 await self.db_manager.register_download(download_result.id)
 
-                estimated_title_display = job.title_display if job.title_display else download_result.display
-                if job.artist_display:
-                    artist_payload = [EditArtistPayload(name_display=job.artist_display)]
-                else:
-                    artist_payload = [
-                        EditArtistPayload(name_display=artist.display)
-                        for artist in download_result.artists
-                    ]
-
-                await self.db_manager.edit_track(
-                    download_result.id, 
-                    EditTrackPayload(
-                        title_display=estimated_title_display,
-                        duration=clean_duration,
-                        artists=artist_payload,
-                        playlist_ids=job.playlist_ids,
+                #playlist inclusion
+                if job.playlist_ids:
+                    await self.db_manager.edit_track(
+                        download_result.id,
+                        EditTrackPayload(
+                            playlist_ids=job.playlist_ids
+                        )
                     )
-                )
 
                 #play queue modification
                 if job.to_queue:
@@ -155,6 +180,16 @@ class DownloadWorker:
                         await self.db_manager.push_next_play_queue(download_result.id, job.room_id) #push to front of the play queue
                     else:
                         await self.db_manager.push_play_queue(download_result.id, job.room_id) #push to end of the play queue
+
+                #enrich
+                if record_matched:
+                    logger.info(f"[{self.worker_id}] Record matched, attempting enrichment: {download_result.full_display}") #\n{download_result.model_dump_json(indent=2)}")
+                    for artist in download_result.artists:
+                        await self.enr_queue.add(
+                            EnrichJob(
+                                artist_id=artist.id
+                            )
+                        )
 
                 await self.db_manager.build_search_index()
 

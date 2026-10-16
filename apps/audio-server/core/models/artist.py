@@ -9,4 +9,7 @@ class ArtistBase(ScuttleBase):
     @property
     def display(self) -> str:
         return self.name_display or self.name
-    
+
+
+class ArtistDetails(ArtistBase):
+    enriched_at: int

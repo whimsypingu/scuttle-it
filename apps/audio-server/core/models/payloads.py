@@ -21,13 +21,13 @@ class ReorderQueuePayload(ScuttleBase):
 #see: apps/web-client/src/store/hooks/hooks.types.ts
 class EditArtistPayload(ScuttleBase):
     id: str | None = None #optional external source ID to identify which artist to edit
-    new_id: str | None = None
     name_display: str | None = None
+
+    enriched_at: int | None = None #last time of enrichment
     
 #see: apps/web-client/src/store/hooks/hooks.types.ts
 class EditTrackPayload(ScuttleBase):
-    id: str | None = None #optional external source ID to identify which artist to edit
-    new_id: str | None = None
+    id: str | None = None #optional external source ID to identify which track to edit
     title_display: str | None = None
     duration: float | None = None
 

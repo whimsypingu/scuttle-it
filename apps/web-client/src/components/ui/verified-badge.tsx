@@ -1,0 +1,40 @@
+import type { ArtistBase } from "@/track/track.types";
+import { SealCheckIcon } from "@phosphor-icons/react";
+
+const OFFICIAL_PREFIXES = ["MB__"];
+
+// checks if the artist id belongs to an official database like MusicBrainz
+const isOfficialArtist = (artist: ArtistBase) => {
+    return OFFICIAL_PREFIXES.some((prefix) => artist.id.startsWith(prefix));
+};
+
+export interface VerifiedArtistBadgeProps {
+    artist: ArtistBase;
+    className?: string;
+    size?: number;
+}
+
+export const VerifiedArtistBadge = ({
+    artist,
+    className = "inline-block shrink-0",
+    size = 16,
+}: VerifiedArtistBadgeProps) => {
+    if (!isOfficialArtist(artist)) {
+        return null;
+    }
+
+    return (
+        <SealCheckIcon
+            weight="fill"
+            size={size}
+            className={className}
+            style={{  //override any svg specific styling in parent classes
+                width: `${size}px`, 
+                height: `${size}px`, 
+                minWidth: `${size}px`, 
+                minHeight: `${size}px` 
+            }}
+            aria-label="Verified Official Metadata"
+        />
+    );
+};

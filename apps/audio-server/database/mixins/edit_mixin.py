@@ -1,12 +1,43 @@
 import logging
+import uuid
 
-from core.models.payloads import EditTrackPayload, EditPlaylistPayload
+from config import settings
+
+from core.models.payloads import EditArtistPayload, EditTrackPayload, EditPlaylistPayload
 
 logger = logging.getLogger(__name__)
 
 
 class EditMixin:
     """Handles editing database records"""
+
+    async def edit_artist(self, artist_id: str, payload: EditArtistPayload) -> bool:
+        """Edit artist data"""
+        logger.info(f"Editing artist_id {artist_id}")
+        
+        try:
+            async with self.session() as db:
+                #artist field edits
+                fields = []
+                params = []
+                
+                if payload.name_display is not None:
+                    fields.append("name_display = ?")
+                    params.append(payload.name_display)
+                if payload.enriched_at is not None:
+                    fields.append("enriched_at = ?")
+                    params.append(payload.enriched_at)
+                
+                if fields:
+                    await db.execute(f"UPDATE artists SET {", ".join(fields)} WHERE id = ?;", (*params, artist_id))
+
+                logger.info(f"Successfully edited artist with original artist_id: {artist_id} | {payload.name_display}")
+                return True
+        
+        except Exception:
+            logger.exception(f"Critical failure during artist edit for original artist_id: {artist_id}")
+            raise
+
 
     async def edit_track(self, track_id: str, payload: EditTrackPayload) -> bool:
         """Edit track data"""
@@ -40,10 +71,18 @@ class EditMixin:
                     await db.execute("DELETE FROM track_artists WHERE track_internal_id = ?;", (track_internal_id,))
 
                     for artist in payload.artists:
-                        cursor = await db.execute("INSERT INTO artists (name, name_display) VALUES (?, ?) RETURNING internal_id;", (artist.name_display, artist.name_display))
+                        artist_id = artist.id or f"{settings.SCUT_PREFIX}{str(uuid.uuid4())}" #generate a new artist id if a completely new entry
+                        cursor = await db.execute('''
+                            INSERT INTO artists (id, name, name_display) 
+                            VALUES (?, ?, ?) 
+                            ON CONFLICT(id) DO UPDATE SET
+                                name = COALESCE(artists.name, excluded.name),
+                                name_display = excluded.name_display
+                            RETURNING internal_id;
+                        ''', (artist_id, artist.name_display, artist.name_display))
                         row = await cursor.fetchone()
                         if not row:
-                            logger.error(f"Failed to get internal_id for edit_artist: {artist.name_display}")
+                            logger.error(f"Failed to get internal_id for edit_artist: {artist}")
                             raise ValueError("Failed to retrieve internal_id after insert edit_artist")
                         artist_internal_id = row[0]
 

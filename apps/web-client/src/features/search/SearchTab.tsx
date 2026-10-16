@@ -68,7 +68,7 @@ export const SearchTab = ({
     // deep search
     const handleDeepSearch = async () => {
         if (!query.trim()) return;
-        triggerYoutubeSearch({ q: query, limit: 1 });
+        triggerYoutubeSearch({ q: query, limit: 3 });
     }
 
     return (

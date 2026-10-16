@@ -1,22 +1,25 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useEditTrack } from "@/store/hooks/useEdit";
 import { usePlaylists } from "@/store/hooks/usePlaylists";
 import { useOffline } from "@/features/offline/OfflineProvider";
+import { useArtistSearch } from "@/store/hooks/useSearch";
 
 import { LinkIcon, NotchesIcon } from "@phosphor-icons/react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
+import { Combobox, ComboboxChip, ComboboxChips, ComboboxChipsInput, ComboboxContent, ComboboxItem, ComboboxList, ComboboxValue, useComboboxAnchor } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
 import { HoldToDeleteButton } from "@/components/ui/hold-delete";
 
-import { getTrackDisplayMetadata, getTrackSourceMetadata, getTrackSourceLink } from "@/track/track.utils";
+import { getTrackDisplayMetadata, getTrackSourceLink } from "@/track/track.utils";
 
 import { MIN_BUTTON_WIDTH, SOURCE_ICON_SIZE } from "@/features/edit/edit.constants";
 
-import type { TrackBase } from "@/track/track.types";
+import type { ArtistBase, TrackBase } from "@/track/track.types";
 import type { PlaylistId } from "@/playlist/playlist.types";
 import type { EditArtistPayload, EditTrackPayload } from "@/store/hooks/hooks.types";
+import { VerifiedArtistBadge } from "@/components/ui/verified-badge";
 
 
 interface EditTrackFormProps {
@@ -29,15 +32,57 @@ export const EditTrackForm = ({
     onSave 
 }: EditTrackFormProps) => {
     const [titleInput, setTitleInput] = useState("");
-    //const [artists, setArtists] = useState<string[]>(track.artists.map(a => a.nameDisplay ?? a.name)); //EMERGENCY: use this with shadcn badges? to make artists selectable in the future
     const [artistInput, setArtistInput] = useState("");
+    const [debouncedQuery, setDebouncedQuery] = useState("");
+
+    // debounce effect on search input - see: apps/web-client/features/search/SearchTab.tsx
+    useEffect(() => {
+        if (!artistInput.trim()) {
+            setDebouncedQuery("");
+            return;
+        }
+
+        const handler = setTimeout(() => {
+            setDebouncedQuery(artistInput);
+        }, 500); //ms delay to set the debounced query value
+
+        // cancel the timer if the user types again within the delay
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [artistInput]);
 
     const { isOffline } = useOffline();
 
-    const { title, artists } = getTrackSourceMetadata(track); //source data
     const { link } = getTrackSourceLink(track);
 
-    const { titleDisplay, artistDisplay } = getTrackDisplayMetadata(track); //placeholders
+    const { titleDisplay } = getTrackDisplayMetadata(track); //placeholders
+
+    //combobox
+    const anchor = useComboboxAnchor();
+    const [selectedArtists, setSelectedArtists] = useState<ArtistBase[]>(track.artists);
+
+    const selectedArtistIds = useMemo(() => {
+        return new Set(selectedArtists.map(a => a.id));
+    }, [selectedArtists]);
+
+    const { artistResults } = useArtistSearch(debouncedQuery);
+
+    const allArtistResults = useMemo(() => {
+        const trimmed = artistInput.trim();
+        if (!trimmed) return [];
+
+        //filter out selected results
+        const unselectedResults = artistResults.filter(a => !selectedArtistIds.has(a.id));
+
+        const customArtist: ArtistBase = {
+            id: `temp-${Date.now()}`, //unnecessary to use generateUUID (?)
+            name: trimmed,
+            nameDisplay: trimmed,
+        };
+
+        return [...unselectedResults, customArtist];
+    }, [artistResults, artistInput, selectedArtistIds]);
 
     //all possible playlists
     const { playlists } = usePlaylists();
@@ -82,7 +127,7 @@ export const EditTrackForm = ({
                         onClick={() => handlePlaylistToggle(p.id)}
                     >
                         <Checkbox 
-                            id={p.id}
+                            id={p.id} 
                             checked={selectedPlaylistIds.has(p.id)}
                         />
 
@@ -95,58 +140,27 @@ export const EditTrackForm = ({
         );
     };
 
-    //draw the ui subcomponent for the source data
-    const renderSourceContent = () => {
-        return (
-            <div className="flex flex-col px-1">
-                <div className="flex flex-row items-center gap-2 px-1 py-1">
-                    <div className="shrink-0">
-                        <NotchesIcon size={SOURCE_ICON_SIZE} />
-                    </div>
-                    <label className="flex-1 text-xs font-medium text-muted-foreground">
-                        {title}
-                    </label>
-                </div>
-
-                <div className="flex flex-row items-center gap-2 px-1 py-1">
-                    <div className="shrink-0">
-                        <NotchesIcon size={SOURCE_ICON_SIZE} />
-                    </div>
-                    <label className="flex-1 text-xs font-medium text-muted-foreground">
-                        {artists}
-                    </label>
-                </div>
-
-                <a 
-                    href={link}
-                    target="_blank" //open in new tab
-                    rel="noopener noreferrer nofollow" //security, privacy, and seo
-                >
-                    <div className="flex flex-row items-center gap-2 px-1 py-1 active:scale-[0.98]">
-                        <div className="shrink-0">
-                            <LinkIcon size={SOURCE_ICON_SIZE} />
-                        </div>
-                        <label className="flex-1 text-xs font-medium underline underline-offset-4 text-muted-foreground">
-                            {link}
-                        </label>
-                    </div>
-                </a>
-            </div>
-        );
-    };
-
     const handleSave = () => { //use temp edit payload strategy -- migrate to artist selection in the future
-        const artistPayload: EditArtistPayload = {
-            nameDisplay: artistInput || undefined,
-        };
+        const artistPayload: EditArtistPayload[] = selectedArtists.map((a) => {
+            const isCustom = a.id.startsWith("temp-");
 
-        const originalIds = trackDetails?.playlists.map(p => p.id) ?? [];
-        const hasPlaylistChanges = selectedPlaylistIds.size !== originalIds.length || originalIds.some(id => !selectedPlaylistIds.has(id));
+            return {
+                id: isCustom ? undefined : a.id,
+                nameDisplay: a.nameDisplay,
+            }
+        });
+
+        const originalPlaylistIds = trackDetails?.playlists.map(p => p.id) ?? [];
+        const hasPlaylistChanges = selectedPlaylistIds.size !== originalPlaylistIds.length || originalPlaylistIds.some(id => !selectedPlaylistIds.has(id));
+
+        const originalArtistIds = track.artists.map(a => a.id) ?? []; //realistically this should always be >=1
+        const hasArtistChanges = selectedArtistIds.size !== originalArtistIds.length || originalArtistIds.some(id => !selectedArtistIds.has(id));
+        const hasValidArtists = selectedArtistIds.size > 0;
 
         //finalized payload
         const payload: EditTrackPayload = {
             titleDisplay: titleInput || undefined,
-            artists: artistInput ? [artistPayload] : undefined,
+            artists: (hasArtistChanges && hasValidArtists) ? artistPayload : undefined,
             playlistIds: hasPlaylistChanges ? [...selectedPlaylistIds] : undefined,
         };
         editTrack(payload);
@@ -180,17 +194,60 @@ export const EditTrackForm = ({
                     <label className="text-sm font-medium text-muted-foreground">
                         Artist
                     </label>
-                    <Textarea
-                        value={artistInput}
-                        onChange={(e) => setArtistInput(e.target.value)}
-                        placeholder={artistDisplay}
-                        disabled={isOffline}
-                        className="text-md focus-visible:ring-1"
-                    />
+                    
+                    <Combobox
+                        multiple
+                        autoHighlight
+                        items={allArtistResults}
+                        
+                        defaultValue={track.artists}
+                        value={selectedArtists}
+                        onValueChange={(newArtists: ArtistBase[]) => setSelectedArtists(newArtists)}
+
+                        inputValue={artistInput}
+                        onInputValueChange={(newInput: string) => setArtistInput(newInput)}
+                    >
+                        {/* Selected artists */}
+                        <ComboboxChips ref={anchor} className="w-full max-w-sm flex-wrap p-1.5 gap-1.5 min-h-[42px]">
+                            <ComboboxValue>
+                                {(values: ArtistBase[]) => (
+                                    <React.Fragment>
+                                        {values.map((value) => (
+                                            <ComboboxChip key={value.id} className="px-2 py-0.5 text-xs font-medium">
+                                                <span>{value.nameDisplay || value.name}</span>
+                                                <VerifiedArtistBadge artist={value} size={10} />
+                                            </ComboboxChip>
+                                        ))}
+                                        <ComboboxChipsInput className="text-sm py-1 px-1 min-w-[100px]" placeholder="Add artist..." />
+                                    </React.Fragment>
+                                )}
+                            </ComboboxValue>
+                        </ComboboxChips>
+
+                        {/* Dropdown artists */}
+                        <ComboboxContent
+                            anchor={anchor}
+                            className="z-50 min-w-[var(--anchor-width)] w-[var(--anchor-width)] rounded-md border bg-popover text-popover-foreground shadow-md outline-none"
+                        >
+                            <ComboboxList className="max-h-56 overflow-y-auto p-1 space-y-0.5">
+                                {(item: ArtistBase) => (
+                                    <ComboboxItem 
+                                        key={item.id} 
+                                        value={item}
+                                        className="flex items-center justify-start gap-1.5 px-3 py-2 text-sm rounded-sm cursor-pointer hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                                    >
+                                        <span>{item.nameDisplay || item.name}</span>
+                                        <VerifiedArtistBadge artist={item} size={12} />
+                                    </ComboboxItem>
+                                )}
+                            </ComboboxList>
+        
+                        </ComboboxContent>
+                    </Combobox>
                 </div>
 
                 {/* PLAYLIST MEMBERSHIP */}
-                {!isOffline && (
+                {!isOffline && playlists.length > 0 && (
                     <>
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-medium text-muted-foreground">
@@ -206,7 +263,32 @@ export const EditTrackForm = ({
                     <label className="text-sm font-medium text-muted-foreground">
                         Source
                     </label>
-                    {renderSourceContent()}
+
+                    <div className="flex flex-col px-1">
+                        <div className="flex flex-row items-center gap-2 px-1 py-1">
+                            <div className="shrink-0">
+                                <NotchesIcon size={SOURCE_ICON_SIZE} />
+                            </div>
+                            <label className="flex-1 text-xs font-medium text-muted-foreground">
+                                {track.title}
+                            </label>
+                        </div>
+
+                        <a 
+                            href={link}
+                            target="_blank" //open in new tab
+                            rel="noopener noreferrer nofollow" //security, privacy, and seo
+                        >
+                            <div className="flex flex-row items-center gap-2 px-1 py-1 active:scale-[0.98]">
+                                <div className="shrink-0">
+                                    <LinkIcon size={SOURCE_ICON_SIZE} />
+                                </div>
+                                <label className="flex-1 text-xs font-medium underline underline-offset-4 text-muted-foreground">
+                                    {link}
+                                </label>
+                            </div>
+                        </a>
+                    </div>
                 </div>
 
                 {/* Delete Button */}

@@ -242,14 +242,19 @@ scuttle-it/
 ## Roadmap
 The most basic version of Scuttle is now functional. However, there are a number of planned ideas for Scuttle in the future, and here they are listed in no particular order:
 
-- [ ] Internal artist handling improvements
-    - [ ] MusicBrainz-based metadata enrichment to automatically generate additional artist song catalog after listening to one.
-    - [ ] Merging artist records based on an ID to reduce duplicate artist entries for the same entity.
-    - [ ] More intuitive artist selection during track editing.
+- [X] Internal artist handling improvements
+    - [X] MusicBrainz-based metadata enrichment to automatically generate additional artist song catalog after listening to one.
+    - [X] Merging artist records based on an ID to reduce duplicate artist entries for the same entity.
+    - [X] More intuitive artist selection during track editing.
 
 - [ ] Recommendations
     - [ ] Possibly allow users to set up their own central servers, which could host playlists and provide curated recommendations. For example, someone could set up their own recommendation server with custom genres or algorithms, and other users could connect to it and get recommendations from there.
     - [ ] Auto-generate internally, either via waveform analysis (BUT this is computationally expensive), or with some kind of robust search algorithm using artist data.
+
+- [ ] Offline
+    - [X] Listen to downloaded tracks offline.
+    - [ ] Adjust syncing strategies for spotty connections to prevent queue thrashing.
+    - [ ] More custom user cached track control.
 
 - [ ] Metadata enhancement
     - [ ] Improvements to metadata extraction guesser (first iteration sitting at around 80% perfection, but with a heavy bias towards popular songs and not a wide enough array of seen training data. Source code can be found in the [download quality-of-life](#downloading) section).
@@ -271,8 +276,12 @@ The most basic version of Scuttle is now functional. However, there are a number
 
 - [ ] UI/UX
     - [ ] History queue.
-    - [ ] Cancel download jobs.
+    - [ ] Cancel current and pending download jobs.
     - [ ] Light mode(?)
+    - [ ] Tracks in the search area should have Like/Edit options.
+    - [ ] Add tracks to a playlist from the playlist.
+    - [ ] Clearer indicator for undownloaded tracks (possibly adjust the icon).
+    - [ ] Haptic feedback for delete(?)
 
 ---
 
