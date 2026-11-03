@@ -428,10 +428,12 @@ export const useSetQueue = () => {
             return { rollbackQueue };
         },
         onError: (err, variables, context) => {
-            if (context?.rollbackQueue) {
-                queryClient.setQueryData(queryKey, context.rollbackQueue);
-            }
+            //do not revert failed network clears, do local clear
+            // if (context?.rollbackQueue) {
+            //     queryClient.setQueryData(queryKey, context.rollbackQueue);
+            // }
             console.log("Optimistic queue clear failed, rolling back.");
+            makeToast("Offline");
         },
         onSuccess: (data) => {
             queryClient.setQueryData(queryKey, data.queue);
